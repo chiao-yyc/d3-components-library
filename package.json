@@ -1,0 +1,30 @@
+{
+  "name": "d3-components",
+  "version": "0.1.0",
+  "description": "D3 Components - 透明化的 D3 組件庫",
+  "private": true,
+  "scripts": {
+    "build": "cd cli && npm run build",
+    "dev": "cd cli && npm run dev",
+    "test": "cd cli && npm run test",
+    "lint": "cd cli && npm run lint",
+    "format": "cd cli && npm run format",
+    "cli:link": "cd cli && npm link",
+    "cli:unlink": "cd cli && npm unlink",
+    "registry:validate": "node scripts/validate-registry.js"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.35.1",
+    "@typescript-eslint/parser": "^8.35.1",
+    "eslint": "^9.18.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "ora": "^8.2.0"
+  }
+}
