@@ -1,0 +1,43 @@
+{
+  "$schema": "./schema.json",
+  "version": "1.0.0",
+  "lastUpdated": "2025-07-03T10:30:00Z",
+  "components": [
+    {
+      "name": "bar-chart",
+      "description": "可客製化的長條圖組件，支援互動和動畫",
+      "version": "1.0.0",
+      "tags": ["chart", "bar", "basic"],
+      "variants": ["default", "animated", "interactive"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "basic-charts",
+      "complexity": "beginner",
+      "lastUpdated": "2025-07-03T10:30:00Z",
+      "files": ["bar-chart.tsx", "bar-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/bar-chart",
+      "docs": "https://d3-components.com/docs/bar-chart"
+    }
+  ],
+  "categories": {
+    "basic-charts": {
+      "name": "基礎圖表",
+      "description": "常用的基本圖表類型",
+      "icon": "📊"
+    },
+    "advanced-charts": {
+      "name": "進階圖表",
+      "description": "複雜的客製化圖表",
+      "icon": "📈"
+    },
+    "utilities": {
+      "name": "工具函數",
+      "description": "資料處理和輔助工具",
+      "icon": "🔧"
+    }
+  },
+  "stats": {
+    "totalComponents": 1,
+    "totalDownloads": 0,
+    "averageRating": 0
+  }
+}
