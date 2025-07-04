@@ -13,7 +13,7 @@ function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               長條圖組件
@@ -26,6 +26,21 @@ function Home() {
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               查看範例
+            </Link>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              資料映射器
+            </h3>
+            <p className="text-gray-600 mb-4">
+              智慧資料偵測、欄位映射和即時圖表預覽功能
+            </p>
+            <Link
+              to="/data-mapper"
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+            >
+              體驗功能
             </Link>
           </div>
 

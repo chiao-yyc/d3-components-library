@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useMemo } from 'react'
 import * as d3 from 'd3'
-import { cn } from '../utils/cn'
+import { cn } from '../../utils/cn'
 import { BarChartProps, ProcessedDataPoint } from './types'
 
 export function BarChart({
