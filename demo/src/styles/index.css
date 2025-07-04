@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .bar-chart-container {
+    @apply relative overflow-hidden;
+  }
+  
+  .bar-chart-svg {
+    @apply block w-full h-full;
+  }
+  
+  .bar-chart-svg .bar {
+    @apply transition-all duration-200;
+  }
+  
+  .bar-chart-svg .bar:hover {
+    @apply opacity-80;
+  }
+  
+  .bar-chart-svg .x-axis,
+  .bar-chart-svg .y-axis {
+    @apply text-sm;
+  }
+  
+  .bar-chart-svg .x-axis text,
+  .bar-chart-svg .y-axis text {
+    @apply fill-current;
+  }
+  
+  .bar-chart-svg .x-axis line,
+  .bar-chart-svg .y-axis line,
+  .bar-chart-svg .x-axis path,
+  .bar-chart-svg .y-axis path {
+    @apply stroke-current;
+  }
+  
+  .empty-state {
+    @apply flex items-center justify-center h-64 text-gray-500;
+  }
+  
+  .demo-card {
+    @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+  }
+  
+  .demo-controls {
+    @apply bg-gray-50 p-4 rounded-lg space-y-4;
+  }
+  
+  .demo-control-group {
+    @apply space-y-2;
+  }
+  
+  .demo-control-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+  
+  .demo-control-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+  
+  .demo-control-checkbox {
+    @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500;
+  }
+  
+  .demo-control-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+}
