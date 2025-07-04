@@ -11,7 +11,10 @@
     "format": "cd cli && npm run format",
     "cli:link": "cd cli && npm link",
     "cli:unlink": "cd cli && npm unlink",
-    "registry:validate": "node scripts/validate-registry.js"
+    "registry:validate": "node scripts/validate-registry.js",
+    "demo:install": "cd demo && npm install",
+    "demo:dev": "cd demo && npm run dev",
+    "demo:build": "cd demo && npm run build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.35.1",
