@@ -1,0 +1,161 @@
+{
+  "name": "radar-chart",
+  "description": "多維數據雷達圖組件，適用於能力評估、績效比較和產品特性分析",
+  "version": "1.0.0",
+  "tags": ["chart", "radar", "spider", "multidimensional", "comparison", "performance"],
+  "variants": ["default", "area", "line", "dots"],
+  "dependencies": ["react", "d3", "@types/d3"],
+  "category": "comparison-charts",
+  "complexity": "intermediate",
+  "files": ["radar-chart.tsx", "radar-chart.css", "types.ts", "index.ts"],
+  "props": {
+    "data": {
+      "type": "array",
+      "description": "雷達圖的資料陣列",
+      "required": true
+    },
+    "axes": {
+      "type": "array",
+      "description": "軸的名稱列表",
+      "required": true
+    },
+    "labelKey": {
+      "type": "string",
+      "description": "標籤欄位名稱",
+      "default": null
+    },
+    "width": {
+      "type": "number",
+      "description": "圖表寬度",
+      "default": 500
+    },
+    "height": {
+      "type": "number",
+      "description": "圖表高度",
+      "default": 500
+    },
+    "radius": {
+      "type": "number",
+      "description": "雷達圖半徑",
+      "default": "auto"
+    },
+    "levels": {
+      "type": "number",
+      "description": "同心圓層級數",
+      "default": 5
+    },
+    "startAngle": {
+      "type": "number",
+      "description": "起始角度（度）",
+      "default": -90
+    },
+    "clockwise": {
+      "type": "boolean",
+      "description": "順時針方向",
+      "default": true
+    },
+    "showGrid": {
+      "type": "boolean",
+      "description": "顯示網格",
+      "default": true
+    },
+    "showGridLabels": {
+      "type": "boolean",
+      "description": "顯示網格標籤",
+      "default": true
+    },
+    "showAxes": {
+      "type": "boolean",
+      "description": "顯示軸線",
+      "default": true
+    },
+    "showAxisLabels": {
+      "type": "boolean",
+      "description": "顯示軸標籤",
+      "default": true
+    },
+    "showDots": {
+      "type": "boolean",
+      "description": "顯示數據點",
+      "default": true
+    },
+    "showArea": {
+      "type": "boolean",
+      "description": "顯示區域填充",
+      "default": true
+    },
+    "minValue": {
+      "type": "number",
+      "description": "最小值",
+      "default": 0
+    },
+    "maxValue": {
+      "type": "number",
+      "description": "最大值",
+      "default": "auto"
+    },
+    "autoScale": {
+      "type": "boolean",
+      "description": "自動縮放",
+      "default": true
+    },
+    "strokeWidth": {
+      "type": "number",
+      "description": "線條寬度",
+      "default": 2
+    },
+    "areaOpacity": {
+      "type": "number",
+      "description": "區域透明度",
+      "default": 0.25
+    },
+    "dotRadius": {
+      "type": "number",
+      "description": "數據點半徑",
+      "default": 4
+    },
+    "showLegend": {
+      "type": "boolean",
+      "description": "顯示圖例",
+      "default": true
+    },
+    "legendPosition": {
+      "type": "string",
+      "description": "圖例位置",
+      "options": ["top", "bottom", "left", "right"],
+      "default": "bottom"
+    },
+    "animate": {
+      "type": "boolean",
+      "description": "啟用動畫效果",
+      "default": true
+    },
+    "interactive": {
+      "type": "boolean",
+      "description": "啟用互動功能",
+      "default": true
+    }
+  },
+  "examples": [
+    {
+      "name": "基本雷達圖",
+      "description": "簡單的雷達圖展示",
+      "code": "<RadarChart data={data} axes={['能力A', '能力B', '能力C']} labelKey='name' />"
+    },
+    {
+      "name": "能力評估",
+      "description": "員工能力評估雷達圖",
+      "code": "<RadarChart data={skillData} axes={skills} showArea={true} areaOpacity={0.3} />"
+    },
+    {
+      "name": "產品比較",
+      "description": "多產品特性比較",
+      "code": "<RadarChart data={products} axes={features} showDots={true} strokeWidth={3} />"
+    },
+    {
+      "name": "績效分析",
+      "description": "團隊績效多維度分析",
+      "code": "<RadarChart data={performance} axes={metrics} showGrid={true} gridLevels={10} />"
+    }
+  ]
+}
