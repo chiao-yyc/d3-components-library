@@ -7,6 +7,7 @@ import ScatterPlotDemo from './pages/ScatterPlotDemo'
 import PieChartDemo from './pages/PieChartDemo'
 import AreaChartDemo from './pages/AreaChartDemo'
 import HeatmapDemo from './pages/HeatmapDemo'
+import GaugeChartDemo from './pages/GaugeChartDemo'
 import Gallery from './pages/Gallery'
 import DataMapperDemo from './pages/DataMapperDemo'
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/pie-chart" element={<PieChartDemo />} />
         <Route path="/area-chart" element={<AreaChartDemo />} />
         <Route path="/heatmap" element={<HeatmapDemo />} />
+        <Route path="/gauge-chart" element={<GaugeChartDemo />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/data-mapper" element={<DataMapperDemo />} />
       </Routes>

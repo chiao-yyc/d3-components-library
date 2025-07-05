@@ -1,0 +1,62 @@
+.gauge-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gauge-chart-svg {
+  overflow: visible;
+}
+
+.chart-area {
+  position: relative;
+}
+
+.tick {
+  pointer-events: none;
+}
+
+.tick text {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 動畫效果 */
+.gauge-chart-svg path {
+  transition: opacity 0.2s ease;
+}
+
+.gauge-chart-svg path:hover {
+  opacity: 0.8;
+}
+
+/* 響應式調整 */
+@media (max-width: 640px) {
+  .gauge-chart-container {
+    font-size: 12px;
+  }
+}
+
+/* 無障礙設計 */
+@media (prefers-reduced-motion: reduce) {
+  .gauge-chart-svg * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高對比模式 */
+@media (prefers-contrast: high) {
+  .gauge-chart-svg path {
+    stroke: #000;
+    stroke-width: 1px;
+  }
+  
+  .gauge-chart-svg text {
+    fill: #000;
+    font-weight: bold;
+  }
+}
