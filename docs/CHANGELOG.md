@@ -1,5 +1,46 @@
 ## [Unreleased]
 
+### 2025-07-05 - Add Funnel Chart Component (Phase 2.3)
+
+#### ✨ New Features
+- **FunnelChart Component**: Professional funnel chart for conversion analysis and process tracking
+  - Multiple shape modes: trapezoid (traditional funnel), rectangle, and curved segments
+  - Direction control with coordinate transformation: top, bottom, left, right orientations
+  - Advanced proportional modes for data representation:
+    - Traditional: width proportional to data, equal heights
+    - Height: height proportional to data, naturally decreasing widths
+    - Area: true area proportional representation
+    - Consistent: uniform shrinkage with configurable parameters
+  - Intelligent shrinkage system with three modes:
+    - Fixed: consistent pixel reduction between segments
+    - Percentage: proportional reduction based on segment width
+    - Data-driven: automatic calculation based on conversion rates
+  - Smart label positioning with horizontal layout for side orientations
+  - Comprehensive animation and interaction support with hover effects
+  - Flexible color schemes (custom, blues, greens, oranges, reds, purples)
+- **Advanced Demo Page**: Four pre-configured scenarios with real-time controls
+  - Sales funnel: lead to customer conversion tracking
+  - Website conversion: visitor to purchase flow analysis
+  - Recruitment process: application to hire pipeline
+  - Marketing campaign: impression to repeat purchase journey
+- **Intelligent Label Management**: Dynamic positioning that adapts to funnel orientation
+  - Vertical funnels: labels positioned on the right side
+  - Horizontal funnels: labels distributed vertically with horizontal text layout
+  - Inside, outside, and side positioning options with overflow prevention
+
+#### 🐛 Bug Fixes
+- Fix horizontal direction label positioning to prevent text overlap and clipping
+- Resolve coordinate transformation issues for left/right orientations
+- Prevent label overflow in side positioning mode for horizontal funnels
+- Fix animation easing function compatibility with D3.js
+
+#### 🛠 Technical Improvements
+- Coordinate transformation system for multi-directional funnel rendering
+- TypeScript interfaces for comprehensive funnel configuration options
+- Modular shrinkage calculation algorithms with validation constraints
+- Enhanced demo interface with conditional controls and usage examples
+- Integration with existing component registry and navigation system
+
 ### 2025-07-05 - Add Gauge Chart Component (Phase 2.2)
 
 #### ✨ New Features
