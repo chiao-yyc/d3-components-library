@@ -1,0 +1,100 @@
+{
+  "name": "gauge-chart",
+  "description": "可客製化的儀表盤組件，支援多區間、動畫效果和指針顯示",
+  "version": "1.0.0",
+  "tags": ["chart", "gauge", "meter", "dashboard", "kpi"],
+  "variants": ["default", "multi-zone", "animated", "interactive"],
+  "dependencies": ["react", "d3", "@types/d3"],
+  "category": "business-charts",
+  "complexity": "intermediate",
+  "files": ["gauge-chart.tsx", "gauge-chart.css", "types.ts", "index.ts"],
+  "props": {
+    "value": {
+      "type": "number",
+      "description": "儀表盤顯示的數值",
+      "default": 0
+    },
+    "min": {
+      "type": "number", 
+      "description": "最小值",
+      "default": 0
+    },
+    "max": {
+      "type": "number",
+      "description": "最大值", 
+      "default": 100
+    },
+    "width": {
+      "type": "number",
+      "description": "圖表寬度",
+      "default": 300
+    },
+    "height": {
+      "type": "number", 
+      "description": "圖表高度",
+      "default": 200
+    },
+    "startAngle": {
+      "type": "number",
+      "description": "起始角度 (度)",
+      "default": -90
+    },
+    "endAngle": {
+      "type": "number",
+      "description": "結束角度 (度)", 
+      "default": 90
+    },
+    "zones": {
+      "type": "array",
+      "description": "多區間配置",
+      "default": null
+    },
+    "animate": {
+      "type": "boolean",
+      "description": "啟用動畫效果",
+      "default": true
+    },
+    "showValue": {
+      "type": "boolean", 
+      "description": "顯示數值",
+      "default": true
+    },
+    "showTicks": {
+      "type": "boolean",
+      "description": "顯示刻度",
+      "default": true
+    },
+    "needleColor": {
+      "type": "string",
+      "description": "指針顏色",
+      "default": "#374151"
+    },
+    "backgroundColor": {
+      "type": "string",
+      "description": "背景顏色", 
+      "default": "#e5e7eb"
+    },
+    "foregroundColor": {
+      "type": "string",
+      "description": "前景顏色",
+      "default": "#3b82f6"
+    }
+  },
+  "examples": [
+    {
+      "name": "基本儀表盤",
+      "description": "簡單的儀表盤顯示",
+      "code": "<GaugeChart value={75} min={0} max={100} />"
+    },
+    {
+      "name": "多區間儀表盤", 
+      "description": "使用不同顏色區間的儀表盤",
+      "code": "<GaugeChart value={85} zones={[{min:0,max:30,color:'red'},{min:30,max:70,color:'yellow'},{min:70,max:100,color:'green'}]} />"
+    },
+    {
+      "name": "自訂角度儀表盤",
+      "description": "半圓形儀表盤",
+      "code": "<GaugeChart value={60} startAngle={-180} endAngle={0} />"
+    }
+  ]
+}
