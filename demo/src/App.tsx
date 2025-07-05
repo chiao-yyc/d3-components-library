@@ -10,6 +10,7 @@ import HeatmapDemo from './pages/HeatmapDemo'
 import GaugeChartDemo from './pages/GaugeChartDemo'
 import FunnelChartDemo from './pages/FunnelChartDemo'
 import BoxPlotDemo from './pages/BoxPlotDemo'
+import ViolinPlotDemo from './pages/ViolinPlotDemo'
 import Gallery from './pages/Gallery'
 import DataMapperDemo from './pages/DataMapperDemo'
 
@@ -27,6 +28,7 @@ function App() {
         <Route path="/gauge-chart" element={<GaugeChartDemo />} />
         <Route path="/funnel-chart" element={<FunnelChartDemo />} />
         <Route path="/box-plot" element={<BoxPlotDemo />} />
+        <Route path="/violin-plot" element={<ViolinPlotDemo />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/data-mapper" element={<DataMapperDemo />} />
       </Routes>
