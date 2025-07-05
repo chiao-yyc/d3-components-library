@@ -130,7 +130,7 @@ export function MappingPreview({
               height={height}
               colors={colors}
               interactive={true}
-              animate={true}
+              animate={false}
             />
           )}
         </div>

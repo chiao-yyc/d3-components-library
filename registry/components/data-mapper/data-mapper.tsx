@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { cn } from '../../utils/cn'
-import { suggestMapping, detectColumnType } from '../../utils/data-detector'
+import { suggestFieldMapping, detectColumnType } from '../../utils/data-detector'
 import { DataMapperProps, DataMapping, FieldInfo } from './types'
 
 export function DataMapper({
@@ -40,7 +40,7 @@ export function DataMapper({
 
     // 獲取建議映射
     if (autoSuggest) {
-      const suggestions = suggestMapping(data)
+      const suggestions = suggestFieldMapping(data)
       suggestions.forEach(suggestion => {
         const field = fields.find(f => f.name === suggestion.field)
         if (field) {
@@ -58,7 +58,7 @@ export function DataMapper({
 
   // 自動設定初始映射
   useEffect(() => {
-    if (fieldInfos.length > 0 && autoSuggest) {
+    if (fieldInfos.length > 0 && autoSuggest && (!mapping.x || !mapping.y)) {
       const xField = fieldInfos.find(f => f.suggested === 'x')
       const yField = fieldInfos.find(f => f.suggested === 'y')
       
@@ -66,9 +66,19 @@ export function DataMapper({
         const newMapping = { x: xField.name, y: yField.name }
         setMapping(newMapping)
         onMappingChange(newMapping)
+      } else {
+        // 備用方案：手動分配第一個 string 給 x，第一個 number 給 y
+        const stringField = fieldInfos.find(f => f.type === 'string')
+        const numberField = fieldInfos.find(f => f.type === 'number')
+        
+        if (stringField && numberField) {
+          const newMapping = { x: stringField.name, y: numberField.name }
+          setMapping(newMapping)
+          onMappingChange(newMapping)
+        }
       }
     }
-  }, [fieldInfos, autoSuggest, onMappingChange])
+  }, [fieldInfos.length, autoSuggest, mapping.x, mapping.y])
 
   const handleMappingChange = (axis: keyof DataMapping, fieldName: string) => {
     const newMapping = { ...mapping, [axis]: fieldName }
