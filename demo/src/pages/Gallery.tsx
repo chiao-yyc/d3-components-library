@@ -1,5 +1,28 @@
 import { BarChart } from '@registry/components/bar-chart/bar-chart'
+import { LineChart } from '@registry/components/line-chart/line-chart'
+import { ScatterPlot } from '@registry/components/scatter-plot/scatter-plot'
 import { basicBarData, salesData, populationData } from '../data/sample-data'
+
+// 生成範例資料
+const timeSeriesData = [
+  { date: '2024-01-01', value: 120 },
+  { date: '2024-01-02', value: 150 },
+  { date: '2024-01-03', value: 110 },
+  { date: '2024-01-04', value: 180 },
+  { date: '2024-01-05', value: 140 },
+  { date: '2024-01-06', value: 160 },
+  { date: '2024-01-07', value: 170 },
+]
+
+const scatterData = [
+  { x: 10, y: 20, category: 'A' },
+  { x: 15, y: 35, category: 'B' },
+  { x: 20, y: 25, category: 'A' },
+  { x: 25, y: 45, category: 'C' },
+  { x: 30, y: 40, category: 'B' },
+  { x: 35, y: 55, category: 'A' },
+  { x: 40, y: 50, category: 'C' },
+]
 
 function Gallery() {
   return (
@@ -101,6 +124,201 @@ function Gallery() {
                 </div>
                 <div className="mt-4 text-sm text-gray-600">
                   <p>每根長條使用不同顏色的彩虹配色</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 折線圖組件 */}
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              折線圖組件
+            </h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* 基本折線圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  基本時間序列
+                </h3>
+                <div className="flex justify-center">
+                  <LineChart
+                    data={timeSeriesData}
+                    xKey="date"
+                    yKey="value"
+                    width={400}
+                    height={250}
+                    colors={['#3b82f6']}
+                    curve="monotone"
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>時間序列資料的基本折線圖</p>
+                </div>
+              </div>
+
+              {/* 區域圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  區域填充圖
+                </h3>
+                <div className="flex justify-center">
+                  <LineChart
+                    data={timeSeriesData}
+                    xKey="date"
+                    yKey="value"
+                    width={400}
+                    height={250}
+                    colors={['#10b981']}
+                    curve="cardinal"
+                    showArea={true}
+                    areaOpacity={0.2}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>帶有區域填充的平滑曲線圖</p>
+                </div>
+              </div>
+
+              {/* 點狀折線圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  點狀折線圖
+                </h3>
+                <div className="flex justify-center">
+                  <LineChart
+                    data={timeSeriesData}
+                    xKey="date"
+                    yKey="value"
+                    width={400}
+                    height={250}
+                    colors={['#ef4444']}
+                    showDots={true}
+                    dotRadius={5}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>顯示資料點的折線圖</p>
+                </div>
+              </div>
+
+              {/* 階梯圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  階梯圖
+                </h3>
+                <div className="flex justify-center">
+                  <LineChart
+                    data={timeSeriesData}
+                    xKey="date"
+                    yKey="value"
+                    width={400}
+                    height={250}
+                    colors={['#f59e0b']}
+                    curve="step"
+                    showDots={true}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>階梯式折線圖，適合展示離散資料</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 散點圖組件 */}
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              散點圖組件
+            </h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* 基本散點圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  基本散點圖
+                </h3>
+                <div className="flex justify-center">
+                  <ScatterPlot
+                    data={scatterData}
+                    xKey="x"
+                    yKey="y"
+                    width={400}
+                    height={250}
+                    colors={['#3b82f6']}
+                    radius={6}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>基本的散點圖，展示兩個變數的關係</p>
+                </div>
+              </div>
+
+              {/* 分類散點圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  分類散點圖
+                </h3>
+                <div className="flex justify-center">
+                  <ScatterPlot
+                    data={scatterData}
+                    xKey="x"
+                    yKey="y"
+                    colorKey="category"
+                    width={400}
+                    height={250}
+                    colors={['#3b82f6', '#ef4444', '#10b981']}
+                    radius={7}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>使用顏色區分不同類別的散點圖</p>
+                </div>
+              </div>
+
+              {/* 趨勢線散點圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  趨勢線分析
+                </h3>
+                <div className="flex justify-center">
+                  <ScatterPlot
+                    data={scatterData}
+                    xKey="x"
+                    yKey="y"
+                    width={400}
+                    height={250}
+                    colors={['#6366f1']}
+                    radius={6}
+                    showTrendline={true}
+                    trendlineColor="#ef4444"
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>包含趨勢線的散點圖，用於相關性分析</p>
+                </div>
+              </div>
+
+              {/* 大小映射散點圖 */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  泡泡圖
+                </h3>
+                <div className="flex justify-center">
+                  <ScatterPlot
+                    data={scatterData.map(d => ({ ...d, size: d.y }))}
+                    xKey="x"
+                    yKey="y"
+                    sizeKey="size"
+                    colorKey="category"
+                    width={400}
+                    height={250}
+                    colors={['#8b5cf6', '#ec4899', '#f97316']}
+                    sizeRange={[4, 12]}
+                  />
+                </div>
+                <div className="mt-4 text-sm text-gray-600">
+                  <p>泡泡大小映射第三個維度的資料</p>
                 </div>
               </div>
             </div>

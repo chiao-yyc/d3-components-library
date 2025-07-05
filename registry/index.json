@@ -16,6 +16,34 @@
       "files": ["bar-chart.tsx", "bar-chart.css", "types.ts", "index.ts"],
       "demo": "https://d3-components.com/demo/bar-chart",
       "docs": "https://d3-components.com/docs/bar-chart"
+    },
+    {
+      "name": "line-chart",
+      "description": "時間序列折線圖組件，支援多系列資料和動畫",
+      "version": "1.0.0",
+      "tags": ["chart", "line", "time-series"],
+      "variants": ["default", "smooth", "area", "step"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "basic-charts",
+      "complexity": "beginner",
+      "lastUpdated": "2025-07-05T16:00:00Z",
+      "files": ["line-chart.tsx", "line-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/line-chart",
+      "docs": "https://d3-components.com/docs/line-chart"
+    },
+    {
+      "name": "scatter-plot",
+      "description": "散點圖組件，支援大小和顏色映射、趨勢線",
+      "version": "1.0.0",
+      "tags": ["chart", "scatter", "correlation", "statistical"],
+      "variants": ["default", "with-trendline", "bubble-chart", "color-coded"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "statistical-charts",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-05T16:00:00Z",
+      "files": ["scatter-plot.tsx", "scatter-plot.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/scatter-plot",
+      "docs": "https://d3-components.com/docs/scatter-plot"
     }
   ],
   "categories": {
@@ -24,10 +52,15 @@
       "description": "常用的基本圖表類型",
       "icon": "📊"
     },
+    "statistical-charts": {
+      "name": "統計圖表",
+      "description": "用於統計分析的圖表類型",
+      "icon": "📈"
+    },
     "advanced-charts": {
       "name": "進階圖表",
       "description": "複雜的客製化圖表",
-      "icon": "📈"
+      "icon": "📉"
     },
     "utilities": {
       "name": "工具函數",
@@ -36,7 +69,7 @@
     }
   },
   "stats": {
-    "totalComponents": 1,
+    "totalComponents": 3,
     "totalDownloads": 0,
     "averageRating": 0
   }

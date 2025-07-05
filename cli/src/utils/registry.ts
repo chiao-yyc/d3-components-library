@@ -1,56 +1,36 @@
 import fs from 'fs-extra'
 import path from 'path'
+import { 
+  ComponentConfig, 
+  BaseComponentConfig, 
+  DetailedComponentConfig, 
+  RegistryIndex 
+} from '../types'
 
 // Registry 配置
 // const REGISTRY_URL = process.env.D3_COMPONENTS_REGISTRY || 'https://registry.d3-components.com'
-const LOCAL_REGISTRY_PATH = path.resolve(process.cwd(), 'registry')
 
-export interface ComponentConfig {
-  name: string
-  description: string
-  version: string
-  tags: string[]
-  variants: string[]
-  dependencies: string[]
-  category: string
-  complexity: 'beginner' | 'intermediate' | 'advanced'
-  lastUpdated: string
-  files: string[]
-  demo?: string
-  docs?: string
-  // Extended configuration from component config.json
-  displayName?: string
-  peerDependencies?: Record<string, string>
-  props?: Record<string, ComponentProp>
-  examples?: ComponentExample[]
-  customization?: ComponentCustomization
-  installation?: ComponentInstallation
+// 動態尋找 registry 目錄
+function findRegistryPath(): string {
+  let currentDir = process.cwd()
+  
+  // 最多向上查找 5 層目錄
+  for (let i = 0; i < 5; i++) {
+    const registryPath = path.join(currentDir, 'registry')
+    if (fs.existsSync(registryPath) && fs.existsSync(path.join(registryPath, 'index.json'))) {
+      return registryPath
+    }
+    
+    const parentDir = path.dirname(currentDir)
+    if (parentDir === currentDir) break // 已到根目錄
+    currentDir = parentDir
+  }
+  
+  // 如果找不到，回退到當前目錄下的 registry
+  return path.resolve(process.cwd(), 'registry')
 }
 
-interface ComponentProp {
-  type: string
-  required?: boolean
-  default?: any
-  description: string
-}
-
-interface ComponentExample {
-  name: string
-  description: string
-  code: string
-}
-
-interface ComponentCustomization {
-  cssVariables?: string[]
-  themes?: string[]
-  responsive?: boolean
-  accessibility?: boolean
-}
-
-interface ComponentInstallation {
-  command: string
-  manualSteps: string[]
-}
+const LOCAL_REGISTRY_PATH = findRegistryPath()
 
 export async function listAllComponents(): Promise<ComponentConfig[]> {
   try {
@@ -98,21 +78,30 @@ async function fetchFromLocal(name: string): Promise<ComponentConfig | null> {
     throw new Error('無法獲取組件列表: 本地 registry/index.json 不存在')
   }
   
-  const index = await fs.readJSON(indexPath)
-  const component = index.components.find((c: any) => c.name === name)
+  const index: RegistryIndex = await fs.readJSON(indexPath)
+  const baseComponent = index.components.find((c: BaseComponentConfig) => c.name === name)
   
-  if (!component) {
+  if (!baseComponent) {
     return null
   }
   
   // 讀取詳細配置
   const configPath = path.join(LOCAL_REGISTRY_PATH, 'components', name, 'config.json')
   if (await fs.pathExists(configPath)) {
-    const detailedConfig = await fs.readJSON(configPath)
-    return { ...component, ...detailedConfig }
+    const detailedConfig: DetailedComponentConfig = await fs.readJSON(configPath)
+    
+    // 合併配置，將詳細配置中的 files 對象數組轉換為字串數組
+    const mergedConfig: ComponentConfig = {
+      ...baseComponent,
+      ...detailedConfig,
+      files: detailedConfig.files ? detailedConfig.files.map(f => f.name) : baseComponent.files,
+      variants: detailedConfig.variants ? detailedConfig.variants.map(v => v.name) : baseComponent.variants
+    }
+    
+    return mergedConfig
   }
   
-  return component
+  return baseComponent
 }
 
 export async function downloadComponentFiles(

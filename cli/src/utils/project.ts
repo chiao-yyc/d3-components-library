@@ -1,6 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
+import { ComponentConfig, ProjectConfig } from '../types'
 
 export async function validateProject() {
   // 檢查專案環境
@@ -31,20 +32,12 @@ export async function validateProject() {
 }
 
 export async function updateProjectConfig(
-  component: { name: string; version: string },
+  component: ComponentConfig,
   variant: string
 ) {
   const configPath = path.resolve('./d3-components.json')
   
-  let config: {
-    $schema: string;
-    components: Array<{
-      name: string;
-      variant: string;
-      version: string;
-      installedAt: string;
-    }>;
-  } = {
+  let config: ProjectConfig = {
     $schema: 'https://registry.d3-components.com/schema.json',
     components: []
   }
@@ -72,14 +65,7 @@ export async function updateProjectConfig(
   await fs.writeJSON(configPath, config, { spaces: 2 })
 }
 
-type InstalledComponent = {
-  name: string;
-  variant: string;
-  version: string;
-  installedAt: string;
-}
-
-export async function getInstalledComponents(): Promise<InstalledComponent[]> {
+export async function getInstalledComponents(): Promise<ProjectConfig['components']> {
   const configPath = path.resolve('./d3-components.json')
   
   if (!await fs.pathExists(configPath)) {

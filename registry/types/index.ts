@@ -59,9 +59,19 @@ export interface ValidationResult {
   isValid: boolean
   errors: string[]
   warnings: string[]
+  confidence: number
 }
 
 export interface SuggestedMapping {
+  type: 'auto' | 'manual'
+  mapping: MappingConfig
+  chartType: string
+  confidence: number
+  reasoning: string
+}
+
+// 欄位建議型別 (用於內部資料偵測)
+export interface FieldSuggestion {
   field: string
   type: DataType
   confidence: number

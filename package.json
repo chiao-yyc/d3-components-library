@@ -11,10 +11,15 @@
     "format": "cd cli && npm run format",
     "cli:link": "cd cli && npm link",
     "cli:unlink": "cd cli && npm unlink",
+    "cli:test": "node cli/dist/index.js",
     "registry:validate": "node scripts/validate-registry.js",
     "demo:install": "cd demo && npm install",
     "demo:dev": "cd demo && npm run dev",
-    "demo:build": "cd demo && npm run build"
+    "demo:build": "cd demo && npm run build",
+    "demo:type-check": "cd demo && npm run type-check",
+    "install:all": "npm install && cd cli && npm install && cd ../demo && npm install",
+    "clean": "rm -rf cli/dist demo/dist node_modules cli/node_modules demo/node_modules",
+    "release": "npm run build && cd cli && npm publish"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.35.1",
@@ -25,9 +30,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "chalk": "^5.4.1",
-    "ora": "^8.2.0"
   }
 }
