@@ -1,0 +1,219 @@
+.radar-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.radar-chart-svg {
+  overflow: visible;
+}
+
+.chart-area {
+  position: relative;
+}
+
+/* 網格樣式 */
+.radar-chart-svg .grid-group circle {
+  transition: opacity 0.2s ease;
+}
+
+.radar-chart-svg .grid-group line {
+  transition: opacity 0.2s ease;
+}
+
+.radar-chart-svg .grid-group text {
+  font-size: 10px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 數據線條樣式 */
+.radar-chart-svg .line-group path {
+  transition: stroke-width 0.2s ease;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.radar-chart-svg .line-group path:hover {
+  stroke-width: 3px;
+}
+
+/* 數據區域樣式 */
+.radar-chart-svg .area-group path {
+  transition: fill-opacity 0.2s ease;
+}
+
+.radar-chart-svg .area-group path:hover {
+  fill-opacity: 0.4;
+}
+
+/* 數據點樣式 */
+.radar-chart-svg .dots-group circle {
+  transition: r 0.2s ease, fill-opacity 0.2s ease;
+  cursor: pointer;
+}
+
+.radar-chart-svg .dots-group circle:hover {
+  r: 6px;
+  fill-opacity: 0.8;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+/* 軸標籤樣式 */
+.radar-chart-svg .labels-group text {
+  pointer-events: none;
+  user-select: none;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* 圖例樣式 */
+.legend {
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.legend .flex {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend span {
+  font-size: 0.875rem;
+  color: #374151;
+  white-space: nowrap;
+}
+
+/* 響應式調整 */
+@media (max-width: 640px) {
+  .radar-chart-container {
+    font-size: 10px;
+  }
+  
+  .radar-chart-svg .labels-group text {
+    font-size: 10px;
+  }
+  
+  .radar-chart-svg .grid-group text {
+    font-size: 8px;
+  }
+  
+  .legend {
+    gap: 0.5rem;
+  }
+  
+  .legend span {
+    font-size: 0.75rem;
+  }
+}
+
+/* 無障礙設計 */
+@media (prefers-reduced-motion: reduce) {
+  .radar-chart-svg * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高對比模式 */
+@media (prefers-contrast: high) {
+  .radar-chart-svg .grid-group circle,
+  .radar-chart-svg .grid-group line {
+    stroke: #000;
+    stroke-width: 2px;
+  }
+  
+  .radar-chart-svg .line-group path {
+    stroke-width: 3px;
+  }
+  
+  .radar-chart-svg .dots-group circle {
+    stroke: #000;
+    stroke-width: 2px;
+  }
+  
+  .radar-chart-svg .labels-group text,
+  .radar-chart-svg .grid-group text {
+    fill: #000;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px #fff;
+  }
+}
+
+/* 工具提示樣式 */
+.radar-chart-container .tooltip {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 打印樣式 */
+@media print {
+  .radar-chart-svg {
+    background: white;
+  }
+  
+  .radar-chart-svg .grid-group circle,
+  .radar-chart-svg .grid-group line {
+    stroke: #666;
+  }
+  
+  .radar-chart-svg .line-group path {
+    stroke-width: 2px;
+  }
+  
+  .radar-chart-svg .area-group path {
+    fill-opacity: 0.2;
+  }
+}
+
+/* 動畫效果 */
+@keyframes radarFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.radar-chart-svg .grid-group,
+.radar-chart-svg .labels-group {
+  animation: radarFadeIn 0.6s ease-out;
+}
+
+/* 聚焦狀態 */
+.radar-chart-svg .line-group path:focus,
+.radar-chart-svg .dots-group circle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 選中狀態 */
+.radar-chart-svg .line-group path.selected {
+  stroke-width: 4px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+.radar-chart-svg .area-group path.selected {
+  fill-opacity: 0.5;
+}
+
+/* 淡化其他系列 */
+.radar-chart-container.hover-mode .radar-chart-svg .line-group path:not(.hovered) {
+  opacity: 0.3;
+}
+
+.radar-chart-container.hover-mode .radar-chart-svg .area-group path:not(.hovered) {
+  opacity: 0.1;
+}
+
+.radar-chart-container.hover-mode .radar-chart-svg .dots-group circle:not(.hovered) {
+  opacity: 0.3;
+}
