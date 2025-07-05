@@ -1,4 +1,4 @@
-import { DataType, SuggestedMapping, ChartSuggestion } from '../types'
+import { DataType, SuggestedMapping, ChartSuggestion, FieldSuggestion } from '../types'
 
 export interface DataTypeInfo {
   type: 'number' | 'string' | 'date' | 'boolean'
@@ -75,12 +75,24 @@ export function detectColumnType(values: any[]): DataTypeInfo {
   const samples = nonNullValues.slice(0, Math.min(5, nonNullValues.length))
   
   // 增強的型別檢測
-  const dateInfo = detectDateType(nonNullValues)
   const numberInfo = detectNumberType(nonNullValues)
+  const dateInfo = detectDateType(nonNullValues)
   const booleanInfo = detectBooleanType(nonNullValues)
   
-  // 比較各類型的信心度，選擇最高的
-  const typeOptions = [dateInfo, numberInfo, booleanInfo].filter(info => info.confidence > 0)
+  // 比較各類型的信心度，但給數字類型優先權
+  const typeOptions = [numberInfo, dateInfo, booleanInfo].filter(info => info.confidence > 0)
+  
+  // 如果數字類型的信心度 >= 0.8，直接使用數字類型
+  if (numberInfo.confidence >= 0.8) {
+    return {
+      type: 'number',
+      confidence: numberInfo.confidence,
+      samples,
+      nullCount,
+      subType: numberInfo.subType,
+      format: numberInfo.format
+    }
+  }
   
   if (typeOptions.length === 0) {
     return {
@@ -141,16 +153,18 @@ function detectDateType(values: any[]): Partial<DataTypeInfo> {
       }
     }
     
-    // 數字類型的時間戳檢測
+    // 數字類型的時間戳檢測（更嚴格的範圍）
     if (typeof value === 'number') {
-      // Unix timestamp 範圍檢查 (1970-2100)
-      if ((value > 0 && value < 4102444800) || (value > 946684800000 && value < 4102444800000)) {
-        const testDate = new Date(value > 4102444800 ? value : value * 1000)
+      // Unix timestamp 範圍檢查
+      // 秒級時間戳：1970-01-01 到 2100-01-01 (946684800 to 4102444800)
+      // 但要排除太小的數字（可能是普通數據）
+      if ((value >= 946684800 && value <= 4102444800) || (value >= 946684800000 && value <= 4102444800000)) {
+        const testDate = new Date(value >= 946684800000 ? value : value * 1000)
         if (!isNaN(testDate.getTime())) {
           matchCount++
           if (!detectedFormat) {
-            detectedFormat = value > 4102444800 ? 'Unix Timestamp (milliseconds)' : 'Unix Timestamp (seconds)'
-            detectedSubType = value > 4102444800 ? 'unix-milliseconds' : 'unix-seconds'
+            detectedFormat = value >= 946684800000 ? 'Unix Timestamp (milliseconds)' : 'Unix Timestamp (seconds)'
+            detectedSubType = value >= 946684800000 ? 'unix-milliseconds' : 'unix-seconds'
           }
         }
       }
@@ -292,6 +306,50 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
   
   const suggestions: SuggestedMapping[] = []
   
+  // 獲取所有可能的欄位組合
+  const chartSuggestions = suggestChartType(data)
+  
+  // 為每種圖表類型生成映射建議
+  chartSuggestions.forEach((chartSuggestion, index) => {
+    const props = chartSuggestion.suggestedProps
+    
+    // 基本映射
+    let mapping: any = {}
+    
+    if (props.xKey) {
+      mapping.x = props.xKey
+    }
+    if (props.yKey) {
+      mapping.y = props.yKey
+    }
+    if (props.colorKey) {
+      mapping.color = props.colorKey
+    }
+    if (props.categoryKey) {
+      mapping.x = props.categoryKey
+    }
+    if (props.valueKey) {
+      mapping.y = props.valueKey
+    }
+    
+    suggestions.push({
+      type: index === 0 ? 'auto' : 'manual',
+      mapping,
+      chartType: chartSuggestion.type,
+      confidence: chartSuggestion.confidence,
+      reasoning: chartSuggestion.reason
+    })
+  })
+  
+  return suggestions
+}
+
+// 新增：欄位建議函數（用於舊版相容性）
+export function suggestFieldMapping(data: any[]): FieldSuggestion[] {
+  if (!data.length) return []
+  
+  const fieldSuggestions: FieldSuggestion[] = []
+  
   // 支援巢狀物件結構
   const allFields = getAllNestedFields(data[0])
   
@@ -349,7 +407,7 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
       confidence *= 0.9 ** (depth - 1)
     }
     
-    suggestions.push({
+    fieldSuggestions.push({
       field,
       type: typeInfo.type,
       confidence: Math.min(0.95, Math.max(0.1, confidence)),
@@ -357,7 +415,7 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
     })
   })
   
-  return suggestions.sort((a, b) => b.confidence - a.confidence)
+  return fieldSuggestions.sort((a, b) => b.confidence - a.confidence)
 }
 
 /**
