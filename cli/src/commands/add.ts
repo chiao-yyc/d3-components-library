@@ -4,12 +4,7 @@ import chalk from 'chalk'
 import ora from 'ora'
 import { fetchComponentConfig, downloadComponentFiles } from '../utils/registry'
 import { validateProject, updateProjectConfig } from '../utils/project'
-
-interface AddOptions {
-  variant?: string
-  dir?: string
-  dryRun?: boolean
-}
+import { ComponentConfig, AddOptions } from '../types'
 
 export async function addCommand(componentName: string, options: AddOptions) {
   try {
@@ -80,7 +75,7 @@ export async function addCommand(componentName: string, options: AddOptions) {
 }
 
 async function selectVariant(
-  component: { name: string; variants: string[] }, 
+  component: ComponentConfig, 
   requestedVariant?: string
 ): Promise<string> {
   // 如果只有一個變體或已指定變體
@@ -126,7 +121,7 @@ async function checkDependencies(deps: string[]) {
 
 
 function previewChanges(
-  component: { name: string; files: Array<{ name: string }>; dependencies: string[] },
+  component: ComponentConfig,
   variant: string,
   targetDir: string
 ) {
@@ -136,8 +131,8 @@ function previewChanges(
   console.log(`目標目錄: ${targetDir}`)
   console.log('\n將會建立的檔案:')
   
-  component.files.forEach(file => {
-    const filePath = path.join(targetDir, file.name)
+  component.files.forEach(fileName => {
+    const filePath = path.join(targetDir, fileName)
     console.log(chalk.green(`  + ${filePath}`))
   })
   
@@ -150,7 +145,7 @@ function previewChanges(
 }
 
 function showSuccessMessage(
-  component: { name: string; example?: string; files: Array<{ name: string }> }, 
+  component: ComponentConfig, 
   targetDir: string,
   copiedFiles: string[]
 ) {
@@ -165,12 +160,17 @@ function showSuccessMessage(
   console.log()
   console.log(chalk.blue('📖 使用方式:'))
   
-  if (component.example) {
-    console.log(chalk.gray(component.example))
+  // 如果有範例，顯示第一個範例
+  if (component.examples && component.examples.length > 0) {
+    console.log(chalk.gray(component.examples[0].code))
   } else {
-    console.log(chalk.gray(`import { ${component.name.split('-').map(word => 
+    // 生成基本導入範例
+    const componentClassName = component.name.split('-').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1)
-    ).join('')} } from './${path.relative('./src', targetDir)}'`))
+    ).join('')
+    
+    const relativePath = path.relative('./src', targetDir)
+    console.log(chalk.gray(`import { ${componentClassName} } from './${relativePath}'`))
   }
   
   console.log()

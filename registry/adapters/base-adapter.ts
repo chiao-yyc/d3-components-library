@@ -11,25 +11,27 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
   validate(data: T[]): ValidationResult {
     const errors: string[] = []
     const warnings: string[] = []
+    let confidence = 1.0
     
     if (!Array.isArray(data)) {
       errors.push('資料必須是陣列格式')
-      return { isValid: false, errors, warnings }
+      return { isValid: false, errors, warnings, confidence: 0 }
     }
     
     if (data.length === 0) {
       warnings.push('資料陣列為空')
-      return { isValid: true, errors, warnings }
+      return { isValid: true, errors, warnings, confidence: 0.5 }
     }
     
     // 檢查資料一致性
     const firstRowKeys = Object.keys(data[0] || {})
     if (firstRowKeys.length === 0) {
       errors.push('資料物件不能為空')
-      return { isValid: false, errors, warnings }
+      return { isValid: false, errors, warnings, confidence: 0 }
     }
     
     // 檢查所有行是否有相同的欄位結構
+    let inconsistentRows = 0
     for (let i = 1; i < Math.min(data.length, 10); i++) {
       const currentKeys = Object.keys(data[i] || {})
       const missingKeys = firstRowKeys.filter(key => !currentKeys.includes(key))
@@ -37,13 +39,20 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
       
       if (missingKeys.length > 0) {
         warnings.push(`第 ${i + 1} 行缺少欄位: ${missingKeys.join(', ')}`)
+        inconsistentRows++
       }
       if (extraKeys.length > 0) {
         warnings.push(`第 ${i + 1} 行多餘欄位: ${extraKeys.join(', ')}`)
+        inconsistentRows++
       }
     }
     
-    return { isValid: errors.length === 0, errors, warnings }
+    // 根據不一致的行數調整信心度
+    if (inconsistentRows > 0) {
+      confidence = Math.max(0.1, 1 - (inconsistentRows / Math.min(data.length, 10)))
+    }
+    
+    return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
   suggest(data: T[]): SuggestedMapping[] {
@@ -106,15 +115,7 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
   protected suggestBestMapping(data: T[]): { x: string, y: string } | null {
     if (!data.length) return null
     
-    const suggestions = this.suggest(data)
-    const xCandidate = suggestions.find(s => s.suggested === 'x')
-    const yCandidate = suggestions.find(s => s.suggested === 'y')
-    
-    if (xCandidate && yCandidate) {
-      return { x: xCandidate.field, y: yCandidate.field }
-    }
-    
-    // 回退到第一個字串欄位作為 X，第一個數字欄位作為 Y
+    // 回退到簡單的欄位分析
     const firstRow = data[0]
     const fields = Object.keys(firstRow)
     
