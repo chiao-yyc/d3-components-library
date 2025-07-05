@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../utils/cn'
 import { BarChartProps, ProcessedDataPoint } from './types'
@@ -17,6 +17,8 @@ export function BarChart({
   colors = ['#3b82f6'],
   animate = false,
   interactive = true,
+  showTooltip = true,
+  tooltipFormat,
   className,
   onDataClick,
   onHover,
@@ -24,12 +26,13 @@ export function BarChart({
 }: BarChartProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; data: ProcessedDataPoint } | null>(null)
 
   // 1. 資料處理
   const processedData = useMemo(() => {
     if (!data?.length) return []
 
-    return data.map((d, index) => {
+    const processed = data.map((d, index) => {
       let x: any, y: any
 
       if (mapping) {
@@ -54,7 +57,10 @@ export function BarChart({
         originalData: d,
         index
       } as ProcessedDataPoint
-    }).filter(d => !isNaN(d.y)) // 過濾無效資料
+    })
+    
+    const result = processed.filter(d => !isNaN(d.y)) // 過濾無效資料
+    return result
   }, [data, xKey, yKey, xAccessor, yAccessor, mapping])
 
   // 2. 比例尺計算
@@ -153,10 +159,20 @@ export function BarChart({
         })
         .on('mouseenter', function(event, d) {
           d3.select(this).style('opacity', 0.8)
+          
+          if (showTooltip) {
+            setTooltip({ 
+              x: 0, 
+              y: 0, 
+              data: d 
+            })
+          }
+          
           onHover?.(d.originalData)
         })
         .on('mouseleave', function() {
           d3.select(this).style('opacity', 1)
+          setTooltip(null)
         })
     }
 
@@ -179,7 +195,7 @@ export function BarChart({
       .attr('class', 'y-axis')
       .call(yAxis)
 
-  }, [scales, processedData, margin, orientation, colors, animate, interactive, onDataClick, onHover])
+  }, [scales, processedData, margin, orientation, colors, animate, interactive, onDataClick, onHover, showTooltip, tooltipFormat])
 
   // 4. 響應式處理
   useEffect(() => {
@@ -208,7 +224,8 @@ export function BarChart({
   return (
     <div 
       ref={containerRef}
-      className={cn('bar-chart-container', className)} 
+      className={cn('bar-chart-container relative', className)}
+      onMouseLeave={() => setTooltip(null)}
       {...props}
     >
       <svg
@@ -217,6 +234,24 @@ export function BarChart({
         height={height}
         className="bar-chart-svg"
       />
+      
+      {/* 工具提示 */}
+      {tooltip && showTooltip && (
+        <div
+          className="absolute z-10 px-2 py-1 text-xs bg-gray-800 text-white rounded shadow-lg pointer-events-none whitespace-nowrap"
+          style={{
+            top: 10,
+            right: 10
+          }}
+        >
+          {tooltipFormat ? tooltipFormat(tooltip.data) : (
+            <div>
+              <div>X: {tooltip.data.x}</div>
+              <div>Y: {tooltip.data.y}</div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,5 +1,26 @@
 ## [Unreleased]
 
+### 2025-07-05 - Data Mapper Bug Fixes
+
+#### 🐛 Bug Fixes
+- Fix Y-axis field selection issue in data mapper when using sample data
+- Resolve infinite re-rendering loop in DataMapper component
+- Improve number field detection priority over date field detection
+- Fix sales field incorrectly identified as date type instead of number
+- Prevent Maximum update depth exceeded error in useEffect dependencies
+- Add fallback mapping logic when auto-suggestion fails
+
+#### ✨ Features
+- Add tooltip functionality to BarChart component
+- Implement interactive hover effects with data display
+- Add configurable tooltip formatting options
+
+#### 🛠 Technical Improvements
+- Optimize field type detection algorithm in data-detector.ts
+- Enhance number type detection with stricter timestamp validation
+- Improve useEffect dependency management to prevent unnecessary re-renders
+- Add conditional checks to prevent mapping state loops
+
 ### 2025-07-04 - Data Adapter System
 
 #### ✨ Features
