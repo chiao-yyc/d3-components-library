@@ -1,0 +1,145 @@
+{
+  "name": "funnel-chart",
+  "description": "可客製化的漏斗圖組件，適用於轉換率分析和流程追蹤",
+  "version": "1.0.0",
+  "tags": ["chart", "funnel", "conversion", "sales", "analytics"],
+  "variants": ["default", "trapezoid", "rectangle", "curved"],
+  "dependencies": ["react", "d3", "@types/d3"],
+  "category": "business-charts",
+  "complexity": "intermediate",
+  "files": ["funnel-chart.tsx", "funnel-chart.css", "types.ts", "index.ts"],
+  "props": {
+    "data": {
+      "type": "array",
+      "description": "漏斗圖的資料陣列",
+      "required": true
+    },
+    "labelKey": {
+      "type": "string",
+      "description": "標籤欄位名稱",
+      "default": null
+    },
+    "valueKey": {
+      "type": "string",
+      "description": "數值欄位名稱", 
+      "default": null
+    },
+    "width": {
+      "type": "number",
+      "description": "圖表寬度",
+      "default": 400
+    },
+    "height": {
+      "type": "number", 
+      "description": "圖表高度",
+      "default": 500
+    },
+    "direction": {
+      "type": "string",
+      "description": "漏斗方向",
+      "options": ["top", "bottom", "left", "right"],
+      "default": "top"
+    },
+    "shape": {
+      "type": "string",
+      "description": "形狀類型",
+      "options": ["trapezoid", "rectangle", "curved"],
+      "default": "trapezoid"
+    },
+    "gap": {
+      "type": "number",
+      "description": "段落間隙",
+      "default": 4
+    },
+    "cornerRadius": {
+      "type": "number",
+      "description": "圓角半徑",
+      "default": 0
+    },
+    "proportionalMode": {
+      "type": "string",
+      "description": "比例模式",
+      "options": ["traditional", "height", "area", "consistent"],
+      "default": "traditional"
+    },
+    "shrinkageType": {
+      "type": "string",
+      "description": "收縮類型",
+      "options": ["fixed", "percentage", "data-driven"],
+      "default": "percentage"
+    },
+    "shrinkageAmount": {
+      "type": "number",
+      "description": "收縮量",
+      "default": 0.1
+    },
+    "minWidth": {
+      "type": "number",
+      "description": "最小寬度",
+      "default": 50
+    },
+    "showLabels": {
+      "type": "boolean",
+      "description": "顯示標籤",
+      "default": true
+    },
+    "showValues": {
+      "type": "boolean", 
+      "description": "顯示數值",
+      "default": true
+    },
+    "showPercentages": {
+      "type": "boolean",
+      "description": "顯示百分比",
+      "default": true
+    },
+    "showConversionRates": {
+      "type": "boolean",
+      "description": "顯示轉換率",
+      "default": true
+    },
+    "labelPosition": {
+      "type": "string",
+      "description": "標籤位置",
+      "options": ["inside", "outside", "side"],
+      "default": "side"
+    },
+    "animate": {
+      "type": "boolean",
+      "description": "啟用動畫效果",
+      "default": true
+    },
+    "interactive": {
+      "type": "boolean",
+      "description": "啟用互動功能",
+      "default": true
+    }
+  },
+  "examples": [
+    {
+      "name": "基本漏斗圖",
+      "description": "簡單的漏斗圖展示",
+      "code": "<FunnelChart data={data} labelKey='stage' valueKey='count' />"
+    },
+    {
+      "name": "銷售漏斗", 
+      "description": "銷售流程漏斗圖",
+      "code": "<FunnelChart data={salesData} shape='trapezoid' showConversionRates={true} />"
+    },
+    {
+      "name": "矩形漏斗",
+      "description": "矩形形狀的漏斗圖",
+      "code": "<FunnelChart data={data} shape='rectangle' gap={8} />"
+    },
+    {
+      "name": "高度比例漏斗",
+      "description": "使用高度比例模式的漏斗圖",
+      "code": "<FunnelChart data={data} proportionalMode='height' shape='trapezoid' />"
+    },
+    {
+      "name": "一致收縮漏斗",
+      "description": "使用一致收縮模式的漏斗圖",
+      "code": "<FunnelChart data={data} proportionalMode='consistent' shrinkageType='percentage' shrinkageAmount={0.1} />"
+    }
+  ]
+}
