@@ -45,6 +45,10 @@ export interface BarChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onE
   animate?: boolean
   interactive?: boolean
   
+  // 工具提示
+  showTooltip?: boolean
+  tooltipFormat?: (data: ProcessedDataPoint) => string
+  
   // 事件處理
   onDataClick?: (data: any) => void
   onHover?: (data: any) => void
