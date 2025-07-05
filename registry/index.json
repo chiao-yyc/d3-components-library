@@ -44,6 +44,48 @@
       "files": ["scatter-plot.tsx", "scatter-plot.css", "types.ts", "index.ts"],
       "demo": "https://d3-components.com/demo/scatter-plot",
       "docs": "https://d3-components.com/docs/scatter-plot"
+    },
+    {
+      "name": "pie-chart",
+      "description": "可客製化的圓餅圖組件，支援甜甜圈模式、動畫和互動功能",
+      "version": "1.0.0",
+      "tags": ["chart", "pie", "donut", "proportion"],
+      "variants": ["default", "donut", "animated", "interactive"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "basic-charts",
+      "complexity": "beginner",
+      "lastUpdated": "2025-07-05T17:00:00Z",
+      "files": ["pie-chart.tsx", "pie-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/pie-chart",
+      "docs": "https://d3-components.com/docs/pie-chart"
+    },
+    {
+      "name": "area-chart",
+      "description": "可客製化的區域圖組件，支援堆疊模式、多系列資料和動畫效果",
+      "version": "1.0.0",
+      "tags": ["chart", "area", "time-series", "stacked"],
+      "variants": ["default", "stacked", "percent", "gradient"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "basic-charts",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-05T18:30:00Z",
+      "files": ["area-chart.tsx", "area-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/area-chart",
+      "docs": "https://d3-components.com/docs/area-chart"
+    },
+    {
+      "name": "heatmap",
+      "description": "可客製化的熱力圖組件，適用於矩陣資料視覺化和相關性分析",
+      "version": "1.0.0",
+      "tags": ["chart", "heatmap", "matrix", "correlation"],
+      "variants": ["default", "correlation", "calendar", "custom-colors"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "statistical-charts",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-05T19:00:00Z",
+      "files": ["heatmap.tsx", "heatmap.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/heatmap",
+      "docs": "https://d3-components.com/docs/heatmap"
     }
   ],
   "categories": {
@@ -69,7 +111,7 @@
     }
   },
   "stats": {
-    "totalComponents": 3,
+    "totalComponents": 6,
     "totalDownloads": 0,
     "averageRating": 0
   }
