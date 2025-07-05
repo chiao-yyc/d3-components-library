@@ -5,3 +5,8 @@ dist/
 .DS_Store
 coverage/
 .nyc_output/
+
+# 測試安裝目錄
+test-installation/
+demo/test-install/
+demo/d3-components.json
