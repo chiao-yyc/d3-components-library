@@ -1,0 +1,27 @@
+{
+  "name": "data-processor",
+  "description": "核心資料處理模組，提供統一的資料映射、轉換和清理功能",
+  "version": "1.0.0",
+  "type": "core",
+  "tags": ["core", "data", "processing", "mapping", "transformation"],
+  "dependencies": [],
+  "files": ["data-processor.ts", "types.ts", "index.ts"],
+  "exports": {
+    "DataProcessor": "核心資料處理器類別",
+    "processData": "快速處理資料的便利函數",
+    "useDataProcessor": "React Hook 用於資料處理"
+  },
+  "features": [
+    "多種資料映射策略 (mapping, accessors, keys, auto-detect)",
+    "自動欄位型別偵測",
+    "資料清理和轉換",
+    "過濾和排序功能",
+    "統計資訊生成",
+    "React Hook 整合"
+  ],
+  "usage": {
+    "basic": "const result = processData(data, { autoDetect: true })",
+    "advanced": "const processor = new DataProcessor({ mapping: { x: 'date', y: 'value' } })",
+    "react": "const { data, mapping, statistics } = useDataProcessor(rawData, config)"
+  }
+}
