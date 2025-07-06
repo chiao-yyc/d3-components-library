@@ -1,0 +1,35 @@
+{
+  "name": "scale-manager",
+  "displayName": "Scale Manager",
+  "description": "比例尺管理系統，提供統一的比例尺創建、註冊和協調功能",
+  "category": "primitives",
+  "subcategory": "scales",
+  "version": "1.0.0",
+  "dependencies": [
+    "react",
+    "d3"
+  ],
+  "files": [
+    "scale-manager.ts",
+    "use-scale-manager.ts",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts"
+  },
+  "tags": [
+    "scales",
+    "manager",
+    "coordination",
+    "primitives"
+  ],
+  "features": [
+    "多種比例尺類型支援",
+    "自動比例尺配置",
+    "軸線協調",
+    "React Hook 整合",
+    "域值和範圍管理"
+  ]
+}

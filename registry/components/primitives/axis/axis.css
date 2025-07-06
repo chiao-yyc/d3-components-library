@@ -1,0 +1,105 @@
+/* Axis 組件樣式 */
+
+:root {
+  --axis-text-color: #6b7280;
+  --axis-line-color: #e5e7eb;
+  --axis-grid-color: #f3f4f6;
+  --axis-label-color: #374151;
+  --axis-font-size: 12px;
+  --axis-label-font-size: 14px;
+  --axis-font-family: system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --axis-text-color: #9ca3af;
+    --axis-line-color: #374151;
+    --axis-grid-color: #1f2937;
+    --axis-label-color: #f9fafb;
+  }
+}
+
+.axis {
+  font-family: var(--axis-font-family);
+  font-size: var(--axis-font-size);
+}
+
+.axis .domain {
+  stroke: var(--axis-line-color);
+  stroke-width: 1;
+  fill: none;
+}
+
+.axis .tick line {
+  stroke: var(--axis-line-color);
+  stroke-width: 1;
+}
+
+.axis .tick text {
+  fill: var(--axis-text-color);
+  font-size: var(--axis-font-size);
+  text-anchor: middle;
+}
+
+.axis-left .tick text {
+  text-anchor: end;
+}
+
+.axis-right .tick text {
+  text-anchor: start;
+}
+
+.axis-label {
+  fill: var(--axis-label-color);
+  font-size: var(--axis-label-font-size);
+  font-weight: 500;
+}
+
+.grid-lines line {
+  stroke: var(--axis-grid-color);
+  stroke-width: 1;
+  stroke-dasharray: 2,2;
+  opacity: 0.6;
+}
+
+.dual-axis .dual-axis-left .axis-label {
+  fill: var(--axis-label-color);
+}
+
+.dual-axis .dual-axis-right .axis-label {
+  fill: var(--axis-label-color);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  :root {
+    --axis-font-size: 10px;
+    --axis-label-font-size: 12px;
+  }
+  
+  .axis .tick text {
+    font-size: var(--axis-font-size);
+  }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  :root {
+    --axis-text-color: #000000;
+    --axis-line-color: #000000;
+    --axis-label-color: #000000;
+  }
+  
+  .grid-lines line {
+    stroke-width: 1;
+    opacity: 0.8;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .axis * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
