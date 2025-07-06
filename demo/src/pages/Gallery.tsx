@@ -4,7 +4,7 @@ import { ScatterPlot } from '@registry/components/scatter-plot/scatter-plot'
 import { PieChart } from '@registry/components/pie-chart/pie-chart'
 import { AreaChart } from '@registry/components/area-chart/area-chart'
 import { Heatmap } from '@registry/components/heatmap/heatmap'
-import { basicBarData, salesData, populationData } from '../data/sample-data'
+import { basicBarData } from '../data/sample-data'
 
 // 生成範例資料
 const timeSeriesData = [

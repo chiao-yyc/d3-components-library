@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { RadarChart } from '@registry/components/radar-chart/radar-chart'
 
 // 員工技能評估數據

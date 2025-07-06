@@ -6,19 +6,22 @@ export interface Margin {
 }
 
 export interface BaseChartProps {
-  data: any[]
+  data: unknown[]
   width?: number
   height?: number
   margin?: Margin
   className?: string
   
-  // 資料映射 (多種方式)
-  xKey?: string
-  yKey?: string
-  xAccessor?: (d: any) => any
-  yAccessor?: (d: any) => any
+  // 資料映射方式 (支援兩種格式以保持向後相容性)
   mapping?: DataMapping
   dataAdapter?: DataAdapter
+  
+  // 向後相容的簡單映射方式
+  xKey?: string
+  yKey?: string
+  colorKey?: string
+  sizeKey?: string
+  seriesKey?: string
   
   // 樣式和行為
   colors?: string[]
@@ -26,33 +29,30 @@ export interface BaseChartProps {
   interactive?: boolean
   
   // 事件處理
-  onDataClick?: (data: any) => void
-  onHover?: (data: any) => void
+  onDataClick?: (data: unknown) => void
+  onHover?: (data: unknown) => void
 }
 
 export interface DataMapping {
-  x: string | ((d: any) => any)
-  y: string | ((d: any) => any)
-  color?: string | ((d: any) => any)
-  size?: string | ((d: any) => any)
+  x: string | ((d: unknown) => unknown)
+  y: string | ((d: unknown) => unknown)
+  color?: string | ((d: unknown) => unknown)
+  size?: string | ((d: unknown) => unknown)
+  [key: string]: string | ((d: unknown) => unknown) | undefined
 }
 
-export interface DataAdapter<T = any> {
-  transform(data: T[], config: MappingConfig): ChartDataPoint[]
+export interface DataAdapter<T = unknown> {
+  transform(data: T[], config: DataMapping): ChartDataPoint[]
   validate(data: T[]): ValidationResult
   suggest(data: T[]): SuggestedMapping[]
 }
 
-export interface MappingConfig {
-  x: string | ((d: any) => any)
-  y: string | ((d: any) => any)
-  [key: string]: any
-}
-
 export interface ChartDataPoint {
-  x: any
-  y: any
-  [key: string]: any
+  x: unknown
+  y: unknown
+  originalData?: unknown
+  index?: number
+  [key: string]: unknown
 }
 
 export interface ValidationResult {
@@ -64,7 +64,7 @@ export interface ValidationResult {
 
 export interface SuggestedMapping {
   type: 'auto' | 'manual'
-  mapping: MappingConfig
+  mapping: DataMapping
   chartType: string
   confidence: number
   reasoning: string

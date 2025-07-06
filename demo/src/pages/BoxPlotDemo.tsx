@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { BoxPlot } from '@registry/components/box-plot/box-plot'
 
 // 學生成績數據

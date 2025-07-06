@@ -1,12 +1,12 @@
-import { DataAdapter, ValidationResult, SuggestedMapping, ChartDataPoint, MappingConfig } from '../types'
+import { DataAdapter, ValidationResult, SuggestedMapping, ChartDataPoint, DataMapping } from '../types'
 import { detectColumnType, suggestMapping } from '../utils/data-detector'
 
 /**
  * 基礎資料適配器抽象類別
  * 提供通用的資料處理功能
  */
-export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
-  abstract transform(data: T[], config: MappingConfig): ChartDataPoint[]
+export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
+  abstract transform(data: T[], config: DataMapping): ChartDataPoint[]
   
   validate(data: T[]): ValidationResult {
     const errors: string[] = []
@@ -62,7 +62,9 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
   /**
    * 解析欄位路徑（支援巢狀物件）
    */
-  protected resolveFieldPath(obj: any, path: string | ((d: any) => any)): any {
+  protected resolveFieldPath(obj: any, path: string | ((d: any) => any) | undefined): any {
+    if (path === undefined) return undefined
+    
     if (typeof path === 'function') {
       return path(obj)
     }
@@ -110,6 +112,31 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
   }
   
   /**
+   * 通用的值清理方法
+   */
+  protected cleanValue(value: any): any {
+    if (value == null) return null
+    
+    if (typeof value === 'string') {
+      const trimmed = value.trim()
+      
+      // 嘗試轉換為數值
+      const numValue = this.cleanNumber(trimmed)
+      if (!isNaN(numValue) && /^[0-9.,%-]+$/.test(trimmed)) {
+        return numValue
+      }
+      
+      // 嘗試轉換為日期
+      const dateValue = this.cleanDate(trimmed)
+      if (dateValue) return dateValue
+      
+      return trimmed
+    }
+    
+    return value
+  }
+  
+  /**
    * 偵測並建議最佳的 X/Y 軸映射
    */
   protected suggestBestMapping(data: T[]): { x: string, y: string } | null {
@@ -117,7 +144,7 @@ export abstract class BaseAdapter<T = any> implements DataAdapter<T> {
     
     // 回退到簡單的欄位分析
     const firstRow = data[0]
-    const fields = Object.keys(firstRow)
+    const fields = Object.keys(firstRow as Record<string, any>)
     
     let xField = fields[0]
     let yField = fields[1]

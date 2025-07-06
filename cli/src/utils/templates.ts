@@ -3,7 +3,7 @@ import path from 'path'
 import { TemplateContext } from '../types'
 
 /**
- * U!ŠxÿÛ
+ * U!ï¿½xï¿½ï¿½
  */
 export async function processTemplateFiles(targetDir: string, context: TemplateContext): Promise<void> {
   try {
@@ -16,7 +16,7 @@ export async function processTemplateFiles(targetDir: string, context: TemplateC
       if (stat.isFile() && (filePath.endsWith('.tsx') || filePath.endsWith('.ts'))) {
         let content = await fs.readFile(filePath, 'utf8')
         
-        // ÿÛ!Šx
+        // ï¿½ï¿½!ï¿½x
         Object.entries(context).forEach(([key, value]) => {
           const regex = new RegExp(`{{${key}}}`, 'g')
           content = content.replace(regex, String(value))
@@ -31,9 +31,9 @@ export async function processTemplateFiles(targetDir: string, context: TemplateC
 }
 
 /**
- * Dö!g¹
+ * Dï¿½!gï¿½
  */
-export function generateComponentTemplate(componentName: string, variant: string): string {
+export function generateComponentTemplate(componentName: string): string {
   const className = componentName.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join('')
@@ -42,7 +42,7 @@ export function generateComponentTemplate(componentName: string, variant: string
 import { ${className}Props } from './types'
 
 export function ${className}({ ...props }: ${className}Props) {
-  // Döæ\
+  // Dï¿½ï¿½\
   return <div>{{componentName}} - {{variant}}</div>
 }
 

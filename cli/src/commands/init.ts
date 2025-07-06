@@ -47,7 +47,7 @@ export async function initCommand(options: InitOptions) {
     
     // 6. 建立配置檔案
     spinner.start('建立配置檔案...')
-    await createConfigFile(configPath, projectInfo, options)
+    await createConfigFile(configPath, projectInfo)
     spinner.succeed('配置檔案建立完成')
     
     // 7. 複製工具函數
@@ -123,7 +123,7 @@ async function analyzeProject(projectDir: string): Promise<ProjectInfo> {
   let srcDir = './src'
   let componentsDir = './src/components'
   let utilsDir = './src/utils'
-  let stylesDir = './src/styles'
+  const stylesDir = './src/styles'
   
   // 檢查常見的目錄結構
   if (await fs.pathExists(path.join(projectDir, 'src'))) {
@@ -176,7 +176,7 @@ async function createDirectoryStructure(projectDir: string, info: ProjectInfo) {
   }
 }
 
-async function createConfigFile(configPath: string, info: ProjectInfo, options: InitOptions) {
+async function createConfigFile(configPath: string, info: ProjectInfo) {
   const config: ProjectConfig = {
     $schema: 'https://registry.d3-components.com/schema.json',
     components: [],

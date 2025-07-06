@@ -1,4 +1,4 @@
-import { DataType, SuggestedMapping, ChartSuggestion } from '../types'
+import { DataType, SuggestedMapping, ChartSuggestion } from '@registry/types'
 
 export interface DataTypeInfo {
   type: 'number' | 'string' | 'date' | 'boolean'
@@ -120,11 +120,16 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
       }
     }
     
+    // 創建基本映射配置
+    const mapping: any = {}
+    mapping[suggested] = field
+    
     suggestions.push({
-      field,
-      type,
+      type: 'auto',
+      mapping,
+      chartType: type === 'date' ? 'line' : type === 'number' ? 'bar' : 'pie',
       confidence,
-      suggested
+      reasoning: `建議將 ${field} 欄位用作 ${suggested} 軸，基於其 ${type} 資料類型`
     })
   })
   

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Heatmap } from '@registry/components/heatmap'
 
 // 相關性矩陣資料

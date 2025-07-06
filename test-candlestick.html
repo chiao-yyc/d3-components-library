@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K線圖測試</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .candlestick-container {
+            margin: 20px 0;
+        }
+        .candle-up {
+            fill: #ef4444;
+            stroke: #ef4444;
+        }
+        .candle-down {
+            fill: #22c55e;
+            stroke: #22c55e;
+        }
+        .wick {
+            stroke-width: 1;
+        }
+        .axis {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>K線圖基本測試</h1>
+    <div id="candlestick-chart"></div>
+
+    <script>
+        // 測試數據
+        const data = [
+            { date: '2024-01-01', open: 100, high: 105, low: 98, close: 103 },
+            { date: '2024-01-02', open: 103, high: 108, low: 101, close: 106 },
+            { date: '2024-01-03', open: 106, high: 110, low: 104, close: 108 },
+            { date: '2024-01-04', open: 108, high: 112, low: 106, close: 107 },
+            { date: '2024-01-05', open: 107, high: 109, low: 103, close: 105 },
+            { date: '2024-01-08', open: 105, high: 111, low: 104, close: 110 },
+            { date: '2024-01-09', open: 110, high: 115, low: 108, close: 113 },
+            { date: '2024-01-10', open: 113, high: 118, low: 111, close: 116 }
+        ];
+
+        // 處理數據
+        const processedData = data.map(d => ({
+            ...d,
+            date: new Date(d.date),
+            direction: d.close >= d.open ? 'up' : 'down'
+        }));
+
+        // 設定尺寸
+        const width = 800;
+        const height = 400;
+        const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+        const chartWidth = width - margin.left - margin.right;
+        const chartHeight = height - margin.top - margin.bottom;
+
+        // 創建 SVG
+        const svg = d3.select('#candlestick-chart')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+        // 比例尺
+        const xScale = d3.scaleTime()
+            .domain(d3.extent(processedData, d => d.date))
+            .range([0, chartWidth]);
+
+        const yScale = d3.scaleLinear()
+            .domain(d3.extent(processedData.flatMap(d => [d.low, d.high])))
+            .nice()
+            .range([chartHeight, 0]);
+
+        // 蠟燭寬度
+        const candleWidth = Math.max(3, chartWidth / processedData.length * 0.7);
+
+        // 繪製蠟燭
+        const candles = g.selectAll('.candlestick')
+            .data(processedData)
+            .enter()
+            .append('g')
+            .attr('class', 'candlestick');
+
+        // 影線
+        candles.append('line')
+            .attr('class', 'wick')
+            .attr('x1', d => xScale(d.date))
+            .attr('x2', d => xScale(d.date))
+            .attr('y1', d => yScale(d.high))
+            .attr('y2', d => yScale(d.low))
+            .attr('stroke', d => d.direction === 'up' ? '#ef4444' : '#22c55e')
+            .attr('stroke-width', 1);
+
+        // 實體
+        candles.append('rect')
+            .attr('class', d => `body candle-${d.direction}`)
+            .attr('x', d => xScale(d.date) - candleWidth / 2)
+            .attr('y', d => yScale(Math.max(d.open, d.close)))
+            .attr('width', candleWidth)
+            .attr('height', d => Math.max(1, Math.abs(yScale(d.open) - yScale(d.close))))
+            .attr('fill', d => d.direction === 'up' ? '#ef4444' : '#22c55e')
+            .attr('stroke', d => d.direction === 'up' ? '#ef4444' : '#22c55e')
+            .attr('stroke-width', 0.5);
+
+        // X軸
+        g.append('g')
+            .attr('class', 'x-axis')
+            .attr('transform', `translate(0, ${chartHeight})`)
+            .call(d3.axisBottom(xScale).tickFormat(d3.timeFormat('%m/%d')));
+
+        // Y軸
+        g.append('g')
+            .attr('class', 'y-axis')
+            .call(d3.axisLeft(yScale));
+
+        // 添加點擊事件
+        candles.on('click', function(event, d) {
+            const change = d.close - d.open;
+            const changePercent = (change / d.open * 100).toFixed(2);
+            alert(`日期: ${d.date.toLocaleDateString()}\n開盤: ${d.open}\n最高: ${d.high}\n最低: ${d.low}\n收盤: ${d.close}\n漲跌: ${change.toFixed(2)} (${changePercent}%)`);
+        });
+
+        console.log('K線圖渲染完成!', processedData);
+    </script>
+</body>
+</html>

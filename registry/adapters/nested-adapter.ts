@@ -1,5 +1,5 @@
 import { BaseAdapter } from './base-adapter'
-import { ChartDataPoint, MappingConfig, ValidationResult, SuggestedMapping } from '../types'
+import { ChartDataPoint, DataMapping, ValidationResult, SuggestedMapping, FieldSuggestion, DataType } from '../types'
 
 /**
  * 巢狀物件資料適配器
@@ -7,7 +7,7 @@ import { ChartDataPoint, MappingConfig, ValidationResult, SuggestedMapping } fro
  */
 export class NestedAdapter extends BaseAdapter<Record<string, any>> {
   
-  transform(data: Record<string, any>[], config: MappingConfig): ChartDataPoint[] {
+  transform(data: Record<string, any>[], config: DataMapping): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     for (let i = 0; i < data.length; i++) {
@@ -59,7 +59,7 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
     const warnings = [...baseValidation.warnings]
     
     if (data.length === 0) {
-      return { isValid: true, errors, warnings }
+      return { isValid: true, errors, warnings, confidence: 1.0 }
     }
     
     // 分析巢狀結構的複雜度
@@ -90,13 +90,45 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
       }
     })
     
-    return { isValid: errors.length === 0, errors, warnings }
+    const confidence = errors.length === 0 ? 0.8 : Math.max(0.2, 1 - (errors.length / 5))
+    return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
   suggest(data: Record<string, any>[]): SuggestedMapping[] {
-    if (data.length === 0) return []
+    const baseSuggestions = super.suggest(data)
     
-    const suggestions: SuggestedMapping[] = []
+    if (data.length === 0) return baseSuggestions
+    
+    // 尋找最佳的 x 和 y 欄位
+    const fieldSuggestions = this.getFieldSuggestions(data)
+    
+    if (fieldSuggestions.length < 2) {
+      return baseSuggestions
+    }
+    
+    // 找出最適合做 x 和 y 軸的欄位
+    const xField = fieldSuggestions.find(f => f.suggested === 'x') || fieldSuggestions[0]
+    const yField = fieldSuggestions.find(f => f.suggested === 'y') || fieldSuggestions[1]
+    
+    const suggestion: SuggestedMapping = {
+      type: 'auto',
+      mapping: {
+        x: xField.field,
+        y: yField.field
+      },
+      chartType: xField.type === 'date' ? 'line' : 'bar',
+      confidence: Math.min(xField.confidence, yField.confidence),
+      reasoning: `巢狀資料結構分析建議使用 ${xField.field} 做為 X 軸，${yField.field} 做為 Y 軸`
+    }
+    
+    return [suggestion, ...baseSuggestions]
+  }
+  
+  /**
+   * 獲取欄位建議
+   */
+  private getFieldSuggestions(data: Record<string, any>[]): FieldSuggestion[] {
+    const suggestions: FieldSuggestion[] = []
     const flattenedFields = this.getAllNestedFields(data[0])
     
     flattenedFields.forEach(fieldPath => {
@@ -136,7 +168,7 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
       
       suggestions.push({
         field: fieldPath,
-        type,
+        type: type as DataType,
         confidence,
         suggested
       })
@@ -205,7 +237,7 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
     
     // 計算結構不一致的數量
     const uniqueStructures = new Set(structures)
-    const inconsistentStructures = structures.length - 1 // 除了第一個，其他不同的都算不一致
+    const inconsistentStructures = uniqueStructures.size - 1 // 除了第一個，其他不同的都算不一致
     
     return { maxDepth, avgDepth, inconsistentStructures }
   }
@@ -305,30 +337,6 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
     return Math.min(0.95, Math.max(0.1, confidence))
   }
   
-  /**
-   * 清理各種型別的值
-   */
-  private cleanValue(value: any): any {
-    if (value == null) return null
-    
-    if (typeof value === 'string') {
-      const trimmed = value.trim()
-      
-      // 嘗試轉換為數值
-      const numValue = this.cleanNumber(trimmed)
-      if (!isNaN(numValue) && /^[0-9.,%-]+$/.test(trimmed)) {
-        return numValue
-      }
-      
-      // 嘗試轉換為日期
-      const dateValue = this.cleanDate(trimmed)
-      if (dateValue) return dateValue
-      
-      return trimmed
-    }
-    
-    return value
-  }
   
   /**
    * 扁平化巢狀物件（輔助函數）

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { FunnelChart } from '@registry/components/funnel-chart/funnel-chart'
 
 // 銷售漏斗資料
