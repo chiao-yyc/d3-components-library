@@ -1,43 +1,51 @@
 import { Routes, Route } from 'react-router-dom'
+import { lazy, Suspense } from 'react'
 import Layout from './components/Layout'
-import Home from './pages/Home'
-import BarChartDemo from './pages/BarChartDemo'
-import LineChartDemo from './pages/LineChartDemo'
-import ScatterPlotDemo from './pages/ScatterPlotDemo'
-import PieChartDemo from './pages/PieChartDemo'
-import AreaChartDemo from './pages/AreaChartDemo'
-import HeatmapDemo from './pages/HeatmapDemo'
-import GaugeChartDemo from './pages/GaugeChartDemo'
-import FunnelChartDemo from './pages/FunnelChartDemo'
-import BoxPlotDemo from './pages/BoxPlotDemo'
-import ViolinPlotDemo from './pages/ViolinPlotDemo'
-import RadarChartDemo from './pages/RadarChartDemo'
-import CandlestickDemo from './pages/CandlestickDemo'
-import ModularTestDemo from './pages/ModularTestDemo'
-import Gallery from './pages/Gallery'
-import DataMapperDemo from './pages/DataMapperDemo'
+import LoadingSpinner from './components/LoadingSpinner'
+
+// 使用 lazy loading 優化性能
+const Home = lazy(() => import('./pages/Home'))
+const BarChartDemo = lazy(() => import('./pages/BarChartDemo'))
+const LineChartDemo = lazy(() => import('./pages/LineChartDemo'))
+const ScatterPlotDemo = lazy(() => import('./pages/ScatterPlotDemo'))
+const PieChartDemo = lazy(() => import('./pages/PieChartDemo'))
+const AreaChartDemo = lazy(() => import('./pages/AreaChartDemo'))
+const HeatmapDemo = lazy(() => import('./pages/HeatmapDemo'))
+const GaugeChartDemo = lazy(() => import('./pages/GaugeChartDemo'))
+const FunnelChartDemo = lazy(() => import('./pages/FunnelChartDemo'))
+const BoxPlotDemo = lazy(() => import('./pages/BoxPlotDemo'))
+const ViolinPlotDemo = lazy(() => import('./pages/ViolinPlotDemo'))
+const RadarChartDemo = lazy(() => import('./pages/RadarChartDemo'))
+const CandlestickDemo = lazy(() => import('./pages/CandlestickDemo'))
+const ModularTestDemo = lazy(() => import('./pages/ModularTestDemo'))
+const Gallery = lazy(() => import('./pages/Gallery'))
+const DataMapperDemo = lazy(() => import('./pages/DataMapperDemo'))
+const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
 
 function App() {
   return (
     <Layout>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/bar-chart" element={<BarChartDemo />} />
-        <Route path="/line-chart" element={<LineChartDemo />} />
-        <Route path="/scatter-plot" element={<ScatterPlotDemo />} />
-        <Route path="/pie-chart" element={<PieChartDemo />} />
-        <Route path="/area-chart" element={<AreaChartDemo />} />
-        <Route path="/heatmap" element={<HeatmapDemo />} />
-        <Route path="/gauge-chart" element={<GaugeChartDemo />} />
-        <Route path="/funnel-chart" element={<FunnelChartDemo />} />
-        <Route path="/box-plot" element={<BoxPlotDemo />} />
-        <Route path="/violin-plot" element={<ViolinPlotDemo />} />
-        <Route path="/radar-chart" element={<RadarChartDemo />} />
-        <Route path="/candlestick" element={<CandlestickDemo />} />
-        <Route path="/modular-test" element={<ModularTestDemo />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/data-mapper" element={<DataMapperDemo />} />
-      </Routes>
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/bar-chart" element={<BarChartDemo />} />
+          <Route path="/line-chart" element={<LineChartDemo />} />
+          <Route path="/scatter-plot" element={<ScatterPlotDemo />} />
+          <Route path="/pie-chart" element={<PieChartDemo />} />
+          <Route path="/area-chart" element={<AreaChartDemo />} />
+          <Route path="/heatmap" element={<HeatmapDemo />} />
+          <Route path="/gauge-chart" element={<GaugeChartDemo />} />
+          <Route path="/funnel-chart" element={<FunnelChartDemo />} />
+          <Route path="/box-plot" element={<BoxPlotDemo />} />
+          <Route path="/violin-plot" element={<ViolinPlotDemo />} />
+          <Route path="/radar-chart" element={<RadarChartDemo />} />
+          <Route path="/candlestick" element={<CandlestickDemo />} />
+          <Route path="/modular-test" element={<ModularTestDemo />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/data-mapper" element={<DataMapperDemo />} />
+          <Route path="/simple-components" element={<SimpleComponentsDemo />} />
+        </Routes>
+      </Suspense>
     </Layout>
   )
 }
