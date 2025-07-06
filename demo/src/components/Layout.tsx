@@ -161,9 +161,6 @@ function Layout({ children }: LayoutProps) {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-xs text-gray-500">
-                Phase 7: 用戶體驗改善
-              </div>
               <a
                 href="https://github.com/your-repo/d3-components"
                 target="_blank"
