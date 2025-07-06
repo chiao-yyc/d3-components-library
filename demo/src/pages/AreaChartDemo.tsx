@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { AreaChart } from '@registry/components/area-chart/area-chart'
 
 // 時間序列資料
@@ -52,7 +52,7 @@ export default function AreaChartDemo() {
   const [interactive, setInteractive] = useState(true)
 
   // 當前資料和映射
-  const { currentData, mapping, dataKey } = useMemo(() => {
+  const { currentData, mapping } = useMemo(() => {
     switch (selectedDataset) {
       case 'timeSeries':
         // 轉換為長格式用於多系列
@@ -63,8 +63,7 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: transformed,
-          mapping: { x: 'date', y: 'value', category: 'category' },
-          dataKey: 'financial'
+          mapping: { x: 'date', y: 'value', category: 'category' }
         }
       
       case 'multiSeries':
@@ -75,8 +74,7 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: deviceData,
-          mapping: { x: 'month', y: 'users', category: 'device' },
-          dataKey: 'devices'
+          mapping: { x: 'month', y: 'users', category: 'device' }
         }
       
       case 'product':
@@ -87,15 +85,13 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: productSales,
-          mapping: { x: 'quarter', y: 'sales', category: 'product' },
-          dataKey: 'products'
+          mapping: { x: 'quarter', y: 'sales', category: 'product' }
         }
       
       default:
         return {
           currentData: [],
-          mapping: { x: 'x', y: 'y' },
-          dataKey: 'default'
+          mapping: { x: 'x', y: 'y' }
         }
     }
   }, [selectedDataset])

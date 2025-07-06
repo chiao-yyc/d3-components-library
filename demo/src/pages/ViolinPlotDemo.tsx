@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { ViolinPlot } from '@registry/components/violin-plot/violin-plot'
 
 // 生成正常分佈數據

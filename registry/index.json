@@ -86,6 +86,20 @@
       "files": ["heatmap.tsx", "heatmap.css", "types.ts", "index.ts"],
       "demo": "https://d3-components.com/demo/heatmap",
       "docs": "https://d3-components.com/docs/heatmap"
+    },
+    {
+      "name": "candlestick-chart",
+      "description": "專業級股市 K線圖（蠟燭圖）組件，支援 OHLC 數據、成交量、技術分析功能",
+      "version": "1.0.0",
+      "tags": ["chart", "candlestick", "k-line", "ohlc", "stock", "financial", "trading"],
+      "variants": ["default", "with-volume", "taiwan-style", "us-style", "minimal"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "financial-charts",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T12:00:00Z",
+      "files": ["candlestick-chart.tsx", "candlestick-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/candlestick",
+      "docs": "https://d3-components.com/docs/candlestick-chart"
     }
   ],
   "categories": {
@@ -99,6 +113,11 @@
       "description": "用於統計分析的圖表類型",
       "icon": "📈"
     },
+    "financial-charts": {
+      "name": "金融圖表",
+      "description": "專業級金融和股市分析圖表",
+      "icon": "💹"
+    },
     "advanced-charts": {
       "name": "進階圖表",
       "description": "複雜的客製化圖表",
@@ -111,7 +130,7 @@
     }
   },
   "stats": {
-    "totalComponents": 6,
+    "totalComponents": 7,
     "totalDownloads": 0,
     "averageRating": 0
   }

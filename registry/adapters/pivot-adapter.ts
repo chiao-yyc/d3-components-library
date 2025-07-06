@@ -1,5 +1,5 @@
 import { BaseAdapter } from './base-adapter'
-import { ChartDataPoint, MappingConfig, ValidationResult, SuggestedMapping } from '../types'
+import { ChartDataPoint, ValidationResult, SuggestedMapping } from '../types'
 
 /**
  * 樞紐表資料適配器
@@ -7,7 +7,7 @@ import { ChartDataPoint, MappingConfig, ValidationResult, SuggestedMapping } fro
  */
 export class PivotAdapter extends BaseAdapter<Record<string, any>> {
   
-  transform(data: Record<string, any>[], config: MappingConfig & PivotConfig): ChartDataPoint[] {
+  transform(data: Record<string, any>[], config: PivotMappingConfig): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     // 如果需要樞紐轉換
@@ -41,9 +41,12 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
         // 添加其他映射欄位
         Object.keys(config).forEach(key => {
           if (key !== 'x' && key !== 'y' && key !== 'pivotConfig') {
-            const value = this.resolveFieldPath(row, config[key])
-            if (value != null) {
-              dataPoint[key] = this.cleanValue(value)
+            const fieldPath = config[key as keyof PivotMappingConfig]
+            if (typeof fieldPath === 'string' || typeof fieldPath === 'function') {
+              const value = this.resolveFieldPath(row, fieldPath)
+              if (value != null) {
+                dataPoint[key] = this.cleanValue(value)
+              }
             }
           }
         })
@@ -65,7 +68,7 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
     const warnings = [...baseValidation.warnings]
     
     if (data.length === 0) {
-      return { isValid: true, errors, warnings }
+      return { isValid: true, errors, warnings, confidence: 1.0 }
     }
     
     // 分析資料是否適合樞紐轉換
@@ -83,7 +86,8 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
       warnings.push(`發現 ${analysis.duplicateKeyPairs} 個重複的索引鍵組合，可能需要聚合處理`)
     }
     
-    return { isValid: errors.length === 0, errors, warnings }
+    const confidence = errors.length === 0 ? 0.75 : Math.max(0.2, 1 - (errors.length / 6))
+    return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
   suggest(data: Record<string, any>[]): SuggestedMapping[] {
@@ -92,32 +96,18 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
     
     // 如果是寬表格，建議樞紐轉換後的映射
     if (analysis.isWideFormat && analysis.confidence > 0.7) {
-      const pivotSuggestions: SuggestedMapping[] = [
-        {
-          field: 'variable',
-          type: 'string',
-          confidence: 0.9,
-          suggested: 'x'
+      const pivotSuggestion: SuggestedMapping = {
+        type: 'auto',
+        mapping: {
+          x: 'variable',
+          y: 'value'
         },
-        {
-          field: 'value',
-          type: 'number',
-          confidence: 0.9,
-          suggested: 'y'
-        }
-      ]
+        chartType: 'line',
+        confidence: 0.9,
+        reasoning: '偵測到寬表格格式，建議使用樞紐轉換將欄位轉換為行資料進行時間序列分析'
+      }
       
-      // 添加識別欄位建議
-      analysis.identifierColumns.forEach(col => {
-        pivotSuggestions.push({
-          field: col,
-          type: 'string',
-          confidence: 0.8,
-          suggested: 'color'
-        })
-      })
-      
-      return pivotSuggestions
+      return [pivotSuggestion, ...baseSuggestions]
     }
     
     return baseSuggestions
@@ -127,8 +117,6 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
    * 執行樞紐轉換
    */
   private performPivot(data: Record<string, any>[], config: PivotConfig): Record<string, any>[] {
-    const result: Record<string, any>[] = []
-    
     switch (config.type) {
       case 'wide-to-long':
         return this.wideToLong(data, config)
@@ -176,7 +164,6 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
    * 長表格轉寬表格
    */
   private longToWide(data: Record<string, any>[], config: PivotConfig): Record<string, any>[] {
-    const result: Record<string, any>[] = []
     const keyField = config.keyField!
     const valueField = config.valueField!
     const idColumns = config.idColumns || []
@@ -436,26 +423,6 @@ export class PivotAdapter extends BaseAdapter<Record<string, any>> {
     return duplicates
   }
   
-  /**
-   * 清理各種型別的值
-   */
-  private cleanValue(value: any): any {
-    if (value == null) return null
-    
-    if (typeof value === 'string') {
-      const trimmed = value.trim()
-      
-      // 嘗試轉換為數值
-      const numValue = this.cleanNumber(trimmed)
-      if (!isNaN(numValue) && /^[0-9.,%-]+$/.test(trimmed)) {
-        return numValue
-      }
-      
-      return trimmed
-    }
-    
-    return value
-  }
   
   /**
    * 建議樞紐轉換配置
@@ -500,11 +467,13 @@ interface PivotAnalysis {
   duplicateKeyPairs: number
 }
 
-interface MappingConfig {
-  x: string | ((d: any) => any)
-  y: string | ((d: any) => any)
-  [key: string]: any
+interface PivotMappingConfig {
+  x: string | ((d: unknown) => unknown)
+  y: string | ((d: unknown) => unknown)
+  color?: string | ((d: unknown) => unknown)
+  size?: string | ((d: unknown) => unknown)
   pivotConfig?: PivotConfig
+  [key: string]: string | ((d: unknown) => unknown) | PivotConfig | undefined
 }
 
 export type { PivotConfig, PivotAnalysis }

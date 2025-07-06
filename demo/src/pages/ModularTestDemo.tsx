@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { BarChartRefactored } from '@registry/components/charts/bar-chart/bar-chart-refactored'
 import { BarChartSimple } from '@registry/components/charts/bar-chart/bar-chart-simple'
 import { processData } from '@registry/components/core/data-processor'

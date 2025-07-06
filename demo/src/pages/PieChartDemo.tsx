@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { PieChart } from '@registry/components/pie-chart'
 
 // 範例資料

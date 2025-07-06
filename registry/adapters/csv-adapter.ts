@@ -1,5 +1,5 @@
 import { BaseAdapter } from './base-adapter'
-import { ChartDataPoint, MappingConfig, ValidationResult } from '../types'
+import { ChartDataPoint, DataMapping, ValidationResult } from '../types'
 import { detectColumnType } from '../utils/data-detector'
 
 /**
@@ -8,7 +8,7 @@ import { detectColumnType } from '../utils/data-detector'
  */
 export class CsvAdapter extends BaseAdapter<Record<string, any>> {
   
-  transform(data: Record<string, any>[], config: MappingConfig): ChartDataPoint[] {
+  transform(data: Record<string, any>[], config: DataMapping): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     for (let i = 0; i < data.length; i++) {
@@ -60,7 +60,7 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
     const warnings = [...baseValidation.warnings]
     
     if (data.length === 0) {
-      return { isValid: true, errors, warnings }
+      return { isValid: true, errors, warnings, confidence: 1.0 }
     }
     
     // CSV 特定驗證
@@ -98,7 +98,8 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
       }
     })
     
-    return { isValid: errors.length === 0, errors, warnings }
+    const confidence = errors.length === 0 ? 0.9 : Math.max(0.1, 1 - (errors.length / 10))
+    return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
   /**
@@ -207,26 +208,4 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
     return value
   }
   
-  /**
-   * 清理各種型別的值
-   */
-  private cleanValue(value: any): any {
-    if (value == null) return null
-    
-    if (typeof value === 'string') {
-      // 嘗試轉換為數值
-      const numValue = this.cleanNumber(value)
-      if (!isNaN(numValue) && value.match(/^[0-9.,%-]+$/)) {
-        return numValue
-      }
-      
-      // 嘗試轉換為日期
-      const dateValue = this.cleanDate(value)
-      if (dateValue) return dateValue
-      
-      return value.trim()
-    }
-    
-    return value
-  }
 }

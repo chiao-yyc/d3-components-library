@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import fs from 'fs'
 import path from 'path'
 import readline from 'readline'
-import { CsvAdapter, TimeSeriesAdapter, NestedAdapter, PivotAdapter } from '../../../registry/adapters'
+import { CsvAdapter } from '../../../registry/adapters'
 import { suggestMapping, suggestChartType } from '../../../registry/utils/data-detector'
 import { SuggestedMapping, ChartSuggestion } from '../../../registry/types'
 

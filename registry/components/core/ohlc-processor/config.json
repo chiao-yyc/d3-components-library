@@ -1,0 +1,38 @@
+{
+  "name": "ohlc-processor",
+  "description": "OHLC (開高低收) 股票數據處理核心模組",
+  "version": "1.0.0",
+  "type": "core",
+  "category": "data-processing",
+  "tags": ["ohlc", "stock", "financial", "candlestick", "data-processing"],
+  "exports": [
+    "OHLCProcessor",
+    "processOHLCData",
+    "useOHLCProcessor"
+  ],
+  "dependencies": {
+    "react": "^18.0.0"
+  },
+  "files": [
+    "ohlc-processor.ts",
+    "use-ohlc-processor.ts",
+    "types.ts",
+    "index.ts",
+    "config.json"
+  ],
+  "features": [
+    "自動欄位偵測",
+    "多種日期格式支援",
+    "OHLC 數據驗證",
+    "統計資訊計算",
+    "十字星判定",
+    "數據排序和清理",
+    "React Hook 整合"
+  ],
+  "useCases": [
+    "股票 K線圖數據處理",
+    "金融時間序列分析",
+    "蠟燭圖可視化",
+    "技術分析指標計算"
+  ]
+}

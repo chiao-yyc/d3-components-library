@@ -1,6 +1,5 @@
 import { BaseAdapter } from './base-adapter'
-import { ChartDataPoint, MappingConfig, ValidationResult, SuggestedMapping } from '../types'
-import { detectColumnType } from '../utils/data-detector'
+import { ChartDataPoint, DataMapping, ValidationResult, SuggestedMapping } from '../types'
 
 /**
  * 時間序列資料適配器
@@ -25,7 +24,7 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
     /^\d{13}$/
   ]
   
-  transform(data: Record<string, any>[], config: MappingConfig): ChartDataPoint[] {
+  transform(data: Record<string, any>[], config: DataMapping): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     // 排序資料以確保時間順序
@@ -60,7 +59,7 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
           if (key !== 'x' && key !== 'y') {
             const value = this.resolveFieldPath(row, config[key])
             if (value != null) {
-              dataPoint[key] = this.cleanValue(value)
+              dataPoint[key] = this.cleanTimeValue(value)
             }
           }
         })
@@ -82,7 +81,7 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
     const warnings = [...baseValidation.warnings]
     
     if (data.length === 0) {
-      return { isValid: true, errors, warnings }
+      return { isValid: true, errors, warnings, confidence: 1.0 }
     }
     
     // 尋找時間欄位
@@ -90,7 +89,7 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
     
     if (timeFields.length === 0) {
       errors.push('未找到有效的時間欄位，時間序列適配器需要至少一個時間欄位')
-      return { isValid: false, errors, warnings }
+      return { isValid: false, errors, warnings, confidence: 0.0 }
     }
     
     // 檢查時間資料的完整性
@@ -137,7 +136,8 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
       }
     })
     
-    return { isValid: errors.length === 0, errors, warnings }
+    const confidence = errors.length === 0 ? 0.85 : Math.max(0.1, 1 - (errors.length / 8))
+    return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
   suggest(data: Record<string, any>[]): SuggestedMapping[] {
@@ -145,11 +145,10 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
     
     // 提高時間欄位的建議權重
     return baseSuggestions.map(suggestion => {
-      if (suggestion.type === 'date') {
+      if (suggestion.chartType === 'line' && suggestion.reasoning.includes('時間')) {
         return {
           ...suggestion,
-          confidence: Math.min(0.95, suggestion.confidence + 0.2),
-          suggested: 'x' as const
+          confidence: Math.min(0.95, suggestion.confidence + 0.2)
         }
       }
       return suggestion
@@ -251,23 +250,17 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
   }
   
   /**
-   * 清理各種型別的值
+   * 時間序列特定的值清理方法
    */
-  private cleanValue(value: any): any {
+  private cleanTimeValue(value: any): any {
     if (value == null) return null
     
-    // 嘗試解析為時間
+    // 優先嘗試解析為時間
     const timeValue = this.parseTimeValue(value)
     if (timeValue) return timeValue
     
-    // 嘗試解析為數值
-    if (typeof value === 'string') {
-      const numValue = this.cleanNumber(value)
-      if (!isNaN(numValue)) return numValue
-      return value.trim()
-    }
-    
-    return value
+    // 回退到基本清理
+    return this.cleanValue(value)
   }
   
   /**

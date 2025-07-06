@@ -1,4 +1,4 @@
-import { DataType, SuggestedMapping, ChartSuggestion, FieldSuggestion } from '../types'
+import { DataType, SuggestedMapping, ChartSuggestion, FieldSuggestion } from '../types/index'
 
 export interface DataTypeInfo {
   type: 'number' | 'string' | 'date' | 'boolean'
@@ -80,13 +80,13 @@ export function detectColumnType(values: any[]): DataTypeInfo {
   const booleanInfo = detectBooleanType(nonNullValues)
   
   // 比較各類型的信心度，但給數字類型優先權
-  const typeOptions = [numberInfo, dateInfo, booleanInfo].filter(info => info.confidence > 0)
+  const typeOptions = [numberInfo, dateInfo, booleanInfo].filter(info => (info.confidence || 0) > 0)
   
   // 如果數字類型的信心度 >= 0.8，直接使用數字類型
-  if (numberInfo.confidence >= 0.8) {
+  if ((numberInfo.confidence || 0) >= 0.8) {
     return {
       type: 'number',
-      confidence: numberInfo.confidence,
+      confidence: numberInfo.confidence || 0,
       samples,
       nullCount,
       subType: numberInfo.subType,
@@ -106,13 +106,16 @@ export function detectColumnType(values: any[]): DataTypeInfo {
   
   // 選擇信心度最高的類型
   const bestType = typeOptions.reduce((best, current) => 
-    current.confidence > best.confidence ? current : best
+    (current.confidence || 0) > (best.confidence || 0) ? current : best
   )
   
   return {
-    ...bestType,
+    type: bestType.type || 'string',
+    confidence: bestType.confidence || 0,
     samples,
-    nullCount
+    nullCount,
+    subType: bestType.subType,
+    format: bestType.format
   }
 }
 

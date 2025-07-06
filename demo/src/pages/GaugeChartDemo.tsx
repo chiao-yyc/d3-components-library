@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { GaugeChart } from '@registry/components/gauge-chart/gauge-chart'
 
 // KPI 資料

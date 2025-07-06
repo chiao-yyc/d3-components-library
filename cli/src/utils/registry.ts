@@ -161,7 +161,7 @@ export async function downloadComponentFiles(
 
 async function copyUtilFiles(targetDir: string, config: ComponentConfig) {
   // 檢查是否需要複製 utils 檔案，根據組件依賴決定
-  let utilsNeeded = ['cn.ts']
+  const utilsNeeded = ['cn.ts']
   
   // 如果組件有資料處理需求，也複製 data-detector
   if (config.dependencies?.includes('d3') || config.tags?.includes('chart')) {
