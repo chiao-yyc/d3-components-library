@@ -12,6 +12,7 @@ import FunnelChartDemo from './pages/FunnelChartDemo'
 import BoxPlotDemo from './pages/BoxPlotDemo'
 import ViolinPlotDemo from './pages/ViolinPlotDemo'
 import RadarChartDemo from './pages/RadarChartDemo'
+import ModularTestDemo from './pages/ModularTestDemo'
 import Gallery from './pages/Gallery'
 import DataMapperDemo from './pages/DataMapperDemo'
 
@@ -31,6 +32,7 @@ function App() {
         <Route path="/box-plot" element={<BoxPlotDemo />} />
         <Route path="/violin-plot" element={<ViolinPlotDemo />} />
         <Route path="/radar-chart" element={<RadarChartDemo />} />
+        <Route path="/modular-test" element={<ModularTestDemo />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/data-mapper" element={<DataMapperDemo />} />
       </Routes>

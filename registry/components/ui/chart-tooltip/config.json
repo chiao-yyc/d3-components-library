@@ -1,0 +1,34 @@
+{
+  "name": "chart-tooltip",
+  "description": "統一的圖表提示框組件，支援多種顯示模式和自動位置調整",
+  "version": "1.0.0",
+  "type": "ui",
+  "tags": ["ui", "tooltip", "interaction", "overlay"],
+  "dependencies": [],
+  "files": ["chart-tooltip.tsx", "chart-tooltip.css", "use-tooltip.ts", "types.ts", "index.ts"],
+  "exports": {
+    "ChartTooltip": "主要提示框組件",
+    "useTooltip": "React Hook 用於提示框狀態管理",
+    "useD3Tooltip": "專門用於 D3 元素的 Hook"
+  },
+  "features": [
+    "自動位置調整和邊界檢測",
+    "多種主題和樣式選項",
+    "動畫和過渡效果",
+    "互動模式支援",
+    "箭頭指示器",
+    "React Hook 整合",
+    "D3 事件處理器",
+    "響應式設計"
+  ],
+  "usage": {
+    "basic": "<ChartTooltip visible={true} position={{x: 100, y: 100}} content={tooltipContent} />",
+    "hook": "const { tooltip, showTooltip, hideTooltip } = useTooltip()",
+    "d3": "const { tooltip, createD3Handlers } = useD3Tooltip()"
+  },
+  "styling": {
+    "themes": ["light", "dark", "auto"],
+    "positions": ["auto", "top", "bottom", "left", "right"],
+    "animations": ["fade", "scale", "slide"]
+  }
+}
