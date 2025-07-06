@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BarChart } from '@registry/components/bar-chart/bar-chart'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
+import InteractiveTutorial from '../components/InteractiveTutorial'
 
 function BarChartDemo() {
   const [selectedDataset, setSelectedDataset] = useState('basic')
@@ -13,6 +14,40 @@ function BarChartDemo() {
   const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 40 })
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
+
+  const tutorialSteps = [
+    {
+      title: "認識長條圖組件",
+      content: "長條圖是最常用的圖表類型之一，用於比較不同類別的數值。在左側控制面板中，你可以調整各種參數來自定義圖表的外觀和行為。",
+      highlight: "嘗試更改資料集選項，觀察圖表如何即時更新"
+    },
+    {
+      title: "調整圖表尺寸",
+      content: "使用寬度和高度滑桿來調整圖表的尺寸。這對於適應不同的容器或螢幕尺寸非常有用。",
+      code: `<BarChart
+  data={data}
+  width={600}
+  height={400}
+/>`,
+      highlight: "寬度建議在 400-1200 像素之間，高度建議在 300-800 像素之間"
+    },
+    {
+      title: "自定義顏色方案",
+      content: "選擇不同的顏色方案來匹配你的設計風格。每個方案都經過精心設計，確保良好的視覺效果和無障礙性。",
+      highlight: "顏色方案不僅影響美觀，也會影響圖表的可讀性"
+    },
+    {
+      title: "配置互動功能",
+      content: "啟用提示框、網格線等功能來增強用戶體驗。這些互動元素讓用戶能更好地理解數據。",
+      code: `<BarChart
+  data={data}
+  showTooltip={true}
+  showGrid={true}
+  interactive={true}
+/>`,
+      highlight: "提示框會在滑鼠懸停時顯示詳細的數據信息"
+    }
+  ]
 
   return (
     <div className="px-4 py-8">
@@ -186,11 +221,10 @@ function BarChartDemo() {
 
           {/* 圖表顯示區 */}
           <div className="lg:col-span-2">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                圖表預覽
-              </h3>
-              
+            <InteractiveTutorial 
+              title="🎯 長條圖互動教學"
+              steps={tutorialSteps}
+            >
               <div className="flex justify-center">
                 <BarChart
                   data={currentDataset.data}
@@ -205,7 +239,7 @@ function BarChartDemo() {
                   showTooltip={showTooltip}
                 />
               </div>
-            </div>
+            </InteractiveTutorial>
 
             {/* 資料預覽 */}
             <div className="bg-white p-6 rounded-lg shadow-sm border mt-6">
