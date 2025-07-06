@@ -1,0 +1,40 @@
+{
+  "name": "axis",
+  "displayName": "Axis Components",
+  "description": "獨立的軸線組件，支援 X 軸、Y 軸和雙軸配置",
+  "category": "primitives",
+  "subcategory": "axis",
+  "version": "1.0.0",
+  "dependencies": [
+    "react",
+    "d3"
+  ],
+  "files": [
+    "axis.tsx",
+    "x-axis.tsx",
+    "y-axis.tsx",
+    "dual-axis.tsx",
+    "axis.css",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts",
+    "styles": "./axis.css"
+  },
+  "tags": [
+    "axis",
+    "scales",
+    "ticks",
+    "labels",
+    "primitives"
+  ],
+  "features": [
+    "X/Y 軸線組件",
+    "雙軸支援",
+    "網格線配置",
+    "刻度自訂",
+    "標籤和格式化"
+  ]
+}

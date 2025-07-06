@@ -21,6 +21,7 @@ const ModularTestDemo = lazy(() => import('./pages/ModularTestDemo'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const DataMapperDemo = lazy(() => import('./pages/DataMapperDemo'))
 const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
+const ComboChartDemo = lazy(() => import('./pages/ComboChartDemo'))
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/data-mapper" element={<DataMapperDemo />} />
           <Route path="/simple-components" element={<SimpleComponentsDemo />} />
+          <Route path="/combo-chart" element={<ComboChartDemo />} />
         </Routes>
       </Suspense>
     </Layout>

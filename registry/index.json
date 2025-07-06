@@ -100,6 +100,90 @@
       "files": ["candlestick-chart.tsx", "candlestick-chart.css", "types.ts", "index.ts"],
       "demo": "https://d3-components.com/demo/candlestick",
       "docs": "https://d3-components.com/docs/candlestick-chart"
+    },
+    {
+      "name": "chart-canvas",
+      "description": "統一的圖表容器組件，提供 SVG 畫布、維度管理和比例尺註冊功能",
+      "version": "1.0.0",
+      "tags": ["primitives", "canvas", "container", "svg"],
+      "variants": ["default"],
+      "dependencies": ["react", "d3"],
+      "category": "primitives",
+      "complexity": "beginner",
+      "lastUpdated": "2025-07-06T15:00:00Z",
+      "files": ["chart-canvas.tsx", "chart-canvas.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/primitives/canvas",
+      "docs": "https://d3-components.com/docs/primitives/canvas"
+    },
+    {
+      "name": "scale-manager",
+      "description": "比例尺管理系統，提供統一的比例尺創建、註冊和協調功能",
+      "version": "1.0.0",
+      "tags": ["primitives", "scales", "manager", "coordination"],
+      "variants": ["default"],
+      "dependencies": ["react", "d3"],
+      "category": "primitives",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T15:00:00Z",
+      "files": ["scale-manager.ts", "use-scale-manager.ts", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/primitives/scales",
+      "docs": "https://d3-components.com/docs/primitives/scales"
+    },
+    {
+      "name": "layer-manager",
+      "description": "圖層管理系統，提供圖層順序控制、可見性管理和自動渲染功能",
+      "version": "1.0.0",
+      "tags": ["primitives", "layers", "manager", "layout"],
+      "variants": ["default"],
+      "dependencies": ["react"],
+      "category": "primitives",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T15:00:00Z",
+      "files": ["layer-manager.tsx", "use-chart-layer.ts", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/primitives/layouts",
+      "docs": "https://d3-components.com/docs/primitives/layouts"
+    },
+    {
+      "name": "axis",
+      "description": "獨立的軸線組件，支援 X 軸、Y 軸和雙軸配置",
+      "version": "1.0.0",
+      "tags": ["primitives", "axis", "scales", "ticks", "labels"],
+      "variants": ["x-axis", "y-axis", "dual-axis"],
+      "dependencies": ["react", "d3"],
+      "category": "primitives",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T15:00:00Z",
+      "files": ["axis.tsx", "x-axis.tsx", "y-axis.tsx", "dual-axis.tsx", "axis.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/primitives/axis",
+      "docs": "https://d3-components.com/docs/primitives/axis"
+    },
+    {
+      "name": "shapes",
+      "description": "原子級圖形元素組件，包含 Bar、Line、Area 等基礎圖形",
+      "version": "1.0.0",
+      "tags": ["primitives", "shapes", "bar", "line", "area"],
+      "variants": ["bar", "line", "area"],
+      "dependencies": ["react", "d3"],
+      "category": "primitives",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T15:00:00Z",
+      "files": ["bar.tsx", "line.tsx", "area.tsx", "shapes.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/primitives/shapes",
+      "docs": "https://d3-components.com/docs/primitives/shapes"
+    },
+    {
+      "name": "combo-chart",
+      "description": "組合圖表組件，展示模組化組件系統的應用範例，支援 Bar + Line 組合",
+      "version": "1.0.0",
+      "tags": ["composite", "combo", "bar", "line", "dual-axis"],
+      "variants": ["default", "dual-axis"],
+      "dependencies": ["react", "d3", "../primitives"],
+      "category": "composite",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-07-06T15:30:00Z",
+      "files": ["combo-chart.tsx", "combo-chart.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/combo-chart",
+      "docs": "https://d3-components.com/docs/composite/combo-chart"
     }
   ],
   "categories": {
@@ -123,6 +207,16 @@
       "description": "複雜的客製化圖表",
       "icon": "📉"
     },
+    "primitives": {
+      "name": "原子組件",
+      "description": "可組合的基礎圖表元素",
+      "icon": "🧩"
+    },
+    "composite": {
+      "name": "組合圖表",
+      "description": "由原子組件組合而成的複合圖表",
+      "icon": "🔗"
+    },
     "utilities": {
       "name": "工具函數",
       "description": "資料處理和輔助工具",
@@ -130,7 +224,7 @@
     }
   },
   "stats": {
-    "totalComponents": 7,
+    "totalComponents": 13,
     "totalDownloads": 0,
     "averageRating": 0
   }

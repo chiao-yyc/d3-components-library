@@ -1,0 +1,37 @@
+{
+  "name": "chart-canvas",
+  "displayName": "Chart Canvas",
+  "description": "統一的圖表容器組件，提供 SVG 畫布、維度管理和比例尺註冊功能",
+  "category": "primitives",
+  "subcategory": "canvas",
+  "version": "1.0.0",
+  "dependencies": [
+    "react",
+    "d3"
+  ],
+  "files": [
+    "chart-canvas.tsx",
+    "chart-canvas.css",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts",
+    "styles": "./chart-canvas.css"
+  },
+  "tags": [
+    "canvas",
+    "container",
+    "svg",
+    "scales",
+    "primitives"
+  ],
+  "features": [
+    "SVG 容器管理",
+    "維度和邊距配置",
+    "比例尺註冊系統",
+    "React Context 整合",
+    "響應式設計支援"
+  ]
+}

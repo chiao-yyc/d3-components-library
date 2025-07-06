@@ -1,0 +1,40 @@
+{
+  "name": "shapes",
+  "displayName": "Chart Shapes",
+  "description": "原子級圖形元素組件，包含 Bar、Line、Area 等基礎圖形",
+  "category": "primitives",
+  "subcategory": "shapes",
+  "version": "1.0.0",
+  "dependencies": [
+    "react",
+    "d3"
+  ],
+  "files": [
+    "bar.tsx",
+    "line.tsx",
+    "area.tsx",
+    "shapes.css",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts",
+    "styles": "./shapes.css"
+  },
+  "tags": [
+    "shapes",
+    "bar",
+    "line",
+    "area",
+    "primitives"
+  ],
+  "features": [
+    "Bar 圖形元素",
+    "Line 圖形元素",
+    "Area 圖形元素",
+    "動畫支援",
+    "互動事件處理",
+    "響應式設計"
+  ]
+}

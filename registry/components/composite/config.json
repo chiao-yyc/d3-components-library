@@ -1,0 +1,38 @@
+{
+  "name": "combo-chart",
+  "displayName": "Combo Chart",
+  "description": "組合圖表組件，展示模組化組件系統的應用範例，支援 Bar + Line 組合",
+  "category": "composite",
+  "subcategory": "charts",
+  "version": "1.0.0",
+  "dependencies": [
+    "react",
+    "d3",
+    "../primitives"
+  ],
+  "files": [
+    "combo-chart.tsx",
+    "combo-chart.css",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts",
+    "styles": "./combo-chart.css"
+  },
+  "tags": [
+    "combo",
+    "composite",
+    "bar",
+    "line",
+    "dual-axis"
+  ],
+  "features": [
+    "Bar + Line 組合圖表",
+    "雙軸支援",
+    "模組化組件應用",
+    "動畫效果",
+    "響應式設計"
+  ]
+}

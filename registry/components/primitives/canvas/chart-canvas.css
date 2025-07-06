@@ -1,0 +1,57 @@
+/* ChartCanvas 組件樣式 */
+
+:root {
+  --chart-canvas-background: #ffffff;
+  --chart-canvas-border: #e5e7eb;
+  --chart-canvas-font-family: system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --chart-canvas-background: #1f2937;
+    --chart-canvas-border: #374151;
+  }
+}
+
+.chart-canvas-container {
+  position: relative;
+  background: var(--chart-canvas-background);
+  border: 1px solid var(--chart-canvas-border);
+  border-radius: 6px;
+  font-family: var(--chart-canvas-font-family);
+  overflow: hidden;
+}
+
+.chart-canvas-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+
+.chart-content {
+  pointer-events: all;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .chart-canvas-container {
+    border-radius: 4px;
+  }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  .chart-canvas-container {
+    border-width: 2px;
+    border-color: #000000;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .chart-canvas-svg * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

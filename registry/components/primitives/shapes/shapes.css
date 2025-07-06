@@ -1,0 +1,148 @@
+/* Shapes 組件樣式 */
+
+:root {
+  --shape-primary-color: #3b82f6;
+  --shape-secondary-color: #6b7280;
+  --shape-success-color: #10b981;
+  --shape-warning-color: #f59e0b;
+  --shape-error-color: #ef4444;
+  
+  --shape-hover-opacity: 0.8;
+  --shape-transition-duration: 0.2s;
+  --shape-transition-easing: ease-in-out;
+}
+
+/* Bar 樣式 */
+.bars {
+  cursor: default;
+}
+
+.bar-shape {
+  transition: 
+    opacity var(--shape-transition-duration) var(--shape-transition-easing),
+    fill var(--shape-transition-duration) var(--shape-transition-easing);
+}
+
+.bar-shape:hover {
+  opacity: var(--shape-hover-opacity);
+  cursor: pointer;
+}
+
+.bars-vertical .bar-shape {
+  shape-rendering: crispEdges;
+}
+
+.bars-horizontal .bar-shape {
+  shape-rendering: crispEdges;
+}
+
+/* Line 樣式 */
+.line {
+  cursor: default;
+}
+
+.line-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: 
+    stroke-width var(--shape-transition-duration) var(--shape-transition-easing),
+    opacity var(--shape-transition-duration) var(--shape-transition-easing);
+}
+
+.line-path:hover {
+  stroke-width: calc(var(--stroke-width, 2px) + 1px);
+}
+
+.line-point {
+  cursor: pointer;
+  transition: 
+    r var(--shape-transition-duration) var(--shape-transition-easing),
+    opacity var(--shape-transition-duration) var(--shape-transition-easing);
+}
+
+.line-point:hover {
+  r: calc(var(--point-radius, 3px) + 1px);
+}
+
+/* Area 樣式 */
+.area {
+  cursor: default;
+}
+
+.area-path {
+  transition: 
+    opacity var(--shape-transition-duration) var(--shape-transition-easing),
+    fill var(--shape-transition-duration) var(--shape-transition-easing);
+}
+
+.area-path:hover {
+  opacity: var(--shape-hover-opacity);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .line-point {
+    r: 2px;
+  }
+  
+  .bar-shape {
+    stroke-width: 0.5px;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .bar-shape,
+  .line-path,
+  .line-point,
+  .area-path {
+    transition: none !important;
+  }
+  
+  .line-path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  .bar-shape,
+  .line-path,
+  .area-path {
+    stroke: #000000;
+    stroke-width: 1px;
+  }
+  
+  .line-point {
+    stroke: #000000;
+    stroke-width: 2px;
+  }
+}
+
+/* 色彩變體 */
+.shape-primary {
+  fill: var(--shape-primary-color);
+  stroke: var(--shape-primary-color);
+}
+
+.shape-secondary {
+  fill: var(--shape-secondary-color);
+  stroke: var(--shape-secondary-color);
+}
+
+.shape-success {
+  fill: var(--shape-success-color);
+  stroke: var(--shape-success-color);
+}
+
+.shape-warning {
+  fill: var(--shape-warning-color);
+  stroke: var(--shape-warning-color);
+}
+
+.shape-error {
+  fill: var(--shape-error-color);
+  stroke: var(--shape-error-color);
+}

@@ -1,0 +1,34 @@
+{
+  "name": "layer-manager",
+  "displayName": "Layer Manager",
+  "description": "圖層管理系統，提供圖層順序控制、可見性管理和自動渲染功能",
+  "category": "primitives",
+  "subcategory": "layouts",
+  "version": "1.0.0",
+  "dependencies": [
+    "react"
+  ],
+  "files": [
+    "layer-manager.tsx",
+    "use-chart-layer.ts",
+    "types.ts",
+    "index.ts"
+  ],
+  "exports": {
+    "main": "./index.ts",
+    "types": "./types.ts"
+  },
+  "tags": [
+    "layers",
+    "manager",
+    "layout",
+    "primitives"
+  ],
+  "features": [
+    "圖層順序管理",
+    "可見性控制",
+    "互動性設定",
+    "自動圖層註冊",
+    "React Hook 整合"
+  ]
+}
