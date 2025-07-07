@@ -48,7 +48,11 @@ export const Area: React.FC<AreaProps> = ({
     const selection = d3.select(areaRef.current)
 
     const areaGenerator = d3.area<AreaShapeData>()
-      .x(d => xScale(d.x))
+      .x(d => {
+        const x = xScale(d.x)
+        // 如果是 band scale，調整到中心位置
+        return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
+      })
       .y1(d => yScale(d.y))
       .y0(d => {
         if (typeof baseline === 'function') {

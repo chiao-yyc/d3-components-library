@@ -34,7 +34,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line'
+  type: 'bar' | 'line' | 'area'
   dataKey: string
   name: string
   yAxis: 'left' | 'right'
@@ -47,6 +47,13 @@ export interface ComboChartSeries {
   showPoints?: boolean
   pointRadius?: number
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step'
+  // Area 專用配置
+  areaOpacity?: number
+  baseline?: number
+  gradient?: {
+    id: string
+    stops: { offset: string; color: string; opacity?: number }[]
+  }
 }
 
 export interface EnhancedComboChartProps {
