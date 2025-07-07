@@ -1,5 +1,113 @@
 ## [Unreleased]
 
+### 2025-07-07 - Stacked Area + Line Combination Charts (Phase 2.1)
+
+#### ✨ Advanced Stacked Area Implementation
+- **StackedArea Component**: Sophisticated multi-series stacked area visualization with D3.js stack generator
+  - **Intelligent Stacking System**: Advanced D3.js stack() generator integration for precise layer calculation
+    - Support for multiple stacking orders: ascending, descending, insideOut, none, reverse
+    - Flexible stacking offsets: standard, expand (percentage), silhouette (symmetric), wiggle (streamgraph)
+    - Automatic handling of missing values and negative data points
+    - Dynamic series configuration with color, opacity, and gradient support
+  - **Professional Data Processing**: Robust data transformation and validation
+    - Automatic zero-filling for missing series values to ensure consistent stacking
+    - Intelligent data mapping from unified data source to stacked format
+    - Proper coordinate calculation with band scale centering support
+    - Performance-optimized algorithms for large datasets and multiple series
+  - **Advanced Visualization Features**: Rich styling and interaction capabilities
+    - Individual series gradient support with custom color stops
+    - Per-series opacity control for visual emphasis and hierarchy
+    - Smooth animation transitions with configurable timing and easing
+    - Comprehensive event handling with series-specific context and data access
+- **Enhanced Combo Chart Integration**: Seamless stacked area support in combination charts
+  - **Flexible Series Grouping**: stackGroupKey property for organizing multiple stacked area groups
+  - Unified data interface supporting mixed chart types (stacked areas + lines + bars)
+  - Intelligent layer ordering system: stackedArea → area → bar → line
+  - Advanced scale coordination between stacked areas and other chart components
+
+#### 🎯 Comprehensive Demo Implementation
+- **StackedAreaLineComboDemo**: Three sophisticated real-world analysis scenarios
+  - **Website Traffic Analysis**: Multi-channel traffic source visualization
+    - Stacked areas for organic, social, paid, and direct traffic components
+    - Line overlays for conversion rate and average session time metrics
+    - Real-time stacking mode switching (standard, percentage, symmetric, streamgraph)
+    - Interactive series control with channel-specific filtering and highlighting
+  - **Revenue Composition Analysis**: Product line revenue breakdown with performance indicators
+    - Stacked revenue components by product lines and service categories
+    - Growth rate and profit margin trend analysis with dual-axis support
+    - Quarterly analysis with strategic business intelligence insights
+    - Dynamic recalculation based on selected series and time periods
+  - **Energy Consumption Analysis**: Multi-source energy composition with environmental metrics
+    - Stacked energy sources: coal, gas, nuclear, hydro, solar, wind power
+    - Carbon emission trends and renewable energy ratio tracking
+    - Long-term sustainability analysis with policy impact visualization
+    - Environmental correlation indicators and efficiency metrics
+- **Advanced Control System**: Professional configuration interface for data exploration
+  - **Stacking Configuration**: Real-time switching between stacking modes and ordering methods
+  - **Interactive Series Management**: Individual series toggle with color-coded visual feedback
+  - **Scenario Navigation**: Quick transition between different analysis contexts
+  - **Statistical Dashboard**: Automatic calculation of composition ratios and trend indicators
+
+#### 🛠 Technical Architecture Excellence
+- **D3.js Stack Generator Integration**: Mathematical precision in stacking algorithms
+  ```tsx
+  const stack = d3.stack<StackedAreaData>()
+    .keys(keys)
+    .order(getStackOrder(stackOrder))
+    .offset(getStackOffset(stackOffset))
+  ```
+- **Advanced Area Path Generation**: Optimized rendering for complex multi-series visualization
+  - Precise coordinate calculation with proper Y0 and Y1 positioning
+  - Smooth curve interpolation with multiple curve type support
+  - Efficient path generation with performance optimization for animation
+  - Proper clipping and overflow handling for responsive containers
+- **Type Safety and Extensibility**: Comprehensive TypeScript interfaces for development efficiency
+  - Extended ComboChartSeries interface with stackedArea type support
+  - Detailed StackedAreaSeries and StackedAreaData type definitions
+  - Generic type support for custom data structures and analysis requirements
+  - Runtime type validation and error handling with graceful degradation
+
+#### 📊 Advanced Visualization Capabilities
+- **Multi-Mode Stacking Support**: Comprehensive stacking analysis options
+  - **Standard Stacking**: Traditional cumulative stacking for absolute value analysis
+  - **Percentage Stacking**: Normalized stacking for composition ratio analysis
+  - **Symmetric Stacking**: Centered stacking for balanced visual representation
+  - **Streamgraph Mode**: Organic flow visualization for aesthetic data storytelling
+- **Dynamic Series Management**: Interactive data exploration and filtering
+  - Real-time series visibility control with immediate chart updates
+  - Color-coded legend with series-specific styling and metadata
+  - Statistical summary calculations with automatic recalculation
+  - Export-ready formatting for presentation and reporting requirements
+- **Performance Optimization**: Efficient rendering for complex datasets
+  - Optimized D3.js integration with minimal re-renders
+  - Intelligent caching of stacking calculations for interactive updates
+  - Memory-efficient data structures for large time-series datasets
+  - Responsive design with automatic scaling and mobile optimization
+
+#### 🔧 Developer Experience Enhancements
+- **Modular Architecture**: Building blocks for advanced stacked visualizations
+  - StackedArea component designed for standalone usage and composition
+  - Consistent API design following established primitives patterns
+  - Comprehensive prop configuration for diverse use cases and requirements
+  - Clear separation of concerns between data processing and rendering logic
+- **Educational Value**: Reference implementation for advanced D3.js + React patterns
+  - Detailed code examples demonstrating stacking algorithm integration
+  - Best practices for multi-series data handling and transformation
+  - Performance considerations and optimization techniques documentation
+  - Integration patterns with existing chart composition architecture
+
+#### 🏗 Foundation for Advanced Analytics
+- **Business Intelligence Applications**: Professional tools for data-driven decision making
+  - Multi-dimensional trend analysis with composition and correlation insights
+  - Strategic planning support with scenario modeling and forecasting capabilities
+  - Performance monitoring dashboards with real-time data integration
+  - Comparative analysis tools for market research and competitive intelligence
+- **Scientific Visualization**: Research-grade visualization for academic and industrial applications
+  - Environmental data analysis with multi-factor correlation studies
+  - Economic modeling with sector composition and trend analysis
+  - Resource allocation optimization with visual constraint modeling
+  - Time-series analysis with seasonal decomposition and pattern recognition
+
 ### 2025-07-07 - Multi-Bar + Line Combination Charts (Phase 1.3)
 
 #### ✨ Multi-Bar Grouping Implementation

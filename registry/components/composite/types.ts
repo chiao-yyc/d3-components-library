@@ -34,7 +34,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area'
+  type: 'bar' | 'line' | 'area' | 'stackedArea'
   dataKey: string
   name: string
   yAxis: 'left' | 'right'
@@ -55,6 +55,10 @@ export interface ComboChartSeries {
     id: string
     stops: { offset: string; color: string; opacity?: number }[]
   }
+  // StackedArea 專用配置
+  stackGroupKey?: string // 用於分組多個堆疊區域系列
+  stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
+  stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
 }
 
 export interface EnhancedComboChartProps {
