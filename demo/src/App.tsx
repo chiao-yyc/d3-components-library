@@ -27,6 +27,7 @@ const AreaLineComboDemo = lazy(() => import('./pages/AreaLineComboDemo'))
 const MultiBarLineComboDemo = lazy(() => import('./pages/MultiBarLineComboDemo'))
 const StackedAreaLineComboDemo = lazy(() => import('./pages/StackedAreaLineComboDemo'))
 const ScatterRegressionComboDemo = lazy(() => import('./pages/ScatterRegressionComboDemo'))
+const WaterfallLineComboDemo = lazy(() => import('./pages/WaterfallLineComboDemo'))
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
           <Route path="/multi-bar-line-combo" element={<MultiBarLineComboDemo />} />
           <Route path="/stacked-area-line-combo" element={<StackedAreaLineComboDemo />} />
           <Route path="/scatter-regression-combo" element={<ScatterRegressionComboDemo />} />
+          <Route path="/waterfall-line-combo" element={<WaterfallLineComboDemo />} />
         </Routes>
       </Suspense>
     </Layout>
