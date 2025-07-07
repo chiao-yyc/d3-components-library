@@ -79,6 +79,19 @@ function Layout({ children }: LayoutProps) {
                   🔧 組合圖表
                 </NavLink>
 
+                <NavLink
+                  to="/enhanced-combo-chart"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      isActive
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }
+                >
+                  ⚡ 增強組合圖表
+                </NavLink>
+
                 {/* 基礎圖表下拉 */}
                 <div className="relative">
                   <button
