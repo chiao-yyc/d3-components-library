@@ -24,6 +24,7 @@ const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
 const ComboChartDemo = lazy(() => import('./pages/ComboChartDemo'))
 const EnhancedComboChartDemo = lazy(() => import('./pages/EnhancedComboChartDemo'))
 const AreaLineComboDemo = lazy(() => import('./pages/AreaLineComboDemo'))
+const MultiBarLineComboDemo = lazy(() => import('./pages/MultiBarLineComboDemo'))
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           <Route path="/combo-chart" element={<ComboChartDemo />} />
           <Route path="/enhanced-combo-chart" element={<EnhancedComboChartDemo />} />
           <Route path="/area-line-combo" element={<AreaLineComboDemo />} />
+          <Route path="/multi-bar-line-combo" element={<MultiBarLineComboDemo />} />
         </Routes>
       </Suspense>
     </Layout>

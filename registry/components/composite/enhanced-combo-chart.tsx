@@ -14,6 +14,7 @@ import {
   type LineShapeData,
   type AreaShapeData
 } from '../primitives'
+import { MultiBar } from '../primitives/shapes/multi-bar'
 
 // 增強的數據接口 - 支援統一數據源
 export interface EnhancedComboData {
@@ -21,7 +22,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line'
+  type: 'bar' | 'line' | 'area'
   dataKey: string // 指向數據中的欄位
   name: string
   yAxis: 'left' | 'right'
@@ -29,11 +30,16 @@ export interface ComboChartSeries {
   // Bar 專用配置
   barWidth?: number
   barOpacity?: number
+  barGroupKey?: string // 用於分組多個 bar 系列
   // Line 專用配置
   strokeWidth?: number
   showPoints?: boolean
   pointRadius?: number
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step'
+  // Area 專用配置
+  areaOpacity?: number
+  baseline?: number
+  gradient?: { id: string; stops: { offset: string; color: string; opacity?: number }[] }
 }
 
 export interface EnhancedComboChartProps {
@@ -582,9 +588,78 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return order[a.type] - order[b.type]
   })
 
+  // 處理多 Bar 分組
+  const barSeries = sortedSeries.filter(s => s.type === 'bar')
+  const nonBarSeries = sortedSeries.filter(s => s.type !== 'bar')
+  
+  // 計算 Bar 分組
+  const barGroups = new Map()
+  barSeries.forEach((series, index) => {
+    const groupKey = series.barGroupKey || 'default'
+    if (!barGroups.has(groupKey)) {
+      barGroups.set(groupKey, [])
+    }
+    barGroups.get(groupKey).push({ series, originalIndex: index })
+  })
+
   return (
     <>
-      {sortedSeries.map((seriesConfig, index) => {
+      {/* 渲染分組的 Bar 系列 */}
+      {Array.from(barGroups.entries()).map(([groupKey, groupSeries]) => 
+        groupSeries.map((item, groupIndex) => {
+          const { series: seriesConfig, originalIndex } = item
+          const yScale = seriesConfig.yAxis === 'left' ? leftYScale : rightYScale
+          if (!yScale) {
+            console.warn(`⚠️ No Y scale available for series ${seriesConfig.name}`)
+            return null
+          }
+
+          // 計算分組偏移
+          const groupSize = groupSeries.length
+          const barWidthTotal = xScale.bandwidth ? xScale.bandwidth() : 40
+          const barWidth = barWidthTotal / groupSize
+          const groupOffset = (groupIndex - (groupSize - 1) / 2) * barWidth
+
+          // 轉換數據格式並添加分組偏移
+          const seriesData = data.map(d => ({
+            x: d[xKey],
+            y: Number(d[seriesConfig.dataKey]) || 0,
+            originalData: d,
+            groupOffset // 傳遞偏移量給 Bar 組件
+          }))
+
+          console.log(`🎨 Rendering bar series: ${seriesConfig.name} (group: ${groupKey}, offset: ${groupOffset})`, {
+            dataPoints: seriesData.length,
+            sampleData: seriesData.slice(0, 2),
+            yScale: seriesConfig.yAxis,
+            color: seriesConfig.color,
+            groupOffset
+          })
+
+          return (
+            <MultiBar
+              key={`bar-${seriesConfig.name}-${originalIndex}`}
+              data={seriesData}
+              xScale={xScale}
+              yScale={yScale}
+              color={seriesConfig.color}
+              opacity={seriesConfig.barOpacity || 0.8}
+              animate={animate}
+              animationDuration={animationDuration}
+              className={`enhanced-combo-bar-${originalIndex}`}
+              barWidth={barWidth}
+              groupOffset={groupOffset}
+              onBarClick={interactive && onSeriesClick ? 
+                (d, i, event) => onSeriesClick(seriesConfig, d, event) : undefined}
+              onBarMouseEnter={interactive && onSeriesHover ?
+                (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
+            />
+          )
+        })
+      )}
+
+      {/* 渲染非 Bar 系列 */}
+      {nonBarSeries.map((seriesConfig, index) => {
         const yScale = seriesConfig.yAxis === 'left' ? leftYScale : rightYScale
         if (!yScale) {
           console.warn(`⚠️ No Y scale available for series ${seriesConfig.name}`)
@@ -626,18 +701,6 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               gradient={seriesConfig.gradient}
               onAreaClick={interactive && onSeriesClick ?
                 (event) => onSeriesClick(seriesConfig, null, event) : undefined}
-            />
-          )
-        } else if (seriesConfig.type === 'bar') {
-          return (
-            <Bar
-              key={`bar-${seriesConfig.name}-${index}`}
-              {...commonProps}
-              opacity={seriesConfig.barOpacity || 0.8}
-              onBarClick={interactive && onSeriesClick ? 
-                (d, i, event) => onSeriesClick(seriesConfig, d, event) : undefined}
-              onBarMouseEnter={interactive && onSeriesHover ?
-                (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
             />
           )
         } else if (seriesConfig.type === 'line') {
