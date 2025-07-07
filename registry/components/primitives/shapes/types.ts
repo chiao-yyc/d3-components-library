@@ -76,3 +76,35 @@ export interface AreaProps {
   }
   onAreaClick?: (event: React.MouseEvent) => void
 }
+
+export interface StackedAreaData {
+  x: any
+  [key: string]: any
+}
+
+export interface StackedAreaSeries {
+  key: string
+  color: string
+  name?: string
+  opacity?: number
+  gradient?: {
+    id: string
+    stops: { offset: string; color: string; opacity?: number }[]
+  }
+}
+
+export interface StackedAreaProps {
+  data: StackedAreaData[]
+  series: StackedAreaSeries[]
+  xScale: any
+  yScale: any
+  curve?: d3.CurveFactory
+  className?: string
+  animate?: boolean
+  animationDuration?: number
+  stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
+  stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
+  onAreaClick?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  onAreaMouseEnter?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  onAreaMouseLeave?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+}

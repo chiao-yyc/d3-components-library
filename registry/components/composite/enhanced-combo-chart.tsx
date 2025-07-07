@@ -10,9 +10,12 @@ import {
   Bar,
   Line,
   Area,
+  StackedArea,
   type BarShapeData,
   type LineShapeData,
-  type AreaShapeData
+  type AreaShapeData,
+  type StackedAreaData,
+  type StackedAreaSeries
 } from '../primitives'
 import { MultiBar } from '../primitives/shapes/multi-bar'
 
@@ -22,7 +25,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area'
+  type: 'bar' | 'line' | 'area' | 'stackedArea'
   dataKey: string // 指向數據中的欄位
   name: string
   yAxis: 'left' | 'right'
@@ -40,6 +43,10 @@ export interface ComboChartSeries {
   areaOpacity?: number
   baseline?: number
   gradient?: { id: string; stops: { offset: string; color: string; opacity?: number }[] }
+  // StackedArea 專用配置
+  stackGroupKey?: string // 用於分組多個堆疊區域系列
+  stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
+  stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
 }
 
 export interface EnhancedComboChartProps {
@@ -151,14 +158,48 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
     // 計算左軸域值
     let leftYDomain: [number, number] = [0, 1]
     if (leftSeries.length > 0) {
-      const leftValues = leftSeries.flatMap(s => 
-        data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
-      )
+      // 檢查是否有堆疊區域系列
+      const leftStackedAreaSeries = leftSeries.filter(s => s.type === 'stackedArea')
+      const leftNonStackedSeries = leftSeries.filter(s => s.type !== 'stackedArea')
+
+      let leftValues: number[] = []
+
+      // 處理非堆疊系列
+      if (leftNonStackedSeries.length > 0) {
+        leftValues = leftValues.concat(
+          leftNonStackedSeries.flatMap(s => 
+            data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
+          )
+        )
+      }
+
+      // 處理堆疊系列 - 需要計算堆疊總和
+      if (leftStackedAreaSeries.length > 0) {
+        // 按堆疊組分組
+        const stackGroups = new Map<string, typeof leftStackedAreaSeries>()
+        leftStackedAreaSeries.forEach(s => {
+          const groupKey = s.stackGroupKey || 'default'
+          if (!stackGroups.has(groupKey)) {
+            stackGroups.set(groupKey, [])
+          }
+          stackGroups.get(groupKey)!.push(s)
+        })
+
+        // 計算每個堆疊組的總和
+        stackGroups.forEach(groupSeries => {
+          const stackedTotals = data.map(d => 
+            groupSeries.reduce((sum, s) => sum + (Number(d[s.dataKey]) || 0), 0)
+          )
+          leftValues = leftValues.concat(stackedTotals)
+        })
+      }
+
       if (leftValues.length > 0) {
         const extent = d3.extent(leftValues) as [number, number]
-        // 為 Bar 圖預留底部空間，從 0 開始
+        // 檢查是否有堆疊區域系列，如果有則強制從 0 開始
+        const hasStackedArea = leftStackedAreaSeries.length > 0
         leftYDomain = [
-          Math.min(0, extent[0]), 
+          hasStackedArea ? 0 : Math.min(0, extent[0]), 
           extent[1] * 1.1 // 頂部留 10% 空間
         ]
       }
@@ -167,13 +208,48 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
     // 計算右軸域值
     let rightYDomain: [number, number] = [0, 1]
     if (rightSeries.length > 0) {
-      const rightValues = rightSeries.flatMap(s => 
-        data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
-      )
+      // 檢查是否有堆疊區域系列
+      const rightStackedAreaSeries = rightSeries.filter(s => s.type === 'stackedArea')
+      const rightNonStackedSeries = rightSeries.filter(s => s.type !== 'stackedArea')
+
+      let rightValues: number[] = []
+
+      // 處理非堆疊系列
+      if (rightNonStackedSeries.length > 0) {
+        rightValues = rightValues.concat(
+          rightNonStackedSeries.flatMap(s => 
+            data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
+          )
+        )
+      }
+
+      // 處理堆疊系列 - 需要計算堆疊總和
+      if (rightStackedAreaSeries.length > 0) {
+        // 按堆疊組分組
+        const stackGroups = new Map<string, typeof rightStackedAreaSeries>()
+        rightStackedAreaSeries.forEach(s => {
+          const groupKey = s.stackGroupKey || 'default'
+          if (!stackGroups.has(groupKey)) {
+            stackGroups.set(groupKey, [])
+          }
+          stackGroups.get(groupKey)!.push(s)
+        })
+
+        // 計算每個堆疊組的總和
+        stackGroups.forEach(groupSeries => {
+          const stackedTotals = data.map(d => 
+            groupSeries.reduce((sum, s) => sum + (Number(d[s.dataKey]) || 0), 0)
+          )
+          rightValues = rightValues.concat(stackedTotals)
+        })
+      }
+
       if (rightValues.length > 0) {
         const extent = d3.extent(rightValues) as [number, number]
+        // 檢查是否有堆疊區域系列，如果有則強制從 0 開始
+        const hasStackedArea = rightStackedAreaSeries.length > 0
         rightYDomain = [
-          Math.min(0, extent[0]),
+          hasStackedArea ? 0 : Math.min(0, extent[0]),
           extent[1] * 1.1
         ]
       }
@@ -582,15 +658,16 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return null
   }
 
-  // 按類型排序：area -> bar -> line，確保正確的圖層順序
+  // 按類型排序：stackedArea -> area -> bar -> line，確保正確的圖層順序
   const sortedSeries = [...series].sort((a, b) => {
-    const order = { area: 0, bar: 1, line: 2 }
+    const order = { stackedArea: 0, area: 1, bar: 2, line: 3 }
     return order[a.type] - order[b.type]
   })
 
   // 處理多 Bar 分組
   const barSeries = sortedSeries.filter(s => s.type === 'bar')
-  const nonBarSeries = sortedSeries.filter(s => s.type !== 'bar')
+  const stackedAreaSeries = sortedSeries.filter(s => s.type === 'stackedArea')
+  const nonBarSeries = sortedSeries.filter(s => s.type !== 'bar' && s.type !== 'stackedArea')
   
   // 計算 Bar 分組
   const barGroups = new Map()
@@ -602,8 +679,80 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     barGroups.get(groupKey).push({ series, originalIndex: index })
   })
 
+  // 處理 StackedArea 分組
+  const stackedAreaGroups = new Map()
+  stackedAreaSeries.forEach((series, index) => {
+    const groupKey = series.stackGroupKey || 'default'
+    if (!stackedAreaGroups.has(groupKey)) {
+      stackedAreaGroups.set(groupKey, [])
+    }
+    stackedAreaGroups.get(groupKey).push({ series, originalIndex: index })
+  })
+
   return (
     <>
+      {/* 渲染分組的 StackedArea 系列 */}
+      {Array.from(stackedAreaGroups.entries()).map(([groupKey, groupSeries]) => {
+        const yScale = groupSeries[0]?.series.yAxis === 'left' ? leftYScale : rightYScale
+        if (!yScale) {
+          console.warn(`⚠️ No Y scale available for stacked area group ${groupKey}`)
+          return null
+        }
+
+        // 準備堆疊區域的系列配置
+        const stackedAreaSeriesConfig: StackedAreaSeries[] = groupSeries.map(item => ({
+          key: item.series.dataKey,
+          color: item.series.color,
+          name: item.series.name,
+          opacity: item.series.areaOpacity,
+          gradient: item.series.gradient
+        }))
+
+        // 轉換數據格式用於堆疊
+        const stackedAreaData: StackedAreaData[] = data.map(d => ({
+          x: d[xKey],
+          ...groupSeries.reduce((acc, item) => {
+            acc[item.series.dataKey] = Number(d[item.series.dataKey]) || 0
+            return acc
+          }, {} as any)
+        }))
+
+        console.log(`🎨 Rendering stacked area group: ${groupKey}`, {
+          dataPoints: stackedAreaData.length,
+          seriesCount: stackedAreaSeriesConfig.length,
+          yScale: groupSeries[0]?.series.yAxis
+        })
+
+        const firstSeries = groupSeries[0]?.series
+        return (
+          <StackedArea
+            key={`stacked-area-${groupKey}`}
+            data={stackedAreaData}
+            series={stackedAreaSeriesConfig}
+            xScale={xScale}
+            yScale={yScale}
+            curve={getCurveFunction(firstSeries?.curve || 'monotone')}
+            animate={animate}
+            animationDuration={animationDuration}
+            stackOrder={firstSeries?.stackOrder || 'none'}
+            stackOffset={firstSeries?.stackOffset || 'none'}
+            className={`enhanced-combo-stacked-area-${groupKey}`}
+            onAreaClick={interactive && onSeriesClick ? 
+              (series, event) => onSeriesClick(
+                groupSeries.find(gs => gs.series.dataKey === series.key)?.series || firstSeries, 
+                null, 
+                event
+              ) : undefined}
+            onAreaMouseEnter={interactive && onSeriesHover ?
+              (series, event) => onSeriesHover(
+                groupSeries.find(gs => gs.series.dataKey === series.key)?.series || firstSeries,
+                null,
+                event
+              ) : undefined}
+          />
+        )
+      })}
+
       {/* 渲染分組的 Bar 系列 */}
       {Array.from(barGroups.entries()).map(([groupKey, groupSeries]) => 
         groupSeries.map((item, groupIndex) => {
