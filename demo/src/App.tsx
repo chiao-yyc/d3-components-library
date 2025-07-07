@@ -26,6 +26,7 @@ const EnhancedComboChartDemo = lazy(() => import('./pages/EnhancedComboChartDemo
 const AreaLineComboDemo = lazy(() => import('./pages/AreaLineComboDemo'))
 const MultiBarLineComboDemo = lazy(() => import('./pages/MultiBarLineComboDemo'))
 const StackedAreaLineComboDemo = lazy(() => import('./pages/StackedAreaLineComboDemo'))
+const ScatterRegressionComboDemo = lazy(() => import('./pages/ScatterRegressionComboDemo'))
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
           <Route path="/area-line-combo" element={<AreaLineComboDemo />} />
           <Route path="/multi-bar-line-combo" element={<MultiBarLineComboDemo />} />
           <Route path="/stacked-area-line-combo" element={<StackedAreaLineComboDemo />} />
+          <Route path="/scatter-regression-combo" element={<ScatterRegressionComboDemo />} />
         </Routes>
       </Suspense>
     </Layout>
