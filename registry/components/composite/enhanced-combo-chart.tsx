@@ -11,11 +11,15 @@ import {
   Line,
   Area,
   StackedArea,
+  Scatter,
+  RegressionLine,
   type BarShapeData,
   type LineShapeData,
   type AreaShapeData,
   type StackedAreaData,
-  type StackedAreaSeries
+  type StackedAreaSeries,
+  type ScatterShapeData,
+  type RegressionData
 } from '../primitives'
 import { MultiBar } from '../primitives/shapes/multi-bar'
 
@@ -25,7 +29,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area' | 'stackedArea'
+  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter'
   dataKey: string // 指向數據中的欄位
   name: string
   yAxis: 'left' | 'right'
@@ -47,6 +51,22 @@ export interface ComboChartSeries {
   stackGroupKey?: string // 用於分組多個堆疊區域系列
   stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
   stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
+  // Scatter 專用配置
+  scatterRadius?: number
+  scatterOpacity?: number
+  sizeKey?: string // 用於氣泡圖大小映射
+  sizeRange?: [number, number]
+  groupKey?: string // 用於分組著色
+  strokeColor?: string
+  scatterStrokeWidth?: number
+  // Regression Line 專用配置
+  showRegression?: boolean
+  regressionType?: 'linear' | 'polynomial' | 'exponential'
+  regressionColor?: string
+  regressionWidth?: number
+  regressionDasharray?: string
+  showEquation?: boolean
+  showRSquared?: boolean
 }
 
 export interface EnhancedComboChartProps {
@@ -658,9 +678,9 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return null
   }
 
-  // 按類型排序：stackedArea -> area -> bar -> line，確保正確的圖層順序
+  // 按類型排序：stackedArea -> area -> bar -> scatter -> line，確保正確的圖層順序
   const sortedSeries = [...series].sort((a, b) => {
-    const order = { stackedArea: 0, area: 1, bar: 2, line: 3 }
+    const order = { stackedArea: 0, area: 1, bar: 2, scatter: 3, line: 4 }
     return order[a.type] - order[b.type]
   })
 
@@ -869,6 +889,100 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
                 (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
             />
           )
+        } else if (seriesConfig.type === 'scatter') {
+          // 轉換 scatter 數據格式，支援氣泡圖
+          const scatterData: ScatterShapeData[] = data.map(d => ({
+            x: d[xKey],
+            y: Number(d[seriesConfig.dataKey]) || 0,
+            size: seriesConfig.sizeKey ? Number(d[seriesConfig.sizeKey]) : undefined,
+            color: seriesConfig.groupKey ? d[seriesConfig.groupKey] : undefined,
+            group: seriesConfig.groupKey ? d[seriesConfig.groupKey] : undefined,
+            originalData: d
+          }))
+
+          // 創建大小比例尺（如果有 sizeKey）
+          let sizeScale = null
+          if (seriesConfig.sizeKey && seriesConfig.sizeRange) {
+            const sizeValues = scatterData
+              .map(d => d.size)
+              .filter(s => s !== undefined) as number[]
+            
+            if (sizeValues.length > 0) {
+              const sizeDomain = d3.extent(sizeValues) as [number, number]
+              sizeScale = d3.scaleSqrt()
+                .domain(sizeDomain)
+                .range(seriesConfig.sizeRange)
+            }
+          }
+
+          // 創建顏色比例尺（如果有 groupKey）
+          let colorScale = null
+          if (seriesConfig.groupKey) {
+            const colorValues = Array.from(new Set(
+              scatterData.map(d => d.group).filter(g => g !== undefined)
+            ))
+            
+            if (colorValues.length > 0) {
+              colorScale = d3.scaleOrdinal()
+                .domain(colorValues)
+                .range(d3.schemeCategory10)
+            }
+          }
+
+          const scatterElement = (
+            <Scatter
+              key={`scatter-${seriesConfig.name}-${index}`}
+              data={scatterData}
+              xScale={xScale}
+              yScale={yScale}
+              radius={seriesConfig.scatterRadius || 4}
+              sizeScale={sizeScale}
+              colorScale={colorScale}
+              opacity={seriesConfig.scatterOpacity || 0.7}
+              strokeWidth={seriesConfig.scatterStrokeWidth || 1}
+              strokeColor={seriesConfig.strokeColor || 'white'}
+              animate={animate}
+              animationDuration={animationDuration}
+              className={`enhanced-combo-scatter-${index}`}
+              onPointClick={interactive && onSeriesClick ?
+                (d, event) => onSeriesClick(seriesConfig, d.originalData, event) : undefined}
+              onPointMouseEnter={interactive && onSeriesHover ?
+                (d, event) => onSeriesHover(seriesConfig, d.originalData, event) : undefined}
+            />
+          )
+
+          // 如果需要回歸線，同時渲染回歸線
+          if (seriesConfig.showRegression) {
+            const regressionData: RegressionData[] = scatterData.map(d => ({
+              x: Number(d.x) || 0,
+              y: Number(d.y) || 0
+            }))
+
+            return (
+              <g key={`scatter-regression-${seriesConfig.name}-${index}`}>
+                {scatterElement}
+                <RegressionLine
+                  data={regressionData}
+                  xScale={xScale}
+                  yScale={yScale}
+                  strokeColor={seriesConfig.regressionColor || '#ef4444'}
+                  strokeWidth={seriesConfig.regressionWidth || 2}
+                  strokeDasharray={seriesConfig.regressionDasharray || '5,5'}
+                  opacity={0.8}
+                  regressionType={seriesConfig.regressionType || 'linear'}
+                  showEquation={seriesConfig.showEquation || false}
+                  showRSquared={seriesConfig.showRSquared || false}
+                  animate={animate}
+                  animationDuration={animationDuration}
+                  className={`enhanced-combo-regression-${index}`}
+                  onLineClick={interactive && onSeriesClick ?
+                    (regressionInfo, event) => onSeriesClick(seriesConfig, regressionInfo, event) : undefined}
+                />
+              </g>
+            )
+          }
+
+          return scatterElement
         }
 
         return null

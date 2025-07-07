@@ -108,3 +108,53 @@ export interface StackedAreaProps {
   onAreaMouseEnter?: (series: StackedAreaSeries, event: React.MouseEvent) => void
   onAreaMouseLeave?: (series: StackedAreaSeries, event: React.MouseEvent) => void
 }
+
+export interface ScatterShapeData {
+  x: any
+  y: any
+  size?: number
+  color?: string
+  group?: string
+  [key: string]: any
+}
+
+export interface ScatterProps {
+  data: ScatterShapeData[]
+  xScale: any
+  yScale: any
+  radius?: number
+  sizeScale?: any
+  colorScale?: any
+  className?: string
+  animate?: boolean
+  animationDuration?: number
+  opacity?: number
+  strokeWidth?: number
+  strokeColor?: string
+  onPointClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  onPointMouseEnter?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  onPointMouseLeave?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+}
+
+export interface RegressionData {
+  x: number
+  y: number
+}
+
+export interface RegressionLineProps {
+  data: RegressionData[]
+  xScale: any
+  yScale: any
+  className?: string
+  animate?: boolean
+  animationDuration?: number
+  strokeColor?: string
+  strokeWidth?: number
+  strokeDasharray?: string
+  opacity?: number
+  regressionType?: 'linear' | 'polynomial' | 'exponential'
+  polynomialDegree?: number
+  showEquation?: boolean
+  showRSquared?: boolean
+  onLineClick?: (regressionData: { slope: number; intercept: number; rSquared: number }, event: React.MouseEvent) => void
+}
