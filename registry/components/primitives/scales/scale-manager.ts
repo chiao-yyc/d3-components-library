@@ -42,6 +42,19 @@ export class ScaleManager {
     return scale
   }
 
+  // 直接註冊已存在的比例尺實例
+  registerExistingScale(name: string, scale: any, config: ScaleConfig, axis?: 'x' | 'y' | 'y2'): any {
+    const registration: ScaleRegistration = {
+      name,
+      scale,
+      config,
+      axis
+    }
+    
+    this.scales.set(name, registration)
+    return scale
+  }
+
   getScale(name: string): any {
     const registration = this.scales.get(name)
     return registration?.scale

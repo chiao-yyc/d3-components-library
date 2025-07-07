@@ -1,0 +1,244 @@
+/* Enhanced ComboChart 組件樣式 */
+
+:root {
+  --enhanced-combo-primary: #3b82f6;
+  --enhanced-combo-secondary: #ef4444;
+  --enhanced-combo-success: #10b981;
+  --enhanced-combo-warning: #f59e0b;
+  --enhanced-combo-purple: #8b5cf6;
+  
+  --enhanced-combo-background: #ffffff;
+  --enhanced-combo-border: #e5e7eb;
+  --enhanced-combo-text: #374151;
+  --enhanced-combo-text-muted: #6b7280;
+  
+  --enhanced-combo-animation-duration: 0.3s;
+  --enhanced-combo-animation-easing: ease-in-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --enhanced-combo-background: #1f2937;
+    --enhanced-combo-border: #374151;
+    --enhanced-combo-text: #f9fafb;
+    --enhanced-combo-text-muted: #9ca3af;
+  }
+}
+
+.enhanced-combo-chart {
+  position: relative;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.enhanced-combo-chart-canvas {
+  background: var(--enhanced-combo-background);
+  border: 1px solid var(--enhanced-combo-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 空狀態樣式 */
+.enhanced-combo-chart .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--enhanced-combo-text-muted);
+  font-size: 14px;
+  border: 2px dashed var(--enhanced-combo-border);
+  border-radius: 8px;
+  background: var(--enhanced-combo-background);
+}
+
+/* 軸線樣式增強 */
+.enhanced-combo-x-axis .axis-label {
+  fill: var(--enhanced-combo-text);
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.enhanced-combo-left-axis .axis-label {
+  fill: var(--enhanced-combo-primary);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.enhanced-combo-right-axis .axis-label {
+  fill: var(--enhanced-combo-secondary);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* 圖層樣式 */
+.enhanced-combo-chart [class*="enhanced-combo-bar-"] .bar-shape {
+  opacity: 0.8;
+  transition: all var(--enhanced-combo-animation-duration) var(--enhanced-combo-animation-easing);
+  cursor: pointer;
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-bar-"] .bar-shape:hover {
+  opacity: 1;
+  filter: brightness(1.1);
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  transition: stroke-width var(--enhanced-combo-animation-duration) var(--enhanced-combo-animation-easing);
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-path:hover {
+  stroke-width: calc(var(--stroke-width, 2px) + 1px);
+  cursor: pointer;
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point {
+  stroke-width: 2;
+  fill: var(--enhanced-combo-background);
+  cursor: pointer;
+  transition: all var(--enhanced-combo-animation-duration) var(--enhanced-combo-animation-easing);
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point:hover {
+  stroke-width: 3;
+  r: calc(var(--point-radius, 3px) + 1px);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* 網格線增強 */
+.enhanced-combo-chart .grid-lines line {
+  stroke: var(--enhanced-combo-border);
+  stroke-width: 0.5;
+  stroke-dasharray: 3,3;
+  opacity: 0.5;
+}
+
+/* 動畫增強 */
+@keyframes enhanced-combo-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enhanced-combo-chart [class*="enhanced-combo-bar-"] .bar-shape,
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-path,
+.enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point {
+  animation: enhanced-combo-fade-in var(--enhanced-combo-animation-duration) var(--enhanced-combo-animation-easing);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .enhanced-combo-chart-canvas {
+    border-radius: 6px;
+  }
+  
+  .enhanced-combo-x-axis .axis-label,
+  .enhanced-combo-left-axis .axis-label,
+  .enhanced-combo-right-axis .axis-label {
+    font-size: 11px;
+  }
+  
+  .enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point {
+    r: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .enhanced-combo-chart-canvas {
+    border-radius: 4px;
+  }
+  
+  .enhanced-combo-x-axis .axis-label,
+  .enhanced-combo-left-axis .axis-label,
+  .enhanced-combo-right-axis .axis-label {
+    font-size: 10px;
+  }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  .enhanced-combo-chart [class*="enhanced-combo-bar-"] .bar-shape,
+  .enhanced-combo-chart [class*="enhanced-combo-line-"] .line-path {
+    stroke: var(--enhanced-combo-text);
+    stroke-width: 2px;
+  }
+  
+  .enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point {
+    stroke: var(--enhanced-combo-text);
+    stroke-width: 3px;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .enhanced-combo-chart [class*="enhanced-combo-bar-"] .bar-shape,
+  .enhanced-combo-chart [class*="enhanced-combo-line-"] .line-path,
+  .enhanced-combo-chart [class*="enhanced-combo-line-"] .line-point {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 主題色彩變體 */
+.enhanced-combo-chart.theme-blue {
+  --enhanced-combo-primary: #2563eb;
+  --enhanced-combo-secondary: #7c3aed;
+}
+
+.enhanced-combo-chart.theme-green {
+  --enhanced-combo-primary: #059669;
+  --enhanced-combo-secondary: #dc2626;
+}
+
+.enhanced-combo-chart.theme-warm {
+  --enhanced-combo-primary: #ea580c;
+  --enhanced-combo-secondary: #7c2d12;
+}
+
+/* 圖例支援（為未來功能預留） */
+.enhanced-combo-chart .legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 8px;
+  background: var(--enhanced-combo-background);
+  border-radius: 6px;
+}
+
+.enhanced-combo-chart .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--enhanced-combo-text);
+  cursor: pointer;
+  transition: opacity var(--enhanced-combo-animation-duration) var(--enhanced-combo-animation-easing);
+}
+
+.enhanced-combo-chart .legend-item:hover {
+  opacity: 0.8;
+}
+
+.enhanced-combo-chart .legend-item.disabled {
+  opacity: 0.5;
+}
+
+.enhanced-combo-chart .legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.enhanced-combo-chart .legend-marker.line {
+  height: 2px;
+  border-radius: 1px;
+  margin: 5px 0;
+}

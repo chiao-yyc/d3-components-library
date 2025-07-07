@@ -33,6 +33,15 @@ export const useScaleManager = (options: UseScaleManagerOptions = {}) => {
     return scaleManager.registerScale(name, config, axis)
   }, [scaleManager])
 
+  const registerExistingScale = useCallback((
+    name: string,
+    scale: any,
+    config: ScaleConfig,
+    axis?: 'x' | 'y' | 'y2'
+  ) => {
+    return scaleManager.registerExistingScale(name, scale, config, axis)
+  }, [scaleManager])
+
   const autoConfigureScale = useCallback((
     name: string,
     data: any[],
@@ -65,6 +74,7 @@ export const useScaleManager = (options: UseScaleManagerOptions = {}) => {
 
   return {
     registerScale,
+    registerExistingScale,
     autoConfigureScale,
     getScale,
     updateDomain,

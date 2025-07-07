@@ -45,20 +45,20 @@ export const Axis: React.FC<AxisProps> = ({
   useEffect(() => {
     if (!axisRef.current || !scale) return
 
-    const axisGenerator = d3.axisBottom(scale)
+    let axisGenerator: any
 
     switch (orientation) {
       case 'top':
-        axisGenerator.scale(scale).orient('top')
+        axisGenerator = d3.axisTop(scale)
         break
       case 'bottom':
-        axisGenerator.scale(scale).orient('bottom')
+        axisGenerator = d3.axisBottom(scale)
         break
       case 'left':
-        axisGenerator.scale(scale).orient('left')
+        axisGenerator = d3.axisLeft(scale)
         break
       case 'right':
-        axisGenerator.scale(scale).orient('right')
+        axisGenerator = d3.axisRight(scale)
         break
     }
 

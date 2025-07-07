@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../utils/cn'
 import { LineChartProps, ProcessedDataPoint, LineSeriesConfig } from './types'
+import './line-chart.css'
 
 export function LineChart({
   data,
@@ -38,7 +39,15 @@ export function LineChart({
 
   // 1. 資料處理
   const { processedData, seriesData, xScale, yScale } = useMemo(() => {
-    if (!data?.length) return { processedData: [], seriesData: [], xScale: null, yScale: null }
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Processing data:', data)
+    }
+    if (!data?.length) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('No data provided to LineChart')
+      }
+      return { processedData: [], seriesData: [], xScale: null, yScale: null }
+    }
 
     // 處理資料映射
     const processed = data.map((d, index) => {
@@ -101,6 +110,15 @@ export function LineChart({
       .domain([yDomain[0] - yPadding, yDomain[1] + yPadding])
       .range([innerHeight, 0])
 
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Data processing complete:', {
+        processedData: processed,
+        seriesData: series,
+        xScale: xScale.domain(),
+        yScale: yScale.domain()
+      })
+    }
+    
     return { processedData: processed, seriesData: series, xScale, yScale }
   }, [data, xKey, yKey, xAccessor, yAccessor, mapping, seriesKey, width, height, margin])
 
@@ -164,7 +182,17 @@ export function LineChart({
 
   // 4. D3 渲染
   useEffect(() => {
-    if (!svgRef.current || !xScale || !yScale || !lineGenerator) return
+    if (!svgRef.current || !xScale || !yScale || !lineGenerator) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Missing dependencies for Line Chart rendering:', {
+          svgRef: !!svgRef.current,
+          xScale: !!xScale,
+          yScale: !!yScale,
+          lineGenerator: !!lineGenerator
+        })
+      }
+      return
+    }
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -233,6 +261,11 @@ export function LineChart({
       }
 
       // 線條
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Drawing line for series ${key} with ${seriesPoints.length} points`)
+        console.log('Line generator result:', lineGenerator(seriesPoints))
+      }
+      
       const line = g.append('path')
         .datum(seriesPoints)
         .attr('class', `line-${key}`)
@@ -240,6 +273,9 @@ export function LineChart({
         .attr('fill', 'none')
         .attr('stroke', seriesColor)
         .attr('stroke-width', strokeWidth)
+        .style('stroke', seriesColor)
+        .style('stroke-width', strokeWidth)
+        .style('fill', 'none')
 
       // 動畫
       if (animate) {
@@ -349,7 +385,7 @@ export function LineChart({
   return (
     <div 
       ref={containerRef} 
-      className={cn("relative", className)} 
+      className={cn("relative line-chart", className)} 
       onMouseLeave={() => setTooltip(null)}
       {...props}
     >
