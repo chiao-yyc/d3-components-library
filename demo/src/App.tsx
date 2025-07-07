@@ -23,7 +23,7 @@ const DataMapperDemo = lazy(() => import('./pages/DataMapperDemo'))
 const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
 const ComboChartDemo = lazy(() => import('./pages/ComboChartDemo'))
 const EnhancedComboChartDemo = lazy(() => import('./pages/EnhancedComboChartDemo'))
-const DebugLineChart = lazy(() => import('../debug-line-issue'))
+const AreaLineComboDemo = lazy(() => import('./pages/AreaLineComboDemo'))
 
 function App() {
   return (
@@ -49,7 +49,7 @@ function App() {
           <Route path="/simple-components" element={<SimpleComponentsDemo />} />
           <Route path="/combo-chart" element={<ComboChartDemo />} />
           <Route path="/enhanced-combo-chart" element={<EnhancedComboChartDemo />} />
-          <Route path="/debug-line" element={<DebugLineChart />} />
+          <Route path="/area-line-combo" element={<AreaLineComboDemo />} />
         </Routes>
       </Suspense>
     </Layout>
