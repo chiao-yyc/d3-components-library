@@ -157,6 +157,45 @@ function Layout({ children }: LayoutProps) {
                   💧 瀑布線條組合
                 </NavLink>
 
+                <NavLink
+                  to="/area-scatter-combo"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      isActive
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }
+                >
+                  🎯 區域散點組合
+                </NavLink>
+
+                <NavLink
+                  to="/triple-combo"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      isActive
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }
+                >
+                  🚀 三重組合圖表
+                </NavLink>
+
+                <NavLink
+                  to="/dynamic-combo"
+                  className={({ isActive }) =>
+                    `inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      isActive
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`
+                  }
+                >
+                  ⚡ 動態組合系統
+                </NavLink>
+
                 {/* 基礎圖表下拉 */}
                 <div className="relative">
                   <button
