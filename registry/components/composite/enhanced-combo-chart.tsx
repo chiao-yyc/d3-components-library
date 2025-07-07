@@ -9,8 +9,10 @@ import {
   DualAxis,
   Bar,
   Line,
+  Area,
   type BarShapeData,
-  type LineShapeData
+  type LineShapeData,
+  type AreaShapeData
 } from '../primitives'
 
 // 增強的數據接口 - 支援統一數據源
@@ -574,11 +576,10 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return null
   }
 
-  // 按類型排序：bar 系列先渲染，line 系列後渲染，確保 line 在上層
+  // 按類型排序：area -> bar -> line，確保正確的圖層順序
   const sortedSeries = [...series].sort((a, b) => {
-    if (a.type === 'bar' && b.type === 'line') return -1
-    if (a.type === 'line' && b.type === 'bar') return 1
-    return 0
+    const order = { area: 0, bar: 1, line: 2 }
+    return order[a.type] - order[b.type]
   })
 
   return (
@@ -614,7 +615,20 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
           className: `enhanced-combo-${seriesConfig.type}-${index}`
         }
 
-        if (seriesConfig.type === 'bar') {
+        if (seriesConfig.type === 'area') {
+          return (
+            <Area
+              key={`area-${seriesConfig.name}-${index}`}
+              {...commonProps}
+              opacity={seriesConfig.areaOpacity || 0.6}
+              baseline={seriesConfig.baseline || 0}
+              curve={getCurveFunction(seriesConfig.curve || 'monotone')}
+              gradient={seriesConfig.gradient}
+              onAreaClick={interactive && onSeriesClick ?
+                (event) => onSeriesClick(seriesConfig, null, event) : undefined}
+            />
+          )
+        } else if (seriesConfig.type === 'bar') {
           return (
             <Bar
               key={`bar-${seriesConfig.name}-${index}`}
