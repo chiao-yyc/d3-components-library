@@ -34,7 +34,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter'
+  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter' | 'waterfall'
   dataKey: string
   name: string
   yAxis: 'left' | 'right'
@@ -75,6 +75,17 @@ export interface ComboChartSeries {
   regressionDasharray?: string
   showEquation?: boolean
   showRSquared?: boolean
+  // Waterfall 專用配置
+  typeKey?: string // 用於指定瀑布圖類型的數據字段
+  waterfallOpacity?: number
+  positiveColor?: string
+  negativeColor?: string
+  totalColor?: string
+  subtotalColor?: string
+  showConnectors?: boolean
+  connectorColor?: string
+  connectorWidth?: number
+  connectorDasharray?: string
 }
 
 export interface EnhancedComboChartProps {

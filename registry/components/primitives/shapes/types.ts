@@ -158,3 +158,35 @@ export interface RegressionLineProps {
   showRSquared?: boolean
   onLineClick?: (regressionData: { slope: number; intercept: number; rSquared: number }, event: React.MouseEvent) => void
 }
+
+export interface WaterfallShapeData {
+  x: any
+  value: number
+  type?: 'positive' | 'negative' | 'total' | 'subtotal'
+  label?: string
+  category?: string
+  [key: string]: any
+}
+
+export interface WaterfallProps {
+  data: WaterfallShapeData[]
+  xScale: any
+  yScale: any
+  className?: string
+  animate?: boolean
+  animationDuration?: number
+  positiveColor?: string
+  negativeColor?: string
+  totalColor?: string
+  subtotalColor?: string
+  opacity?: number
+  strokeWidth?: number
+  strokeColor?: string
+  showConnectors?: boolean
+  connectorColor?: string
+  connectorWidth?: number
+  connectorDasharray?: string
+  onBarClick?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  onBarMouseEnter?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  onBarMouseLeave?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+}
