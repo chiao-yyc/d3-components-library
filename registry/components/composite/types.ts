@@ -34,7 +34,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area' | 'stackedArea'
+  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter'
   dataKey: string
   name: string
   yAxis: 'left' | 'right'
@@ -59,6 +59,22 @@ export interface ComboChartSeries {
   stackGroupKey?: string // 用於分組多個堆疊區域系列
   stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
   stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
+  // Scatter 專用配置
+  scatterRadius?: number
+  scatterOpacity?: number
+  sizeKey?: string // 用於氣泡圖大小映射
+  sizeRange?: [number, number]
+  groupKey?: string // 用於分組著色
+  strokeColor?: string
+  scatterStrokeWidth?: number
+  // Regression Line 專用配置
+  showRegression?: boolean
+  regressionType?: 'linear' | 'polynomial' | 'exponential'
+  regressionColor?: string
+  regressionWidth?: number
+  regressionDasharray?: string
+  showEquation?: boolean
+  showRSquared?: boolean
 }
 
 export interface EnhancedComboChartProps {
