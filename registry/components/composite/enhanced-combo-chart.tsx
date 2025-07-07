@@ -13,13 +13,15 @@ import {
   StackedArea,
   Scatter,
   RegressionLine,
+  Waterfall,
   type BarShapeData,
   type LineShapeData,
   type AreaShapeData,
   type StackedAreaData,
   type StackedAreaSeries,
   type ScatterShapeData,
-  type RegressionData
+  type RegressionData,
+  type WaterfallShapeData
 } from '../primitives'
 import { MultiBar } from '../primitives/shapes/multi-bar'
 
@@ -29,7 +31,7 @@ export interface EnhancedComboData {
 }
 
 export interface ComboChartSeries {
-  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter'
+  type: 'bar' | 'line' | 'area' | 'stackedArea' | 'scatter' | 'waterfall'
   dataKey: string // 指向數據中的欄位
   name: string
   yAxis: 'left' | 'right'
@@ -67,6 +69,17 @@ export interface ComboChartSeries {
   regressionDasharray?: string
   showEquation?: boolean
   showRSquared?: boolean
+  // Waterfall 專用配置
+  typeKey?: string // 用於指定瀑布圖類型的數據字段
+  waterfallOpacity?: number
+  positiveColor?: string
+  negativeColor?: string
+  totalColor?: string
+  subtotalColor?: string
+  showConnectors?: boolean
+  connectorColor?: string
+  connectorWidth?: number
+  connectorDasharray?: string
 }
 
 export interface EnhancedComboChartProps {
@@ -178,9 +191,10 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
     // 計算左軸域值
     let leftYDomain: [number, number] = [0, 1]
     if (leftSeries.length > 0) {
-      // 檢查是否有堆疊區域系列
+      // 檢查是否有堆疊區域系列和瀑布圖系列
       const leftStackedAreaSeries = leftSeries.filter(s => s.type === 'stackedArea')
-      const leftNonStackedSeries = leftSeries.filter(s => s.type !== 'stackedArea')
+      const leftWaterfallSeries = leftSeries.filter(s => s.type === 'waterfall')
+      const leftNonStackedSeries = leftSeries.filter(s => s.type !== 'stackedArea' && s.type !== 'waterfall')
 
       let leftValues: number[] = []
 
@@ -191,6 +205,36 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
             data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
           )
         )
+      }
+
+      // 處理瀑布圖系列 - 需要計算累積值範圍
+      if (leftWaterfallSeries.length > 0) {
+        leftWaterfallSeries.forEach(s => {
+          let cumulativeValue = 0
+          const waterfallValues: number[] = [0] // 包含起始的 0
+          
+          data.forEach(d => {
+            const value = Number(d[s.dataKey]) || 0
+            const type = s.typeKey ? d[s.typeKey] : (value >= 0 ? 'positive' : 'negative')
+            
+            switch (type) {
+              case 'total':
+              case 'subtotal':
+                cumulativeValue += value
+                waterfallValues.push(0, cumulativeValue) // 添加起點和終點
+                break
+              case 'positive':
+              case 'negative':
+              default:
+                waterfallValues.push(cumulativeValue) // 添加當前累積值
+                cumulativeValue += value
+                waterfallValues.push(cumulativeValue) // 添加新的累積值
+                break
+            }
+          })
+          
+          leftValues = leftValues.concat(waterfallValues)
+        })
       }
 
       // 處理堆疊系列 - 需要計算堆疊總和
@@ -228,9 +272,10 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
     // 計算右軸域值
     let rightYDomain: [number, number] = [0, 1]
     if (rightSeries.length > 0) {
-      // 檢查是否有堆疊區域系列
+      // 檢查是否有堆疊區域系列和瀑布圖系列
       const rightStackedAreaSeries = rightSeries.filter(s => s.type === 'stackedArea')
-      const rightNonStackedSeries = rightSeries.filter(s => s.type !== 'stackedArea')
+      const rightWaterfallSeries = rightSeries.filter(s => s.type === 'waterfall')
+      const rightNonStackedSeries = rightSeries.filter(s => s.type !== 'stackedArea' && s.type !== 'waterfall')
 
       let rightValues: number[] = []
 
@@ -241,6 +286,36 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
             data.map(d => Number(d[s.dataKey]) || 0).filter(v => !isNaN(v))
           )
         )
+      }
+
+      // 處理瀑布圖系列 - 需要計算累積值範圍
+      if (rightWaterfallSeries.length > 0) {
+        rightWaterfallSeries.forEach(s => {
+          let cumulativeValue = 0
+          const waterfallValues: number[] = [0] // 包含起始的 0
+          
+          data.forEach(d => {
+            const value = Number(d[s.dataKey]) || 0
+            const type = s.typeKey ? d[s.typeKey] : (value >= 0 ? 'positive' : 'negative')
+            
+            switch (type) {
+              case 'total':
+              case 'subtotal':
+                cumulativeValue += value
+                waterfallValues.push(0, cumulativeValue) // 添加起點和終點
+                break
+              case 'positive':
+              case 'negative':
+              default:
+                waterfallValues.push(cumulativeValue) // 添加當前累積值
+                cumulativeValue += value
+                waterfallValues.push(cumulativeValue) // 添加新的累積值
+                break
+            }
+          })
+          
+          rightValues = rightValues.concat(waterfallValues)
+        })
       }
 
       // 處理堆疊系列 - 需要計算堆疊總和
@@ -678,9 +753,9 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return null
   }
 
-  // 按類型排序：stackedArea -> area -> bar -> scatter -> line，確保正確的圖層順序
+  // 按類型排序：stackedArea -> area -> bar -> waterfall -> scatter -> line，確保正確的圖層順序
   const sortedSeries = [...series].sort((a, b) => {
-    const order = { stackedArea: 0, area: 1, bar: 2, scatter: 3, line: 4 }
+    const order = { stackedArea: 0, area: 1, bar: 2, waterfall: 3, scatter: 4, line: 5 }
     return order[a.type] - order[b.type]
   })
 
@@ -983,6 +1058,43 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
           }
 
           return scatterElement
+        } else if (seriesConfig.type === 'waterfall') {
+          // 轉換 waterfall 數據格式
+          const waterfallData: WaterfallShapeData[] = data.map(d => ({
+            x: d[xKey],
+            value: Number(d[seriesConfig.dataKey]) || 0,
+            type: seriesConfig.typeKey ? d[seriesConfig.typeKey] : undefined,
+            label: d.label,
+            category: d.category,
+            originalData: d
+          }))
+
+          return (
+            <Waterfall
+              key={`waterfall-${seriesConfig.name}-${index}`}
+              data={waterfallData}
+              xScale={xScale}
+              yScale={yScale}
+              animate={animate}
+              animationDuration={animationDuration}
+              opacity={seriesConfig.waterfallOpacity || 0.8}
+              positiveColor={seriesConfig.positiveColor || '#10b981'}
+              negativeColor={seriesConfig.negativeColor || '#ef4444'}
+              totalColor={seriesConfig.totalColor || '#3b82f6'}
+              subtotalColor={seriesConfig.subtotalColor || '#8b5cf6'}
+              showConnectors={seriesConfig.showConnectors ?? true}
+              connectorColor={seriesConfig.connectorColor || '#6b7280'}
+              connectorWidth={seriesConfig.connectorWidth || 1}
+              connectorDasharray={seriesConfig.connectorDasharray || '3,3'}
+              strokeColor={seriesConfig.strokeColor || 'white'}
+              strokeWidth={1}
+              className={`enhanced-combo-waterfall-${index}`}
+              onBarClick={interactive && onSeriesClick ?
+                (d, cumulative, event) => onSeriesClick(seriesConfig, { ...d.originalData, cumulativeValue: cumulative }, event) : undefined}
+              onBarMouseEnter={interactive && onSeriesHover ?
+                (d, cumulative, event) => onSeriesHover(seriesConfig, { ...d.originalData, cumulativeValue: cumulative }, event) : undefined}
+            />
+          )
         }
 
         return null

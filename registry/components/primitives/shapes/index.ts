@@ -4,6 +4,7 @@ export { Area } from './area'
 export { StackedArea } from './stacked-area'
 export { Scatter } from './scatter'
 export { RegressionLine } from './regression-line'
+export { Waterfall } from './waterfall'
 export type { 
   BarShapeData,
   BarProps,
@@ -17,5 +18,7 @@ export type {
   ScatterShapeData,
   ScatterProps,
   RegressionData,
-  RegressionLineProps
+  RegressionLineProps,
+  WaterfallShapeData,
+  WaterfallProps
 } from './types'
