@@ -42,6 +42,7 @@ export interface ComboChartSeries {
   // Bar 專用配置
   barWidth?: number
   barOpacity?: number
+  barGroupKey?: string // 用於分組多個 bar 系列
   // Line 專用配置
   strokeWidth?: number
   showPoints?: boolean
