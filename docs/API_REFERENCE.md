@@ -4,17 +4,18 @@
 
 ## 目錄
 
-- [簡化組件](#簡化組件)
-- [完整組件](#完整組件)
+- [基礎圖表](#基礎圖表)
+- [統計圖表](#統計圖表)
+- [金融圖表](#金融圖表)
 - [核心模組](#核心模組)
 - [資料適配器](#資料適配器)
 - [通用類型](#通用類型)
 
-## 簡化組件
+## 基礎圖表
 
-簡化組件專為快速使用和學習而設計，提供最基本但完整的功能。
+基礎圖表組件提供常用的數據視覺化功能，適用於大部分場景。
 
-### BarChartSimple
+### BarChart
 
 基礎長條圖組件，支援垂直和水平佈局。
 
@@ -38,7 +39,7 @@
 #### 使用範例
 
 ```tsx
-import { BarChartSimple } from '@registry/components/simple'
+import { BarChart } from '@registry/components/basic/bar-chart'
 
 const data = [
   { x: 'A', y: 100 },
@@ -48,7 +49,7 @@ const data = [
 
 function MyChart() {
   return (
-    <BarChartSimple
+    <BarChart
       data={data}
       width={600}
       height={400}
@@ -58,7 +59,7 @@ function MyChart() {
 }
 ```
 
-### SimpleLineChart
+### LineChart
 
 基礎線圖組件，支援多系列和時間序列資料。
 
@@ -93,7 +94,7 @@ interface SimpleLineChartData {
 #### 使用範例
 
 ```tsx
-import { SimpleLineChart } from '@registry/components/simple'
+import { LineChart } from '@registry/components/basic/line-chart'
 
 const data = [
   { x: new Date('2024-01-01'), y: 100 },
@@ -103,7 +104,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimpleLineChart
+    <LineChart
       data={data}
       showDots={true}
       showArea={false}
@@ -113,7 +114,7 @@ function MyChart() {
 }
 ```
 
-### SimplePieChart
+### PieChart
 
 基礎餅圖組件，支援圓環圖和圖例。
 
@@ -149,7 +150,7 @@ interface SimplePieChartData {
 #### 使用範例
 
 ```tsx
-import { SimplePieChart } from '@registry/components/simple'
+import { PieChart } from '@registry/components/basic/pie-chart'
 
 const data = [
   { label: 'Chrome', value: 60 },
@@ -160,7 +161,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimplePieChart
+    <PieChart
       data={data}
       innerRadius={50}  // 創建圓環圖
       showLegend={true}
@@ -170,7 +171,7 @@ function MyChart() {
 }
 ```
 
-### SimpleScatterPlot
+### ScatterPlot
 
 基礎散佈圖組件，支援趨勢線和氣泡圖功能。
 
@@ -208,7 +209,7 @@ interface SimpleScatterPlotData {
 #### 使用範例
 
 ```tsx
-import { SimpleScatterPlot } from '@registry/components/simple'
+import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
 
 const data = [
   { x: 10, y: 20, size: 5, label: '點 A' },
@@ -218,7 +219,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimpleScatterPlot
+    <ScatterPlot
       data={data}
       showTrendLine={true}
       xLabel="溫度 (°C)"
@@ -229,7 +230,7 @@ function MyChart() {
 }
 ```
 
-### SimpleAreaChart
+### AreaChart
 
 基礎面積圖組件，支援堆疊和百分比模式。
 
@@ -264,7 +265,7 @@ interface SimpleAreaChartData {
 #### 使用範例
 
 ```tsx
-import { SimpleAreaChart } from '@registry/components/simple'
+import { AreaChart } from '@registry/components/basic/area-chart'
 
 const data = [
   { x: new Date('2024-01-01'), y: 100, series: 'A' },
@@ -275,7 +276,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimpleAreaChart
+    <AreaChart
       data={data}
       stackMode="stack"  // 堆疊模式
       areaOpacity={0.7}
@@ -284,7 +285,7 @@ function MyChart() {
 }
 ```
 
-### SimpleHeatmap
+### Heatmap
 
 基礎熱力圖組件，支援多種顏色方案。
 
@@ -317,7 +318,7 @@ interface SimpleHeatmapData {
 #### 使用範例
 
 ```tsx
-import { SimpleHeatmap } from '@registry/components/simple'
+import { Heatmap } from '@registry/components/basic/heatmap'
 
 const data = [
   { x: 'Mon', y: 'Morning', value: 5 },
@@ -328,7 +329,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimpleHeatmap
+    <Heatmap
       data={data}
       colorScheme="viridis"
       showValues={true}
@@ -338,7 +339,7 @@ function MyChart() {
 }
 ```
 
-### SimpleCandlestick
+### CandlestickChart
 
 基礎 K線圖組件，支援台股和美股顏色模式。
 
@@ -373,7 +374,7 @@ interface SimpleCandlestickData {
 #### 使用範例
 
 ```tsx
-import { SimpleCandlestick } from '@registry/components/simple'
+import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
 
 const data = [
   { date: '2024-01-01', open: 100, high: 110, low: 95, close: 105 },
@@ -383,7 +384,7 @@ const data = [
 
 function MyChart() {
   return (
-    <SimpleCandlestick
+    <CandlestickChart
       data={data}
       colorMode="tw"  // 台股模式：紅漲綠跌
       showVolume={false}
@@ -391,6 +392,46 @@ function MyChart() {
     />
   )
 }
+```
+
+## 統計圖表
+
+統計圖表組件提供專業的統計數據視覺化功能。
+
+### BoxPlot
+
+箱形圖組件，用於顯示數據的分布情況。
+
+```tsx
+import { BoxPlot } from '@registry/components/statistical/box-plot'
+```
+
+### RadarChart
+
+雷達圖組件，用於多維度數據比較。
+
+```tsx
+import { RadarChart } from '@registry/components/statistical/radar-chart'
+```
+
+### ViolinPlot
+
+小提琴圖組件，結合了箱形圖和密度圖的特點。
+
+```tsx
+import { ViolinPlot } from '@registry/components/statistical/violin-plot'
+```
+
+## 金融圖表
+
+金融圖表組件提供專業的金融數據視覺化功能。
+
+### CandlestickChart
+
+K線圖組件，用於顯示股票價格走勢。
+
+```tsx
+import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
 ```
 
 ## 通用類型
@@ -472,7 +513,7 @@ function ResponsiveChart() {
 
   return (
     <div id="chart-container">
-      <BarChartSimple
+      <BarChart
         data={data}
         width={dimensions.width}
         height={dimensions.height}
@@ -497,7 +538,7 @@ function OptimizedChart({ rawData }) {
     }))
   }, [rawData])
 
-  return <BarChartSimple data={processedData} />
+  return <BarChart data={processedData} />
 }
 ```
 
@@ -511,7 +552,7 @@ function AccessibleChart() {
     <div>
       <h2>銷售數據圖表</h2>
       <p>此圖表顯示 2024 年各季度的銷售數據</p>
-      <BarChartSimple
+      <BarChart
         data={data}
         className="chart"
         onDataClick={(data) => {
@@ -557,7 +598,7 @@ function RobustChart({ data }) {
   }
 
   try {
-    return <BarChartSimple data={data} />
+    return <BarChart data={data} />
   } catch (error) {
     console.error('圖表渲染錯誤:', error)
     return (
@@ -576,7 +617,7 @@ function RobustChart({ data }) {
 A: 使用 `colors` 屬性傳入自定義顏色陣列：
 
 ```tsx
-<BarChartSimple
+<BarChart
   data={data}
   colors={['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24']}
 />
@@ -612,8 +653,8 @@ A: 簡化組件的 API 設計與完整組件相容，升級步驟：
 
 ```tsx
 // 從簡化組件
-import { BarChartSimple } from '@registry/components/simple'
+import { BarChart } from '@registry/components/basic/bar-chart'
 
 // 升級到完整組件
-import { BarChart } from '@registry/components/bar-chart/bar-chart'
+import { BarChart } from '@registry/components/basic/bar-chart'
 ```

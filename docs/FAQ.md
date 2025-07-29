@@ -64,52 +64,56 @@ A: 確保您的 `tsconfig.json` 包含：
 
 ## 組件使用
 
-### Q: 簡化組件與完整組件有什麼差別？
+### Q: 如何選擇適合的圖表組件？
 
-A: 主要差別如下：
+A: 根據數據類型和使用場景選擇：
 
-| 特性 | 簡化組件 | 完整組件 |
-|------|----------|----------|
-| **學習曲線** | 低，API 簡單 | 中等，功能豐富 |
-| **自定義程度** | 基本配置選項 | 高度可自定義 |
-| **資料處理** | 簡單格式 | 複雜資料適配器 |
-| **效能優化** | 基本優化 | 高級優化功能 |
-| **檔案大小** | 較小 | 較大 |
-| **適用場景** | 快速原型、學習 | 生產環境、複雜需求 |
+| 組件類型 | 適用場景 | 推薦組件 |
+|----------|----------|----------|
+| **基礎圖表** | 一般數據視覺化、商業報表 | bar-chart, line-chart, pie-chart |
+| **統計圖表** | 統計分析、數據探索 | box-plot, violin-plot, scatter-plot |
+| **金融圖表** | 金融數據、股票分析 | candlestick-chart, gauge-chart |
+| **複合圖表** | 多維度數據展示 | combo-chart, enhanced-combo-chart |
 
 **建議**：
-- 學習或快速原型時使用簡化組件
-- 生產環境或需要高度自定義時使用完整組件
+- 商業報表使用基礎圖表組件
+- 統計分析使用統計圖表組件
+- 金融應用使用金融圖表組件
 
-### Q: 如何從簡化組件升級到完整組件？
+### Q: 如何使用不同類型的圖表組件？
 
-A: 升級步驟：
+A: 使用步驟：
 
-1. **更改導入路徑**：
+1. **選擇合適的組件**：
 ```tsx
-// 從
-import { BarChartSimple } from '@registry/components/simple'
+// 基礎圖表
+import { BarChart } from '@registry/components/basic/bar-chart'
 
-// 改為
-import { BarChart } from '@registry/components/bar-chart/bar-chart'
+// 統計圖表
+import { BoxPlot } from '@registry/components/statistical/box-plot'
+
+// 金融圖表
+import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
 ```
 
-2. **調整屬性名稱**（如有必要）：
-```tsx
-// 簡化組件
-<BarChartSimple data={data} />
-
-// 完整組件（基本相容）
-<BarChart data={data} />
-```
-
-3. **添加高級配置**（可選）：
+2. **配置組件屬性**：
 ```tsx
 <BarChart 
   data={data}
-  dataAdapter={new CsvAdapter()}
-  mapping={{ x: 'category', y: 'value' }}
-  animation={{ duration: 1000, easing: 'easeInOut' }}
+  width={800}
+  height={400}
+  xKey="category"
+  yKey="value"
+/>
+```
+
+3. **添加互動功能**（可選）：
+```tsx
+<BarChart 
+  data={data}
+  onDataClick={(data) => console.log('點擊:', data)}
+  showTooltip={true}
+  animate={true}
 />
 ```
 
@@ -244,7 +248,7 @@ A: 多種方式自定義顏色：
 
 ```tsx
 // 1. 使用預設顏色方案
-<BarChartSimple 
+<BarChart 
   data={data}
   colors={['#ff6b6b', '#4ecdc4', '#45b7d1']}
 />
@@ -256,7 +260,7 @@ const dataWithColors = [
 ]
 
 // 3. 使用 CSS 變量
-<BarChartSimple 
+<BarChart 
   data={data}
   className="custom-chart"
 />
@@ -298,7 +302,7 @@ function ResponsiveChart({ data }) {
   
   return (
     <div id="chart-container">
-      <BarChartSimple 
+      <BarChart 
         data={data}
         width={size.width}
         height={size.height}
@@ -313,7 +317,7 @@ function ResponsiveChart({ data }) {
 A: 使用 className 和 CSS：
 
 ```tsx
-<BarChartSimple 
+<BarChart 
   data={data}
   className="my-custom-chart"
 />
@@ -350,7 +354,7 @@ A: 效能優化策略：
 ```tsx
 // 1. 使用 React.memo 避免不必要的重新渲染
 const OptimizedChart = React.memo(function Chart({ data, config }) {
-  return <BarChartSimple data={data} {...config} />
+  return <BarChart data={data} {...config} />
 })
 
 // 2. 記憶化資料處理
@@ -361,7 +365,7 @@ function DataProcessingChart({ rawData, filters }) {
       .map(item => ({ x: item.name, y: item.value }))
   }, [rawData, filters])
   
-  return <BarChartSimple data={processedData} />
+  return <BarChart data={processedData} />
 }
 
 // 3. 延遲載入
@@ -435,7 +439,7 @@ function DebugChart({ data }) {
   
   return (
     <div ref={containerRef}>
-      <BarChartSimple data={data} />
+      <BarChart data={data} />
     </div>
   )
 }
@@ -579,7 +583,7 @@ function BrowserCompatibleChart({ data }) {
     )
   }
   
-  return <BarChartSimple data={data} />
+  return <BarChart data={data} />
 }
 ```
 
@@ -607,7 +611,7 @@ function InteractiveChart({ data }) {
   
   return (
     <div>
-      <BarChartSimple 
+      <BarChart 
         data={data}
         onDataClick={setSelectedData}
       />
@@ -653,7 +657,7 @@ function DataDrivenChart() {
   if (isLoading) return <ChartSkeleton />
   if (error) return <div>載入失敗：{error.message}</div>
   
-  return <BarChartSimple data={data} />
+  return <BarChart data={data} />
 }
 
 // 與狀態管理整合
@@ -666,7 +670,7 @@ function ConnectedChart() {
   }, [dispatch])
   
   return (
-    <BarChartSimple 
+    <BarChart 
       data={data}
       onDataClick={handleDataClick}
     />
@@ -735,7 +739,7 @@ function ExportableChart({ data }) {
       </div>
       
       <div ref={chartRef}>
-        <BarChartSimple data={data} />
+        <BarChart data={data} />
       </div>
     </div>
   )

@@ -13,8 +13,8 @@
     - Dynamic size mapping based on additional data dimensions
     - Fixed and variable point sizing modes with real-time adjustment
     - Color grouping and opacity controls for optimal visual clarity
-    - Professional stroke styling for enhanced point distinction
-  - **Three Professional Scenarios**: Real-world application demonstrations
+    - Professional stroke styling for enhanced point distinctiondemonstrat
+  - **Three Professional Scenarios**: Real-world application ions
     - **Temperature Prediction**: Weather forecasting with confidence intervals and actual observations
     - **Stock Analysis**: Price range visualization with volume transaction hotspots
     - **Population Density**: Geographic density distribution with urban center markers

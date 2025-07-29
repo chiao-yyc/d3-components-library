@@ -65,15 +65,33 @@ export async function updateProjectConfig(
   await fs.writeJSON(configPath, config, { spaces: 2 })
 }
 
-export async function getInstalledComponents(): Promise<ProjectConfig['components']> {
+export async function getProjectConfig(): Promise<any> {
   const configPath = path.resolve('./d3-components.json')
   
-  if (!await fs.pathExists(configPath)) {
-    return []
+  let config = {
+    $schema: 'https://registry.d3-components.com/schema.json',
+    name: '',
+    version: '1.0.0',
+    template: 'react',
+    paths: {
+      components: './src/components/ui',
+      utils: './src/utils',
+      styles: './src/styles'
+    },
+    components: {}
   }
   
-  const config = await fs.readJSON(configPath)
-  return config.components || []
+  if (await fs.pathExists(configPath)) {
+    const existing = await fs.readJSON(configPath)
+    config = { ...config, ...existing }
+  }
+  
+  return config
+}
+
+export async function getInstalledComponents(): Promise<ProjectConfig['components']> {
+  const config = await getProjectConfig()
+  return Object.values(config.components || {})
 }
 
 export async function isComponentInstalled(name: string): Promise<boolean> {
