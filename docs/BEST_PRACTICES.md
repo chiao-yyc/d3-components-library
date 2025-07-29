@@ -66,7 +66,7 @@ function SafeChart({ data }) {
     return <div>資料格式錯誤</div>
   }
 
-  return <BarChartSimple data={data} />
+  return <BarChart data={data} />
 }
 ```
 
@@ -112,7 +112,7 @@ const dataTransformers = {
 // 使用範例
 function FlexibleChart({ rawData, dataType }) {
   const transformedData = dataTransformers[dataType]?.(rawData) || rawData
-  return <BarChartSimple data={transformedData} />
+  return <BarChart data={transformedData} />
 }
 ```
 
@@ -166,17 +166,17 @@ function SmartChart({ data }) {
 }
 ```
 
-### 2. 簡化 vs 完整組件
+### 2. 組件類型選擇
 
-選擇指南：
+根據使用場景選擇合適的組件類型：
 
 | 使用場景 | 推薦選擇 | 原因 |
 |----------|----------|------|
-| 快速原型 | 簡化組件 | 快速上手，最少配置 |
-| 學習目的 | 簡化組件 | API 簡單，易於理解 |
-| 產品環境 | 完整組件 | 更多自定義選項 |
-| 複雜資料 | 完整組件 | 高級資料處理功能 |
-| 高效能需求 | 完整組件 | 效能優化功能 |
+| 商業報表 | 基礎圖表 | 通用性強，易於使用 |
+| 統計分析 | 統計圖表 | 專業統計功能 |
+| 金融應用 | 金融圖表 | 金融數據特化 |
+| 複合展示 | 組合圖表 | 多維度數據整合 |
+| 快速原型 | 基礎圖表 | 快速上手，最少配置 |
 
 ## 效能優化
 
@@ -334,7 +334,7 @@ function ResponsiveChart({ data }) {
 
   return (
     <div ref={containerRef} className="w-full p-4">
-      <BarChartSimple
+      <BarChart
         data={data}
         width={size.width}
         height={size.height}
@@ -419,7 +419,7 @@ function AccessibleChart({ data, title, description }) {
         {description}
       </p>
       
-      <BarChartSimple
+      <BarChart
         data={data}
         onDataClick={(data) => {
           // 宣告選擇的資料點
@@ -510,7 +510,7 @@ function KeyboardAccessibleChart({ data }) {
       onKeyDown={handleKeyDown}
       className="focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
-      <BarChartSimple
+      <BarChart
         data={data}
         onDataClick={handleDataClick}
       />
@@ -567,7 +567,7 @@ function AccessibleColorChart({ data, accessibilityMode = 'normal' }) {
     : undefined
 
   return (
-    <BarChartSimple
+    <BarChart
       data={data}
       colors={colors}
     />
@@ -644,7 +644,7 @@ class ChartErrorBoundary extends React.Component<
 function SafeChartWrapper({ data }) {
   return (
     <ChartErrorBoundary>
-      <BarChartSimple data={data} />
+      <BarChart data={data} />
     </ChartErrorBoundary>
   )
 }
@@ -737,7 +737,7 @@ function validateChartData(data: any[], chartType: string) {
 
 ```tsx
 import { render, screen, fireEvent } from '@testing-library/react'
-import { BarChartSimple } from '@registry/components/simple'
+import { BarChart } from '@registry/components/basic/bar-chart'
 
 describe('BarChartSimple', () => {
   const mockData = [
@@ -747,7 +747,7 @@ describe('BarChartSimple', () => {
   ]
 
   test('渲染基本圖表', () => {
-    render(<BarChartSimple data={mockData} />)
+    render(<BarChart data={mockData} />)
     
     // 檢查 SVG 元素存在
     const svg = screen.getByRole('img', { hidden: true })
@@ -757,7 +757,7 @@ describe('BarChartSimple', () => {
   test('處理點擊事件', () => {
     const handleClick = jest.fn()
     render(
-      <BarChartSimple 
+      <BarChart 
         data={mockData} 
         onDataClick={handleClick}
       />
@@ -771,14 +771,14 @@ describe('BarChartSimple', () => {
   })
 
   test('處理空資料', () => {
-    render(<BarChartSimple data={[]} />)
+    render(<BarChart data={[]} />)
     
     expect(screen.getByText(/無.*資料/)).toBeInTheDocument()
   })
 
   test('響應尺寸變化', () => {
     const { rerender } = render(
-      <BarChartSimple data={mockData} width={400} height={300} />
+      <BarChart data={mockData} width={400} height={300} />
     )
 
     let svg = screen.getByRole('img', { hidden: true })
@@ -786,7 +786,7 @@ describe('BarChartSimple', () => {
     expect(svg).toHaveAttribute('height', '300')
 
     rerender(
-      <BarChartSimple data={mockData} width={600} height={400} />
+      <BarChart data={mockData} width={600} height={400} />
     )
 
     svg = screen.getByRole('img', { hidden: true })
@@ -967,7 +967,7 @@ function PerformanceMonitoredChart({ data, chartType }) {
     }
   }, [data, chartType])
 
-  return <BarChartSimple data={data} />
+  return <BarChart data={data} />
 }
 ```
 
@@ -1020,7 +1020,7 @@ function BrowserCompatibleChart({ data }) {
     )
   }
 
-  return <BarChartSimple data={data} />
+  return <BarChart data={data} />
 }
 ```
 
