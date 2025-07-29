@@ -1,0 +1,82 @@
+{
+  "name": "area-chart",
+  "description": "可客製化的區域圖組件，支援堆疊模式、多系列資料和動畫效果",
+  "version": "1.0.0",
+  "tags": ["chart", "area", "time-series", "stacked"],
+  "variants": {
+    "default": {
+      "description": "完整功能的區域圖組件",
+      "complexity": "intermediate",
+      "features": ["完整API", "高度客製化", "進階互動"]
+    },
+    "simple": {
+      "description": "簡化版區域圖組件",
+      "complexity": "basic",
+      "features": ["簡化API", "快速使用", "基本功能"]
+    },
+    "stacked": {
+      "description": "堆疊模式預設配置",
+      "complexity": "intermediate",
+      "features": ["堆疊顯示", "多系列支援"]
+    },
+    "percent": {
+      "description": "百分比堆疊預設配置",
+      "complexity": "intermediate",
+      "features": ["百分比顯示", "比例分析"]
+    }
+  },
+  "dependencies": ["react", "d3", "@types/d3"],
+  "category": "basic-charts",
+  "complexity": "intermediate",
+  "lastUpdated": "2025-07-05T18:00:00Z",
+  "files": ["area-chart.tsx", "area-chart.css", "types.ts", "index.ts"],
+  "variants_files": {
+    "default": ["area-chart.tsx"],
+    "simple": ["area-chart.tsx"],
+    "stacked": ["area-chart.tsx"],
+    "percent": ["area-chart.tsx"]
+  },
+  "demo": "https://d3-components.com/demo/area-chart",
+  "docs": "https://d3-components.com/docs/area-chart",
+  "examples": [
+    {
+      "name": "基本區域圖",
+      "description": "簡單的時間序列區域圖",
+      "props": {
+        "data": "[{date: '2023-01', value: 100}, {date: '2023-02', value: 150}]",
+        "xKey": "date",
+        "yKey": "value"
+      }
+    },
+    {
+      "name": "堆疊區域圖",
+      "description": "多系列資料的堆疊展示",
+      "props": {
+        "stackMode": "stack",
+        "categoryKey": "category",
+        "showLegend": "true"
+      }
+    },
+    {
+      "name": "百分比堆疊",
+      "description": "百分比形式的堆疊區域圖",
+      "props": {
+        "stackMode": "percent",
+        "gradient": "true",
+        "animate": "true"
+      }
+    }
+  ],
+  "features": [
+    "支援單系列和多系列資料",
+    "三種堆疊模式：無堆疊、累積堆疊、百分比堆疊",
+    "多種曲線類型：線性、平滑、基樣條、階梯",
+    "漸變填充和透明度控制",
+    "互動式圖例和工具提示",
+    "網格線和軸標籤自訂",
+    "資料點標記顯示",
+    "進場動畫和過渡效果",
+    "響應式設計支援",
+    "支援時間序列和數值資料"
+  ]
+}

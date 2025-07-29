@@ -1,0 +1,233 @@
+/* BarChart 組件樣式 */
+
+/* CSS 變數定義 - 可以在專案中覆蓋 */
+:root {
+  --bar-chart-primary: #3b82f6;
+  --bar-chart-secondary: #6b7280;
+  --bar-chart-success: #10b981;
+  --bar-chart-warning: #f59e0b;
+  --bar-chart-error: #ef4444;
+  
+  --bar-chart-background: #ffffff;
+  --bar-chart-text: #1f2937;
+  --bar-chart-text-muted: #6b7280;
+  --bar-chart-border: #e5e7eb;
+  
+  --bar-chart-font-family: system-ui, -apple-system, sans-serif;
+  --bar-chart-font-size: 12px;
+  --bar-chart-font-size-title: 16px;
+  
+  --bar-chart-border-radius: 4px;
+  --bar-chart-animation-duration: 0.3s;
+  --bar-chart-animation-easing: ease-in-out;
+}
+
+/* 深色模式支援 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bar-chart-background: #1f2937;
+    --bar-chart-text: #f9fafb;
+    --bar-chart-text-muted: #9ca3af;
+    --bar-chart-border: #374151;
+  }
+}
+
+/* 主容器 */
+.bar-chart-container {
+  position: relative;
+  background: var(--bar-chart-background);
+  border-radius: var(--bar-chart-border-radius);
+  font-family: var(--bar-chart-font-family);
+  color: var(--bar-chart-text);
+}
+
+/* SVG 樣式 */
+.bar-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* 長條樣式 */
+.bar-chart-svg .bar {
+  fill: var(--bar-chart-primary);
+  stroke: none;
+  transition: 
+    opacity var(--bar-chart-animation-duration) var(--bar-chart-animation-easing),
+    fill var(--bar-chart-animation-duration) var(--bar-chart-animation-easing);
+}
+
+.bar-chart-svg .bar:hover {
+  opacity: 0.8;
+}
+
+/* 軸線樣式 */
+.bar-chart-svg .x-axis,
+.bar-chart-svg .y-axis {
+  font-size: var(--bar-chart-font-size);
+  color: var(--bar-chart-text);
+}
+
+.bar-chart-svg .x-axis .domain,
+.bar-chart-svg .y-axis .domain {
+  stroke: var(--bar-chart-border);
+  stroke-width: 1;
+}
+
+.bar-chart-svg .x-axis .tick line,
+.bar-chart-svg .y-axis .tick line {
+  stroke: var(--bar-chart-border);
+  stroke-width: 1;
+}
+
+.bar-chart-svg .x-axis .tick text,
+.bar-chart-svg .y-axis .tick text {
+  fill: var(--bar-chart-text-muted);
+  font-size: var(--bar-chart-font-size);
+}
+
+/* 網格線 */
+.bar-chart-svg .grid line {
+  stroke: var(--bar-chart-border);
+  stroke-opacity: 0.3;
+  stroke-dasharray: 2,2;
+}
+
+.bar-chart-svg .grid path {
+  stroke-width: 0;
+}
+
+/* 空狀態 */
+.bar-chart-container .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--bar-chart-text-muted);
+  font-size: var(--bar-chart-font-size);
+  border: 2px dashed var(--bar-chart-border);
+  border-radius: var(--bar-chart-border-radius);
+}
+
+/* 工具提示 */
+.bar-chart-tooltip {
+  position: absolute;
+  background: var(--bar-chart-background);
+  border: 1px solid var(--bar-chart-border);
+  border-radius: var(--bar-chart-border-radius);
+  padding: 8px 12px;
+  font-size: var(--bar-chart-font-size);
+  color: var(--bar-chart-text);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity var(--bar-chart-animation-duration) var(--bar-chart-animation-easing);
+}
+
+.bar-chart-tooltip.visible {
+  opacity: 1;
+}
+
+/* 載入狀態 */
+.bar-chart-container.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.bar-chart-container.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--bar-chart-border);
+  border-top-color: var(--bar-chart-primary);
+  border-radius: 50%;
+  animation: bar-chart-spin 1s linear infinite;
+}
+
+@keyframes bar-chart-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .bar-chart-svg .x-axis .tick text,
+  .bar-chart-svg .y-axis .tick text {
+    font-size: 10px;
+  }
+  
+  .bar-chart-container {
+    font-size: 10px;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .bar-chart-svg .bar,
+  .bar-chart-tooltip,
+  .bar-chart-container.loading::after {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  :root {
+    --bar-chart-border: #000000;
+    --bar-chart-text: #000000;
+  }
+  
+  .bar-chart-svg .bar {
+    stroke: var(--bar-chart-text);
+    stroke-width: 1;
+  }
+}
+
+/* 變體樣式 */
+
+/* 水平方向專用樣式 */
+.bar-chart-container[data-orientation="horizontal"] .bar-chart-svg .x-axis .tick text {
+  text-anchor: middle;
+}
+
+.bar-chart-container[data-orientation="horizontal"] .bar-chart-svg .y-axis .tick text {
+  text-anchor: end;
+}
+
+/* 垂直方向專用樣式 */
+.bar-chart-container[data-orientation="vertical"] .bar-chart-svg .x-axis .tick text {
+  text-anchor: middle;
+}
+
+.bar-chart-container[data-orientation="vertical"] .bar-chart-svg .y-axis .tick text {
+  text-anchor: end;
+}
+
+/* 多色彩方案 */
+.bar-chart-container[data-color-scheme="categorical"] .bar {
+  fill: var(--bar-chart-primary);
+}
+
+.bar-chart-container[data-color-scheme="categorical"] .bar:nth-child(2n) {
+  fill: var(--bar-chart-secondary);
+}
+
+.bar-chart-container[data-color-scheme="categorical"] .bar:nth-child(3n) {
+  fill: var(--bar-chart-success);
+}
+
+.bar-chart-container[data-color-scheme="categorical"] .bar:nth-child(4n) {
+  fill: var(--bar-chart-warning);
+}
+
+.bar-chart-container[data-color-scheme="categorical"] .bar:nth-child(5n) {
+  fill: var(--bar-chart-error);
+}
