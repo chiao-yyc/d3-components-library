@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { MinimalCandlestick } from '@registry/components/candlestick-chart/candlestick-minimal'
+import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
 
 // 生成模擬股票數據
 function generateStockData(days: number = 60, initialPrice: number = 100) {
@@ -201,7 +201,7 @@ export default function CandlestickDemo() {
         </h2>
         
         <div className="flex justify-center">
-          <MinimalCandlestick
+          <CandlestickChart
             data={currentData}
             width={900}
             height={600}
@@ -259,7 +259,7 @@ export default function CandlestickDemo() {
           <h3 className="text-md font-semibold text-gray-900 mb-3">
             美股風格（綠漲紅跌）
           </h3>
-          <MinimalCandlestick
+          <CandlestickChart
             data={currentData.slice(-15)}
             width={400}
             height={300}
@@ -272,7 +272,7 @@ export default function CandlestickDemo() {
           <h3 className="text-md font-semibold text-gray-900 mb-3">
             極簡風格（自訂顏色）
           </h3>
-          <MinimalCandlestick
+          <CandlestickChart
             data={currentData.slice(-15)}
             width={400}
             height={300}

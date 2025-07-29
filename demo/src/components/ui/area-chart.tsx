@@ -1,10 +1,10 @@
 // UI Wrapper for AreaChart component
 // This file provides a simple import path for the demo environment
 
-export { AreaChart } from '@registry/components/area-chart'
+export { AreaChart } from '@registry/components/basic/area-chart'
 export type { 
   AreaChartProps, 
   AreaDataPoint, 
   ProcessedAreaDataPoint,
   AreaSeriesData 
-} from '@registry/components/area-chart'
+} from '@registry/components/basic/area-chart'

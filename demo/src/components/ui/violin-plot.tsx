@@ -1,4 +1,4 @@
-export { ViolinPlot } from '@registry/components/violin-plot/violin-plot'
+export { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
 export type { 
   ViolinPlotProps, 
   ViolinPlotDataPoint, 
@@ -6,4 +6,4 @@ export type {
   ViolinStatistics,
   ViolinShape,
   DensityPoint
-} from '@registry/components/violin-plot/types'
+} from '@registry/components/statistical/violin-plot/types'

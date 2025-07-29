@@ -1,3 +1,3 @@
 // 直接引用 Registry 中的組件，支援即時開發預覽
-export { ScatterPlot } from '@registry/components/scatter-plot/scatter-plot'
-export type { ScatterPlotProps } from '@registry/components/scatter-plot/types'
+export { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+export type { ScatterPlotProps } from '@registry/components/statistical/scatter-plot/types'

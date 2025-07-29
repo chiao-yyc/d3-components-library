@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { RadarChart } from '@registry/components/radar-chart/radar-chart'
+import { RadarChart } from '@registry/components/statistical/radar-chart/radar-chart'
 
 // 員工技能評估數據
 const skillAssessmentData = [
@@ -629,7 +629,7 @@ export default function RadarChartDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { RadarChart } from '@registry/components/radar-chart'
+          <code>{`import { RadarChart } from '@registry/components/statistical/radar-chart'
 
 const data = [
   { name: '張小明', 技術能力: 85, 溝通能力: 75, 領導力: 60 },
