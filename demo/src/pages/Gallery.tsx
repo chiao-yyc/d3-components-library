@@ -1,9 +1,9 @@
-import { BarChart } from '@registry/components/bar-chart/bar-chart'
-import { LineChart } from '@registry/components/line-chart/line-chart'
-import { ScatterPlot } from '@registry/components/scatter-plot/scatter-plot'
-import { PieChart } from '@registry/components/pie-chart/pie-chart'
-import { AreaChart } from '@registry/components/area-chart/area-chart'
-import { Heatmap } from '@registry/components/heatmap/heatmap'
+import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
+import { LineChart } from '@registry/components/basic/line-chart/line-chart'
+import { ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot'
+import { PieChart } from '@registry/components/basic/pie-chart/pie-chart'
+import { AreaChart } from '@registry/components/basic/area-chart/area-chart'
+import { Heatmap } from '@registry/components/basic/heatmap/heatmap'
 import { basicBarData } from '../data/sample-data'
 
 // 生成範例資料
@@ -492,7 +492,7 @@ function Gallery() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <pre className="text-sm text-gray-800 overflow-x-auto">
-{`import { BarChart } from '@registry/components/bar-chart'
+{`import { BarChart } from '@registry/components/basic/bar-chart'
 
 const data = [
   { category: 'A', value: 30 },

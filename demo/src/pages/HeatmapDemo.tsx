@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Heatmap } from '@registry/components/heatmap'
+import { Heatmap } from '@registry/components/basic/heatmap'
 
 // 相關性矩陣資料
 const correlationData = [
@@ -412,7 +412,7 @@ export default function HeatmapDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { Heatmap } from '@registry/components/heatmap'
+          <code>{`import { Heatmap } from '@registry/components/basic/heatmap'
 
 const data = [
   { x: 'A', y: '1', value: 0.8 },

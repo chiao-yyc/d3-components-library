@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { FunnelChart } from '@registry/components/funnel-chart/funnel-chart'
+import { FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart'
 
 // 銷售漏斗資料
 const salesFunnelData = [
@@ -503,7 +503,7 @@ export default function FunnelChartDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { FunnelChart } from '@registry/components/funnel-chart'
+          <code>{`import { FunnelChart } from '@registry/components/basic/funnel-chart'
 
 const data = [
   { stage: '潛在客戶', count: 10000 },

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { BoxPlot } from '@registry/components/box-plot/box-plot'
+import { BoxPlot } from '@registry/components/statistical/box-plot/box-plot'
 
 // 學生成績數據
 const studentScoresData = [
@@ -489,7 +489,7 @@ export default function BoxPlotDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { BoxPlot } from '@registry/components/box-plot'
+          <code>{`import { BoxPlot } from '@registry/components/statistical/box-plot'
 
 const data = [
   { subject: '數學', scores: [85, 92, 78, 88, 95, 82, 90, 87] },

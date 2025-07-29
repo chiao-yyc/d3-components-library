@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BarChart } from '@registry/components/bar-chart/bar-chart'
+import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import InteractiveTutorial from '../components/InteractiveTutorial'
 

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { GaugeChart } from '@registry/components/gauge-chart/gauge-chart'
+import { GaugeChart } from '@registry/components/basic/gauge-chart/gauge-chart'
 
 // KPI 資料
 const kpiData = [
@@ -451,7 +451,7 @@ export default function GaugeChartDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { GaugeChart } from '@registry/components/gauge-chart'
+          <code>{`import { GaugeChart } from '@registry/components/basic/gauge-chart'
 
 const data = [{
   metric: 'CPU 使用率',

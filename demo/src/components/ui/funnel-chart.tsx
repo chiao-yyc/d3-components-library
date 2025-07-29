@@ -1,7 +1,7 @@
-export { FunnelChart } from '@registry/components/funnel-chart/funnel-chart'
+export { FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart'
 export type { 
   FunnelChartProps, 
   FunnelChartDataPoint, 
   ProcessedFunnelDataPoint,
   FunnelSegment 
-} from '@registry/components/funnel-chart/types'
+} from '@registry/components/basic/funnel-chart/types'

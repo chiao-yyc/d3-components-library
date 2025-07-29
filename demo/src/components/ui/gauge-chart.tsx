@@ -1,7 +1,7 @@
-export { GaugeChart } from '@registry/components/gauge-chart/gauge-chart'
+export { GaugeChart } from '@registry/components/basic/gauge-chart/gauge-chart'
 export type { 
   GaugeChartProps, 
   GaugeChartDataPoint, 
   ProcessedGaugeDataPoint,
   GaugeZone 
-} from '@registry/components/gauge-chart/types'
+} from '@registry/components/basic/gauge-chart/types'

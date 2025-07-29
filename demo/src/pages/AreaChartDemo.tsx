@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { AreaChart } from '@registry/components/area-chart/area-chart'
+import { AreaChart } from '@registry/components/basic/area-chart'
 
 // 時間序列資料
 const timeSeriesData = [
@@ -394,7 +394,7 @@ export default function AreaChartDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { AreaChart } from '@registry/components/area-chart'
+          <code>{`import { AreaChart } from '@registry/components/basic/area-chart'
 
 const data = [
   { date: '2023-01', revenue: 120000, category: '營收' },

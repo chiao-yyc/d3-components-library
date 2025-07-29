@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { BarChartRefactored } from '@registry/components/charts/bar-chart/bar-chart-refactored'
-import { BarChartSimple } from '@registry/components/charts/bar-chart/bar-chart-simple'
+import { BarChart } from '@registry/components/basic/bar-chart'
 import { processData } from '@registry/components/core/data-processor'
 
 // 測試數據
@@ -111,7 +110,7 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          <BarChartSimple
+          <BarChart
             data={sampleData}
             width={600}
             height={400}
@@ -135,7 +134,7 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          <BarChartRefactored
+          <BarChart
             data={sampleData}
             width={600}
             height={400}
@@ -160,7 +159,7 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          <BarChartSimple
+          <BarChart
             data={salesData}
             mapping={{ x: 'month', y: 'revenue' }}
             width={600}
@@ -184,7 +183,7 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          <BarChartSimple
+          <BarChart
             data={salesData}
             xAccessor={(d) => d.month}
             yAccessor={(d) => d.revenue - d.costs}

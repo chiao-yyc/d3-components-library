@@ -1,4 +1,4 @@
-export { RadarChart } from '@registry/components/radar-chart/radar-chart'
+export { RadarChart } from '@registry/components/statistical/radar-chart/radar-chart'
 export type { 
   RadarChartProps, 
   RadarChartDataPoint, 
@@ -6,4 +6,4 @@ export type {
   RadarValue,
   RadarAxis,
   RadarSeries
-} from '@registry/components/radar-chart/types'
+} from '@registry/components/statistical/radar-chart/types'

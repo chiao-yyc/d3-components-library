@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ViolinPlot } from '@registry/components/violin-plot/violin-plot'
+import { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
 
 // 生成正常分佈數據
 function generateNormalData(mean: number, std: number, count: number): number[] {
@@ -575,7 +575,7 @@ export default function ViolinPlotDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { ViolinPlot } from '@registry/components/violin-plot'
+          <code>{`import { ViolinPlot } from '@registry/components/statistical/violin-plot'
 
 const data = [
   { group: '對照組', measurements: [85, 92, 78, 88, 95, 82] },
