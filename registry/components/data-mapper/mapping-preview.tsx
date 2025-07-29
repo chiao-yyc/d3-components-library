@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { cn } from '../../utils/cn'
-import { BarChart } from '../bar-chart/bar-chart'
+import { BarChart } from '../basic/bar-chart'
 import { MappingPreviewProps, DataMapping } from './types'
 
 export function MappingPreview({

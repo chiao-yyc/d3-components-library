@@ -1,6 +1,29 @@
 import React, { useCallback, useState, useRef } from 'react'
 import { cn } from '../../utils/cn'
-import { CsvAdapter } from '../../adapters'
+// Simple CSV parser
+function parseCSV(content: string): any[] {
+  const lines = content.trim().split('\n')
+  if (lines.length < 2) return []
+  
+  const headers = lines[0].split(',').map(h => h.trim())
+  const data = []
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(',').map(v => v.trim())
+    const row: any = {}
+    
+    headers.forEach((header, index) => {
+      const value = values[index] || ''
+      // Try to parse as number
+      const numValue = parseFloat(value)
+      row[header] = isNaN(numValue) ? value : numValue
+    })
+    
+    data.push(row)
+  }
+  
+  return data
+}
 import { DataUploadProps } from './types'
 
 export function DataUpload({
@@ -34,7 +57,7 @@ export function DataUpload({
 
       switch (extension) {
         case '.csv':
-          data = CsvAdapter.parseCSV(content)
+          data = parseCSV(content)
           break
         case '.json':
           const jsonData = JSON.parse(content)
