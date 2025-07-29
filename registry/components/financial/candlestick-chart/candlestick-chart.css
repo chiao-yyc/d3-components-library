@@ -1,0 +1,196 @@
+/* Candlestick Chart Component Styles */
+
+.candlestick-chart-container {
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.candlestick-chart-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 蠟燭圖元素 */
+.candlestick {
+  transition: opacity 0.2s ease;
+}
+
+.candlestick:hover {
+  opacity: 0.8;
+}
+
+.candlestick .wick {
+  stroke-linecap: round;
+}
+
+.candlestick .body {
+  stroke-linejoin: round;
+}
+
+/* 成交量圖表 */
+.volume-bar {
+  transition: opacity 0.2s ease;
+}
+
+.volume-bar:hover {
+  opacity: 0.8;
+}
+
+/* 格線樣式 */
+.grid-horizontal line,
+.grid-vertical line {
+  shape-rendering: crispEdges;
+}
+
+/* 坐標軸樣式 */
+.x-axis .domain,
+.y-axis .domain,
+.volume-axis .domain {
+  stroke: #d1d5db;
+  stroke-width: 1px;
+}
+
+.x-axis .tick line,
+.y-axis .tick line,
+.volume-axis .tick line {
+  stroke: #e5e7eb;
+  stroke-width: 1px;
+}
+
+.x-axis text,
+.y-axis text,
+.volume-axis text {
+  fill: #6b7280;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+/* 十字線游標 */
+.crosshair {
+  pointer-events: none;
+}
+
+.crosshair-line {
+  stroke: #374151;
+  stroke-width: 1px;
+  stroke-dasharray: 3,3;
+  opacity: 0.7;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .candlestick-chart-container {
+    font-size: 12px;
+  }
+  
+  .x-axis text,
+  .y-axis text,
+  .volume-axis text {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .candlestick-chart-container {
+    font-size: 11px;
+  }
+  
+  .x-axis text,
+  .y-axis text,
+  .volume-axis text {
+    font-size: 9px;
+  }
+}
+
+/* 錯誤和空狀態 */
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.error-state {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.empty-state {
+  color: #6b7280;
+}
+
+/* 統計資訊面板 */
+.stats-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 警告訊息 */
+.warning-panel {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+/* 動畫效果 */
+@keyframes candlestick-appear {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.candlestick-animated .body {
+  animation: candlestick-appear 0.6s ease-out;
+}
+
+/* 暗色主題支援 */
+@media (prefers-color-scheme: dark) {
+  .candlestick-chart-container {
+    color: #f3f4f6;
+  }
+  
+  .stats-panel {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+  
+  .x-axis .domain,
+  .y-axis .domain,
+  .volume-axis .domain {
+    stroke: #4b5563;
+  }
+  
+  .x-axis .tick line,
+  .y-axis .tick line,
+  .volume-axis .tick line {
+    stroke: #374151;
+  }
+  
+  .x-axis text,
+  .y-axis text,
+  .volume-axis text {
+    fill: #d1d5db;
+  }
+  
+  .grid-horizontal line,
+  .grid-vertical line {
+    stroke: #374151;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "base-chart",
+  "description": "所有圖表組件的基礎類別，提供統一的接口和共用功能",
+  "version": "1.0.0",
+  "tags": ["core", "base", "abstract", "foundation"],
+  "category": "core",
+  "complexity": "advanced",
+  "lastUpdated": "2025-07-09T12:00:00Z",
+  "files": ["base-chart.tsx", "types.ts", "index.ts"],
+  "dependencies": ["react", "d3", "@types/d3"],
+  "features": [
+    "統一的圖表接口",
+    "自動數據驗證",
+    "錯誤處理機制",
+    "工具提示系統",
+    "動畫支援",
+    "響應式設計",
+    "數據類型自動檢測",
+    "映射建議系統",
+    "變體支援架構"
+  ],
+  "usage": {
+    "purpose": "作為其他圖表組件的基礎類別，不直接使用",
+    "inheritance": "extends BaseChart<TProps>",
+    "methods": [
+      "processData(): 處理原始數據",
+      "createScales(): 創建D3比例尺",
+      "renderChart(): 渲染圖表內容",
+      "getChartType(): 返回圖表類型"
+    ]
+  }
+}
