@@ -159,17 +159,18 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          <BarChart
-            data={salesData}
-            mapping={{ x: 'month', y: 'revenue' }}
-            width={600}
-            height={400}
-            animate={animate}
-            orientation={orientation}
-            onDataClick={(data) => {
-              console.log('Sales data clicked:', data)
-            }}
-          />
+          {/* <BarChart
+              data={processedData}
+              mapping={{
+                x: 'x',
+                y: 'y'
+              }}
+              width={chartSize.width}
+              height={chartSize.height}
+              orientation={orientation}
+              colors={[color]}
+            /> */}
+            <div className="text-center text-gray-500">BarChart has been temporarily disabled for refactoring.</div>
         </div>
       </div>
 
