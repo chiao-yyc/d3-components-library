@@ -1,24 +1,20 @@
-import React from 'react'
-export { AreaChart } from './area-chart'
-export type { 
-  AreaChartProps, 
-  AreaDataPoint, 
-  ProcessedAreaDataPoint,
-  AreaSeriesData,
-  SimpleAreaChartData,
-  SimpleAreaChartProps
-} from './types'
-export { default as areaChartStyles } from './area-chart.css?inline'
 
-// 便利導出 - 使用函數語法避免JSX問題
+import React from 'react';
+import './area-chart.css';
+export { AreaChart } from './area-chart';
+export type { AreaChartProps, SimpleAreaChartData, SimpleAreaChartProps } from './types';
+
+export { D3AreaChart } from './core';
+export type { AreaChartConfig as D3AreaChartConfig } from './core';
+
 export const SimpleAreaChart = (props: any) => {
-  return React.createElement(AreaChart, { ...props, variant: "simple" })
-}
+  return React.createElement(AreaChart, { ...props, variant: "simple" });
+};
 
 export const StackedAreaChart = (props: any) => {
-  return React.createElement(AreaChart, { ...props, variant: "stacked" })
-}
+  return React.createElement(AreaChart, { ...props, variant: "stacked" });
+};
 
 export const PercentAreaChart = (props: any) => {
-  return React.createElement(AreaChart, { ...props, variant: "percent" })
-}
+  return React.createElement(AreaChart, { ...props, variant: "percent" });
+};
