@@ -1,5 +1,5 @@
-import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
-import { LineChart } from '@registry/components/basic/line-chart/line-chart'
+// import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
+// import { LineChart } from '@registry/components/basic/line-chart/line-chart'
 import { ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot'
 import { PieChart } from '@registry/components/basic/pie-chart/pie-chart'
 import { AreaChart } from '@registry/components/basic/area-chart/area-chart'
@@ -79,13 +79,13 @@ function Gallery() {
 
         <div className="space-y-12">
           {/* 長條圖組件 */}
-          <section>
+          {/* <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               長條圖組件 (Bar Chart)
             </h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本長條圖 */}
+              
               <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   基本長條圖
@@ -105,7 +105,7 @@ function Gallery() {
                 </div>
               </div>
 
-              {/* 多色長條圖 */}
+              
               <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   多色長條圖
@@ -125,16 +125,16 @@ function Gallery() {
                 </div>
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* 折線圖組件 */}
-          <section>
+          {/* <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               折線圖組件 (Line Chart)
             </h2>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本折線圖 */}
+              
               <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   基本時間序列
@@ -155,7 +155,7 @@ function Gallery() {
                 </div>
               </div>
 
-              {/* 區域填充圖 */}
+              
               <div className="bg-white p-6 rounded-lg shadow-sm border">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   區域填充圖
@@ -178,7 +178,7 @@ function Gallery() {
                 </div>
               </div>
             </div>
-          </section>
+          </section> */}
 
           {/* 散點圖組件 */}
           <section>

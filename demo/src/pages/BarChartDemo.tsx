@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
+import { BarChart } from '@registry/components/basic/bar-chart'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import InteractiveTutorial from '../components/InteractiveTutorial'
 
@@ -12,6 +12,9 @@ function BarChartDemo() {
   const [showAxis, setShowAxis] = useState(true)
   const [showTooltip, setShowTooltip] = useState(true)
   const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 40 })
+  const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
 
@@ -103,6 +106,21 @@ function BarChartDemo() {
                         {scheme.charAt(0).toUpperCase() + scheme.slice(1)}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                {/* 方向 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    方向
+                  </label>
+                  <select 
+                    value={orientation} 
+                    onChange={(e) => setOrientation(e.target.value as 'vertical' | 'horizontal')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="vertical">垂直</option>
+                    <option value="horizontal">水平</option>
                   </select>
                 </div>
 
@@ -213,6 +231,24 @@ function BarChartDemo() {
                       />
                       <span className="text-sm text-gray-700">顯示提示</span>
                     </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={animate}
+                        onChange={(e) => setAnimate(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700">動畫效果</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={interactive}
+                        onChange={(e) => setInteractive(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700">互動功能</span>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -226,18 +262,23 @@ function BarChartDemo() {
               steps={tutorialSteps}
             >
               <div className="flex justify-center">
-                <BarChart
-                  data={currentDataset.data}
-                  xKey={currentDataset.xKey}
-                  yKey={currentDataset.yKey}
-                  width={chartWidth}
-                  height={chartHeight}
-                  margin={margin}
-                  colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
-                  showGrid={showGrid}
-                  showAxis={showAxis}
-                  showTooltip={showTooltip}
-                />
+                <div className="bg-white rounded-lg p-6 border">
+                  <BarChart
+                    data={currentDataset.data}
+                    xKey={currentDataset.xKey}
+                    yKey={currentDataset.yKey}
+                    width={chartWidth}
+                    height={chartHeight}
+                    orientation={orientation}
+                    colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
+                    animate={animate}
+                    interactive={interactive}
+                    showTooltip={showTooltip}
+                    margin={margin}
+                    onDataClick={(data) => console.log('Clicked:', data)}
+                    onHover={(data) => console.log('Hovered:', data)}
+                  />
+                </div>
               </div>
             </InteractiveTutorial>
 
