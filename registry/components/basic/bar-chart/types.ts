@@ -1,85 +1,23 @@
-import { HTMLAttributes } from 'react'
 
-export interface Margin {
-  top: number
-  right: number
-  bottom: number
-  left: number
+import { HTMLAttributes } from 'react';
+import { BarChartConfig as CoreBarChartConfig, ProcessedDataPoint as CoreProcessedDataPoint } from './core/types';
+
+// Re-export core types if they need to be exposed to the consumer
+export type { Margin, DataMapping, ProcessedDataPoint } from './core/types';
+
+// React-specific props
+export interface BarChartProps extends CoreBarChartConfig, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+  className?: string;
 }
 
-export interface DataMapping {
-  x: string | ((d: any) => any)
-  y: string | ((d: any) => any)
-  color?: string | ((d: any) => any)
-}
-
-export interface ProcessedDataPoint {
-  x: any
-  y: number
-  originalData: any
-  index: number
-}
-
-export interface BarChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onError'> {
-  // 資料相關
-  data: any[]
-  
-  // 資料映射 (多種方式)
-  xKey?: string
-  yKey?: string
-  xAccessor?: (d: any) => any
-  yAccessor?: (d: any) => any
-  mapping?: DataMapping
-  
-  // 圖表尺寸
-  width?: number
-  height?: number
-  margin?: Margin
-  
-  // 外觀配置
-  orientation?: 'vertical' | 'horizontal'
-  colors?: string[]
-  className?: string
-  
-  // 行為配置
-  animate?: boolean
-  interactive?: boolean
-  
-  // 工具提示
-  showTooltip?: boolean
-  tooltipFormat?: (data: ProcessedDataPoint) => string
-  
-  // 事件處理
-  onDataClick?: (data: any) => void
-  onHover?: (data: any) => void
-}
-
+// Deprecated or to be removed if not used by React wrapper
 export interface BarChartConfig {
-  // 預設配置
-  defaultWidth: number
-  defaultHeight: number
-  defaultMargin: Margin
-  defaultColors: string[]
-  
-  // 動畫配置
-  animationDuration: number
-  animationEasing: string
-  
-  // 樣式配置
-  barPadding: number
-  hoverOpacity: number
-}
-
-// 資料驗證相關
-export interface ValidationResult {
-  isValid: boolean
-  errors: string[]
-  warnings: string[]
-}
-
-export interface SuggestedMapping {
-  field: string
-  type: 'string' | 'number' | 'date' | 'boolean'
-  confidence: number
-  suggested: 'x' | 'y' | 'color'
+  defaultWidth: number;
+  defaultHeight: number;
+  defaultMargin: CoreBarChartConfig['margin'];
+  defaultColors: string[];
+  animationDuration: number;
+  animationEasing: string;
+  barPadding: number;
+  hoverOpacity: number;
 }
