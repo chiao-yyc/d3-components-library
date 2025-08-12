@@ -1,9 +1,9 @@
-// import { BarChart } from '@registry/components/basic/bar-chart/bar-chart'
-// import { LineChart } from '@registry/components/basic/line-chart/line-chart'
-import { ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot'
-import { PieChart } from '@registry/components/basic/pie-chart/pie-chart'
-import { AreaChart } from '@registry/components/basic/area-chart/area-chart'
-import { Heatmap } from '@registry/components/basic/heatmap/heatmap'
+import { BarChart } from '@registry/components/basic/bar-chart'
+import { LineChart } from '@registry/components/basic/line-chart'
+import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+import { PieChart } from '@registry/components/basic/pie-chart'
+import { AreaChart } from '@registry/components/basic/area-chart'
+import { Heatmap } from '@registry/components/basic/heatmap'
 import { basicBarData } from '../data/sample-data'
 
 // 生成範例資料
@@ -79,7 +79,7 @@ function Gallery() {
 
         <div className="space-y-12">
           {/* 長條圖組件 */}
-          {/* <section>
+          <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               長條圖組件 (Bar Chart)
             </h2>
@@ -125,10 +125,10 @@ function Gallery() {
                 </div>
               </div>
             </div>
-          </section> */}
+          </section>
 
           {/* 折線圖組件 */}
-          {/* <section>
+          <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
               折線圖組件 (Line Chart)
             </h2>
@@ -178,7 +178,7 @@ function Gallery() {
                 </div>
               </div>
             </div>
-          </section> */}
+          </section>
 
           {/* 散點圖組件 */}
           <section>

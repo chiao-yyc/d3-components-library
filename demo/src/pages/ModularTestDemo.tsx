@@ -159,18 +159,18 @@ export default function ModularTestDemo() {
         </p>
         
         <div className="flex justify-center">
-          {/* <BarChart
-              data={processedData}
-              mapping={{
-                x: 'x',
-                y: 'y'
-              }}
-              width={chartSize.width}
-              height={chartSize.height}
-              orientation={orientation}
-              colors={[color]}
-            /> */}
-            <div className="text-center text-gray-500">BarChart has been temporarily disabled for refactoring.</div>
+          <BarChart
+            data={testResult.data}
+            mapping={{
+              x: 'category', // Assuming 'category' is the x-axis for sampleData
+              y: 'value'     // Assuming 'value' is the y-axis for sampleData
+            }}
+            width={600}
+            height={400}
+            orientation={orientation}
+            colorScheme={selectedScheme}
+            animate={animate}
+          />
         </div>
       </div>
 
