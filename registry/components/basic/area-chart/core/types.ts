@@ -1,23 +1,11 @@
 // Pure TypeScript types for the core area chart logic
-export interface Margin {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
+import { BaseChartProps } from '../../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 
-export interface DataMapping {
-  x: string | ((d: any) => any);
-  y: string | ((d: any) => any);
-  category?: string | ((d: any) => any);
-}
+export type { Margin, DataMapping } from '../../../core/base-chart/types';
 
-export interface ProcessedAreaDataPoint {
-  x: Date | number | string;
-  y: number;
+export interface ProcessedAreaDataPoint extends CoreProcessedDataPoint {
   category?: string;
-  originalData?: any;
-  index: number;
   y0?: number;
   y1?: number;
 }
@@ -28,10 +16,8 @@ export interface AreaSeriesData {
   color?: string;
 }
 
-export interface AreaChartConfig {
-  data: any[];
-
-  // Data mapping
+export interface AreaChartProps extends BaseChartProps {
+  // AreaChart 特有的屬性
   xKey?: string;
   yKey?: string;
   categoryKey?: string;
@@ -39,13 +25,8 @@ export interface AreaChartConfig {
   yAccessor?: (d: any) => number;
   categoryAccessor?: (d: any) => string;
   mapping?: DataMapping;
-
-  // Dimensions
-  width?: number;
-  height?: number;
-  margin?: Margin;
-
-  // Appearance
+  
+  // Area 特定樣式
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
   stackMode?: 'none' | 'stack' | 'percent';
   fillOpacity?: number;
@@ -56,16 +37,23 @@ export interface AreaChartConfig {
   showGrid?: boolean;
   showDots?: boolean;
   dotRadius?: number;
-
-  // Behavior
-  animate?: boolean;
-  animationDuration?: number;
+  
+  // Axis
+  showXAxis?: boolean;
+  showYAxis?: boolean;
+  xAxisFormat?: (d: any) => string;
+  yAxisFormat?: (d: any) => string;
+  
+  // Legend
+  showLegend?: boolean;
+  legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+  
+  // Interactive
   interactive?: boolean;
-
+  
   // Tooltip
-  showTooltip?: boolean;
   tooltipFormat?: (d: ProcessedAreaDataPoint, series?: string) => string;
-
+  
   // Events
   onDataClick?: (d: ProcessedAreaDataPoint, series?: string) => void;
   onDataHover?: (d: ProcessedAreaDataPoint | null, series?: string) => void;

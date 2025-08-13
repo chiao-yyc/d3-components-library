@@ -1,10 +1,11 @@
 
 import { HTMLAttributes } from 'react';
-import { AreaChartConfig as CoreAreaChartConfig } from './core/types';
+import { AreaChartProps as CoreAreaChartProps, ProcessedAreaDataPoint, AreaSeriesData } from './core/types';
 
 export type { Margin, DataMapping, ProcessedAreaDataPoint, AreaSeriesData } from './core/types';
 
-export interface AreaChartProps extends CoreAreaChartConfig, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+// React 包裝器的 props，繼承 core 的 AreaChartProps 並添加 HTML 屬性
+export interface AreaChartProps extends CoreAreaChartProps, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
   className?: string;
   style?: React.CSSProperties;
 }

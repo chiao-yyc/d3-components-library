@@ -388,9 +388,14 @@ export class DataProcessor {
     // 常見日期格式的正則表達式
     const datePatterns = [
       /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
+      /^\d{4}-\d{2}$/, // YYYY-MM (新增：支援年月格式)
       /^\d{2}\/\d{2}\/\d{4}$/, // MM/DD/YYYY
       /^\d{2}-\d{2}-\d{4}$/, // MM-DD-YYYY
       /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
+      /^\d{4}\/\d{2}$/, // YYYY/MM (新增：支援年月格式)
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO datetime
+      /^\d{4}年\d{1,2}月\d{1,2}日$/, // 中文日期格式
+      /^\d{4}年\d{1,2}月$/, // 中文年月格式
     ]
     
     return datePatterns.some(pattern => pattern.test(value))
