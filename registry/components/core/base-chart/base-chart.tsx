@@ -27,8 +27,8 @@ export interface BaseChartState {
 }
 
 export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> {
-  protected svgRef = useRef<SVGSVGElement>(null)
-  protected containerRef = useRef<HTMLDivElement>(null)
+  protected svgRef: React.RefObject<SVGSVGElement> | null = null;
+  protected containerRef: React.RefObject<HTMLDivElement> | null = null;
   protected props: TProps
   protected state: BaseChartState
 
@@ -171,18 +171,27 @@ export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
   return React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
-    const chartInstance = useMemo(() => new ChartClass(props), [props])
+    const containerRef = useRef<HTMLDivElement>(null);
+    const svgRef = useRef<SVGSVGElement>(null);
+    const chartInstance = useMemo(() => new ChartClass(props), []);
+
+    // Assign refs to the instance
+    chartInstance.containerRef = containerRef;
+    chartInstance.svgRef = svgRef;
+    
     const [, forceUpdate] = useState({})
     
     useEffect(() => {
-      if (chartInstance.svgRef.current) {
+      if (chartInstance.svgRef?.current) {
         try {
-          chartInstance.renderChart()
+          chartInstance.processData();
+          chartInstance.createScales();
+          chartInstance.renderChart();
         } catch (error) {
-          chartInstance.handleError(error as Error)
+          chartInstance.handleError(error as Error);
         }
       }
-    }, [chartInstance, props.data])
+    }, [props, chartInstance]);
 
     // 公開實例方法
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])

@@ -15,6 +15,11 @@ export default defineConfig({
       'd3': resolve(__dirname, './node_modules/d3'),
     },
   },
+  optimizeDeps: {
+    include: [
+      '@registry/components/basic/bar-chart',
+    ],
+  },
   server: {
     port: 3000,
     open: true,

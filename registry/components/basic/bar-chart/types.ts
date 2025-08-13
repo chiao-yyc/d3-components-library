@@ -1,23 +1,26 @@
-
 import { HTMLAttributes } from 'react';
-import { BarChartConfig as CoreBarChartConfig, ProcessedDataPoint as CoreProcessedDataPoint } from './core/types';
+import { BaseChartProps, Margin } from '../../core/base-chart/types';
+import { DataMapping, ProcessedDataPoint as CoreProcessedDataPoint } from '../../core/data-processor/types';
 
-// Re-export core types if they need to be exposed to the consumer
-export type { Margin, DataMapping, ProcessedDataPoint } from './core/types';
+// Re-export core types
+export type { Margin, DataMapping };
 
-// React-specific props
-export interface BarChartProps extends CoreBarChartConfig, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
-  className?: string;
+// Update ProcessedDataPoint to align with DataProcessor's output
+export interface ProcessedDataPoint extends CoreProcessedDataPoint {
+  // Add any BarChart specific processed data properties here if needed
 }
 
-// Deprecated or to be removed if not used by React wrapper
-export interface BarChartConfig {
-  defaultWidth: number;
-  defaultHeight: number;
-  defaultMargin: CoreBarChartConfig['margin'];
-  defaultColors: string[];
-  animationDuration: number;
-  animationEasing: string;
-  barPadding: number;
-  hoverOpacity: number;
+// BarChartProps extends BaseChartProps
+export interface BarChartProps extends BaseChartProps {
+  // BarChart specific properties
+  xKey?: string;
+  yKey?: string;
+  xAccessor?: (d: any) => any;
+  yAccessor?: (d: any) => any;
+  mapping?: DataMapping;
+  orientation?: 'vertical' | 'horizontal';
+  colors?: string[];
+  tooltipFormat?: (data: ProcessedDataPoint) => string;
+  onDataClick?: (data: any) => void;
+  onHover?: (data: any) => void;
 }

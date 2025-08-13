@@ -28,6 +28,6 @@
       "@registry/*": ["../registry/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../registry"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
