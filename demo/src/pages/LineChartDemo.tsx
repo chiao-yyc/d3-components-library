@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LineChart } from '../components/ui/line-chart'
+import { LineChart } from '@registry/components/basic/line-chart'
 
 // 生成範例資料
 const generateTimeSeriesData = (points: number = 30) => {

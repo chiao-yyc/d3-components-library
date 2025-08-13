@@ -47,6 +47,20 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected abstract renderChart(): void
   protected abstract getChartType(): string
 
+  // New method to update props and trigger re-render cycle
+  public update(newProps: TProps) {
+    this.props = newProps; // Update internal props
+    if (this.svgRef?.current) { // Only proceed if SVG is ready
+      try {
+        this.processData();
+        this.createScales();
+        this.renderChart();
+      } catch (error) {
+        this.handleError(error as Error);
+      }
+    }
+  }
+
   // 共用方法
   protected getChartDimensions() {
     const { width = 800, height = 400, margin = { top: 20, right: 30, bottom: 40, left: 40 } } = this.props
@@ -183,15 +197,9 @@ export function createChartComponent<TProps extends BaseChartProps>(
     
     useEffect(() => {
       if (chartInstance.svgRef?.current) {
-        try {
-          chartInstance.processData();
-          chartInstance.createScales();
-          chartInstance.renderChart();
-        } catch (error) {
-          chartInstance.handleError(error as Error);
-        }
+        chartInstance.update(props); // Call the new update method
       }
-    }, [props, chartInstance]);
+    }, [props, chartInstance, chartInstance.svgRef.current]);
 
     // 公開實例方法
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])

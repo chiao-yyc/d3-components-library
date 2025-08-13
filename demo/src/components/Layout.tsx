@@ -67,6 +67,12 @@ function Layout({ children }: LayoutProps) {
         { path: '/triple-combo', name: '三重組合', icon: '🚀' },
         { path: '/dynamic-combo', name: '動態組合', icon: '⚡' }
       ]
+    },
+    {
+      title: '開發工具',
+      items: [
+        { path: '/data-processor-test', name: 'DataProcessor 測試', icon: '🔬' }
+      ]
     }
   ]
 
