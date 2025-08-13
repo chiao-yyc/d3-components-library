@@ -1,30 +1,16 @@
 // Pure TypeScript types for the core scatter plot logic
-export interface Margin {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
+import { BaseChartProps } from '../../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 
-export interface DataMapping {
-  x: string | ((d: any) => any);
-  y: string | ((d: any) => any);
-  size?: string | ((d: any) => any);
-  color?: string | ((d: any) => any);
-}
+export type { Margin, DataMapping } from '../../../core/base-chart/types';
 
-export interface ProcessedDataPoint {
-  x: number;
-  y: number;
+export interface ProcessedScatterDataPoint extends CoreProcessedDataPoint {
   size?: number;
   color?: string;
-  originalData: any;
 }
 
-export interface ScatterPlotConfig {
-  data: any[];
-
-  // Data mapping
+export interface ScatterPlotProps extends BaseChartProps {
+  // ScatterPlot 特有的屬性
   xKey?: string;
   yKey?: string;
   sizeKey?: string;
@@ -35,12 +21,7 @@ export interface ScatterPlotConfig {
   colorAccessor?: (d: any) => string;
   mapping?: DataMapping;
 
-  // Dimensions
-  width?: number;
-  height?: number;
-  margin?: Margin;
-
-  // Appearance
+  // Scatter 特定樣式
   radius?: number;
   minRadius?: number;
   maxRadius?: number;
@@ -55,16 +36,17 @@ export interface ScatterPlotConfig {
   trendlineColor?: string;
   trendlineWidth?: number;
 
-  // Behavior
-  animate?: boolean;
-  animationDuration?: number;
+  // 互動
   interactive?: boolean;
 
   // Tooltip
-  showTooltip?: boolean;
-  tooltipFormat?: (d: ProcessedDataPoint) => string;
+  tooltipFormat?: (d: ProcessedScatterDataPoint) => string;
 
   // Events
-  onDataClick?: (d: ProcessedDataPoint) => void;
-  onHover?: (d: ProcessedDataPoint | null) => void;
+  onDataClick?: (d: ProcessedScatterDataPoint) => void;
+  onHover?: (d: ProcessedScatterDataPoint | null) => void;
 }
+
+// 保持向下兼容的類型別名
+export type ScatterPlotConfig = ScatterPlotProps;
+export type ProcessedDataPoint = ProcessedScatterDataPoint;
