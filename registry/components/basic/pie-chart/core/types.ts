@@ -1,32 +1,20 @@
 // Pure TypeScript types for the core pie chart logic
-export interface Margin {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
+import { BaseChartProps } from '../../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 
-export interface DataMapping {
-  label: string | ((d: any) => string);
-  value: string | ((d: any) => number);
-  color?: string | ((d: any) => string);
-}
+export type { Margin, DataMapping } from '../../../core/base-chart/types';
 
-export interface ProcessedPieDataPoint {
+export interface ProcessedPieDataPoint extends CoreProcessedDataPoint {
   label: string;
   value: number;
   color?: string;
-  originalData?: any;
   percentage: number;
   startAngle: number;
   endAngle: number;
-  index: number;
 }
 
-export interface PieChartConfig {
-  data: any[];
-
-  // Data mapping
+export interface PieChartProps extends BaseChartProps {
+  // PieChart 特有的屬性
   labelKey?: string;
   valueKey?: string;
   colorKey?: string;
@@ -35,12 +23,7 @@ export interface PieChartConfig {
   colorAccessor?: (d: any) => string;
   mapping?: DataMapping;
 
-  // Dimensions
-  width?: number;
-  height?: number;
-  margin?: Margin;
-
-  // Appearance
+  // Pie 特定樣式
   innerRadius?: number;
   outerRadius?: number;
   cornerRadius?: number;
@@ -57,18 +40,17 @@ export interface PieChartConfig {
   showCenterText?: boolean;
   centerTextFormat?: (total: number, data: ProcessedPieDataPoint[]) => { total: string; label: string };
 
-  // Behavior
-  animate?: boolean;
-  animationDuration?: number;
+  // Animation
   animationType?: 'fade' | 'scale' | 'rotate' | 'sweep';
   hoverEffect?: 'lift' | 'scale' | 'glow' | 'none';
-  interactive?: boolean;
 
   // Tooltip
-  showTooltip?: boolean;
   tooltipFormat?: (d: ProcessedPieDataPoint) => string;
 
   // Events
   onSliceClick?: (d: ProcessedPieDataPoint) => void;
   onSliceHover?: (d: ProcessedPieDataPoint | null) => void;
 }
+
+// 保持向下兼容的類型別名
+export type PieChartConfig = PieChartProps;
