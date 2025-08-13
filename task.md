@@ -214,6 +214,201 @@
     *   執行 `tsc --noEmit` 或 `npm run typecheck` (如果有的話) 進行型別檢查。
 
 ---
+
+# 其他圖表組件抽象化規劃
+
+**目標：** 將剩餘的圖表組件重構為 JS/TS 核心模式，使其繼承 `BaseChart` 抽象類，並整合 `DataProcessor` 和 `ColorScheme` 核心模組，以實現統一的架構模式並便於各種前端框架包裝使用。
+
+## 📋 待抽象化圖表清單
+
+### **階段 1: 基礎圖表 (高優先級)**
+
+#### Task 1: AreaChart 抽象化
+**位置：** `registry/components/basic/area-chart/`
+**特點：** 支援堆疊模式、多重區域、漸層填充
+**複雜度：** 中等（需處理堆疊邏輯）
+
+#### Task 2: PieChart 抽象化  
+**位置：** `registry/components/basic/pie-chart/`
+**特點：** 支援甜甜圈圖、標籤、圖例、動畫
+**複雜度：** 中等（圓形布局特殊性）
+
+#### Task 3: ScatterPlot 抽象化
+**位置：** `registry/components/statistical/scatter-plot/`
+**特點：** 支援氣泡圖、趨勢線、多維度映射
+**複雜度：** 中等（多維度數據處理）
+
+### **階段 2: 特殊圖表 (中優先級)**
+
+#### Task 4: HeatMap 抽象化
+**位置：** `registry/components/basic/heatmap/`
+**特點：** 矩陣數據、顏色映射、格網布局
+**複雜度：** 高（二維數據結構）
+
+#### Task 5: FunnelChart 抽象化
+**位置：** `registry/components/basic/funnel-chart/`
+**特點：** 梯形布局、轉換率顯示
+**複雜度：** 中等（特殊幾何形狀）
+
+#### Task 6: GaugeChart 抽象化
+**位置：** `registry/components/basic/gauge-chart/`
+**特點：** 弧形布局、指針、刻度
+**複雜度：** 中等（極座標系統）
+
+### **階段 3: 統計圖表 (中優先級)**
+
+#### Task 7: BoxPlot 抽象化
+**位置：** `registry/components/statistical/box-plot/`
+**特點：** 統計分佈、四分位數、異常值
+**複雜度：** 中等（統計計算）
+
+#### Task 8: RadarChart 抽象化
+**位置：** `registry/components/statistical/radar-chart/`
+**特點：** 極座標、多軸、多邊形區域
+**複雜度：** 高（極座標轉換）
+
+#### Task 9: ViolinPlot 抽象化
+**位置：** `registry/components/statistical/violin-plot/`
+**特點：** 密度分佈、統計形狀
+**複雜度：** 高（密度計算）
+
+### **階段 4: 金融圖表 (低優先級)**
+
+#### Task 10: CandlestickChart 抽象化
+**位置：** `registry/components/financial/candlestick-chart/`
+**特點：** OHLC 數據、K線樣式、成交量
+**複雜度：** 中等（金融數據格式）
+
+## 🔧 標準抽象化模板
+
+每個圖表將遵循以下統一重構步驟：
+
+### Step 1: 核心類重構 (`core/[chart-name].ts`)
+```typescript
+export class D3[ChartName] extends BaseChart<[ChartName]Props> {
+  constructor(config: [ChartName]Props) {
+    super(config);
+  }
+
+  protected processData(): ProcessedDataPoint[] {
+    const { data, mapping, xKey, yKey, xAccessor, yAccessor } = this.props;
+    const processor = new DataProcessor({
+      mapping: mapping,
+      keys: { x: xKey, y: yKey },
+      accessors: { x: xAccessor, y: yAccessor },
+      autoDetect: true,
+    });
+    const result = processor.process(data);
+    if (result.errors.length > 0) {
+      this.handleError(new Error(result.errors.join(', ')));
+    }
+    this.processedData = result.data as ProcessedDataPoint[];
+    return this.processedData;
+  }
+  
+  protected createScales(): void {
+    const { width, height, margin, colors } = this.props;
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    // 創建圖表特定的比例尺邏輯
+    
+    // 顏色比例尺
+    this.colorScale = createColorScale({
+      type: 'custom',
+      colors: colors,
+      domain: [0, this.processedData.length - 1],
+      interpolate: false
+    });
+  }
+  
+  protected renderChart(): void {
+    const g = this.createSVGContainer();
+    
+    // 實現圖表特定的渲染邏輯
+    // 使用 this.colorScale.getColor() 獲取顏色
+    // 使用 this.createTooltip() 和 this.hideTooltip() 處理互動
+  }
+  
+  protected getChartType(): string {
+    return '[chart-type]';
+  }
+}
+```
+
+### Step 2: React 包裝器重構 (`[chart-name].tsx`)
+```typescript
+import { createChartComponent } from '../../../core/base-chart/base-chart';
+import { D3[ChartName] } from './core/[chart-name]';
+import { [ChartName]Props } from './types';
+
+export const [ChartName] = createChartComponent<[ChartName]Props>(D3[ChartName]);
+```
+
+### Step 3: 類型定義重構 (`types.ts`)
+```typescript
+import { HTMLAttributes } from 'react';
+import { BaseChartProps } from '../../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+
+export type { Margin, DataMapping } from '../../../core/base-chart/types';
+
+export interface ProcessedDataPoint extends CoreProcessedDataPoint {
+  // 圖表特有的處理後屬性
+}
+
+export interface [ChartName]Props extends BaseChartProps, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+  // 圖表特有的屬性
+  xKey?: string;
+  yKey?: string;
+  xAccessor?: (d: any) => any;
+  yAccessor?: (d: any) => any;
+  mapping?: DataMapping;
+  colors?: string[];
+  tooltipFormat?: (data: ProcessedDataPoint) => string;
+  onDataClick?: (data: any) => void;
+  onHover?: (data: any) => void;
+  
+  // 圖表專用屬性...
+}
+```
+
+## 📅 實施優先順序建議
+
+**Phase 1 (Week 1-2):**
+- AreaChart (最接近 LineChart，容易開始)
+- PieChart (獨立性高，風險低)
+
+**Phase 2 (Week 3-4):**
+- ScatterPlot (與其他圖表互補性強)
+- HeatMap (數據處理複雜，需更多時間)
+
+**Phase 3 (Week 5-6):**
+- FunnelChart, GaugeChart (特殊布局圖表)
+
+**Phase 4 (Week 7-8):**
+- BoxPlot, RadarChart (統計圖表)
+
+**Phase 5 (Week 9):**
+- ViolinPlot, CandlestickChart (最複雜的圖表)
+
+## 🎁 預期效益
+
+1. **代碼復用**: 減少 70% 重複代碼
+2. **維護性**: 統一架構便於維護和調試
+3. **擴展性**: 新框架包裝更容易（Vue, Angular, Svelte）
+4. **一致性**: 統一的 API 和行為模式
+5. **測試**: 核心邏輯與 UI 分離，更容易進行單元測試
+6. **類型安全**: 完整的 TypeScript 支援
+7. **性能**: BaseChart 提供統一的生命週期管理
+
+## 📝 注意事項
+
+- 每個圖表抽象化後都需要在 demo 中測試功能完整性
+- 特別注意保持現有 API 的向下兼容性
+- 統一錯誤處理和邊界情況
+- 確保動畫和互動體驗的一致性
+
+---
 **注意事項：**
 
 *   在修改檔案之前，請確保備份相關檔案。
@@ -436,3 +631,198 @@
 3.  **執行專案的 lint 和型別檢查：**
     *   在專案根目錄執行 `npm run lint` (如果有的話)。
     *   執行 `tsc --noEmit` 或 `npm run typecheck` (如果有的話) 進行型別檢查。
+
+---
+
+# 其他圖表組件抽象化規劃
+
+**目標：** 將剩餘的圖表組件重構為 JS/TS 核心模式，使其繼承 `BaseChart` 抽象類，並整合 `DataProcessor` 和 `ColorScheme` 核心模組，以實現統一的架構模式並便於各種前端框架包裝使用。
+
+## 📋 待抽象化圖表清單
+
+### **階段 1: 基礎圖表 (高優先級)**
+
+#### Task 1: AreaChart 抽象化
+**位置：** `registry/components/basic/area-chart/`
+**特點：** 支援堆疊模式、多重區域、漸層填充
+**複雜度：** 中等（需處理堆疊邏輯）
+
+#### Task 2: PieChart 抽象化  
+**位置：** `registry/components/basic/pie-chart/`
+**特點：** 支援甜甜圈圖、標籤、圖例、動畫
+**複雜度：** 中等（圓形布局特殊性）
+
+#### Task 3: ScatterPlot 抽象化
+**位置：** `registry/components/statistical/scatter-plot/`
+**特點：** 支援氣泡圖、趨勢線、多維度映射
+**複雜度：** 中等（多維度數據處理）
+
+### **階段 2: 特殊圖表 (中優先級)**
+
+#### Task 4: HeatMap 抽象化
+**位置：** `registry/components/basic/heatmap/`
+**特點：** 矩陣數據、顏色映射、格網布局
+**複雜度：** 高（二維數據結構）
+
+#### Task 5: FunnelChart 抽象化
+**位置：** `registry/components/basic/funnel-chart/`
+**特點：** 梯形布局、轉換率顯示
+**複雜度：** 中等（特殊幾何形狀）
+
+#### Task 6: GaugeChart 抽象化
+**位置：** `registry/components/basic/gauge-chart/`
+**特點：** 弧形布局、指針、刻度
+**複雜度：** 中等（極座標系統）
+
+### **階段 3: 統計圖表 (中優先級)**
+
+#### Task 7: BoxPlot 抽象化
+**位置：** `registry/components/statistical/box-plot/`
+**特點：** 統計分佈、四分位數、異常值
+**複雜度：** 中等（統計計算）
+
+#### Task 8: RadarChart 抽象化
+**位置：** `registry/components/statistical/radar-chart/`
+**特點：** 極座標、多軸、多邊形區域
+**複雜度：** 高（極座標轉換）
+
+#### Task 9: ViolinPlot 抽象化
+**位置：** `registry/components/statistical/violin-plot/`
+**特點：** 密度分佈、統計形狀
+**複雜度：** 高（密度計算）
+
+### **階段 4: 金融圖表 (低優先級)**
+
+#### Task 10: CandlestickChart 抽象化
+**位置：** `registry/components/financial/candlestick-chart/`
+**特點：** OHLC 數據、K線樣式、成交量
+**複雜度：** 中等（金融數據格式）
+
+## 🔧 標準抽象化模板
+
+每個圖表將遵循以下統一重構步驟：
+
+### Step 1: 核心類重構 (`core/[chart-name].ts`)
+```typescript
+export class D3[ChartName] extends BaseChart<[ChartName]Props> {
+  constructor(config: [ChartName]Props) {
+    super(config);
+  }
+
+  protected processData(): ProcessedDataPoint[] {
+    const { data, mapping, xKey, yKey, xAccessor, yAccessor } = this.props;
+    const processor = new DataProcessor({
+      mapping: mapping,
+      keys: { x: xKey, y: yKey },
+      accessors: { x: xAccessor, y: yAccessor },
+      autoDetect: true,
+    });
+    const result = processor.process(data);
+    if (result.errors.length > 0) {
+      this.handleError(new Error(result.errors.join(', ')));
+    }
+    this.processedData = result.data as ProcessedDataPoint[];
+    return this.processedData;
+  }
+  
+  protected createScales(): void {
+    const { width, height, margin, colors } = this.props;
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    // 創建圖表特定的比例尺邏輯
+    
+    // 顏色比例尺
+    this.colorScale = createColorScale({
+      type: 'custom',
+      colors: colors,
+      domain: [0, this.processedData.length - 1],
+      interpolate: false
+    });
+  }
+  
+  protected renderChart(): void {
+    const g = this.createSVGContainer();
+    
+    // 實現圖表特定的渲染邏輯
+    // 使用 this.colorScale.getColor() 獲取顏色
+    // 使用 this.createTooltip() 和 this.hideTooltip() 處理互動
+  }
+  
+  protected getChartType(): string {
+    return '[chart-type]';
+  }
+}
+```
+
+### Step 2: React 包裝器重構 (`[chart-name].tsx`)
+```typescript
+import { createChartComponent } from '../../../core/base-chart/base-chart';
+import { D3[ChartName] } from './core/[chart-name]';
+import { [ChartName]Props } from './types';
+
+export const [ChartName] = createChartComponent<[ChartName]Props>(D3[ChartName]);
+```
+
+### Step 3: 類型定義重構 (`types.ts`)
+```typescript
+import { HTMLAttributes } from 'react';
+import { BaseChartProps } from '../../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+
+export type { Margin, DataMapping } from '../../../core/base-chart/types';
+
+export interface ProcessedDataPoint extends CoreProcessedDataPoint {
+  // 圖表特有的處理後屬性
+}
+
+export interface [ChartName]Props extends BaseChartProps, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+  // 圖表特有的屬性
+  xKey?: string;
+  yKey?: string;
+  xAccessor?: (d: any) => any;
+  yAccessor?: (d: any) => any;
+  mapping?: DataMapping;
+  colors?: string[];
+  tooltipFormat?: (data: ProcessedDataPoint) => string;
+  onDataClick?: (data: any) => void;
+  onHover?: (data: any) => void;
+  
+  // 圖表專用屬性...
+}
+```
+
+## 📅 實施優先順序建議
+
+**Phase 1 (Week 1-2):**
+- AreaChart (最接近 LineChart，容易開始)
+- PieChart (獨立性高，風險低)
+
+**Phase 2 (Week 3-4):**
+- ScatterPlot (與其他圖表互補性強)
+- HeatMap (數據處理複雜，需更多時間)
+
+**Phase 3 (Week 5-6):**
+- FunnelChart, GaugeChart (特殊布局圖表)
+
+**Phase 4 (Week 7-8):**
+- BoxPlot, RadarChart (統計圖表)
+
+**Phase 5 (Week 9):**
+- ViolinPlot, CandlestickChart (最複雜的圖表)
+
+## 🎁 預期效益
+
+1. **代碼復用**: 減少 70% 重複代碼
+2. **維護性**: 統一架構便於維護和調試
+3. **擴展性**: 新框架包裝更容易（Vue, Angular, Svelte）
+4. **一致性**: 統一的 API 和行為模式
+5. **測試**: 核心邏輯與 UI 分離，更容易進行單元測試
+6. **類型安全**: 完整的 TypeScript 支援
+7. **性能**: BaseChart 提供統一的生命週期管理
+
+## 📝 注意事項
+
+- 每個圖表抽象化後都需要在 demo 中測試功能完整性
+- 特別注意保持現有 API 的向下兼容性
+- 統一錯誤處理和邊界情況
+- 確保動畫和互動體驗的一致性
