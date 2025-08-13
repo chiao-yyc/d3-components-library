@@ -362,6 +362,11 @@ export class DataProcessor {
   private parseNumber(value: string): number | null {
     if (typeof value !== 'string') return null
     
+    // 避免將日期字符串錯誤解析為數字
+    if (this.looksLikeDate(value)) {
+      return null
+    }
+    
     // 移除常見的非數字字符
     let cleaned = value.replace(/[,$%]/g, '')
     
@@ -375,13 +380,35 @@ export class DataProcessor {
   }
   
   /**
+   * 檢查值是否看起來像日期
+   */
+  private looksLikeDate(value: any): boolean {
+    if (typeof value !== 'string') return false
+    
+    // 常見日期格式的正則表達式
+    const datePatterns = [
+      /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
+      /^\d{2}\/\d{2}\/\d{4}$/, // MM/DD/YYYY
+      /^\d{2}-\d{2}-\d{4}$/, // MM-DD-YYYY
+      /^\d{4}\/\d{2}\/\d{2}$/, // YYYY/MM/DD
+    ]
+    
+    return datePatterns.some(pattern => pattern.test(value))
+  }
+
+  /**
    * 解析日期
    */
   private parseDate(value: string | number): Date | null {
     try {
+      // 只對看起來像日期的字符串進行解析
+      if (typeof value === 'string' && !this.looksLikeDate(value)) {
+        return null
+      }
+      
       const date = new Date(value)
       return isNaN(date.getTime()) ? null : date
-    } catch {
+    } catch (e) {
       return null
     }
   }

@@ -18,6 +18,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       '@registry/components/basic/bar-chart',
+      '@registry/components/basic/line-chart',
     ],
   },
   server: {
