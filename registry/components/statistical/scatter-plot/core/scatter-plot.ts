@@ -209,21 +209,19 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         .attr('opacity', opacity);
     }
 
-    // 軸線
-    const xAxis = d3.axisBottom(xScale);
-    this.scatterGroup.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0,${chartHeight})`)
-      .call(xAxis);
-
-    const yAxis = d3.axisLeft(yScale);
-    this.scatterGroup.append('g')
-      .attr('class', 'y-axis')
-      .call(yAxis);
-
-    // 軸線樣式
-    this.scatterGroup.selectAll('.domain').style('stroke', '#d1d5db');
-    this.scatterGroup.selectAll('.tick line').style('stroke', '#d1d5db');
+    // 使用 BaseChart 共用軸線渲染工具
+    this.renderAxes(this.scatterGroup, { xScale, yScale }, {
+      showXAxis: true,
+      showYAxis: true,
+      xAxisConfig: {
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      },
+      yAxisConfig: {
+        fontSize: '12px', 
+        fontColor: '#6b7280'
+      }
+    });
   }
 
   public getChartType(): string {

@@ -259,35 +259,21 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
         });
     }
 
-    // 渲染軸線
-    if (showXAxis !== false) {
-      const xAxis = d3.axisBottom(xScale);
-      if (xAxisFormat) {
-        xAxis.tickFormat(xAxisFormat);
+    // 使用 BaseChart 共用軸線渲染工具
+    this.renderAxes(g, { xScale, yScale }, {
+      showXAxis,
+      showYAxis,
+      xAxisConfig: {
+        format: xAxisFormat,
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      },
+      yAxisConfig: {
+        format: yAxisFormat,
+        fontSize: '12px',
+        fontColor: '#6b7280'
       }
-      
-      g.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0,${chartHeight})`)
-        .call(xAxis)
-        .selectAll('text')
-        .style('font-size', '12px')
-        .style('fill', '#6b7280');
-    }
-
-    if (showYAxis !== false) {
-      const yAxis = d3.axisLeft(yScale);
-      if (yAxisFormat) {
-        yAxis.tickFormat(yAxisFormat);
-      }
-      
-      g.append('g')
-        .attr('class', 'y-axis')
-        .call(yAxis)
-        .selectAll('text')
-        .style('font-size', '12px')
-        .style('fill', '#6b7280');
-    }
+    });
   }
 
   protected getChartType(): string {

@@ -1,6 +1,7 @@
 import React, { ReactNode, useMemo, useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../../utils/cn'
+import { renderAxis, renderGrid, renderLegend, renderArcLabels, renderBarLabels, renderPointLabels, AxisConfig, GridConfig, LegendConfig, LabelConfig, BarLabelConfig, PointLabelConfig } from './chart-utils'
 
 export interface BaseChartProps {
   data: any[]
@@ -71,6 +72,108 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       chartWidth: width - margin.left - margin.right,
       chartHeight: height - margin.top - margin.bottom
     }
+  }
+
+  // 統一軸線渲染方法
+  protected renderAxes(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    scales: any,
+    config: {
+      showXAxis?: boolean;
+      showYAxis?: boolean;
+      xAxisConfig?: Partial<AxisConfig>;
+      yAxisConfig?: Partial<AxisConfig>;
+      showXGrid?: boolean;
+      showYGrid?: boolean;
+      xGridConfig?: Partial<GridConfig>;
+      yGridConfig?: Partial<GridConfig>;
+    } = {}
+  ): void {
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    const { xScale, yScale } = scales;
+
+    // 渲染 X 軸
+    if (config.showXAxis !== false && xScale) {
+      const xAxisConfig: AxisConfig = {
+        scale: xScale,
+        orientation: 'bottom',
+        show: true,
+        ...config.xAxisConfig
+      };
+      renderAxis(container, xAxisConfig, { width: chartWidth, height: chartHeight });
+    }
+
+    // 渲染 Y 軸
+    if (config.showYAxis !== false && yScale) {
+      const yAxisConfig: AxisConfig = {
+        scale: yScale,
+        orientation: 'left',
+        show: true,
+        ...config.yAxisConfig
+      };
+      renderAxis(container, yAxisConfig, { width: chartWidth, height: chartHeight });
+    }
+
+    // 渲染 X 網格線
+    if (config.showXGrid && xScale) {
+      const xGridConfig: GridConfig = {
+        scale: xScale,
+        orientation: 'vertical',
+        show: true,
+        ...config.xGridConfig
+      };
+      renderGrid(container, xGridConfig, { width: chartWidth, height: chartHeight });
+    }
+
+    // 渲染 Y 網格線
+    if (config.showYGrid && yScale) {
+      const yGridConfig: GridConfig = {
+        scale: yScale,
+        orientation: 'horizontal',
+        show: true,
+        ...config.yGridConfig
+      };
+      renderGrid(container, yGridConfig, { width: chartWidth, height: chartHeight });
+    }
+  }
+
+  // 統一圖例渲染方法
+  protected renderLegend(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    data: Array<{ label: string; color: string; value?: number }>,
+    config: LegendConfig = {}
+  ): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    return renderLegend(container, data, config, { width: chartWidth, height: chartHeight });
+  }
+
+  // 統一標籤渲染方法
+  protected renderArcLabels(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    arcs: any[],
+    config: LabelConfig,
+    arcGenerator: d3.Arc<any, any>
+  ): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+    return renderArcLabels(container, arcs, config, arcGenerator);
+  }
+
+  protected renderBarLabels(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    data: any[],
+    config: BarLabelConfig,
+    scales: { xScale: any; yScale: any },
+    orientation: 'vertical' | 'horizontal' = 'vertical'
+  ): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+    return renderBarLabels(container, data, config, scales, orientation);
+  }
+
+  protected renderPointLabels(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    data: any[],
+    config: PointLabelConfig,
+    scales: { xScale: any; yScale: any }
+  ): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+    return renderPointLabels(container, data, config, scales);
   }
 
   protected validateData(): boolean {

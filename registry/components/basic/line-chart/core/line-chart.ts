@@ -172,12 +172,21 @@ export class D3LineChart extends BaseChart<LineChartProps> {
         }
     });
 
-    const xAxis = d3.axisBottom(xScale as any);
-    if (this.processedData[0]?.x instanceof Date) {
-        xAxis.tickFormat(d3.timeFormat('%m/%d') as any);
-    }
-    g.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis); // Use chartHeight
-    g.append('g').attr('class', 'y-axis').call(d3.axisLeft(yScale));
+    // 使用 BaseChart 共用軸線渲染工具
+    const xAxisFormat = this.processedData[0]?.x instanceof Date ? d3.timeFormat('%m/%d') as any : undefined;
+    this.renderAxes(g, { xScale, yScale }, {
+      showXAxis: true,
+      showYAxis: true,
+      xAxisConfig: {
+        format: xAxisFormat,
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      },
+      yAxisConfig: {
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      }
+    });
   }
 
   protected getChartType(): string {
