@@ -1,6 +1,6 @@
 
 import * as d3 from 'd3';
-import { BarChartProps, ProcessedDataPoint } from './types';
+import { BarChartProps, ProcessedDataPoint } from '../types';
 import { BaseChart, BaseChartProps } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
@@ -70,7 +70,7 @@ export class D3BarChart extends BaseChart<BarChartProps> {
   }
 
   protected renderChart(): void {
-    const { orientation, animate, animationDuration, interactive, showTooltip } = this.props;
+    const { orientation, animate, animationDuration, interactive, showTooltip, showLabels, labelPosition, labelFormat } = this.props;
     const { xScale, yScale, chartWidth, chartHeight } = this.scales;
 
     const g = this.createSVGContainer();
@@ -132,20 +132,30 @@ export class D3BarChart extends BaseChart<BarChartProps> {
         });
     }
 
-    const xAxis = orientation === 'vertical' 
-      ? d3.axisBottom(xScale as d3.ScaleBand<string>)
-      : d3.axisBottom(xScale as d3.ScaleLinear<number, number>);
-    g.append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0,${chartHeight})`)
-      .call(xAxis);
+    // 使用 BaseChart 共用軸線渲染工具
+    this.renderAxes(g, { xScale, yScale }, {
+      showXAxis: true,
+      showYAxis: true,
+      xAxisConfig: {
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      },
+      yAxisConfig: {
+        fontSize: '12px',
+        fontColor: '#6b7280'
+      }
+    });
 
-    const yAxis = orientation === 'vertical'
-      ? d3.axisLeft(yScale as d3.ScaleLinear<number, number>)
-      : d3.axisLeft(yScale as d3.ScaleBand<string>);
-    g.append('g')
-      .attr('class', 'y-axis')
-      .call(yAxis);
+    // 渲染條形標籤
+    if (showLabels) {
+      this.renderBarLabels(g, this.processedData, {
+        show: true,
+        position: labelPosition || 'top',
+        format: labelFormat,
+        fontSize: '11px',
+        fontColor: '#374151'
+      }, { xScale, yScale }, orientation);
+    }
   }
 
   protected getChartType(): string {

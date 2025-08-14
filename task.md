@@ -811,21 +811,35 @@ protected renderChart(): void {
 # 📊 圖表抽象化進度總覽
 
 ## ✅ **已完成的圖表組件抽象化：**
-1. **AreaChart** - 完全遷移至 BaseChart 模式 ✅
-2. **PieChart** - 完全遷移至 BaseChart 模式 ✅  
-3. **ScatterPlot** - 完全遷移至 BaseChart 模式 ✅
-4. **HeatMap** - 完全遷移至 BaseChart 模式，整合 ScaleManager ✅
+1. **LineChart** - 完全遷移至 BaseChart 模式，使用共用軸線工具 ✅
+2. **AreaChart** - 完全遷移至 BaseChart 模式，使用共用軸線工具 ✅
+3. **PieChart** - 完全遷移至 BaseChart 模式 ✅  
+4. **ScatterPlot** - 完全遷移至 BaseChart 模式，使用共用軸線工具 ✅
+5. **HeatMap** - 完全遷移至 BaseChart 模式，整合 ScaleManager，使用共用軸線工具 ✅
 
-## ⏳ **待處理的圖表組件：**
-5. **FunnelChart** - 待開始 ⏳
-6. **GaugeChart** - 待開始 ⏳
-7. **BoxPlot** - 待開始 ⏳
-8. **RadarChart** - 待開始 ⏳
-9. **ViolinPlot** - 待開始 ⏳
-10. **CandlestickChart** - 待開始 ⏳
+## ✅ **BaseChart 共用工具系統：**
+- **軸線渲染工具** - renderAxes(), renderAxis(), renderGrid() ✅
+- **圖例渲染工具** - renderLegend() 支援所有圖表類型 ✅
+- **標籤渲染工具** - renderArcLabels(), renderBarLabels(), renderPointLabels() ✅
+- **動畫工具** - applyEnterAnimation(), applyUpdateAnimation(), applyArcEnterAnimation() ✅
+- **樣式工具** - applyTextStyles(), applyShapeStyles(), applyAxisStyles() ✅
+
+## ⚡ **高優先級待處理：**
+6. **BarChart** - 待遷移至 BaseChart 模式 🔥 (基礎圖表，使用頻率高)
+
+## ⏳ **中優先級待處理：**
+7. **FunnelChart** - 待開始 ⏳
+8. **GaugeChart** - 待開始 ⏳ 
+9. **BoxPlot** - 待開始 ⏳
+10. **RadarChart** - 待開始 ⏳
+
+## 🔮 **低優先級待處理：**
+11. **ViolinPlot** - 待開始 🔮
+12. **CandlestickChart** - 待開始 🔮
 
 ## 🎯 **下一步重點：**
-- **BaseChart 共用工具函數抽象化** - 軸線渲染工具函數 🔥
+- **BarChart 抽象化** - 基礎圖表，優先處理 🔥
+- 為 BarChart 集成共用軸線和標籤工具
 - 繼續剩餘圖表組件的抽象化工作
 
 ---

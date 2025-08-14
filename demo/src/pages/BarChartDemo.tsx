@@ -15,6 +15,8 @@ function BarChartDemo() {
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
+  const [showLabels, setShowLabels] = useState(false)
+  const [labelPosition, setLabelPosition] = useState<'top' | 'center' | 'bottom'>('top')
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
 
@@ -249,8 +251,35 @@ function BarChartDemo() {
                       />
                       <span className="text-sm text-gray-700">互動功能</span>
                     </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={showLabels}
+                        onChange={(e) => setShowLabels(e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="text-sm text-gray-700">顯示標籤</span>
+                    </label>
                   </div>
                 </div>
+
+                {/* 標籤位置 */}
+                {showLabels && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      標籤位置
+                    </label>
+                    <select 
+                      value={labelPosition} 
+                      onChange={(e) => setLabelPosition(e.target.value as 'top' | 'center' | 'bottom')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="top">頂部</option>
+                      <option value="center">中央</option>
+                      <option value="bottom">底部</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -274,6 +303,8 @@ function BarChartDemo() {
                     animate={animate}
                     interactive={interactive}
                     showTooltip={showTooltip}
+                    showLabels={showLabels}
+                    labelPosition={labelPosition}
                     margin={margin}
                     onDataClick={(data) => console.log('Clicked:', data)}
                     onHover={(data) => console.log('Hovered:', data)}
