@@ -19,6 +19,7 @@ export interface BaseChartProps {
   style?: React.CSSProperties
   animate?: boolean
   animationDuration?: number
+  interactive?: boolean
   showTooltip?: boolean
   onError?: (error: Error) => void
 }

@@ -20,7 +20,16 @@ export interface BarChartProps extends BaseChartProps {
   mapping?: DataMapping;
   orientation?: 'vertical' | 'horizontal';
   colors?: string[];
+  
+  // Labels
+  showLabels?: boolean;
+  labelPosition?: 'top' | 'center' | 'bottom';
+  labelFormat?: (value: any) => string;
+  
+  // Tooltip
   tooltipFormat?: (data: ProcessedDataPoint) => string;
+  
+  // Events
   onDataClick?: (data: any) => void;
   onHover?: (data: any) => void;
 }
