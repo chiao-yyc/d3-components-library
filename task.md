@@ -419,6 +419,393 @@ export interface [ChartName]Props extends BaseChartProps, Omit<HTMLAttributes<HT
 *   `BaseChart` 的 `update()` 方法會自動呼叫 `processData()`, `createScales()`, `renderChart()`，所以 `D3BarChart` 不需要手動呼叫這些方法。
 *   `BaseChart` 的 `destroy()` 方法會清理 SVG，所以 `D3BarChart` 不需要手動清理。
 
+---
+
+# BaseChart 共用工具函數抽象化規劃
+
+**目標：** 分析並抽象各圖表組件中重複的功能邏輯，創建統一的工具函數庫，以進一步減少代碼重複並提升維護效率。
+
+## 🔍 當前問題分析
+
+### **❌ 軸線渲染重複問題**
+
+目前所有基於 BaseChart 的圖表組件都是**各自獨立繪製軸線**，存在以下問題：
+
+1. **代碼重複** - 每個圖表都重複相同的軸線創建邏輯
+2. **樣式不一致** - 有些圖表有詳細的樣式設定，有些沒有
+3. **功能差異** - 條件檢查、格式化、旋轉等功能實現不統一
+4. **維護困難** - 修改軸線邏輯需要在多個檔案中重複修改
+
+**範例對比：**
+
+```typescript
+// BarChart (basic/bar-chart/core/bar-chart.ts:135-148)
+const xAxis = orientation === 'vertical' 
+  ? d3.axisBottom(xScale as d3.ScaleBand<string>)
+  : d3.axisBottom(xScale as d3.ScaleLinear<number, number>);
+g.append('g')
+  .attr('class', 'x-axis')
+  .attr('transform', `translate(0,${chartHeight})`)
+  .call(xAxis);
+
+// LineChart (basic/line-chart/core/line-chart.ts:175-180)
+const xAxis = d3.axisBottom(xScale as any);
+if (this.processedData[0]?.x instanceof Date) {
+    xAxis.tickFormat(d3.timeFormat('%m/%d') as any);
+}
+g.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis);
+
+// AreaChart (basic/area-chart/core/area-chart.ts:264-275)
+if (showXAxis !== false) {
+  const xAxis = d3.axisBottom(xScale);
+  if (xAxisFormat) {
+    xAxis.tickFormat(xAxisFormat);
+  }
+  g.append('g')
+    .attr('class', 'x-axis')
+    .attr('transform', `translate(0,${chartHeight})`)
+    .call(xAxis)
+    .selectAll('text')
+    .style('font-size', '12px')
+    .style('fill', '#6b7280');
+}
+```
+
+## 🎯 共用工具函數規劃
+
+### **Task 1: 創建統一軸線渲染工具**
+
+**位置：** `registry/components/core/base-chart/chart-utils.ts`
+
+#### **1.1 軸線渲染工具函數**
+
+```typescript
+// 軸線配置介面
+export interface AxisConfig {
+  scale: any;
+  orientation: 'top' | 'bottom' | 'left' | 'right';
+  label?: string;
+  format?: (d: any) => string;
+  rotation?: number;
+  fontSize?: string;
+  fontColor?: string;
+  tickCount?: number;
+  tickSize?: number;
+  gridlines?: boolean;
+  className?: string;
+  show?: boolean;
+}
+
+// 統一軸線渲染函數
+export function renderAxis(
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  config: AxisConfig,
+  chartDimensions: { width: number; height: number }
+): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+  if (config.show === false) return null;
+  
+  // 建立軸線生成器
+  let axisGenerator: d3.Axis<any>;
+  let transform = '';
+  
+  switch (config.orientation) {
+    case 'bottom':
+      axisGenerator = d3.axisBottom(config.scale);
+      transform = `translate(0,${chartDimensions.height})`;
+      break;
+    case 'top':
+      axisGenerator = d3.axisTop(config.scale);
+      break;
+    case 'left':
+      axisGenerator = d3.axisLeft(config.scale);
+      break;
+    case 'right':
+      axisGenerator = d3.axisRight(config.scale);
+      transform = `translate(${chartDimensions.width},0)`;
+      break;
+  }
+  
+  // 配置軸線屬性
+  if (config.format) axisGenerator.tickFormat(config.format);
+  if (config.tickCount) axisGenerator.ticks(config.tickCount);
+  if (config.tickSize) axisGenerator.tickSize(config.tickSize);
+  
+  // 渲染軸線
+  const axisGroup = container.append('g')
+    .attr('class', config.className || `${config.orientation}-axis`)
+    .attr('transform', transform)
+    .call(axisGenerator);
+  
+  // 統一樣式
+  axisGroup.selectAll('text')
+    .style('font-size', config.fontSize || '12px')
+    .style('fill', config.fontColor || '#6b7280');
+  
+  // 處理文字旋轉
+  if (config.rotation && config.rotation !== 0) {
+    const textAnchor = config.rotation < 0 ? 'end' : 'start';
+    axisGroup.selectAll('text')
+      .style('text-anchor', textAnchor)
+      .attr('transform', `rotate(${config.rotation})`);
+  }
+  
+  // 軸線標籤
+  if (config.label) {
+    // 添加軸線標籤邏輯
+  }
+  
+  return axisGroup;
+}
+```
+
+#### **1.2 網格線渲染工具函數**
+
+```typescript
+export interface GridConfig {
+  scale: any;
+  orientation: 'horizontal' | 'vertical';
+  tickCount?: number;
+  strokeColor?: string;
+  strokeWidth?: number;
+  strokeOpacity?: number;
+  show?: boolean;
+}
+
+export function renderGrid(
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  config: GridConfig,
+  chartDimensions: { width: number; height: number }
+): d3.Selection<SVGGElement, unknown, null, undefined> | null {
+  if (config.show === false) return null;
+  
+  const gridGroup = container.append('g')
+    .attr('class', `grid grid-${config.orientation}`);
+  
+  if (config.orientation === 'horizontal') {
+    gridGroup.selectAll('line')
+      .data(config.scale.ticks(config.tickCount))
+      .enter().append('line')
+      .attr('x1', 0)
+      .attr('x2', chartDimensions.width)
+      .attr('y1', d => config.scale(d))
+      .attr('y2', d => config.scale(d))
+      .attr('stroke', config.strokeColor || '#e5e7eb')
+      .attr('stroke-width', config.strokeWidth || 1)
+      .attr('stroke-opacity', config.strokeOpacity || 0.7);
+  } else {
+    gridGroup.selectAll('line')
+      .data(config.scale.ticks(config.tickCount))
+      .enter().append('line')
+      .attr('x1', d => config.scale(d))
+      .attr('x2', d => config.scale(d))
+      .attr('y1', 0)
+      .attr('y2', chartDimensions.height)
+      .attr('stroke', config.strokeColor || '#e5e7eb')
+      .attr('stroke-width', config.strokeWidth || 1)
+      .attr('stroke-opacity', config.strokeOpacity || 0.7);
+  }
+  
+  return gridGroup;
+}
+```
+
+### **Task 2: 動畫工具函數**
+
+```typescript
+export interface AnimationConfig {
+  enabled?: boolean;
+  duration?: number;
+  delay?: number;
+  easing?: string;
+}
+
+export function applyEnterAnimation(
+  selection: d3.Selection<any, any, any, any>,
+  config: AnimationConfig
+): d3.Selection<any, any, any, any> {
+  if (!config.enabled) return selection;
+  
+  return selection
+    .attr('opacity', 0)
+    .transition()
+    .duration(config.duration || 750)
+    .delay(config.delay || 0)
+    .attr('opacity', 1);
+}
+
+export function applyUpdateAnimation(
+  selection: d3.Selection<any, any, any, any>,
+  config: AnimationConfig
+): d3.Transition<any, any, any, any> {
+  return selection
+    .transition()
+    .duration(config.duration || 500)
+    .delay(config.delay || 0);
+}
+```
+
+### **Task 3: 樣式統一工具函數**
+
+```typescript
+export interface StyleConfig {
+  fontSize?: string;
+  fontFamily?: string;
+  fontColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  fillColor?: string;
+  opacity?: number;
+}
+
+export function applyTextStyles(
+  selection: d3.Selection<any, any, any, any>,
+  config: StyleConfig
+): d3.Selection<any, any, any, any> {
+  if (config.fontSize) selection.style('font-size', config.fontSize);
+  if (config.fontFamily) selection.style('font-family', config.fontFamily);
+  if (config.fontColor) selection.style('fill', config.fontColor);
+  return selection;
+}
+
+export function applyShapeStyles(
+  selection: d3.Selection<any, any, any, any>,
+  config: StyleConfig
+): d3.Selection<any, any, any, any> {
+  if (config.fillColor) selection.attr('fill', config.fillColor);
+  if (config.strokeColor) selection.attr('stroke', config.strokeColor);
+  if (config.strokeWidth) selection.attr('stroke-width', config.strokeWidth);
+  if (config.opacity) selection.attr('opacity', config.opacity);
+  return selection;
+}
+```
+
+### **Task 4: BaseChart 中整合工具函數**
+
+#### **4.1 擴展 BaseChart 抽象類**
+
+```typescript
+// 在 BaseChart 中添加統一的軸線渲染方法
+protected renderAxes(config: {
+  xAxis?: AxisConfig;
+  yAxis?: AxisConfig;
+  showGrid?: boolean;
+  gridConfig?: { x?: GridConfig; y?: GridConfig };
+}): void {
+  const { chartWidth, chartHeight } = this.getChartDimensions();
+  const dimensions = { width: chartWidth, height: chartHeight };
+  const g = this.createSVGContainer();
+  
+  // 渲染網格線 (在軸線之前)
+  if (config.showGrid && config.gridConfig) {
+    if (config.gridConfig.x) {
+      renderGrid(g, config.gridConfig.x, dimensions);
+    }
+    if (config.gridConfig.y) {
+      renderGrid(g, config.gridConfig.y, dimensions);
+    }
+  }
+  
+  // 渲染軸線
+  if (config.xAxis) {
+    renderAxis(g, config.xAxis, dimensions);
+  }
+  if (config.yAxis) {
+    renderAxis(g, config.yAxis, dimensions);
+  }
+  
+  // 統一軸線樣式
+  g.selectAll('.domain').style('stroke', '#d1d5db');
+  g.selectAll('.tick line').style('stroke', '#d1d5db');
+}
+```
+
+#### **4.2 各圖表組件中的使用**
+
+```typescript
+// 在各個圖表的 renderChart() 方法中使用
+protected renderChart(): void {
+  const { showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, showGrid } = this.props;
+  const { xScale, yScale } = this.scales;
+  
+  // 使用統一的軸線渲染
+  this.renderAxes({
+    xAxis: {
+      scale: xScale,
+      orientation: 'bottom',
+      format: xAxisFormat,
+      rotation: xAxisRotation,
+      show: showXAxis
+    },
+    yAxis: {
+      scale: yScale,
+      orientation: 'left',
+      format: yAxisFormat,
+      rotation: yAxisRotation,
+      show: showYAxis
+    },
+    showGrid,
+    gridConfig: {
+      x: { scale: xScale, orientation: 'vertical', show: showGrid },
+      y: { scale: yScale, orientation: 'horizontal', show: showGrid }
+    }
+  });
+  
+  // ... 圖表特定的渲染邏輯
+}
+```
+
+## 🎁 預期效益
+
+### **量化效益：**
+1. **代碼減少**: 軸線相關代碼減少 80% 重複
+2. **維護成本**: 單一修改點，無需在多個檔案中重複修改
+3. **一致性**: 100% 統一的軸線樣式和行為
+4. **開發效率**: 新圖表組件開發時間減少 30%
+
+### **質化效益：**
+1. **維護性提升**: 統一的工具函數易於維護和調試
+2. **測試便利**: 工具函數可獨立進行單元測試
+3. **擴展性增強**: 新功能只需在工具函數中添加
+4. **代碼品質**: 統一的實現標準提升整體代碼品質
+
+## 📅 實施計劃
+
+### **Phase 1: 基礎工具函數 (1-2 天)**
+- 創建 `chart-utils.ts` 檔案
+- 實現軸線渲染工具函數
+- 實現網格線渲染工具函數
+
+### **Phase 2: 樣式和動畫工具 (1 天)**  
+- 實現樣式統一工具函數
+- 實現動畫工具函數
+
+### **Phase 3: BaseChart 整合 (1 天)**
+- 在 BaseChart 中添加 `renderAxes()` 方法
+- 更新 BaseChart 抽象介面
+
+### **Phase 4: 圖表組件遷移 (2-3 天)**
+- 依序更新各圖表組件使用新工具函數
+- 移除重複的軸線渲染代碼
+- 測試確保功能一致性
+
+### **Phase 5: 驗證和優化 (1 天)**
+- 全面測試所有圖表組件
+- 效能測試和優化
+- 文檔更新
+
+## 📝 其他可抽象的功能
+
+基於代碼分析，還發現以下可抽象的重複功能：
+
+1. **Tooltip 渲染** - 各圖表都有相似的 tooltip 邏輯
+2. **Legend 渲染** - 圖例組件可以統一
+3. **事件處理** - 點擊、懸停等事件處理模式
+4. **響應式計算** - 圖表尺寸自適應邏輯
+5. **數據驗證** - 輸入數據的格式驗證
+6. **錯誤處理** - 統一的錯誤顯示和恢復機制
+
+這些功能將在後續階段中逐步抽象和統一。
+
 # Line Chart 元件抽象化規劃
 
 **目標：** 將 `registry/components/basic/line-chart/` 元件重構，使其繼承 `registry/components/core/base-chart/BaseChart`，並整合 `data-processor` 和 `color-scheme` 核心模組，以實現更高度的抽象化和共用性。

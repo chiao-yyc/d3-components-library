@@ -1,87 +1,79 @@
 
 import * as d3 from 'd3';
-import { HeatmapConfig, ProcessedHeatmapDataPoint, LegendTick } from './types';
+import { ProcessedHeatmapDataPoint } from '../types';
+import { BaseChart } from '../../../core/base-chart/base-chart';
+import { DataProcessor } from '../../../core/data-processor/data-processor';
+import { ColorScale, createColorScale } from '../../../core/color-scheme/color-manager';
+import { ScaleManager } from '../../../primitives/scales/scale-manager';
 
-export class D3Heatmap {
-  private container: HTMLElement;
-  private config: Required<Omit<HeatmapConfig, 'xKey' | 'yKey' | 'valueKey' | 'xAccessor' | 'yAccessor' | 'valueAccessor' | 'mapping' | 'tooltipFormat' | 'onCellClick' | 'onCellHover'> & HeatmapConfig>;
-  private svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
-  private g: d3.Selection<SVGGElement, unknown, null, undefined>;
+import { HeatmapProps } from '../types';
+
+export class D3Heatmap extends BaseChart<HeatmapProps> {
   private processedData: ProcessedHeatmapDataPoint[] = [];
   private xValues: string[] = [];
   private yValues: string[] = [];
   private gridData: ProcessedHeatmapDataPoint[] = [];
+  private colorScale: ColorScale | null = null;
+  private scaleManager: ScaleManager | null = null;
   private scales: any = {};
-  private colorScale: d3.ScaleSequential<number, string> | null = null;
 
-  constructor(container: HTMLElement, config: HeatmapConfig) {
-    this.container = container;
-    const defaultConfig = {
-      width: 600,
-      height: 400,
-      margin: { top: 20, right: 80, bottom: 60, left: 80 },
-      cellPadding: 2,
-      cellRadius: 0,
-      colorScheme: 'blues' as const,
-      showXAxis: true,
-      showYAxis: true,
-      xAxisRotation: -45,
-      yAxisRotation: 0,
-      showLegend: true,
-      legendPosition: 'right' as const,
-      legendTitle: '數值',
-      showValues: false,
-      interactive: true,
-      animate: true,
-      animationDuration: 750,
-      showTooltip: true,
-    };
-
-    this.config = { ...defaultConfig, ...config };
-    this.svg = d3.select(this.container).append('svg');
-    this.g = this.svg.append('g');
-    this.update(this.config);
+  constructor(props: HeatmapProps) {
+    super(props);
   }
 
-  private processData() {
-    const { data, mapping, xAccessor, yAccessor, valueAccessor, xKey, yKey, valueKey, domain } = this.config;
+  protected processData(): ProcessedHeatmapDataPoint[] {
+    const { data, mapping, xAccessor, yAccessor, valueAccessor, xKey, yKey, valueKey, domain } = this.props;
     if (!data?.length) {
       this.processedData = [];
       this.xValues = [];
       this.yValues = [];
       this.gridData = [];
-      return;
+      return [];
     }
 
-    this.processedData = data.map((d, index) => {
-      let x: string | number, y: string | number, value: number;
+    // 使用 DataProcessor 處理原始數據
+    const processor = new DataProcessor({
+      mapping: mapping,
+      keys: { x: xKey, y: yKey, value: valueKey },
+      accessors: { x: xAccessor, y: yAccessor, value: valueAccessor },
+      autoDetect: true,
+    });
+    const processorResult = processor.process(data);
+    if (processorResult.errors.length > 0) {
+      this.handleError(new Error(processorResult.errors.join(', ')));
+    }
+    const processedByDataProcessor = processorResult.data;
 
-      if (mapping) {
-        x = typeof mapping.x === 'function' ? mapping.x(d) : d[mapping.x];
-        y = typeof mapping.y === 'function' ? mapping.y(d) : d[mapping.y];
-        value = typeof mapping.value === 'function' ? mapping.value(d) : Number(d[mapping.value]) || 0;
-      } else if (xAccessor && yAccessor && valueAccessor) {
-        x = xAccessor(d);
-        y = yAccessor(d);
-        value = valueAccessor(d);
-      } else if (xKey && yKey && valueKey) {
-        x = d[xKey];
-        y = d[yKey];
-        value = Number(d[valueKey]) || 0;
-      } else {
-        const keys = Object.keys(d);
-        x = d[keys[0]];
-        y = d[keys[1]];
-        value = Number(d[keys[2]]) || 0;
+    // DataProcessor 已經處理了 mapping，直接使用結果
+    this.processedData = processedByDataProcessor.map((d, index) => {
+      const x = String(d.x);
+      const y = String(d.y);
+      const value = Number(d.value) || 0;
+
+      // 調試信息
+      if (index < 3) {
+        console.log('HeatMap data processing:', { 
+          processedData: d,
+          x, 
+          y, 
+          value,
+          originalValue: d.value
+        });
       }
 
       return {
-        x: String(x), y: String(y), value, originalData: d, xIndex: 0, yIndex: 0, normalizedValue: 0
+        x,
+        y,
+        value,
+        originalData: d.originalData,
+        xIndex: 0,
+        yIndex: 0,
+        normalizedValue: 0
       } as ProcessedHeatmapDataPoint;
     }).filter(d => !isNaN(d.value));
 
-    this.xValues = Array.from(new Set(this.processedData.map(d => d.x))).sort();
-    this.yValues = Array.from(new Set(this.processedData.map(d => d.y))).sort();
+    this.xValues = Array.from(new Set(this.processedData.map(d => String(d.x)))).sort();
+    this.yValues = Array.from(new Set(this.processedData.map(d => String(d.y)))).sort();
 
     const dataMap = new Map();
     this.processedData.forEach(d => {
@@ -91,6 +83,16 @@ export class D3Heatmap {
     const values = this.processedData.map(d => d.value);
     const valueExtent = domain || d3.extent(values) as [number, number];
     const [minValue, maxValue] = valueExtent;
+
+    // 調試網格數據生成
+    console.log('HeatMap gridData generation:', {
+      processedDataLength: this.processedData.length,
+      xValues: this.xValues,
+      yValues: this.yValues,
+      valueExtent,
+      minValue,
+      maxValue
+    });
 
     this.gridData = [];
     this.yValues.forEach((y, yIndex) => {
@@ -109,65 +111,103 @@ export class D3Heatmap {
         }
       });
     });
+
+    // 調試最終網格數據
+    console.log('HeatMap final gridData:', {
+      totalCells: this.gridData.length,
+      cellsWithData: this.gridData.filter(d => d.value !== 0).length,
+      sampleCells: this.gridData.slice(0, 5)
+    });
+
+    return this.processedData;
   }
 
-  private setupScales() {
-    const { width, height, margin, cellPadding, colorScheme, colors, domain } = this.config;
-    const chartWidth = width - margin.left - margin.right;
-    const chartHeight = height - margin.top - margin.bottom;
+  protected createScales(): void {
+    const { cellPadding, colorScheme, colors, domain } = this.props;
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+
+    // 初始化 ScaleManager
+    this.scaleManager = new ScaleManager({ width: chartWidth, height: chartHeight });
 
     const cellWidth = chartWidth / this.xValues.length;
     const cellHeight = chartHeight / this.yValues.length;
 
-    const xScale = d3.scaleBand().domain(this.xValues).range([0, chartWidth]).padding(cellPadding / cellWidth);
-    const yScale = d3.scaleBand().domain(this.yValues).range([0, chartHeight]).padding(cellPadding / cellHeight);
+    // 使用 ScaleManager 註冊比例尺
+    this.scaleManager.registerScale('x', {
+      type: 'band',
+      domain: this.xValues,
+      range: [0, chartWidth],
+      padding: (cellPadding || 2) / cellWidth
+    }, 'x');
+
+    this.scaleManager.registerScale('y', {
+      type: 'band', 
+      domain: this.yValues,
+      range: [0, chartHeight],
+      padding: (cellPadding || 2) / cellHeight
+    }, 'y');
+
+    const xScale = this.scaleManager.getScale('x');
+    const yScale = this.scaleManager.getScale('y');
+    this.scales = { xScale, yScale, chartWidth, chartHeight };
 
     const values = this.processedData.map(d => d.value);
     const valueExtent = domain || d3.extent(values) as [number, number];
 
-    if (colors) {
-      this.colorScale = d3.scaleSequential().domain(valueExtent).interpolator(d3.interpolateRgbBasis(colors));
-    } else {
-      const schemes = {
-        blues: d3.interpolateBlues,
-        greens: d3.interpolateGreens,
-        reds: d3.interpolateReds,
-        oranges: d3.interpolateOranges,
-        purples: d3.interpolatePurples,
-        greys: d3.interpolateGreys
-      };
-      this.colorScale = d3.scaleSequential().domain(valueExtent).interpolator(schemes[colorScheme] || schemes.blues);
-    }
+    // 調試信息
+    console.log('HeatMap createScales with ScaleManager:', {
+      processedDataLength: this.processedData.length,
+      values: values.slice(0, 5),
+      valueExtent,
+      colorScheme,
+      colors,
+      scaleManager: !!this.scaleManager
+    });
 
-    this.scales = { xScale, yScale, cellWidth, cellHeight, chartWidth, chartHeight };
+    if (colors) {
+      this.colorScale = createColorScale(colors, valueExtent);
+    } else {
+      this.colorScale = createColorScale(colorScheme || 'blues', valueExtent);
+    }
   }
 
-  public render() {
-    const { width, height, margin, cellRadius, showValues, valueFormat, textColor, showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, animate, animationDuration, interactive } = this.config;
-    const { xScale, yScale, cellWidth, cellHeight, chartWidth, chartHeight } = this.scales;
+  protected renderChart(): void {
+    const { cellRadius, showValues, valueFormat, textColor, showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, animate, animationDuration } = this.props;
+    const { xScale, yScale, chartHeight } = this.scales;
 
-    this.svg.attr('width', width).attr('height', height);
-    this.g.attr('transform', `translate(${margin.left},${margin.top})`);
-    this.g.selectAll('*').remove();
+    // 關鍵調試信息
+    console.log('HeatMap renderChart:', {
+      gridDataLength: this.gridData.length,
+      gridDataSample: this.gridData.slice(0, 3),
+      colorScale: this.colorScale,
+      scalesReady: !!(xScale && yScale)
+    });
 
-    const cells = this.g.selectAll('.heatmap-cell').data(this.gridData).enter().append('rect')
+    const g = this.createSVGContainer();
+
+    const cells = g.selectAll('.heatmap-cell').data(this.gridData).enter().append('rect')
       .attr('class', 'heatmap-cell')
       .attr('x', d => xScale(d.x) || 0)
       .attr('y', d => yScale(d.y) || 0)
       .attr('width', xScale.bandwidth())
       .attr('height', yScale.bandwidth())
-      .attr('rx', cellRadius)
-      .attr('ry', cellRadius)
-      .attr('fill', d => d.value === 0 ? '#f3f4f6' : this.colorScale!(d.value))
+      .attr('rx', cellRadius || 0)
+      .attr('ry', cellRadius || 0)
+      .attr('fill', d => {
+        if (d.originalData === null) {
+          return 'transparent'; // 沒有數據的格子透明
+        }
+        return this.colorScale!.getColor(d.value);
+      })
       .attr('stroke', '#fff')
       .attr('stroke-width', 1);
 
     if (animate) {
-      cells.attr('opacity', 0).transition().duration(animationDuration).delay((d, i) => (i % this.xValues.length) * 50).attr('opacity', 1);
+      cells.attr('opacity', 0).transition().duration(animationDuration || 750).delay((d, i) => (i % this.xValues.length) * 50).attr('opacity', 1);
     }
 
     if (showValues) {
-      const labels = this.g.selectAll('.heatmap-label').data(this.gridData.filter(d => d.value !== 0)).enter().append('text')
+      const labels = g.selectAll('.heatmap-label').data(this.gridData.filter(d => d.value !== 0)).enter().append('text')
         .attr('class', 'heatmap-label')
         .attr('x', d => (xScale(d.x) || 0) + xScale.bandwidth() / 2)
         .attr('y', d => (yScale(d.y) || 0) + yScale.bandwidth() / 2)
@@ -181,36 +221,51 @@ export class D3Heatmap {
         .text(d => valueFormat ? valueFormat(d.value) : d.value.toFixed(1));
 
       if (animate) {
-        labels.attr('opacity', 0).transition().duration(animationDuration).delay((d, i) => (i % this.xValues.length) * 50 + 200).attr('opacity', 1);
+        labels.attr('opacity', 0).transition().duration(animationDuration || 750).delay((d, i) => (i % this.xValues.length) * 50 + 200).attr('opacity', 1);
       }
     }
 
-    if (showXAxis) {
+    if (showXAxis !== false) {
       const xAxis = d3.axisBottom(xScale);
       if (xAxisFormat) xAxis.tickFormat(xAxisFormat);
-      const xAxisGroup = this.g.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${chartHeight})`).call(xAxis);
-      if (xAxisRotation !== 0) xAxisGroup.selectAll('text').style('text-anchor', xAxisRotation < 0 ? 'end' : 'start').attr('transform', `rotate(${xAxisRotation})`);
+      const xAxisGroup = g.append('g')
+        .attr('class', 'x-axis')
+        .attr('transform', `translate(0,${chartHeight})`)
+        .call(xAxis);
+      
+      xAxisGroup.selectAll('text')
+        .style('font-size', '12px')
+        .style('fill', '#6b7280');
+        
+      if (xAxisRotation && xAxisRotation !== 0) {
+        xAxisGroup.selectAll('text')
+          .style('text-anchor', xAxisRotation < 0 ? 'end' : 'start')
+          .attr('transform', `rotate(${xAxisRotation})`);
+      }
     }
 
-    if (showYAxis) {
+    if (showYAxis !== false) {
       const yAxis = d3.axisLeft(yScale);
       if (yAxisFormat) yAxis.tickFormat(yAxisFormat);
-      const yAxisGroup = this.g.append('g').attr('class', 'y-axis').call(yAxis);
-      if (yAxisRotation !== 0) yAxisGroup.selectAll('text').attr('transform', `rotate(${yAxisRotation})`);
+      const yAxisGroup = g.append('g')
+        .attr('class', 'y-axis')
+        .call(yAxis);
+        
+      yAxisGroup.selectAll('text')
+        .style('font-size', '12px')
+        .style('fill', '#6b7280');
+        
+      if (yAxisRotation && yAxisRotation !== 0) {
+        yAxisGroup.selectAll('text')
+          .attr('transform', `rotate(${yAxisRotation})`);
+      }
     }
 
-    this.g.selectAll('.domain').style('stroke', '#d1d5db');
-    this.g.selectAll('.tick line').style('stroke', '#d1d5db');
+    g.selectAll('.domain').style('stroke', '#d1d5db');
+    g.selectAll('.tick line').style('stroke', '#d1d5db');
   }
 
-  public update(newConfig: Partial<HeatmapConfig>) {
-    this.config = { ...this.config, ...newConfig };
-    this.processData();
-    this.setupScales();
-    this.render();
-  }
-
-  public destroy() {
-    d3.select(this.container).select('svg').remove();
+  protected getChartType(): string {
+    return 'heatmap';
   }
 }
