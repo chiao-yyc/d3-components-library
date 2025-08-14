@@ -1,3 +1,5 @@
+import { BaseChartProps } from '../../core/base-chart/types';
+
 export interface HeatmapDataPoint {
   x: string | number
   y: string | number
@@ -11,7 +13,7 @@ export interface ProcessedHeatmapDataPoint extends HeatmapDataPoint {
   normalizedValue: number
 }
 
-export interface HeatmapProps {
+export interface HeatmapProps extends BaseChartProps {
   data: any[]
   
   // 資料映射
@@ -26,11 +28,6 @@ export interface HeatmapProps {
     y: string | ((d: any) => string | number)
     value: string | ((d: any) => number)
   }
-  
-  // 尺寸與佈局
-  width?: number
-  height?: number
-  margin?: { top: number; right: number; bottom: number; left: number }
   
   // 熱力圖特定設定
   cellPadding?: number
@@ -60,11 +57,6 @@ export interface HeatmapProps {
   valueFormat?: (d: number) => string
   textColor?: string | ((value: number, normalizedValue: number) => string)
   
-  // 互動
-  interactive?: boolean
-  animate?: boolean
-  animationDuration?: number
-  
   // 工具提示
   showTooltip?: boolean
   tooltipFormat?: (d: ProcessedHeatmapDataPoint) => string
@@ -72,10 +64,6 @@ export interface HeatmapProps {
   // 事件處理
   onCellClick?: (d: ProcessedHeatmapDataPoint) => void
   onCellHover?: (d: ProcessedHeatmapDataPoint | null) => void
-  
-  // HTML 屬性
-  className?: string
-  style?: React.CSSProperties
 }
 
 export interface LegendTick {

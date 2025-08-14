@@ -9,6 +9,9 @@ import {
 } from './types'
 import { getPalette, getColorsFromPalette } from './color-palettes'
 
+// 重新導出類型
+export type { ColorScale, ColorSchemeConfig, ColorSchemeType, ColorFormat, ColorManager, ColorPalette }
+
 // D3 色彩比例尺實現
 class D3ColorScale implements ColorScale {
   private scale: any
@@ -280,8 +283,29 @@ export class ChartColorManager implements ColorManager {
 export const colorManager = ChartColorManager.getInstance()
 
 // 便利函數
-export function createColorScale(config: ColorSchemeConfig): ColorScale {
-  return colorManager.createScale(config)
+export function createColorScale(
+  configOrType: ColorSchemeConfig | ColorSchemeType | string[], 
+  domain?: [number, number]
+): ColorScale {
+  if (Array.isArray(configOrType)) {
+    // 如果是顏色數組
+    return colorManager.createScale({
+      type: 'custom',
+      colors: configOrType,
+      domain,
+      interpolate: true
+    })
+  } else if (typeof configOrType === 'string') {
+    // 如果是顏色主題字符串
+    return colorManager.createScale({
+      type: configOrType as ColorSchemeType,
+      domain,
+      interpolate: true
+    })
+  } else {
+    // 如果是完整配置對象
+    return colorManager.createScale(configOrType)
+  }
 }
 
 export function getChartColors(scheme: ColorSchemeType, count: number = 10): string[] {

@@ -4,8 +4,7 @@ import './heatmap.css';
 export { Heatmap } from './heatmap';
 export type { HeatmapProps, HeatmapDataPoint, ProcessedHeatmapDataPoint, LegendTick } from './types';
 
-export { D3Heatmap } from './core';
-export type { HeatmapConfig as D3HeatmapConfig } from './core';
+export { D3Heatmap } from './core/heatmap';
 
 export const CorrelationHeatmap = (props: any) => {
   return React.createElement(Heatmap, { ...props, colorScheme: "reds", showValues: true, domain: [-1, 1] });
