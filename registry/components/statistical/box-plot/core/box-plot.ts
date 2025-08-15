@@ -2,6 +2,8 @@ import * as d3 from 'd3';
 import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
+import { StatisticalUtils } from '../../shared/statistical-utils';
+import { BoxPlotRenderer } from '../../shared/box-plot-renderer';
 import { BoxPlotProps, ProcessedBoxPlotDataPoint, BoxPlotStatistics } from './types';
 
 export class D3BoxPlot extends BaseChart<BoxPlotProps> {
@@ -28,7 +30,7 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
         const label = String(d[labelKey || 'label']);
         const values = Array.isArray(d[valuesKey]) ? d[valuesKey].filter(v => typeof v === 'number' && !isNaN(v)) : [];
         
-        const statistics = this.calculateBoxPlotStatistics(values);
+        const statistics = StatisticalUtils.calculateStatistics(values, this.props.statisticsMethod);
         
         return {
           label,
@@ -60,7 +62,7 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
       
       this.processedData = Array.from(groupedData.entries()).map(([label, values], index) => {
         const numericValues = values.map(v => v.y).filter(v => typeof v === 'number' && !isNaN(v));
-        const statistics = this.calculateBoxPlotStatistics(numericValues);
+        const statistics = StatisticalUtils.calculateStatistics(numericValues, this.props.statisticsMethod);
         
         return {
           label: String(label),
@@ -166,219 +168,51 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
       }
     });
 
-    // 繪製箱形圖組件
-    this.processedData.forEach((d, i) => {
-      const boxGroup = chartArea.append('g')
-        .attr('class', `box-plot-group-${i}`);
-
-      const color = this.colorScale.getColor(i);
-
-      // 計算位置
-      let boxX: number, boxY: number, boxWidthActual: number, boxHeightActual: number;
-      let centerX: number, centerY: number;
-
-      if (orientation === 'vertical') {
-        const xBandScale = xScale as d3.ScaleBand<string>;
-        const yLinearScale = yScale as d3.ScaleLinear<number, number>;
-        
-        centerX = (xBandScale(d.label) || 0) + xBandScale.bandwidth() / 2;
-        boxX = centerX - boxWidth / 2;
-        boxY = yLinearScale(d.statistics.q3);
-        boxWidthActual = boxWidth;
-        boxHeightActual = yLinearScale(d.statistics.q1) - yLinearScale(d.statistics.q3);
-        centerY = boxY + boxHeightActual / 2;
-      } else {
-        const xLinearScale = xScale as d3.ScaleLinear<number, number>;
-        const yBandScale = yScale as d3.ScaleBand<string>;
-        
-        centerY = (yBandScale(d.label) || 0) + yBandScale.bandwidth() / 2;
-        boxX = xLinearScale(d.statistics.q1);
-        boxY = centerY - boxWidth / 2;
-        boxWidthActual = xLinearScale(d.statistics.q3) - xLinearScale(d.statistics.q1);
-        boxHeightActual = boxWidth;
-        centerX = boxX + boxWidthActual / 2;
-      }
-
-      // 繪製 whiskers
-      if (showWhiskers) {
-        this.renderWhiskers(boxGroup, d.statistics, orientation, centerX, centerY, whiskerWidth, boxStroke, boxStrokeWidth);
-      }
-
-      // 繪製箱體
-      boxGroup.append('rect')
-        .attr('class', 'box-rect')
-        .attr('x', boxX)
-        .attr('y', boxY)
-        .attr('width', boxWidthActual)
-        .attr('height', boxHeightActual)
-        .attr('fill', color)
-        .attr('fill-opacity', boxFillOpacity)
-        .attr('stroke', boxStroke)
-        .attr('stroke-width', boxStrokeWidth);
-
-      // 繪製中位數線
-      if (showMedian) {
-        this.renderMedianLine(boxGroup, d.statistics, orientation, boxX, boxY, boxWidthActual, boxHeightActual, boxStroke, boxStrokeWidth + 1);
-      }
-
-      // 繪製平均值標記
-      if (showMean && d.statistics.mean !== undefined) {
-        this.renderMeanMarker(boxGroup, d.statistics, orientation, centerX, centerY, meanStyle, boxStroke, boxStrokeWidth);
-      }
-
-      // 繪製所有數值散點
-      if (showAllPoints) {
-        this.renderAllPoints(boxGroup, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth);
-      }
-
-      // 繪製異常值
-      if (showOutliers) {
-        this.renderOutliers(boxGroup, d, orientation, centerX, centerY, outlierRadius, color, boxStroke, jitterWidth, boxWidth);
-      }
+    // 使用 BoxPlotRenderer.renderStandalone 渲染基本 BoxPlot 元素
+    BoxPlotRenderer.renderStandalone(chartArea, this.processedData, {
+      ...this.scales,
+      colorScale: this.colorScale
+    }, {
+      orientation,
+      boxWidth,
+      whiskerWidth,
+      showQuartiles: true, // BoxPlot 總是顯示四分位數（箱體）
+      showMedian,
+      showMean,
+      showWhiskers,
+      showOutliers,
+      boxFillOpacity,
+      boxStroke,
+      boxStrokeWidth,
+      meanStyle,
+      outlierRadius,
+      jitterWidth
     });
-  }
 
-  private renderWhiskers(
-    group: d3.Selection<SVGGElement, unknown, null, undefined>,
-    statistics: BoxPlotStatistics,
-    orientation: 'vertical' | 'horizontal',
-    centerX: number,
-    centerY: number,
-    whiskerWidth: number,
-    stroke: string,
-    strokeWidth: number
-  ): void {
-    const { xScale, yScale } = this.scales;
+    // 繪製 showAllPoints 功能（BoxPlot 特有功能，不在共用渲染器中）
+    if (showAllPoints) {
+      this.processedData.forEach((d, i) => {
+        const boxGroup = chartArea.select(`.box-plot-group-${i}`);
+        if (!boxGroup.empty()) {
+          // 計算位置
+          let centerX: number, centerY: number;
 
-    if (orientation === 'vertical') {
-      const yLinearScale = yScale as d3.ScaleLinear<number, number>;
-      
-      // 上下 whisker 主線
-      group.append('line')
-        .attr('x1', centerX).attr('x2', centerX)
-        .attr('y1', yLinearScale(statistics.q3)).attr('y2', yLinearScale(statistics.max))
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+          if (orientation === 'vertical') {
+            const xBandScale = xScale as d3.ScaleBand<string>;
+            centerX = (xBandScale(d.label) || 0) + xBandScale.bandwidth() / 2;
+            centerY = 0; // 不需要在垂直模式下使用
+          } else {
+            const yBandScale = yScale as d3.ScaleBand<string>;
+            centerY = (yBandScale(d.label) || 0) + yBandScale.bandwidth() / 2;
+            centerX = 0; // 不需要在水平模式下使用
+          }
 
-      group.append('line')
-        .attr('x1', centerX).attr('x2', centerX)
-        .attr('y1', yLinearScale(statistics.q1)).attr('y2', yLinearScale(statistics.min))
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      // whisker 端點
-      group.append('line')
-        .attr('x1', centerX - whiskerWidth / 2).attr('x2', centerX + whiskerWidth / 2)
-        .attr('y1', yLinearScale(statistics.max)).attr('y2', yLinearScale(statistics.max))
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
-        .attr('x1', centerX - whiskerWidth / 2).attr('x2', centerX + whiskerWidth / 2)
-        .attr('y1', yLinearScale(statistics.min)).attr('y2', yLinearScale(statistics.min))
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-    } else {
-      const xLinearScale = xScale as d3.ScaleLinear<number, number>;
-      
-      // 左右 whisker 主線
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.q1)).attr('x2', xLinearScale(statistics.min))
-        .attr('y1', centerY).attr('y2', centerY)
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.q3)).attr('x2', xLinearScale(statistics.max))
-        .attr('y1', centerY).attr('y2', centerY)
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      // whisker 端點
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.min)).attr('x2', xLinearScale(statistics.min))
-        .attr('y1', centerY - whiskerWidth / 2).attr('y2', centerY + whiskerWidth / 2)
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.max)).attr('x2', xLinearScale(statistics.max))
-        .attr('y1', centerY - whiskerWidth / 2).attr('y2', centerY + whiskerWidth / 2)
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+          this.renderAllPoints(boxGroup, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth);
+        }
+      });
     }
   }
 
-  private renderMedianLine(
-    group: d3.Selection<SVGGElement, unknown, null, undefined>,
-    statistics: BoxPlotStatistics,
-    orientation: 'vertical' | 'horizontal',
-    boxX: number,
-    boxY: number,
-    boxWidth: number,
-    boxHeight: number,
-    stroke: string,
-    strokeWidth: number
-  ): void {
-    const { xScale, yScale } = this.scales;
-
-    if (orientation === 'vertical') {
-      const yLinearScale = yScale as d3.ScaleLinear<number, number>;
-      
-      group.append('line')
-        .attr('x1', boxX).attr('x2', boxX + boxWidth)
-        .attr('y1', yLinearScale(statistics.median)).attr('y2', yLinearScale(statistics.median))
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-    } else {
-      const xLinearScale = xScale as d3.ScaleLinear<number, number>;
-      
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.median)).attr('x2', xLinearScale(statistics.median))
-        .attr('y1', boxY).attr('y2', boxY + boxHeight)
-        .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-    }
-  }
-
-  private renderMeanMarker(
-    group: d3.Selection<SVGGElement, unknown, null, undefined>,
-    statistics: BoxPlotStatistics,
-    orientation: 'vertical' | 'horizontal',
-    centerX: number,
-    centerY: number,
-    style: 'circle' | 'diamond' | 'square',
-    stroke: string,
-    strokeWidth: number
-  ): void {
-    if (statistics.mean === undefined) return;
-
-    const { xScale, yScale } = this.scales;
-
-    let meanX: number, meanY: number;
-    if (orientation === 'vertical') {
-      const yLinearScale = yScale as d3.ScaleLinear<number, number>;
-      meanX = centerX;
-      meanY = yLinearScale(statistics.mean);
-    } else {
-      const xLinearScale = xScale as d3.ScaleLinear<number, number>;
-      meanX = xLinearScale(statistics.mean);
-      meanY = centerY;
-    }
-
-    const size = 6;
-    
-    if (style === 'diamond') {
-      group.append('path')
-        .attr('d', `M ${meanX} ${meanY - size} L ${meanX + size} ${meanY} L ${meanX} ${meanY + size} L ${meanX - size} ${meanY} Z`)
-        .attr('fill', '#fff')
-        .attr('stroke', stroke)
-        .attr('stroke-width', strokeWidth);
-    } else if (style === 'circle') {
-      group.append('circle')
-        .attr('cx', meanX).attr('cy', meanY).attr('r', 4)
-        .attr('fill', '#fff')
-        .attr('stroke', stroke)
-        .attr('stroke-width', strokeWidth);
-    } else {
-      group.append('rect')
-        .attr('x', meanX - 4).attr('y', meanY - 4)
-        .attr('width', 8).attr('height', 8)
-        .attr('fill', '#fff')
-        .attr('stroke', stroke)
-        .attr('stroke-width', strokeWidth);
-    }
-  }
 
   private renderAllPoints(
     group: d3.Selection<SVGGElement, unknown, null, undefined>,
@@ -399,8 +233,8 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
       let pointX: number, pointY: number, pointColor: string;
 
       // 使用確定性的隨機數生成器，基於數值和索引確保一致性
-      const deterministicSeed = this.hashCode(value.toString() + pointIndex.toString() + categoryIndex.toString());
-      const jitterOffset = this.seededRandom(deterministicSeed);
+      const deterministicSeed = StatisticalUtils.hashCode(value.toString() + pointIndex.toString() + categoryIndex.toString());
+      const jitterOffset = StatisticalUtils.seededRandom(deterministicSeed);
 
       // 計算位置
       if (orientation === 'vertical') {
@@ -436,92 +270,7 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
     });
   }
 
-  private renderOutliers(
-    group: d3.Selection<SVGGElement, unknown, null, undefined>,
-    dataPoint: ProcessedBoxPlotDataPoint,
-    orientation: 'vertical' | 'horizontal',
-    centerX: number,
-    centerY: number,
-    radius: number,
-    color: string,
-    stroke: string,
-    jitterWidth: number,
-    boxWidth: number
-  ): void {
-    const { xScale, yScale } = this.scales;
 
-    dataPoint.statistics.outliers.forEach((outlier, outlierIndex) => {
-      let outlierX: number, outlierY: number;
-
-      // 使用確定性的隨機數生成器，基於異常值和索引確保一致性
-      const deterministicSeed = this.hashCode('outlier_' + outlier.toString() + outlierIndex.toString() + dataPoint.index.toString());
-      const jitterOffset = this.seededRandom(deterministicSeed);
-
-      if (orientation === 'vertical') {
-        const yLinearScale = yScale as d3.ScaleLinear<number, number>;
-        outlierX = centerX + (jitterOffset - 0.5) * boxWidth * jitterWidth;
-        outlierY = yLinearScale(outlier);
-      } else {
-        const xLinearScale = xScale as d3.ScaleLinear<number, number>;
-        outlierX = xLinearScale(outlier);
-        outlierY = centerY + (jitterOffset - 0.5) * boxWidth * jitterWidth;
-      }
-
-      group.append('circle')
-        .attr('class', 'outlier')
-        .attr('cx', outlierX)
-        .attr('cy', outlierY)
-        .attr('r', radius)
-        .attr('fill', color)
-        .attr('fill-opacity', 0.6)
-        .attr('stroke', stroke)
-        .attr('stroke-width', 1);
-    });
-  }
-
-  private calculateBoxPlotStatistics(values: number[]): BoxPlotStatistics {
-    const { statisticsMethod = 'tukey' } = this.props;
-    const sorted = [...values].sort((a, b) => a - b);
-    const n = sorted.length;
-    
-    if (n === 0) {
-      return {
-        min: 0, q1: 0, median: 0, q3: 0, max: 0,
-        outliers: [], iqr: 0, lowerFence: 0, upperFence: 0
-      };
-    }
-
-    // 計算四分位數
-    const q1 = d3.quantile(sorted, 0.25) || 0;
-    const median = d3.quantile(sorted, 0.5) || 0;
-    const q3 = d3.quantile(sorted, 0.75) || 0;
-    const iqr = q3 - q1;
-    const mean = values.reduce((sum, val) => sum + val, 0) / n;
-
-    // 計算上下界限
-    let lowerFence: number, upperFence: number;
-    if (statisticsMethod === 'tukey') {
-      lowerFence = q1 - 1.5 * iqr;
-      upperFence = q3 + 1.5 * iqr;
-    } else {
-      lowerFence = Math.min(...sorted);
-      upperFence = Math.max(...sorted);
-    }
-
-    // 找出異常值
-    const outliers = sorted.filter(val => val < lowerFence || val > upperFence);
-    
-    // 找出 whisker 的實際範圍
-    const validValues = sorted.filter(val => val >= lowerFence && val <= upperFence);
-    const min = validValues.length > 0 ? Math.min(...validValues) : sorted[0];
-    const max = validValues.length > 0 ? Math.max(...validValues) : sorted[sorted.length - 1];
-
-    return {
-      min, q1, median, q3, max,
-      outliers, mean, iqr,
-      lowerFence, upperFence
-    };
-  }
 
   protected getChartType(): string {
     return 'box-plot';
@@ -532,24 +281,4 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
     this.renderChart();
   }
 
-  // 確定性隨機數生成器輔助方法
-  private hashCode(str: string): number {
-    let hash = 0;
-    if (str.length === 0) return hash;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-  }
-
-  private seededRandom(seed: number): number {
-    // Linear congruential generator for deterministic random numbers
-    const a = 1664525;
-    const c = 1013904223;
-    const m = Math.pow(2, 32);
-    const x = (a * seed + c) % m;
-    return x / m;
-  }
 }
