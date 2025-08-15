@@ -4,6 +4,8 @@ import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
 import { PieChart } from '@registry/components/basic/pie-chart'
 import { AreaChart } from '@registry/components/basic/area-chart'
 import { Heatmap } from '@registry/components/basic/heatmap'
+import { FunnelChart } from '@registry/components/basic/funnel-chart'
+import { ObservableFunnelChart } from '@registry/components/basic/observable-funnel-chart'
 import { basicBarData } from '../data/sample-data'
 
 // 生成範例資料
@@ -64,6 +66,23 @@ const heatmapData = [
   { x: 'Fri', y: 'C', value: 3 },
 ]
 
+const funnelData = [
+  { step: '瀏覽首頁', users: 10000 },
+  { step: '查看產品', users: 5500 },
+  { step: '加入購物車', users: 2100 },
+  { step: '結帳流程', users: 800 },
+  { step: '完成購買', users: 350 },
+]
+
+// Observable FunnelChart 專用數據格式
+const observableFunnelData = [
+  { step: 1, value: 10000, label: '瀏覽首頁' },
+  { step: 2, value: 5500, label: '查看產品' },
+  { step: 3, value: 2100, label: '加入購物車' },
+  { step: 4, value: 800, label: '結帳流程' },
+  { step: 5, value: 350, label: '完成購買' },
+]
+
 function Gallery() {
   return (
     <div className="px-4 py-8">
@@ -73,7 +92,7 @@ function Gallery() {
             組件庫
           </h1>
           <p className="text-gray-600">
-            瀏覽所有可用的 D3 組件，包含6種圖表類型
+            瀏覽所有可用的 D3 組件，包含7種圖表類型
           </p>
         </div>
 
@@ -389,6 +408,130 @@ function Gallery() {
             </div>
           </section>
 
+          {/* 漏斗圖組件 */}
+          <section>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              漏斗圖組件 (Funnel Chart)
+            </h2>
+            
+            {/* 傳統漏斗圖 */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                傳統漏斗圖 (Traditional Funnel Chart)
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* 基本漏斗圖 */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    基本漏斗圖
+                  </h4>
+                  <div className="flex justify-center">
+                    <FunnelChart
+                      data={funnelData}
+                      labelKey="step"
+                      valueKey="users"
+                      width={350}
+                      height={300}
+                      colors={['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554']}
+                      showLabels={true}
+                      showValues={true}
+                      showPercentages={true}
+                      labelPosition="side"
+                    />
+                  </div>
+                  <div className="mt-4 text-sm text-gray-600">
+                    <p>基本的漏斗圖，展示轉換流程</p>
+                  </div>
+                </div>
+
+                {/* 帶轉換率漏斗圖 */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    轉換率漏斗圖
+                  </h4>
+                  <div className="flex justify-center">
+                    <FunnelChart
+                      data={funnelData}
+                      labelKey="step"
+                      valueKey="users"
+                      width={350}
+                      height={300}
+                      colors={['#10b981', '#059669', '#047857', '#065f46', '#064e3b']}
+                      showLabels={true}
+                      showValues={true}
+                      showConversionRates={true}
+                      labelPosition="side"
+                      colorScheme="greens"
+                    />
+                  </div>
+                  <div className="mt-4 text-sm text-gray-600">
+                    <p>顯示各階段轉換率的漏斗圖</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Observable 風格漏斗圖 */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Observable 風格漏斗圖 (Observable Style Funnel Chart)
+              </h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* 深色主題 Observable 漏斗圖 */}
+                <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
+                  <h4 className="text-lg font-semibold text-white mb-4">
+                    深色主題漏斗圖
+                  </h4>
+                  <div className="flex justify-center">
+                    <ObservableFunnelChart
+                      data={observableFunnelData}
+                      width={350}
+                      height={300}
+                      background="#2a2a2a"
+                      gradient1="#FF6B6B"
+                      gradient2="#4ECDC4"
+                      valueColor="#ffffff"
+                      labelColor="#cccccc"
+                      percentageColor="#888888"
+                      showValues={true}
+                      showLabels={true}
+                      showPercentages={true}
+                    />
+                  </div>
+                  <div className="mt-4 text-sm text-gray-300">
+                    <p>Observable 風格的平滑曲線漏斗圖，適合深色主題</p>
+                  </div>
+                </div>
+
+                {/* 淺色主題 Observable 漏斗圖 */}
+                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                    淺色主題漏斗圖
+                  </h4>
+                  <div className="flex justify-center">
+                    <ObservableFunnelChart
+                      data={observableFunnelData}
+                      width={350}
+                      height={300}
+                      background="#ffffff"
+                      gradient1="#3b82f6"
+                      gradient2="#10b981"
+                      valueColor="#1f2937"
+                      labelColor="#374151"
+                      percentageColor="#6b7280"
+                      showValues={true}
+                      showLabels={true}
+                      showPercentages={true}
+                    />
+                  </div>
+                  <div className="mt-4 text-sm text-gray-600">
+                    <p>適合淺色主題的 Observable 風格漏斗圖</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* 組件特性 */}
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -461,7 +604,7 @@ function Gallery() {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div>
-                  <div className="text-3xl font-bold text-blue-600">6</div>
+                  <div className="text-3xl font-bold text-blue-600">7</div>
                   <div className="text-sm text-gray-600">圖表組件</div>
                 </div>
                 <div>

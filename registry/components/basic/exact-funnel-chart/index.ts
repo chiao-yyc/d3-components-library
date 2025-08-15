@@ -1,0 +1,2 @@
+export { ExactFunnelChartComponent as ExactFunnelChart } from './exact-funnel-chart';
+export { ExactFunnelChart as D3ExactFunnelChart, type ExactFunnelData, type ExactFunnelConfig } from './exact-funnel';
