@@ -48,11 +48,17 @@ export default function BoxPlotDemo() {
   const [meanStyle, setMeanStyle] = useState<'circle' | 'diamond' | 'square'>('diamond')
   const [boxFillOpacity, setBoxFillOpacity] = useState(0.7)
   const [statisticsMethod, setStatisticsMethod] = useState<'standard' | 'tukey' | 'percentile'>('tukey')
-  const [showQuartiles, setShowQuartiles] = useState(true)
   const [showWhiskers, setShowWhiskers] = useState(true)
   const [colorScheme, setColorScheme] = useState<'custom' | 'blues' | 'greens' | 'oranges' | 'reds' | 'purples'>('custom')
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
+  
+  // 新增功能控制
+  const [showAllPoints, setShowAllPoints] = useState(false)
+  const [pointColorMode, setPointColorMode] = useState<'uniform' | 'by-value' | 'by-category'>('uniform')
+  const [jitterWidth, setJitterWidth] = useState(0.6)
+  const [pointRadius, setPointRadius] = useState(2)
+  const [pointOpacity, setPointOpacity] = useState(0.6)
 
   // 當前資料和配置
   const { currentData, config } = useMemo(() => {
@@ -321,19 +327,6 @@ export default function BoxPlotDemo() {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                id="showQuartiles"
-                checked={showQuartiles}
-                onChange={(e) => setShowQuartiles(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="showQuartiles" className="text-sm text-gray-700">
-                顯示四分位數
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
                 id="showWhiskers"
                 checked={showWhiskers}
                 onChange={(e) => setShowWhiskers(e.target.checked)}
@@ -369,7 +362,89 @@ export default function BoxPlotDemo() {
                 互動功能
               </label>
             </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="showAllPoints"
+                checked={showAllPoints}
+                onChange={(e) => setShowAllPoints(e.target.checked)}
+                className="mr-2"
+              />
+              <label htmlFor="showAllPoints" className="text-sm text-gray-700">
+                顯示所有數值散點
+              </label>
+            </div>
           </div>
+
+          {/* 新增散點控制 */}
+          {showAllPoints && (
+            <>
+              {/* 散點顏色模式 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  散點顏色模式
+                </label>
+                <select
+                  value={pointColorMode}
+                  onChange={(e) => setPointColorMode(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="uniform">統一顏色</option>
+                  <option value="by-category">依類別</option>
+                  <option value="by-value">依數值</option>
+                </select>
+              </div>
+
+              {/* Jitter 寬度 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  散點擴散寬度 ({(jitterWidth * 100).toFixed(0)}%)
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={jitterWidth}
+                  onChange={(e) => setJitterWidth(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              {/* 散點半徑 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  散點半徑 ({pointRadius}px)
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="0.5"
+                  value={pointRadius}
+                  onChange={(e) => setPointRadius(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              {/* 散點透明度 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  散點透明度 ({(pointOpacity * 100).toFixed(0)}%)
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.1"
+                  value={pointOpacity}
+                  onChange={(e) => setPointOpacity(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -401,15 +476,19 @@ export default function BoxPlotDemo() {
             meanStyle={meanStyle}
             boxFillOpacity={boxFillOpacity}
             statisticsMethod={statisticsMethod}
-            showQuartiles={showQuartiles}
             showWhiskers={showWhiskers}
             colors={colorScheme === 'custom' ? config.colors : undefined}
             colorScheme={colorScheme}
             animate={animate}
             interactive={interactive}
+            showAllPoints={showAllPoints}
+            pointColorMode={pointColorMode}
+            jitterWidth={jitterWidth}
+            pointRadius={pointRadius}
+            pointOpacity={pointOpacity}
             onBoxClick={(data) => {
               console.log('Box clicked:', data)
-              alert(`點擊了: ${data.label}\n中位數: ${data.statistics.median.toFixed(2)}\n平均值: ${data.statistics.mean?.toFixed(2)}\n異常值: ${data.statistics.outliers.length}個`)
+              alert(`點擊了: ${data.label}\n中位數: ${data.statistics.median.toFixed(2)}\n平均值: ${data.statistics.mean?.toFixed(2)}\n異常值: ${data.statistics.outliers.length}個\n數據點: ${data.values.length}個`)
             }}
             onBoxHover={(data) => {
               console.log('Box hovered:', data)
@@ -512,9 +591,15 @@ const data = [
   meanStyle="${meanStyle}"
   boxFillOpacity={${boxFillOpacity}}
   statisticsMethod="${statisticsMethod}"
+  showWhiskers={${showWhiskers}}
   colorScheme="${colorScheme}"
   animate={${animate}}
   interactive={${interactive}}
+  showAllPoints={${showAllPoints}}
+  pointColorMode="${pointColorMode}"
+  jitterWidth={${jitterWidth}}
+  pointRadius={${pointRadius}}
+  pointOpacity={${pointOpacity}}
   onBoxClick={(data) => console.log('Clicked:', data)}
 />`}</code>
         </pre>

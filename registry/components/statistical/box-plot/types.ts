@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { BaseChartProps } from '../../core/base-chart/types'
 
 export interface BoxPlotDataPoint {
   [key: string]: any
@@ -8,7 +9,7 @@ export interface ProcessedBoxPlotDataPoint {
   label: string
   values: number[]
   statistics: BoxPlotStatistics
-  originalData: BoxPlotDataPoint
+  originalData: BoxPlotDataPoint | BoxPlotDataPoint[]
   index: number
 }
 
@@ -36,27 +37,18 @@ export interface BoxPlotBox {
   index: number
 }
 
-export interface BoxPlotProps {
+export interface BoxPlotProps extends BaseChartProps {
   // 資料相關
   data: BoxPlotDataPoint[]
   labelKey?: string
   valueKey?: string
   valuesKey?: string // 用於已聚合的資料
+  categoryKey?: string // 替代 labelKey 的新字段，與其他組件保持一致
   labelAccessor?: (d: BoxPlotDataPoint) => string
   valueAccessor?: (d: BoxPlotDataPoint) => number[]
   mapping?: {
     label: string | ((d: BoxPlotDataPoint) => string)
     values: string | ((d: BoxPlotDataPoint) => number[])
-  }
-
-  // 尺寸和佈局
-  width?: number
-  height?: number
-  margin?: {
-    top: number
-    right: number
-    bottom: number
-    left: number
   }
   
   // 箱形圖樣式
@@ -79,7 +71,6 @@ export interface BoxPlotProps {
   // 統計選項
   statisticsMethod?: 'standard' | 'tukey' | 'percentile'
   outlierThreshold?: number
-  showQuartiles?: boolean
   showWhiskers?: boolean
   
   // 標籤和文字
@@ -92,22 +83,21 @@ export interface BoxPlotProps {
   fontSize?: number
   fontFamily?: string
   
-  // 動畫
-  animate?: boolean
-  animationDuration?: number
+  // 動畫延遲
   animationDelay?: number
   animationEasing?: string
   
   // 互動
-  interactive?: boolean
-  showTooltip?: boolean
   tooltipFormat?: (data: ProcessedBoxPlotDataPoint) => ReactNode
   onBoxClick?: (data: ProcessedBoxPlotDataPoint) => void
   onBoxHover?: (data: ProcessedBoxPlotDataPoint | null) => void
   
-  // 樣式
-  className?: string
-  style?: React.CSSProperties
+  // 新增功能 - 顯示所有數值散點
+  showAllPoints?: boolean
+  pointColorMode?: 'uniform' | 'by-value' | 'by-category'
+  jitterWidth?: number
+  pointRadius?: number
+  pointOpacity?: number
   
   // HTML 屬性
   [key: string]: any
