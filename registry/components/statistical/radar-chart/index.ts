@@ -1,4 +1,5 @@
-export { RadarChart } from './radar-chart'
+export { RadarChart, defaultRadarChartProps } from './radar-chart'
+export { D3RadarChart } from './core/radar-chart'
 export type { 
   RadarChartProps, 
   RadarChartDataPoint, 
