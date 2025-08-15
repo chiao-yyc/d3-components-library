@@ -27,6 +27,8 @@ docs/
 
 ### 🏗️ 架構文件
 - [專案重構說明](./architecture/project-restructure.md) - 從 monorepo 到 Shadcn 模式的架構演進
+- [組件抽象化狀態報告](./architecture/component-abstraction-status.md) - BaseChart 抽象化進度和組件統計
+- [BaseChart 工具函數參考](./architecture/basechart-tools-reference.md) - 共用工具函數使用指南
 
 ### 📚 API 文件
 *(待建立)*
@@ -60,9 +62,11 @@ npx d3-components init
 
 1. **新手入門**：
    - [專案重構說明](./architecture/project-restructure.md) - 了解專案設計理念
+   - [組件抽象化狀態報告](./architecture/component-abstraction-status.md) - 了解組件架構現狀
 
 2. **開發者**：
    - [Claude 協作開發指南](./guides/Claude%20Development%20Guide.md) - 了解開發流程
+   - [BaseChart 工具函數參考](./architecture/basechart-tools-reference.md) - 學習使用共用工具
    - [CLI 工具開發指南](./guides/D3.js%20Component%20Library%20Guide.md) - 深入 CLI 實作
 
 3. **貢獻者**：
@@ -77,6 +81,10 @@ npx d3-components init
 - 包含適當的連結和交叉引用
 - 保持內容的時效性
 
+## Inspire by / Ref
+
+- [FunnelGraph.js](https://github.com/greghub/funnel-graph-js)
+
 ---
 
-*最後更新：2025-01-02*
+*最後更新：2025-08-15*

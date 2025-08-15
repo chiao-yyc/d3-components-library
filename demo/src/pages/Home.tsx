@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 
 function Home() {
   return (
@@ -58,6 +59,33 @@ function Home() {
               瀏覽組件
             </Link>
           </div>
+        </div>
+
+        {/* Observable Funnel Chart Demo */}
+        <div className="mt-16 bg-white rounded-lg p-8 border shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            🎯 Observable Funnel Chart - 完全復刻版本
+          </h2>
+          <div className="flex justify-center">
+            <ExactFunnelChart
+              data={[
+                { step: 1, value: 62259, label: 'Survey Started' },
+                { step: 2, value: 25465, label: 'Completed Survey' },
+                { step: 3, value: 405, label: 'Click End Card*' }
+              ]}
+              width={600}
+              height={300}
+              background="#2a2a2a"
+              gradient1="#FF6B6B"
+              gradient2="#4ECDC4"
+              values="#ffffff"
+              labels="#cccccc"
+              percentages="#888888"
+            />
+          </div>
+          <p className="text-gray-600 text-center mt-4">
+            完全基於 Observable 範例重新實作的漏斗圖，使用相同的資料和視覺效果
+          </p>
         </div>
 
         <div className="mt-16 bg-gray-50 rounded-lg p-8">

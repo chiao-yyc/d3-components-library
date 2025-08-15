@@ -1,0 +1,102 @@
+.observable-funnel-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.observable-funnel-chart-svg {
+  overflow: visible;
+}
+
+/* 文字標籤樣式 */
+.observable-funnel-chart-svg .values {
+  font-weight: normal;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.observable-funnel-chart-svg .labels {
+  font-weight: bold;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.observable-funnel-chart-svg .percentages {
+  font-weight: normal;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 分隔線樣式 */
+.observable-funnel-chart-svg .separator-line {
+  stroke-dasharray: none;
+  opacity: 0.6;
+}
+
+/* 互動區域 */
+.observable-funnel-chart-svg .interaction-area {
+  transition: opacity 0.2s ease;
+}
+
+.observable-funnel-chart-svg .interaction-area:hover {
+  opacity: 0.1;
+  fill: rgba(255, 255, 255, 0.1);
+}
+
+/* 動畫效果 */
+.observable-funnel-chart-svg path {
+  transition: all 0.3s ease;
+}
+
+/* 響應式調整 */
+@media (max-width: 640px) {
+  .observable-funnel-chart-container {
+    font-size: 10px;
+  }
+  
+  .observable-funnel-chart-svg .values {
+    font-size: 16px !important;
+  }
+  
+  .observable-funnel-chart-svg .labels {
+    font-size: 10px !important;
+  }
+  
+  .observable-funnel-chart-svg .percentages {
+    font-size: 12px !important;
+  }
+}
+
+/* 無障礙設計 */
+@media (prefers-reduced-motion: reduce) {
+  .observable-funnel-chart-svg * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高對比模式 */
+@media (prefers-contrast: high) {
+  .observable-funnel-chart-svg path {
+    stroke: #000;
+    stroke-width: 1px;
+  }
+  
+  .observable-funnel-chart-svg text {
+    fill: #000 !important;
+    font-weight: bold;
+  }
+  
+  .observable-funnel-chart-svg .separator-line {
+    stroke: #000 !important;
+    stroke-width: 2px;
+  }
+}
