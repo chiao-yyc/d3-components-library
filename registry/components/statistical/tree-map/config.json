@@ -1,0 +1,209 @@
+{
+  "name": "tree-map",
+  "description": "專業階層樹狀圖組件，適用於階層數據可視化和比例展示",
+  "version": "1.0.0",
+  "tags": ["chart", "hierarchy", "tree-map", "proportional", "analytics"],
+  "variants": ["hierarchy", "stratified", "nested"],
+  "dependencies": ["react", "d3", "@types/d3"],
+  "category": "hierarchy-visualization",
+  "complexity": "intermediate",
+  "files": ["tree-map.tsx", "tree-map.css", "types.ts", "index.ts"],
+  "props": {
+    "data": {
+      "type": "array|object",
+      "description": "TreeMap 的階層數據或平面化數據",
+      "required": true
+    },
+    "dataFormat": {
+      "type": "string",
+      "description": "數據格式類型",
+      "options": ["hierarchy", "stratified"],
+      "default": "hierarchy"
+    },
+    "valueKey": {
+      "type": "string",
+      "description": "數值欄位名稱",
+      "default": "value"
+    },
+    "nameKey": {
+      "type": "string",
+      "description": "名稱欄位名稱",
+      "default": "name"
+    },
+    "idKey": {
+      "type": "string",
+      "description": "ID欄位名稱（用於stratified格式）",
+      "default": "id"
+    },
+    "parentKey": {
+      "type": "string",
+      "description": "父節點欄位名稱（用於stratified格式）",
+      "default": "parent"
+    },
+    "width": {
+      "type": "number",
+      "description": "圖表寬度",
+      "default": 800
+    },
+    "height": {
+      "type": "number",
+      "description": "圖表高度",
+      "default": 600
+    },
+    "padding": {
+      "type": "number",
+      "description": "矩形間距",
+      "default": 1
+    },
+    "paddingInner": {
+      "type": "number",
+      "description": "內部間距",
+      "default": null
+    },
+    "paddingOuter": {
+      "type": "number",
+      "description": "外部間距",
+      "default": null
+    },
+    "paddingTop": {
+      "type": "number",
+      "description": "頂部間距",
+      "default": null
+    },
+    "tile": {
+      "type": "string",
+      "description": "瓦片算法",
+      "options": ["squarify", "binary", "dice", "slice", "slicedice", "resquarify"],
+      "default": "squarify"
+    },
+    "round": {
+      "type": "boolean",
+      "description": "圓整位置值",
+      "default": true
+    },
+    "colorStrategy": {
+      "type": "string",
+      "description": "顏色策略",
+      "options": ["depth", "parent", "value", "custom"],
+      "default": "depth"
+    },
+    "colorDepth": {
+      "type": "number",
+      "description": "顏色映射的層級深度",
+      "default": 1
+    },
+    "showLabels": {
+      "type": "boolean",
+      "description": "顯示標籤",
+      "default": true
+    },
+    "showValues": {
+      "type": "boolean",
+      "description": "顯示數值",
+      "default": false
+    },
+    "labelAlignment": {
+      "type": "string",
+      "description": "標籤對齊方式",
+      "options": ["center", "top-left", "top-center", "top-right", "bottom-left", "bottom-center", "bottom-right"],
+      "default": "center"
+    },
+    "fontSize": {
+      "type": "number",
+      "description": "字體大小",
+      "default": 12
+    },
+    "fontFamily": {
+      "type": "string",
+      "description": "字體族",
+      "default": "Arial, sans-serif"
+    },
+    "minLabelSize": {
+      "type": "object",
+      "description": "最小標籤顯示尺寸",
+      "default": {"width": 30, "height": 20, "area": 500}
+    },
+    "maxLabelLength": {
+      "type": "number",
+      "description": "最大標籤長度",
+      "default": 20
+    },
+    "showTooltip": {
+      "type": "boolean",
+      "description": "顯示工具提示",
+      "default": true
+    },
+    "animate": {
+      "type": "boolean",
+      "description": "啟用動畫效果",
+      "default": true
+    },
+    "animationDuration": {
+      "type": "number",
+      "description": "動畫持續時間（毫秒）",
+      "default": 750
+    },
+    "interactive": {
+      "type": "boolean",
+      "description": "啟用互動功能",
+      "default": true
+    },
+    "enableZoom": {
+      "type": "boolean",
+      "description": "啟用縮放功能",
+      "default": false
+    },
+    "enableDrill": {
+      "type": "boolean",
+      "description": "啟用下鑽功能",
+      "default": false
+    },
+    "strokeWidth": {
+      "type": "number",
+      "description": "邊框寬度",
+      "default": 1
+    },
+    "strokeColor": {
+      "type": "string",
+      "description": "邊框顏色",
+      "default": "#ffffff"
+    },
+    "opacity": {
+      "type": "number",
+      "description": "矩形透明度",
+      "default": 0.8
+    }
+  },
+  "examples": [
+    {
+      "name": "基本階層樹狀圖",
+      "description": "簡單的階層數據樹狀圖",
+      "code": "<TreeMap data={hierarchyData} valueKey='value' nameKey='name' />"
+    },
+    {
+      "name": "平面化數據樹狀圖",
+      "description": "使用stratified格式的樹狀圖",
+      "code": "<TreeMap data={flatData} dataFormat='stratified' idKey='id' parentKey='parent' />"
+    },
+    {
+      "name": "多層級顏色映射",
+      "description": "按照層級深度映射顏色",
+      "code": "<TreeMap data={data} colorStrategy='depth' colorDepth={2} />"
+    },
+    {
+      "name": "互動式樹狀圖",
+      "description": "支援縮放和下鑽的樹狀圖",
+      "code": "<TreeMap data={data} enableZoom={true} enableDrill={true} showTooltip={true} />"
+    },
+    {
+      "name": "自定義瓦片算法",
+      "description": "使用不同瓦片算法的樹狀圖",
+      "code": "<TreeMap data={data} tile='binary' padding={2} strokeColor='#333' />"
+    },
+    {
+      "name": "標籤和數值顯示",
+      "description": "同時顯示標籤和數值的樹狀圖",
+      "code": "<TreeMap data={data} showLabels={true} showValues={true} labelAlignment='top-left' />"
+    }
+  ]
+}

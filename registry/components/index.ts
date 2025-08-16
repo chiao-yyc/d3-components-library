@@ -12,6 +12,7 @@ export * from './statistical/scatter-plot'
 export * from './statistical/box-plot'
 export * from './statistical/violin-plot'
 export * from './statistical/radar-chart'
+export * from './statistical/tree-map'
 
 // 金融圖表
 export * from './financial/candlestick-chart'
@@ -56,7 +57,8 @@ export const CHART_CATEGORIES = {
       'scatter-plot',
       'box-plot',
       'violin-plot',
-      'radar-chart'
+      'radar-chart',
+      'tree-map'
     ]
   },
   financial: {

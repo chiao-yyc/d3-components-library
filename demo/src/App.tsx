@@ -16,6 +16,7 @@ const FunnelChartDemo = lazy(() => import('./pages/FunnelChartDemo'))
 const BoxPlotDemo = lazy(() => import('./pages/BoxPlotDemo'))
 const ViolinPlotDemo = lazy(() => import('./pages/ViolinPlotDemo'))
 const RadarChartDemo = lazy(() => import('./pages/RadarChartDemo'))
+const TreeMapDemo = lazy(() => import('./pages/TreeMapDemo'))
 const CandlestickDemo = lazy(() => import('./pages/CandlestickDemo'))
 const ModularTestDemo = lazy(() => import('./pages/ModularTestDemo'))
 const Gallery = lazy(() => import('./pages/Gallery'))
@@ -50,6 +51,7 @@ function App() {
           <Route path="/box-plot" element={<BoxPlotDemo />} />
           <Route path="/violin-plot" element={<ViolinPlotDemo />} />
           <Route path="/radar-chart" element={<RadarChartDemo />} />
+          <Route path="/tree-map" element={<TreeMapDemo />} />
           <Route path="/candlestick" element={<CandlestickDemo />} />
           <Route path="/modular-test" element={<ModularTestDemo />} />
           <Route path="/gallery" element={<Gallery />} />
