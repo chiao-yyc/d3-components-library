@@ -1,0 +1,234 @@
+/* TreeMap 組件樣式 */
+.treemap-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 矩形樣式 */
+.treemap-rect {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.treemap-rect:hover {
+  stroke-width: 2;
+  filter: brightness(1.1);
+}
+
+.treemap-rect:focus {
+  outline: none;
+  stroke: #007acc;
+  stroke-width: 2;
+}
+
+/* 標籤樣式 */
+.treemap-label {
+  pointer-events: none;
+  fill: #333333;
+  font-weight: 500;
+  text-anchor: middle;
+  dominant-baseline: central;
+  user-select: none;
+}
+
+/* 階層標籤樣式 */
+.treemap-label-depth-0 {
+  font-weight: bold;
+  font-size: 16px;
+  fill: #000000;
+}
+
+.treemap-label-depth-1 {
+  font-weight: 600;
+  font-size: 14px;
+  fill: #333333;
+}
+
+.treemap-label-depth-2 {
+  font-weight: normal;
+  font-size: 12px;
+  fill: #666666;
+}
+
+.treemap-label-depth-3 {
+  font-weight: normal;
+  font-size: 10px;
+  fill: #999999;
+}
+
+/* 數值標籤樣式 */
+.treemap-value {
+  pointer-events: none;
+  fill: #666666;
+  font-size: 10px;
+  font-weight: normal;
+  text-anchor: middle;
+  user-select: none;
+}
+
+/* 邊框樣式 */
+.treemap-border {
+  fill: none;
+  pointer-events: none;
+}
+
+/* 工具提示樣式 */
+.treemap-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.4;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.treemap-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+/* 縮放和平移時的樣式 */
+.treemap-container.zoomed .treemap-rect {
+  stroke-width: 0.5;
+}
+
+.treemap-container.zoomed .treemap-label {
+  font-size: calc(var(--base-font-size, 12px) * var(--zoom-level, 1));
+}
+
+/* 選中狀態樣式 */
+.treemap-rect.selected {
+  stroke: #007acc;
+  stroke-width: 3;
+  filter: brightness(1.2);
+}
+
+/* 父節點高亮樣式 */
+.treemap-rect.parent-highlight {
+  stroke: #ff6b35;
+  stroke-width: 2;
+  stroke-dasharray: 3,3;
+}
+
+/* 動畫樣式 */
+@keyframes treemap-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.treemap-rect.entering {
+  animation: treemap-appear 0.5s ease-out;
+}
+
+.treemap-rect.exiting {
+  transition: opacity 0.3s ease-out;
+  opacity: 0;
+}
+
+/* 響應式樣式 */
+@media (max-width: 768px) {
+  .treemap-label {
+    font-size: 10px;
+  }
+  
+  .treemap-value {
+    font-size: 8px;
+  }
+  
+  .treemap-tooltip {
+    font-size: 11px;
+    padding: 6px 8px;
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .treemap-label {
+    font-size: 8px;
+  }
+  
+  .treemap-value {
+    font-size: 7px;
+  }
+  
+  .treemap-tooltip {
+    font-size: 10px;
+    padding: 4px 6px;
+    max-width: 120px;
+  }
+}
+
+/* 高對比度模式支援 */
+@media (prefers-contrast: high) {
+  .treemap-rect {
+    stroke-width: 2;
+  }
+  
+  .treemap-label {
+    font-weight: bold;
+  }
+  
+  .treemap-tooltip {
+    background: #000000;
+    border: 2px solid #ffffff;
+  }
+}
+
+/* 深色主題支援 */
+@media (prefers-color-scheme: dark) {
+  .treemap-label {
+    fill: #e0e0e0;
+  }
+  
+  .treemap-value {
+    fill: #b0b0b0;
+  }
+  
+  .treemap-tooltip {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000000;
+  }
+  
+  .treemap-tooltip::after {
+    border-color: rgba(255, 255, 255, 0.9) transparent transparent transparent;
+  }
+}
+
+/* 無障礙支援 */
+.treemap-rect:focus-visible {
+  outline: 2px solid #007acc;
+  outline-offset: 2px;
+}
+
+/* 印刷樣式 */
+@media print {
+  .treemap-tooltip {
+    display: none;
+  }
+  
+  .treemap-rect {
+    stroke-width: 0.5pt;
+  }
+  
+  .treemap-label {
+    font-size: 8pt;
+  }
+}

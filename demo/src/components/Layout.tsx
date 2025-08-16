@@ -50,6 +50,7 @@ function Layout({ children }: LayoutProps) {
         { path: '/box-plot', name: '箱形圖', icon: '📦' },
         { path: '/violin-plot', name: '小提琴圖', icon: '🎻' },
         { path: '/radar-chart', name: '雷達圖', icon: '🎯' },
+        { path: '/tree-map', name: '樹狀圖', icon: '🌳' },
         { path: '/candlestick', name: 'K線圖', icon: '📊' }
       ]
     },
