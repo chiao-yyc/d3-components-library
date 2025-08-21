@@ -28,14 +28,14 @@ export function ChartTooltip({
   ...props
 }: ChartTooltipProps) {
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const [adjustedPosition, setAdjustedPosition] = useState(position)
+  const [adjustedPosition, setAdjustedPosition] = useState(position || { x: 0, y: 0 })
   const [actualPlacement, setActualPlacement] = useState<string>('top')
   const hideTimeoutRef = useRef<NodeJS.Timeout>()
   const showTimeoutRef = useRef<NodeJS.Timeout>()
 
   // 計算調整後的位置
   const calculatePosition = useCallback(() => {
-    if (!tooltipRef.current || !visible) return
+    if (!tooltipRef.current || !visible || !position) return
 
     const tooltip = tooltipRef.current
     const rect = tooltip.getBoundingClientRect()

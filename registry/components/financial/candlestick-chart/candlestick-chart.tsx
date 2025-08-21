@@ -25,7 +25,7 @@ export function CandlestickChart({
   mapping,
   width = 800,
   height = 500,
-  margin = { top: 20, right: 30, bottom: 40, left: 60 },
+  margin,
   upColor,
   downColor,
   dojiColor,
@@ -78,38 +78,52 @@ export function CandlestickChart({
     }
   }, [upColor, downColor, dojiColor, colorMode])
 
+  // 使用固定邊距，避免複雜計算導致的問題
+  const defaultMargin = { top: 20, right: 30, bottom: 40, left: 60 }
+  const finalMargin = margin || defaultMargin
+
   // 計算圖表尺寸
   const chartHeight = showVolume 
-    ? height * (1 - volumeHeightRatio) - margin.top - margin.bottom
-    : height - margin.top - margin.bottom
+    ? height * (1 - volumeHeightRatio) - finalMargin.top - finalMargin.bottom
+    : height - finalMargin.top - finalMargin.bottom
   const volumeHeight = showVolume 
     ? height * volumeHeightRatio - 10 // 10px gap
     : 0
-  const chartWidth = width - margin.left - margin.right
+  const chartWidth = width - finalMargin.left - finalMargin.right
 
   // 創建比例尺
   const scales = useMemo((): CandlestickScales | null => {
-    if (!processedData.length) return null
+    if (!processedData.length || chartWidth <= 0 || chartHeight <= 0) return null
 
-    // 時間比例尺
+    // 時間比例尺 - 增加邊距以避免蠟燭被截斷
+    const timeExtent = d3.extent(processedData, d => d.date) as [Date, Date]
+    const timePadding = (timeExtent[1].getTime() - timeExtent[0].getTime()) * 0.05 // 5% 邊距
     const xScale = d3.scaleTime()
-      .domain(d3.extent(processedData, d => d.date) as [Date, Date])
+      .domain([
+        new Date(timeExtent[0].getTime() - timePadding),
+        new Date(timeExtent[1].getTime() + timePadding)
+      ])
       .range([0, chartWidth])
 
     // 價格比例尺
-    const priceExtent = d3.extent(processedData, d => [d.low, d.high].flat())
+    const allPrices = processedData.flatMap(d => [d.high, d.low])
+    const priceExtent = d3.extent(allPrices) as [number, number]
     const yScale = d3.scaleLinear()
-      .domain(priceExtent as [number, number])
+      .domain(priceExtent)
       .nice()
       .range([chartHeight, 0])
 
     // 成交量比例尺
     let volumeScale: d3.ScaleLinear<number, number> | undefined
     if (showVolume) {
-      const volumeExtent = d3.extent(processedData, d => d.volume || 0) as [number, number]
-      volumeScale = d3.scaleLinear()
-        .domain([0, volumeExtent[1]])
-        .range([volumeHeight, 0])
+      const volumes = processedData.map(d => d.volume || 0).filter(v => v > 0)
+      
+      if (volumes.length > 0) {
+        const maxVolume = Math.max(...volumes)
+        volumeScale = d3.scaleLinear()
+          .domain([0, maxVolume])
+          .range([volumeHeight, 0])
+      }
     }
 
     return { xScale, yScale, volumeScale }
@@ -120,8 +134,14 @@ export function CandlestickChart({
     if (!scales || !processedData.length) return []
 
     const { xScale, yScale } = scales
-    const bandWidth = chartWidth / processedData.length
-    const candleActualWidth = bandWidth * candleWidth
+    
+    // 計算蠟燭間距：基於時間軸實際寬度
+    const timeRange = xScale.domain()
+    const timeDiff = timeRange[1].getTime() - timeRange[0].getTime()
+    const avgTimeBetweenPoints = timeDiff / Math.max(1, processedData.length - 1)
+    const pixelPerMs = chartWidth / timeDiff
+    const availableWidth = avgTimeBetweenPoints * pixelPerMs
+    const candleActualWidth = Math.min(availableWidth * candleWidth, chartWidth / processedData.length * 0.8)
 
     return processedData.map((d, i) => {
       const x = xScale(d.date) - candleActualWidth / 2
@@ -157,19 +177,27 @@ export function CandlestickChart({
     if (!scales?.volumeScale || !showVolume || !processedData.length) return []
 
     const { xScale, volumeScale } = scales
-    const bandWidth = chartWidth / processedData.length
-    const volumeBarWidth = bandWidth * 0.6
+    
+    // 使用與candlestick相同的寬度計算邏輯
+    const timeRange = xScale.domain()
+    const timeDiff = timeRange[1].getTime() - timeRange[0].getTime()
+    const avgTimeBetweenPoints = timeDiff / Math.max(1, processedData.length - 1)
+    const pixelPerMs = chartWidth / timeDiff
+    const availableWidth = avgTimeBetweenPoints * pixelPerMs
+    const volumeBarWidth = Math.min(availableWidth * 0.6, chartWidth / processedData.length * 0.6)
 
     return processedData.map((d, i) => {
       if (!d.volume) return null
 
       const x = xScale(d.date) - volumeBarWidth / 2
-      const barHeight = volumeHeight - volumeScale(d.volume)
-      const y = volumeScale(d.volume)
+      const scaledY = volumeScale(d.volume)  // 0 到 volumeHeight
+      const barHeight = volumeHeight - scaledY  // 實際bar高度
+      const y = scaledY  // bar的頂部位置
 
-      // 成交量柱的顏色跟隨對應蠟燭
-      const candlestick = candlesticks[i]
-      const color = candlestick ? candlestick.color : colors.doji
+      // 直接根據數據方向決定顏色，不依賴candlesticks
+      let color = colors.doji
+      if (d.direction === 'up') color = colors.up
+      else if (d.direction === 'down') color = colors.down
 
       return {
         data: d,
@@ -183,7 +211,7 @@ export function CandlestickChart({
         index: i
       }
     }).filter(Boolean) as VolumeItem[]
-  }, [scales, showVolume, processedData, chartWidth, volumeHeight, candlesticks, colors])
+  }, [scales, showVolume, processedData, chartWidth, volumeHeight, colors])
 
   // Tooltip 功能
   const { tooltip, showTooltip: showTooltipFn, hideTooltip } = useTooltip({
@@ -234,7 +262,7 @@ export function CandlestickChart({
 
     // 主要繪圖區域
     const g = svg.append('g')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`)
+      .attr('transform', `translate(${finalMargin.left}, ${finalMargin.top})`)
 
     const { xScale, yScale, volumeScale } = scales
 
@@ -290,34 +318,38 @@ export function CandlestickChart({
       .attr('stroke', d => d.color)
       .attr('stroke-width', wickWidth)
 
-    // 實體
+    // 實體 - 區分上漲（空心）和下跌（實心）
     const bodies = candleGroups.append('rect')
       .attr('class', 'body')
       .attr('x', d => d.geometry.x)
       .attr('y', d => d.geometry.bodyTop)
       .attr('width', d => d.geometry.width)
       .attr('height', d => d.geometry.bodyHeight)
-      .attr('fill', d => d.color)
+      .attr('fill', d => {
+        // 上漲蠟燭使用空心（白色填充），下跌蠟燭使用實心
+        if (d.data.direction === 'up') {
+          return colorMode === 'tw' ? '#ffffff' : '#ffffff'
+        }
+        return d.color
+      })
       .attr('stroke', d => d.color)
-      .attr('stroke-width', 0.5)
+      .attr('stroke-width', 1)
 
-    // 動畫效果
-    if (animate) {
-      bodies
-        .style('opacity', 0)
-        .attr('transform', 'scaleY(0)')
-        .transition()
-        .duration(animationDuration)
-        .delay((d, i) => i * 20)
-        .ease(d3.easeQuadOut)
-        .style('opacity', 1)
-        .attr('transform', 'scaleY(1)')
-    }
+    // 暫時移除動畫效果，避免opacity問題
+    // if (animate) {
+    //   bodies
+    //     .style('opacity', 0)
+    //     .transition()
+    //     .duration(animationDuration)
+    //     .delay((d, i) => i * 20)
+    //     .ease(d3.easeQuadOut)
+    //     .style('opacity', 1)
+    // }
 
     // 成交量圖表
     if (showVolume && volumeScale && volumes.length) {
       const volumeG = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${height - margin.bottom - volumeHeight})`)
+        .attr('transform', `translate(${finalMargin.left}, ${height - finalMargin.bottom - volumeHeight})`)
 
       volumeG.selectAll('.volume-bar')
         .data(volumes)
@@ -344,7 +376,11 @@ export function CandlestickChart({
     if (interactive) {
       candleGroups
         .on('mouseenter', function(event, d) {
-          d3.select(this).style('opacity', 0.8)
+          // 暫時註解掉hover視覺效果，只保留tooltip和回調
+          // d3.select(this).select('.body')
+          //   .attr('stroke-width', 2)
+          // d3.select(this).select('.wick')
+          //   .attr('stroke-width', wickWidth * 1.5)
           
           if (showTooltip) {
             const position = getPositionFromEvent(event)
@@ -354,7 +390,11 @@ export function CandlestickChart({
           onCandleHover?.(d.data)
         })
         .on('mouseleave', function() {
-          d3.select(this).style('opacity', 1)
+          // 暫時註解掉hover視覺效果恢復
+          // d3.select(this).select('.body')
+          //   .attr('stroke-width', 1)
+          // d3.select(this).select('.wick')
+          //   .attr('stroke-width', wickWidth)
           hideTooltip()
           onCandleHover?.(null)
         })
@@ -392,7 +432,7 @@ export function CandlestickChart({
   }, [
     candlesticks, volumes, scales, chartWidth, chartHeight, volumeHeight, 
     showGrid, showVolume, animate, animationDuration, interactive, wickWidth,
-    margin, height, showTooltip, showTooltipFn, hideTooltip, onCandleClick, onCandleHover
+    finalMargin, height, showTooltip, showTooltipFn, hideTooltip, onCandleClick, onCandleHover
   ])
 
   // 錯誤狀態
@@ -441,7 +481,9 @@ export function CandlestickChart({
         ref={svgRef}
         width={width}
         height={height}
-        className="candlestick-chart-svg overflow-visible"
+        viewBox={`0 0 ${width} ${height}`}
+        className="candlestick-chart-svg overflow-visible max-w-full h-auto"
+        preserveAspectRatio="xMidYMid meet"
       />
 
       {/* 統計資訊顯示 */}
@@ -457,8 +499,7 @@ export function CandlestickChart({
       {/* Tooltip */}
       <ChartTooltip
         visible={tooltip.visible && tooltip.data != null}
-        x={tooltip.position.x}
-        y={tooltip.position.y}
+        position={tooltip.position}
         content={
           tooltip.data && candlesticks.length > 0 
             ? formatTooltipContent(candlesticks.find(c => c.data === tooltip.data.data) || candlesticks[0])
