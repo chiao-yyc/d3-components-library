@@ -31,7 +31,7 @@ export interface ChartTooltipProps {
   visible: boolean
   
   // 位置
-  position: TooltipPosition
+  position?: TooltipPosition
   
   // 內容
   content?: TooltipContent | ReactNode

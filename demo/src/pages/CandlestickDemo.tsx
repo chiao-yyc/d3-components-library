@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
 
 // 生成模擬股票數據
@@ -87,6 +87,8 @@ export default function CandlestickDemo() {
   const [selectedDataset, setSelectedDataset] = useState('tsmc')
   const [colorMode, setColorMode] = useState<'tw' | 'us' | 'custom'>('tw')
   const [showVolume, setShowVolume] = useState(true)
+  const [dimensions, setDimensions] = useState({ width: 800, height: 500 })
+  const containerRef = useRef<HTMLDivElement>(null)
   // 簡化版本暫時移除複雜配置
 
   // 選擇數據集
@@ -125,6 +127,42 @@ export default function CandlestickDemo() {
       avgVolume: volumes.reduce((sum, v) => sum + v, 0) / volumes.length
     }
   }, [currentData])
+
+  // 響應式尺寸偵測
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const width = Math.max(400, rect.width - 48) // 48px for padding
+        const height = Math.max(300, Math.min(600, width * 0.65)) // 適當的寬高比
+        setDimensions({ width, height })
+      }
+    }
+
+    // 初始計算
+    updateDimensions()
+
+    // 監聽視窗大小變化
+    const handleResize = () => {
+      updateDimensions()
+    }
+    
+    window.addEventListener('resize', handleResize)
+    
+    // ResizeObserver 用於更精確的容器大小偵測
+    let resizeObserver: ResizeObserver | null = null
+    if (containerRef.current && 'ResizeObserver' in window) {
+      resizeObserver = new ResizeObserver(updateDimensions)
+      resizeObserver.observe(containerRef.current)
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (resizeObserver) {
+        resizeObserver.disconnect()
+      }
+    }
+  }, [])
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-8">
@@ -200,12 +238,17 @@ export default function CandlestickDemo() {
            '比特幣價格走勢'}
         </h2>
         
-        <div className="flex justify-center">
+        <div 
+          ref={containerRef}
+          className="w-full flex justify-center overflow-hidden"
+          style={{ minHeight: '300px' }}
+        >
           <CandlestickChart
             data={currentData}
-            width={900}
-            height={600}
+            width={dimensions.width}
+            height={dimensions.height}
             colorMode={colorMode}
+            showVolume={showVolume}
             onCandleClick={(data) => {
               const change = data.close - data.open
               const changePercent = data.open !== 0 ? (change / data.open) * 100 : 0
