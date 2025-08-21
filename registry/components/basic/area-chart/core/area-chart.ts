@@ -5,11 +5,19 @@ import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
 import { ProcessedDataPoint } from '../../../core/data-processor/types';
+import { createChartClipPath, createStandardDropShadow, createStandardGlow } from '../../../core/base-chart/visual-effects';
+import { BrushZoomController, CrosshairController, createBrushZoom, createCrosshair } from '../../../core/base-chart/interaction-utils';
 
 export class D3AreaChart extends BaseChart<AreaChartProps> {
   private seriesData: AreaSeriesData[] = [];
   private stackedData: any[] = [];
   private colorScale: any;
+  private scales: any = {};
+  
+  // 交互控制器
+  private brushZoomController: BrushZoomController | null = null;
+  private crosshairController: CrosshairController | null = null;
+  private viewportController: any = null;
 
   constructor(config: AreaChartProps) {
     super(config);
@@ -274,6 +282,314 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
         fontColor: '#6b7280'
       }
     });
+
+    // === 添加交互功能 ===
+    this.addInteractionFeatures(g);
+  }
+
+  /**
+   * 添加交互功能 (移植自 LineChart)
+   */
+  private addInteractionFeatures(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
+    console.log('🔧 AreaChart: addInteractionFeatures 開始執行');
+    
+    // 清理舊的交互控制器和元素
+    this.cleanupInteractionControllers();
+    container.selectAll('.brush').remove();
+    container.selectAll('.crosshair').remove();
+    container.selectAll('.focus').remove();
+    
+    const { 
+      enableBrushZoom, 
+      brushZoomConfig, 
+      onZoom, 
+      onZoomReset,
+      enableCrosshair, 
+      crosshairConfig,
+      enableDropShadow,
+      enableGlowEffect,
+      glowColor,
+      dataAccessor
+    } = this.props;
+
+    console.log('⚙️ AreaChart 交互功能配置:', { 
+      enableBrushZoom, 
+      enableCrosshair, 
+      enableDropShadow, 
+      enableGlowEffect
+    });
+
+    const { xScale, yScale, chartWidth, chartHeight } = this.scales;
+
+    // === 默認剪裁路徑：防止圖表內容溢出軸線區域 ===
+    let defaultClipPathId = null;
+    if (this.svgRef?.current) {
+      console.log('✂️ AreaChart: 創建默認剪裁路徑，防止圖表內容溢出軸線區域');
+      const svg = d3.select(this.svgRef.current);
+      
+      defaultClipPathId = createChartClipPath(svg, { width: chartWidth, height: chartHeight });
+      console.log('✂️ AreaChart: 默認剪裁路徑創建完成:', defaultClipPathId);
+      
+      // 將剪裁路徑應用到所有圖表內容元素，保護軸線
+      const areaElements = container.selectAll('path[class*="area-"]');
+      const lineElements = container.selectAll('path[class*="line-"]');
+      const dotElements = container.selectAll('circle[class*="dot-"]');
+      
+      console.log('✂️ AreaChart: 應用默認剪裁路徑 - 區域:', areaElements.size(), '線條:', lineElements.size(), '點:', dotElements.size());
+      
+      areaElements.attr('clip-path', defaultClipPathId);
+      lineElements.attr('clip-path', defaultClipPathId);
+      dotElements.attr('clip-path', defaultClipPathId);
+      
+      // 確保軸線永遠不被剪裁
+      const axisElements = container.selectAll('.bottom-axis, .left-axis, .top-axis, .right-axis, .x-axis, .y-axis, g[class*="axis"]');
+      axisElements.attr('clip-path', null);
+      console.log('✂️ AreaChart: 軸線保護完成，保護了', axisElements.size(), '個軸線元素');
+    }
+
+    // 應用視覺效果
+    if (enableDropShadow && this.svgRef?.current) {
+      console.log('🌑 AreaChart: 開始應用陰影效果');
+      const svg = d3.select(this.svgRef.current);
+      const areaElements = container.selectAll('path[class*="area-"]');
+      this.addDropShadow(svg, areaElements);
+      console.log('🌑 AreaChart: 陰影效果應用完成');
+    }
+
+    if (enableGlowEffect && this.svgRef?.current) {
+      console.log('✨ AreaChart: 開始應用光暈效果, 顏色:', glowColor);
+      const svg = d3.select(this.svgRef.current);
+      const areaElements = container.selectAll('path[class*="area-"]');
+      this.addGlowEffect(svg, areaElements, glowColor);
+      console.log('✨ AreaChart: 光暈效果應用完成');
+    }
+
+    // 筆刷縮放功能
+    if (enableBrushZoom) {
+      console.log('🖱️ AreaChart: 開始創建筆刷縮放功能');
+      
+      // 使用統一的控制器建立筆刷縮放功能
+      this.brushZoomController = createBrushZoom(
+        container,
+        { xScale, yScale },
+        {
+          enabled: true,
+          direction: 'x',
+          resetOnDoubleClick: brushZoomConfig?.resetOnDoubleClick !== false,
+          onZoom: onZoom,
+          onReset: onZoomReset
+        },
+        { width: chartWidth, height: chartHeight }
+      );
+      
+      console.log('🖌️ AreaChart: 筆刷控制器建立完成');
+      
+      console.log('🖱️ AreaChart: 筆刷縮放功能創建完成');
+    }
+
+    // 十字游標功能
+    if (enableCrosshair) {
+      console.log('🎯 AreaChart: 開始創建十字游標功能');
+      
+      // 使用統一的控制器建立十字游標功能
+      this.crosshairController = createCrosshair(
+        container,
+        this.stackedData.flatMap(series => series.values),
+        { xScale, yScale },
+        {
+          enabled: true,
+          circleRadius: crosshairConfig?.circleRadius || 4,
+          formatText: crosshairConfig?.formatText,
+          ...crosshairConfig
+        },
+        { width: chartWidth, height: chartHeight },
+        dataAccessor
+      );
+
+      console.log('🎯 AreaChart: 十字游標控制器建立完成');
+    }
+
+    console.log('🔧 AreaChart: addInteractionFeatures 執行完成');
+  }
+
+  /**
+   * 清理交互控制器
+   */
+  private cleanupInteractionControllers(): void {
+    if (this.brushZoomController) {
+      this.brushZoomController.destroy?.();
+      this.brushZoomController = null;
+    }
+    
+    if (this.crosshairController) {
+      this.crosshairController.destroy?.();
+      this.crosshairController = null;
+    }
+    
+    this.viewportController = null;
+  }
+
+  /**
+   * 重寫 update 方法以處理交互控制器更新
+   */
+  public update(newProps: AreaChartProps): void {
+    // 清理舊的交互控制器
+    this.cleanupInteractionControllers();
+    
+    // 調用父類的 update 方法
+    super.update(newProps);
+  }
+
+  /**
+   * 處理筆刷結束事件 (移植自 LineChart)
+   */
+  private handleBrushEnd(
+    event: any, 
+    scales: { xScale: any; yScale: any }, 
+    onZoom?: (domain: [any, any]) => void,
+    onZoomReset?: () => void
+  ): void {
+    console.log('🖌️ AreaChart: handleBrushEnd 開始處理');
+    const selection = event.selection;
+    
+    if (!selection) {
+      console.log('🖌️ AreaChart: 沒有選擇區域，執行重置');
+      this.resetZoom(scales, onZoomReset);
+    } else {
+      console.log('🖌️ AreaChart: 有選擇區域，進行縮放');
+      const [x0, x1] = selection;
+      const newDomain: [any, any] = [scales.xScale.invert(x0), scales.xScale.invert(x1)];
+      
+      console.log('🖌️ AreaChart: 縮放到新域值:', newDomain);
+      
+      // 更新比例尺
+      scales.xScale.domain(newDomain);
+      
+      // 重新渲染圖表內容
+      this.updateChartAfterZoom(scales);
+      
+      // 清除筆刷選擇
+      const container = d3.select(this.svgRef?.current).select('g');
+      container.select('.brush').call(d3.brushX().move, null);
+      
+      // 觸發用戶回調
+      if (onZoom) {
+        console.log('🖌️ AreaChart: 觸發用戶縮放回調');
+        onZoom(newDomain);
+      }
+    }
+    console.log('🖌️ AreaChart: handleBrushEnd 處理完成');
+  }
+
+  /**
+   * 重置縮放 (移植自 LineChart)
+   */
+  private resetZoom(scales: { xScale: any; yScale: any }, onZoomReset?: () => void): void {
+    // 重置到原始域 - 需要重新計算原始數據範圍
+    const allValues = this.stackedData.flatMap(series => series.values);
+    let originalXDomain: [any, any];
+    
+    const firstX = allValues[0]?.x;
+    if (firstX instanceof Date) {
+      originalXDomain = d3.extent(allValues, (d: any) => d.x) as [Date, Date];
+    } else if (typeof firstX === 'number') {
+      originalXDomain = d3.extent(allValues, (d: any) => d.x) as [number, number];
+    } else {
+      originalXDomain = [allValues[0]?.x, allValues[allValues.length - 1]?.x];
+    }
+    
+    scales.xScale.domain(originalXDomain);
+    this.updateChartAfterZoom(scales);
+    
+    if (onZoomReset) {
+      onZoomReset();
+    }
+  }
+
+  /**
+   * 縮放後更新圖表 (移植自 LineChart，適配 Area Chart)
+   */
+  private updateChartAfterZoom(scales: { xScale: any; yScale: any }): void {
+    if (!this.svgRef?.current) return;
+
+    const svg = d3.select(this.svgRef.current);
+    const container = svg.select('g');
+    
+    // 更新 X 軸
+    const xAxisGroup = container.select('.bottom-axis');
+    if (!xAxisGroup.empty()) {
+      console.log('🔄 AreaChart: 找到 X 軸組，開始更新');
+      const xAxisFormat = this.stackedData[0]?.values[0]?.x instanceof Date ? d3.timeFormat('%m/%d') as any : undefined;
+      xAxisGroup
+        .transition()
+        .duration(1000)
+        .call(d3.axisBottom(scales.xScale).tickFormat(xAxisFormat));
+      console.log('🔄 AreaChart: X 軸更新完成');
+    }
+    
+    // 更新區域路徑
+    const areaGenerator = d3.area<any>()
+      .x(d => scales.xScale(d.x))
+      .y0(d => scales.yScale(d.y0 || 0))
+      .y1(d => scales.yScale(d.y1 || d.y))
+      .curve(d3[this.getCurve(this.props.curve || 'monotone')]);
+
+    container.selectAll('.area-path')
+      .transition()
+      .duration(1000)
+      .attr('d', (d: any) => areaGenerator(d.values));
+      
+    // 更新線條（如果有的話）
+    const lineGenerator = d3.line<any>()
+      .x(d => scales.xScale(d.x))
+      .y(d => scales.yScale(d.y1 || d.y))
+      .curve(d3[this.getCurve(this.props.curve || 'monotone')]);
+
+    container.selectAll('.line-path')
+      .transition()
+      .duration(1000)
+      .attr('d', (d: any) => lineGenerator(d.values));
+
+    console.log('🔄 AreaChart: 圖表更新完成');
+  }
+
+  /**
+   * 處理十字游標移動 (移植自 LineChart，適配 Area Chart)
+   */
+  private handleCrosshairMove(
+    event: MouseEvent,
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    focus: d3.Selection<SVGCircleElement, unknown, null, undefined>,
+    focusText: d3.Selection<SVGTextElement, unknown, null, undefined>,
+    scales: { xScale: any; yScale: any },
+    crosshairConfig?: Partial<CrosshairConfig>
+  ): void {
+    const [mouseX] = d3.pointer(event, container.node());
+    const xValue = scales.xScale.invert(mouseX);
+    
+    // 查找最近的數據點 - 使用第一個系列的數據
+    if (this.stackedData.length === 0) return;
+    
+    const bisect = d3.bisector((d: any) => d.x).left;
+    const seriesValues = this.stackedData[0].values;
+    const i = bisect(seriesValues, xValue, 1);
+    const selectedData = seriesValues[i];
+    
+    if (selectedData) {
+      const x = scales.xScale(selectedData.x);
+      const y = scales.yScale(selectedData.y1 || selectedData.y);
+
+      focus.attr('cx', x).attr('cy', y);
+
+      const textContent = crosshairConfig?.formatText 
+        ? crosshairConfig.formatText(selectedData)
+        : `${selectedData.x}: ${(selectedData.y || 0).toFixed(2)}`;
+      
+      focusText
+        .text(textContent)
+        .attr('x', x + 10)
+        .attr('y', y - 10);
+    }
   }
 
   protected getChartType(): string {

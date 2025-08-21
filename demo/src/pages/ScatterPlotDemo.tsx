@@ -43,6 +43,17 @@ export default function ScatterPlotDemo() {
   const [showTrendline, setShowTrendline] = useState(false)
   const [animate, setAnimate] = useState(false)
   const [opacity, setOpacity] = useState(0.7)
+  
+  // === 新增的交互功能狀態 ===
+  const [enableBrushZoom, setEnableBrushZoom] = useState(false)
+  const [brushDirection, setBrushDirection] = useState<'x' | 'y' | 'xy'>('xy')
+  const [enableCrosshair, setEnableCrosshair] = useState(false)
+  const [enableDropShadow, setEnableDropShadow] = useState(false)
+  const [enableGlowEffect, setEnableGlowEffect] = useState(false)
+  
+  // 交互回調狀態
+  const [zoomDomain, setZoomDomain] = useState<{ x?: [any, any]; y?: [any, any] } | null>(null)
+  const [crosshairData, setCrosshairData] = useState<any>(null)
 
   return (
     <div className="p-6 space-y-8">
@@ -96,11 +107,118 @@ export default function ScatterPlotDemo() {
             />
           </div>
         </div>
+        
+        {/* === 新增的交互功能控制 === */}
+        <div className="mt-6">
+          <h4 className="text-md font-medium text-gray-800 mb-3">🎯 交互功能 (新增)</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableBrushZoom"
+                checked={enableBrushZoom}
+                onChange={(e) => setEnableBrushZoom(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableBrushZoom" className="text-sm font-medium text-gray-700">
+                筆刷縮放
+              </label>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                縮放方向
+              </label>
+              <select 
+                value={brushDirection} 
+                onChange={(e) => setBrushDirection(e.target.value as any)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="x">X 軸</option>
+                <option value="y">Y 軸</option>
+                <option value="xy">XY 雙軸 (特色)</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableCrosshair"
+                checked={enableCrosshair}
+                onChange={(e) => setEnableCrosshair(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableCrosshair" className="text-sm font-medium text-gray-700">
+                十字游標
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableDropShadow"
+                checked={enableDropShadow}
+                onChange={(e) => setEnableDropShadow(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableDropShadow" className="text-sm font-medium text-gray-700">
+                陰影效果
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableGlowEffect"
+                checked={enableGlowEffect}
+                onChange={(e) => setEnableGlowEffect(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableGlowEffect" className="text-sm font-medium text-gray-700">
+                光暈效果
+              </label>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+            <p className="font-medium mb-2">使用說明:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li><strong>筆刷縮放:</strong> 拖拽選取區域進行縮放，雙擊重置</li>
+              <li><strong>XY 雙軸縮放:</strong> ScatterPlot 的特色功能，可同時縮放 X 和 Y 軸</li>
+              <li><strong>十字游標:</strong> 滑鼠移動時顯示最近散點的詳細信息</li>
+              <li><strong>視覺效果:</strong> 陰影和光暈效果增強視覺表現</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* 基本散點圖 */}
       <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">基本散點圖</h3>
+        <h3 className="text-xl font-semibold mb-4">
+          🎯 交互功能散點圖 (新增功能測試)
+          {enableBrushZoom && <span className="text-sm text-blue-600 ml-2">({brushDirection} 軸縮放)</span>}
+          {enableCrosshair && <span className="text-sm text-green-600 ml-2">(十字游標)</span>}
+        </h3>
+        
+        {/* 交互狀態顯示 */}
+        {(zoomDomain || crosshairData) && (
+          <div className="mb-4 p-3 bg-blue-50 rounded text-sm">
+            <h4 className="font-medium text-blue-800 mb-2">交互狀態:</h4>
+            {zoomDomain && (
+              <div className="text-blue-700">
+                <strong>縮放範圍:</strong> 
+                {zoomDomain.x && ` X: ${zoomDomain.x[0]?.toFixed(2)} - ${zoomDomain.x[1]?.toFixed(2)}`}
+                {zoomDomain.y && ` Y: ${zoomDomain.y[0]?.toFixed(2)} - ${zoomDomain.y[1]?.toFixed(2)}`}
+              </div>
+            )}
+            {crosshairData && (
+              <div className="text-green-700">
+                <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
+              </div>
+            )}
+          </div>
+        )}
+        
         <ScatterPlot
           data={correlationData}
           xKey="x"
@@ -113,6 +231,31 @@ export default function ScatterPlotDemo() {
           animate={animate}
           colors={['#3b82f6']}
           onDataClick={(data) => console.log('Clicked:', data)}
+          
+          // === 新增的交互功能 props ===
+          enableBrushZoom={enableBrushZoom}
+          brushZoomConfig={{
+            direction: brushDirection,
+            resetOnDoubleClick: true
+          }}
+          onZoom={(domain) => {
+            setZoomDomain(domain)
+            console.log('ScatterPlot 縮放:', domain)
+          }}
+          onZoomReset={() => {
+            setZoomDomain(null)
+            console.log('ScatterPlot 縮放重置')
+          }}
+          enableCrosshair={enableCrosshair}
+          crosshairConfig={{
+            showCircle: true,
+            showLines: true,
+            showText: true,
+            formatText: (data) => `X: ${data.x.toFixed(2)}\nY: ${data.y.toFixed(2)}\n類別: ${data.category}`
+          }}
+          enableDropShadow={enableDropShadow}
+          enableGlowEffect={enableGlowEffect}
+          glowColor="#3b82f6"
         />
       </div>
 

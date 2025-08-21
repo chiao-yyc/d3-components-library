@@ -50,6 +50,16 @@ export default function AreaChartDemo() {
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('top')
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
+  
+  // === 新增的交互功能狀態 ===
+  const [enableBrushZoom, setEnableBrushZoom] = useState(false)
+  const [enableCrosshair, setEnableCrosshair] = useState(false)
+  const [enableDropShadow, setEnableDropShadow] = useState(false)
+  const [enableGlowEffect, setEnableGlowEffect] = useState(false)
+  
+  // 交互回調狀態
+  const [zoomDomain, setZoomDomain] = useState<[any, any] | null>(null)
+  const [crosshairData, setCrosshairData] = useState<any>(null)
 
   // 當前資料和映射
   const { currentData, mapping } = useMemo(() => {
@@ -311,7 +321,90 @@ export default function AreaChartDemo() {
               </label>
             </div>
           </div>
+          
+          {/* === 新增的交互功能控制 === */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-800 mb-3">🎯 交互功能 (新增)</h3>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="enableBrushZoom"
+                  checked={enableBrushZoom}
+                  onChange={(e) => setEnableBrushZoom(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="enableBrushZoom" className="text-sm text-gray-700">
+                  筆刷縮放
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="enableCrosshair"
+                  checked={enableCrosshair}
+                  onChange={(e) => setEnableCrosshair(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="enableCrosshair" className="text-sm text-gray-700">
+                  十字游標
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="enableDropShadow"
+                  checked={enableDropShadow}
+                  onChange={(e) => setEnableDropShadow(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="enableDropShadow" className="text-sm text-gray-700">
+                  陰影效果
+                </label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="enableGlowEffect"
+                  checked={enableGlowEffect}
+                  onChange={(e) => setEnableGlowEffect(e.target.checked)}
+                  className="mr-2"
+                />
+                <label htmlFor="enableGlowEffect" className="text-sm text-gray-700">
+                  光暈效果
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* 交互狀態顯示 */}
+        {(zoomDomain || crosshairData) && (
+          <div className="mt-4 p-3 bg-blue-50 rounded text-sm">
+            <h4 className="font-medium text-blue-800 mb-2">交互狀態:</h4>
+            {zoomDomain && (
+              <div className="text-blue-700">
+                <strong>縮放範圍:</strong> {
+                  zoomDomain[0] instanceof Date 
+                    ? zoomDomain[0].toLocaleDateString() 
+                    : zoomDomain[0]?.toString()
+                } 到 {
+                  zoomDomain[1] instanceof Date 
+                    ? zoomDomain[1].toLocaleDateString() 
+                    : zoomDomain[1]?.toString()
+                }
+              </div>
+            )}
+            {crosshairData && (
+              <div className="text-green-700">
+                <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 圖表展示 */}
@@ -345,6 +438,27 @@ export default function AreaChartDemo() {
             onDataHover={(data, series) => {
               console.log('Area data hovered:', data, series)
             }}
+            
+            // === 新增的交互功能 props ===
+            enableBrushZoom={enableBrushZoom}
+            onZoom={(domain) => {
+              setZoomDomain(domain)
+              console.log('AreaChart 縮放:', domain)
+            }}
+            onZoomReset={() => {
+              setZoomDomain(null)
+              console.log('AreaChart 縮放重置')
+            }}
+            enableCrosshair={enableCrosshair}
+            crosshairConfig={{
+              showCircle: true,
+              showLines: true,
+              showText: true,
+              formatText: (data) => `日期: ${data.x}\n數值: ${data.y.toFixed(2)}`
+            }}
+            enableDropShadow={enableDropShadow}
+            enableGlowEffect={enableGlowEffect}
+            glowColor="#3b82f6"
           />
         </div>
       </div>

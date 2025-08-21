@@ -2,6 +2,7 @@
 import { HTMLAttributes } from 'react';
 import { BaseChartProps } from '../../../../core/base-chart/base-chart'; // 導入 BaseChartProps
 import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../../core/data-processor/types'; // 導入 DataProcessor 的 ProcessedDataPoint
+import { BrushZoomConfig, CrosshairConfig } from '../../../../core/base-chart/interaction-utils'; // 導入交互配置類型
 
 // 重新導出 BaseChart 的相關類型
 export type { Margin, DataMapping } from '../../../../core/base-chart/types';
@@ -23,6 +24,7 @@ export interface LineChartProps extends BaseChartProps, Omit<HTMLAttributes<HTML
   tooltipFormat?: (data: ProcessedDataPoint) => string;
   onDataClick?: (data: any) => void;
   onHover?: (data: any) => void;
+  
   // LineChart specific properties from old LineChartConfig that are not in BaseChartProps
   strokeWidth?: number;
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
@@ -33,6 +35,26 @@ export interface LineChartProps extends BaseChartProps, Omit<HTMLAttributes<HTML
   showGrid?: boolean;
   gridOpacity?: number;
   seriesKey?: string; // Added from LineChartConfig
+
+  // === 交互功能相關 props ===
+  
+  // 筆刷縮放功能
+  enableBrushZoom?: boolean;
+  brushZoomConfig?: Partial<BrushZoomConfig>;
+  onZoom?: (domain: [any, any]) => void;
+  onZoomReset?: () => void;
+  
+  // 十字游標功能
+  enableCrosshair?: boolean;
+  crosshairConfig?: Partial<CrosshairConfig>;
+  
+  // 視覺效果增強
+  enableDropShadow?: boolean;
+  enableGlowEffect?: boolean;
+  glowColor?: string;
+  
+  // 數據查找配置
+  dataAccessor?: (d: any) => any; // 用於十字游標的數據查找
 }
 
 // If LineChartConfig is still used, ensure its compatibility with the new structure

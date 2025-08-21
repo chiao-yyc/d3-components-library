@@ -1,6 +1,7 @@
 // Pure TypeScript types for the core area chart logic
 import { BaseChartProps } from '../../../core/base-chart/base-chart';
 import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/interaction-utils';
 
 export type { Margin, DataMapping } from '../../../core/base-chart/types';
 
@@ -57,4 +58,24 @@ export interface AreaChartProps extends BaseChartProps {
   // Events
   onDataClick?: (d: ProcessedAreaDataPoint, series?: string) => void;
   onDataHover?: (d: ProcessedAreaDataPoint | null, series?: string) => void;
+  
+  // === 交互功能相關 props ===
+  
+  // 筆刷縮放功能
+  enableBrushZoom?: boolean;
+  brushZoomConfig?: Partial<BrushZoomConfig>;
+  onZoom?: (domain: [any, any]) => void;
+  onZoomReset?: () => void;
+  
+  // 十字游標功能
+  enableCrosshair?: boolean;
+  crosshairConfig?: Partial<CrosshairConfig>;
+  
+  // 視覺效果增強
+  enableDropShadow?: boolean;
+  enableGlowEffect?: boolean;
+  glowColor?: string;
+  
+  // 數據查找配置
+  dataAccessor?: (d: any) => any; // 用於十字游標的數據查找
 }

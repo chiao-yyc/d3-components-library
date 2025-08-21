@@ -2,6 +2,17 @@ import React, { ReactNode, useMemo, useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../../utils/cn'
 import { renderAxis, renderGrid, renderLegend, renderArcLabels, renderBarLabels, renderPointLabels, AxisConfig, GridConfig, LegendConfig, LabelConfig, BarLabelConfig, PointLabelConfig } from './chart-utils'
+import { 
+  BrushZoomController, 
+  CrosshairController, 
+  ViewportController,
+  BrushZoomConfig, 
+  CrosshairConfig,
+  createBrushZoom,
+  createCrosshair,
+  createViewportController
+} from './interaction-utils'
+import { createChartClipPath, createStandardDropShadow, createStandardGlow } from './visual-effects'
 
 export interface BaseChartProps {
   data: any[]
@@ -229,6 +240,115 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     this.props.onError?.(error)
   }
 
+  // === 交互層管理方法 ===
+
+  /**
+   * 創建交互層 - 用於添加交互功能
+   */
+  protected createInteractiveLayer(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>
+  ): d3.Selection<SVGGElement, unknown, null, undefined> {
+    return container.append('g').attr('class', 'interactive-layer');
+  }
+
+  /**
+   * 啟用筆刷縮放功能
+   */
+  protected enableBrushZoom(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    scales: { xScale: any; yScale: any },
+    config: BrushZoomConfig,
+    onZoomCallback?: (domain: [any, any]) => void
+  ): BrushZoomController {
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    const brushConfig: BrushZoomConfig = {
+      enabled: true,
+      direction: 'x',
+      resetOnDoubleClick: true,
+      onZoom: onZoomCallback,
+      ...config
+    };
+
+    return createBrushZoom(container, scales, brushConfig, { 
+      width: chartWidth, 
+      height: chartHeight 
+    });
+  }
+
+  /**
+   * 啟用十字游標功能
+   */
+  protected enableCrosshair(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    data: any[],
+    scales: { xScale: any; yScale: any },
+    config: CrosshairConfig,
+    dataAccessor?: (d: any) => any
+  ): CrosshairController {
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    const crosshairConfig: CrosshairConfig = {
+      enabled: true,
+      showCircle: true,
+      showLines: true,
+      showText: true,
+      ...config
+    };
+
+    return createCrosshair(container, data, scales, crosshairConfig, { 
+      width: chartWidth, 
+      height: chartHeight 
+    }, dataAccessor);
+  }
+
+  /**
+   * 創建視窗控制器
+   */
+  protected createViewportController(
+    scales: { xScale: any; yScale: any }
+  ): ViewportController {
+    return createViewportController(scales);
+  }
+
+  /**
+   * 應用圖表剪裁路徑
+   */
+  protected applyChartClipPath(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    targetSelection: d3.Selection<any, any, any, any>
+  ): string {
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    const clipPathUrl = createChartClipPath(svg, { width: chartWidth, height: chartHeight });
+    targetSelection.attr('clip-path', clipPathUrl);
+    return clipPathUrl;
+  }
+
+  /**
+   * 添加標準陰影效果
+   */
+  protected addDropShadow(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    targetSelection: d3.Selection<any, any, any, any>
+  ): string {
+    const shadowUrl = createStandardDropShadow(svg);
+    targetSelection.attr('filter', shadowUrl);
+    return shadowUrl;
+  }
+
+  /**
+   * 添加光暈效果
+   */
+  protected addGlowEffect(
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+    targetSelection: d3.Selection<any, any, any, any>,
+    color: string = '#ffffff'
+  ): string {
+    const glowUrl = createStandardGlow(svg, color);
+    targetSelection.attr('filter', glowUrl);
+    return glowUrl;
+  }
+
   // 渲染方法
   render(): ReactNode {
     const { className, style, width, height } = this.props
@@ -288,6 +408,15 @@ export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
   return React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
+    console.log('🚀 createChartComponent 被調用，組件類型:', ChartClass.name);
+    console.log('🚀 props 包含互動功能:', {
+      enableBrushZoom: (props as any).enableBrushZoom,
+      enableCrosshair: (props as any).enableCrosshair,
+      enableClipPath: (props as any).enableClipPath,
+      enableDropShadow: (props as any).enableDropShadow,
+      enableGlowEffect: (props as any).enableGlowEffect
+    });
+    
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const chartInstance = useMemo(() => new ChartClass(props), []);

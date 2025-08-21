@@ -808,6 +808,216 @@ protected renderChart(): void {
 
 ---
 
+# 🔧 交互功能修復與抽象化規劃
+
+**目標：** 修復 LineChart 交互功能問題，並將筆刷縮放、十字游標等交互工具抽象化為可復用的共用工具函數，為所有圖表組件提供穩定一致的交互體驗。
+
+## 🚨 當前問題分析
+
+### **Problem 1: 筆刷縮放時線圖溢出問題**
+- **現象**: 單獨勾選筆刷縮放時，選取筆刷範圍後線圖會超出 xy 軸區域
+- **原因**: 筆刷縮放的剪裁路徑邏輯不正確，邊界計算有誤
+- **位置**: `line-chart.ts:290-313, 573-580`
+
+### **Problem 2: 剪裁路徑導致軸線消失**
+- **現象**: 同時勾選筆刷縮放與剪裁路徑時，xy 軸的 ticks 和 labels 消失
+- **原因**: 剪裁路徑被錯誤地應用到整個容器，影響了軸線元素
+- **位置**: `line-chart.ts:226-232, 401-418`
+
+### **Problem 3: 交互功能衝突**
+- **現象**: 多個交互功能同時啟用時出現不相容問題
+- **原因**: 清理邏輯不完善，元素重複創建導致衝突
+
+## 📋 修復任務清單
+
+### **Task 1: 修復 LineChart 核心交互問題**
+
+#### **1.1 修復筆刷縮放溢出邏輯**
+```typescript
+// 位置: line-chart.ts:290-313
+// 問題: 剪裁路徑創建和應用邏輯錯誤
+
+// 修復前:
+clipPathId = createChartClipPath(svg, { width: chartWidth, height: chartHeight });
+lineElements.attr('clip-path', clipPathId);
+
+// 修復後:
+// 1. 確保剪裁區域計算正確
+// 2. 只在筆刷縮放活動時應用剪裁
+// 3. 添加邊界保護邏輯
+```
+
+#### **1.2 修復剪裁路徑軸線消失問題**
+```typescript
+// 位置: line-chart.ts:401-418
+// 問題: 剪裁路徑應用範圍過廣
+
+// 修復策略:
+// 1. 嚴格限制剪裁路徑只應用到圖表內容元素
+// 2. 軸線元素永遠不被剪裁路徑影響
+// 3. 分離軸線和圖表內容的渲染層級
+```
+
+#### **1.3 改進交互元素清理邏輯**
+```typescript
+// 位置: line-chart.ts:220-233
+// 問題: 清理不徹底導致元素衝突
+
+// 改進方案:
+// 1. 使用更精確的選擇器清理舊元素
+// 2. 分階段清理不同類型的交互元素
+// 3. 添加狀態檢查避免重複創建
+```
+
+### **Task 2: 筆刷縮放工具抽象化**
+
+#### **2.1 創建統一筆刷縮放工具**
+```typescript
+// 位置: base-chart/interaction-utils.ts
+// 目標: 創建可復用的筆刷縮放工具函數
+
+export interface EnhancedBrushZoomConfig extends BrushZoomConfig {
+  clipPath?: {
+    enabled: boolean;
+    targetSelector?: string; // 指定要剪裁的元素選擇器
+    excludeSelector?: string; // 排除不被剪裁的元素選擇器
+  };
+  boundaryProtection?: {
+    enabled: boolean;
+    padding?: number; // 邊界保護間距
+  };
+  axisUpdate?: {
+    enabled: boolean;
+    updateSelectors?: string[]; // 需要更新的軸線選擇器
+  };
+}
+
+export function createEnhancedBrushZoom(
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  scales: { xScale: any; yScale: any },
+  config: EnhancedBrushZoomConfig,
+  chartDimensions: { width: number; height: number },
+  svg?: d3.Selection<SVGSVGElement, unknown, null, undefined>
+): BrushZoomController {
+  // 實現增強版筆刷縮放邏輯
+  // 1. 智能剪裁路徑管理
+  // 2. 自動邊界保護
+  // 3. 軸線安全更新
+  // 4. 元素衝突避免
+}
+```
+
+#### **2.2 改進剪裁路徑管理工具**
+```typescript
+// 位置: base-chart/visual-effects.ts
+// 目標: 創建更靈活的剪裁路徑管理
+
+export interface SmartClipPathConfig {
+  id: string;
+  width: number;
+  height: number;
+  applyTo?: string[]; // 要應用剪裁的元素選擇器
+  excludeFrom?: string[]; // 要排除的元素選擇器
+  safeMode?: boolean; // 安全模式，自動排除軸線元素
+}
+
+export function createSmartClipPath(
+  svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  config: SmartClipPathConfig
+): string {
+  // 實現智能剪裁路徑
+  // 1. 自動識別圖表內容元素
+  // 2. 智能排除軸線和UI元素
+  // 3. 提供細粒度控制選項
+}
+```
+
+#### **2.3 在 BaseChart 中整合增強交互工具**
+```typescript
+// 位置: base-chart/base-chart.tsx
+// 目標: 在 BaseChart 抽象類中提供統一的交互功能支援
+
+// 新增方法:
+protected enableEnhancedBrushZoom(
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  scales: { xScale: any; yScale: any },
+  config: EnhancedBrushZoomConfig
+): BrushZoomController {
+  // 使用新的增強版筆刷縮放工具
+}
+
+protected enableSmartClipPath(
+  container: d3.Selection<SVGGElement, unknown, null, undefined>,
+  config: SmartClipPathConfig
+): string {
+  // 使用新的智能剪裁路徑工具
+}
+```
+
+### **Task 3: 圖表組件更新適配**
+
+#### **3.1 更新 LineChart 使用新工具**
+```typescript
+// 位置: line-chart.ts
+// 目標: 使用新的抽象化工具替換現有實現
+
+// 替換現有的筆刷縮放邏輯
+if (enableBrushZoom) {
+  this.brushZoomController = this.enableEnhancedBrushZoom(container, scales, {
+    enabled: true,
+    direction: 'x',
+    resetOnDoubleClick: true,
+    clipPath: {
+      enabled: true,
+      targetSelector: 'path[class*="line-"], path[class*="area-"]',
+      excludeSelector: '.axis, .grid'
+    },
+    boundaryProtection: { enabled: true, padding: 2 },
+    axisUpdate: { enabled: true },
+    onZoom: onZoom,
+    onReset: onZoomReset
+  });
+}
+```
+
+#### **3.2 為其他圖表準備模板**
+```typescript
+// 為 AreaChart, ScatterPlot, BarChart 等準備通用實現模板
+// 確保所有圖表都能受益於改進的交互工具
+```
+
+## 🎁 預期效益
+
+### **即時效益：**
+1. **問題修復**: 完全解決 LineChart 的三個交互問題
+2. **穩定性提升**: 消除交互功能衝突和異常行為
+3. **用戶體驗**: 提供流暢一致的交互體驗
+
+### **長期效益：**
+1. **代碼復用**: 筆刷縮放工具可供所有圖表使用
+2. **維護性**: 統一的交互邏輯便於維護和調試
+3. **擴展性**: 為新圖表和新交互功能提供穩定基礎
+4. **一致性**: 所有圖表的交互行為保持一致
+
+## 📅 實施計劃
+
+### **Phase 1: 立即修復 (1-2 天)**
+- 修復 LineChart 的三個核心問題
+- 確保 demo 頁面所有場景正常工作
+
+### **Phase 2: 工具抽象化 (2-3 天)**
+- 創建增強版筆刷縮放工具
+- 改進剪裁路徑管理
+- 在 BaseChart 中整合新工具
+
+### **Phase 3: 圖表適配 (1-2 天)**
+- 更新 LineChart 使用新工具
+- 為其他圖表準備適配模板
+- 全面測試和驗證
+
+---
+
 # 📊 圖表抽象化進度總覽
 
 ## ✅ **已完成的圖表組件抽象化：**
@@ -823,6 +1033,12 @@ protected renderChart(): void {
 - **標籤渲染工具** - renderArcLabels(), renderBarLabels(), renderPointLabels() ✅
 - **動畫工具** - applyEnterAnimation(), applyUpdateAnimation(), applyArcEnterAnimation() ✅
 - **樣式工具** - applyTextStyles(), applyShapeStyles(), applyAxisStyles() ✅
+- **交互工具** - createBrushZoom(), createCrosshair(), createViewportController() ✅
+
+## 🔧 **待修復的交互功能問題：**
+- **筆刷縮放溢出問題** - LineChart 筆刷縮放時線圖超出軸線區域 🚨
+- **剪裁路徑軸線消失** - 啟用剪裁路徑時軸線 ticks/labels 消失 🚨
+- **交互功能衝突** - 同時啟用多個交互功能時出現不相容問題 🚨
 
 ## ⚡ **高優先級待處理：**
 6. **BarChart** - 待遷移至 BaseChart 模式 🔥 (基礎圖表，使用頻率高)
@@ -838,6 +1054,8 @@ protected renderChart(): void {
 12. **CandlestickChart** - 待開始 🔮
 
 ## 🎯 **下一步重點：**
+- **修復 LineChart 交互功能問題** - 立即處理 🚨
+- **筆刷縮放工具抽象化** - 為其他圖表提供穩定的交互基礎 🔥
 - **BarChart 抽象化** - 基礎圖表，優先處理 🔥
 - 為 BarChart 集成共用軸線和標籤工具
 - 繼續剩餘圖表組件的抽象化工作
