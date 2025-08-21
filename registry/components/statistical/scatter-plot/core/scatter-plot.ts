@@ -4,6 +4,8 @@ import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 import { ScatterPlotProps, ProcessedScatterDataPoint } from './types';
+import { createChartClipPath, createStandardDropShadow, createStandardGlow } from '../../../core/base-chart/visual-effects';
+import { BrushZoomController, CrosshairController } from '../../../core/base-chart/interaction-utils';
 
 export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   private processedData: ProcessedScatterDataPoint[] = [];
@@ -11,6 +13,11 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   private colorScale: ColorScale | null = null;
   private trendlineData: { x: number; y: number }[] | null = null;
   private scatterGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
+  
+  // 交互控制器
+  private brushZoomController: BrushZoomController | null = null;
+  private crosshairController: CrosshairController | null = null;
+  private viewportController: any = null;
 
   constructor(props: ScatterPlotProps) {
     super(props);
@@ -222,6 +229,351 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         fontColor: '#6b7280'
       }
     });
+
+    // === 添加交互功能 ===
+    this.addInteractionFeatures(g);
+  }
+
+  /**
+   * 添加交互功能 (針對 Scatter Plot 優化，支援 XY 雙軸縮放)
+   */
+  private addInteractionFeatures(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
+    console.log('🔧 ScatterPlot: addInteractionFeatures 開始執行');
+    
+    // 清理舊的交互控制器和元素
+    this.cleanupInteractionControllers();
+    container.selectAll('.brush').remove();
+    container.selectAll('.crosshair').remove();
+    container.selectAll('.focus').remove();
+    
+    const { 
+      enableBrushZoom, 
+      brushZoomConfig, 
+      onZoom, 
+      onZoomReset,
+      enableCrosshair, 
+      crosshairConfig,
+      enableDropShadow,
+      enableGlowEffect,
+      glowColor,
+      dataAccessor
+    } = this.props;
+
+    console.log('⚙️ ScatterPlot 交互功能配置:', { 
+      enableBrushZoom, 
+      enableCrosshair, 
+      enableDropShadow, 
+      enableGlowEffect,
+      brushZoomDirection: brushZoomConfig?.direction || 'xy'
+    });
+
+    const { xScale, yScale, chartWidth, chartHeight } = this.scales;
+
+    // === 默認剪裁路徑：防止圖表內容溢出軸線區域 ===
+    let defaultClipPathId = null;
+    if (this.svgRef?.current) {
+      console.log('✂️ ScatterPlot: 創建默認剪裁路徑，防止圖表內容溢出軸線區域');
+      const svg = d3.select(this.svgRef.current);
+      
+      defaultClipPathId = createChartClipPath(svg, { width: chartWidth, height: chartHeight });
+      console.log('✂️ ScatterPlot: 默認剪裁路徑創建完成:', defaultClipPathId);
+      
+      // 將剪裁路徑應用到所有散點元素，保護軸線
+      const dotElements = container.selectAll('circle.dot');
+      const trendlineElements = container.selectAll('path.trendline');
+      
+      console.log('✂️ ScatterPlot: 應用默認剪裁路徑 - 散點:', dotElements.size(), '趨勢線:', trendlineElements.size());
+      
+      dotElements.attr('clip-path', defaultClipPathId);
+      trendlineElements.attr('clip-path', defaultClipPathId);
+      
+      // 確保軸線永遠不被剪裁
+      const axisElements = container.selectAll('.bottom-axis, .left-axis, .top-axis, .right-axis, .x-axis, .y-axis, g[class*="axis"]');
+      axisElements.attr('clip-path', null);
+      console.log('✂️ ScatterPlot: 軸線保護完成，保護了', axisElements.size(), '個軸線元素');
+    }
+
+    // 應用視覺效果
+    if (enableDropShadow && this.svgRef?.current) {
+      console.log('🌑 ScatterPlot: 開始應用陰影效果');
+      const svg = d3.select(this.svgRef.current);
+      const dotElements = container.selectAll('circle.dot');
+      this.addDropShadow(svg, dotElements);
+      console.log('🌑 ScatterPlot: 陰影效果應用完成');
+    }
+
+    if (enableGlowEffect && this.svgRef?.current) {
+      console.log('✨ ScatterPlot: 開始應用光暈效果, 顏色:', glowColor);
+      const svg = d3.select(this.svgRef.current);
+      const dotElements = container.selectAll('circle.dot');
+      this.addGlowEffect(svg, dotElements, glowColor);
+      console.log('✨ ScatterPlot: 光暈效果應用完成');
+    }
+
+    // 筆刷縮放功能 (Scatter Plot 的特色：支援 XY 雙軸縮放)
+    if (enableBrushZoom) {
+      console.log('🖱️ ScatterPlot: 開始創建筆刷縮放功能');
+      
+      // ScatterPlot 預設使用 XY 雙軸縮放，這是它的優勢
+      const direction = brushZoomConfig?.direction || 'xy';
+      console.log('🖱️ ScatterPlot: 縮放方向:', direction);
+      
+      // 使用統一的控制器建立筆刷縮放功能
+      this.brushZoomController = createBrushZoom(
+        container,
+        { xScale, yScale },
+        {
+          enabled: true,
+          direction: direction,
+          resetOnDoubleClick: brushZoomConfig?.resetOnDoubleClick !== false,
+          onZoom: onZoom,
+          onReset: onZoomReset
+        },
+        { width: chartWidth, height: chartHeight }
+      );
+      
+      console.log('🖌️ ScatterPlot: 筆刷控制器建立完成');
+      
+      console.log('🖱️ ScatterPlot: 筆刷縮放功能創建完成');
+    }
+
+    // 十字游標功能
+    if (enableCrosshair) {
+      console.log('🎯 ScatterPlot: 開始創建十字游標功能');
+      
+      // 使用統一的控制器建立十字游標功能
+      this.crosshairController = createCrosshair(
+        container,
+        this.processedData,
+        { xScale, yScale },
+        {
+          enabled: true,
+          circleRadius: crosshairConfig?.circleRadius || 4,
+          formatText: crosshairConfig?.formatText,
+          ...crosshairConfig
+        },
+        { width: chartWidth, height: chartHeight },
+        dataAccessor
+      );
+
+      console.log('🎯 ScatterPlot: 十字游標控制器建立完成');
+    }
+
+    console.log('🔧 ScatterPlot: addInteractionFeatures 執行完成');
+  }
+
+  /**
+   * 清理交互控制器
+   */
+  private cleanupInteractionControllers(): void {
+    if (this.brushZoomController) {
+      this.brushZoomController.destroy?.();
+      this.brushZoomController = null;
+    }
+    
+    if (this.crosshairController) {
+      this.crosshairController.destroy?.();
+      this.crosshairController = null;
+    }
+    
+    this.viewportController = null;
+  }
+
+  /**
+   * 重寫 update 方法以處理交互控制器更新
+   */
+  public update(newProps: ScatterPlotProps): void {
+    // 清理舊的交互控制器
+    this.cleanupInteractionControllers();
+    
+    // 調用父類的 update 方法
+    super.update(newProps);
+  }
+
+  /**
+   * 處理筆刷結束事件 (ScatterPlot 特色：支援 XY 雙軸縮放)
+   */
+  private handleBrushEnd(
+    event: any, 
+    scales: { xScale: any; yScale: any }, 
+    onZoom?: (domain: { x?: [any, any]; y?: [any, any] }) => void,
+    onZoomReset?: () => void,
+    direction: string = 'xy'
+  ): void {
+    console.log('🖌️ ScatterPlot: handleBrushEnd 開始處理, 方向:', direction);
+    const selection = event.selection;
+    
+    if (!selection) {
+      console.log('🖌️ ScatterPlot: 沒有選擇區域，執行重置');
+      this.resetZoom(scales, onZoomReset);
+    } else {
+      console.log('🖌️ ScatterPlot: 有選擇區域，進行縮放');
+      
+      let newDomain: { x?: [any, any]; y?: [any, any] } = {};
+      
+      if (direction === 'x') {
+        const [x0, x1] = selection;
+        newDomain.x = [scales.xScale.invert(x0), scales.xScale.invert(x1)];
+        scales.xScale.domain(newDomain.x);
+      } else if (direction === 'y') {
+        const [y0, y1] = selection;
+        newDomain.y = [scales.yScale.invert(y1), scales.yScale.invert(y0)]; // Y軸反向
+        scales.yScale.domain(newDomain.y);
+      } else if (direction === 'xy') {
+        // 2D 筆刷選擇，ScatterPlot 的特色功能
+        const [[x0, y0], [x1, y1]] = selection;
+        newDomain.x = [scales.xScale.invert(x0), scales.xScale.invert(x1)];
+        newDomain.y = [scales.yScale.invert(y1), scales.yScale.invert(y0)]; // Y軸反向
+        
+        scales.xScale.domain(newDomain.x);
+        scales.yScale.domain(newDomain.y);
+      }
+      
+      console.log('🖌️ ScatterPlot: 縮放到新域值:', newDomain);
+      
+      // 重新渲染圖表內容
+      this.updateChartAfterZoom(scales);
+      
+      // 清除筆刷選擇
+      const container = d3.select(this.svgRef?.current).select('g');
+      if (direction === 'x') {
+        container.select('.brush').call(d3.brushX().move, null);
+      } else if (direction === 'y') {
+        container.select('.brush').call(d3.brushY().move, null);
+      } else {
+        container.select('.brush').call(d3.brush().move, null);
+      }
+      
+      // 觸發用戶回調
+      if (onZoom) {
+        console.log('🖌️ ScatterPlot: 觸發用戶縮放回調');
+        onZoom(newDomain);
+      }
+    }
+    console.log('🖌️ ScatterPlot: handleBrushEnd 處理完成');
+  }
+
+  /**
+   * 重置縮放 (ScatterPlot 雙軸重置)
+   */
+  private resetZoom(scales: { xScale: any; yScale: any }, onZoomReset?: () => void): void {
+    // 重置到原始域
+    const originalXDomain = d3.extent(this.processedData, (d: any) => d.x) as [number, number];
+    const originalYDomain = d3.extent(this.processedData, (d: any) => d.y) as [number, number];
+    
+    scales.xScale.domain(originalXDomain);
+    scales.yScale.domain(originalYDomain);
+    this.updateChartAfterZoom(scales);
+    
+    if (onZoomReset) {
+      onZoomReset();
+    }
+  }
+
+  /**
+   * 縮放後更新圖表 (ScatterPlot 雙軸更新)
+   */
+  private updateChartAfterZoom(scales: { xScale: any; yScale: any }): void {
+    if (!this.svgRef?.current) return;
+
+    const svg = d3.select(this.svgRef.current);
+    const container = svg.select('g');
+    
+    // 更新軸線
+    const xAxisGroup = container.select('.bottom-axis');
+    if (!xAxisGroup.empty()) {
+      console.log('🔄 ScatterPlot: 找到 X 軸組，開始更新');
+      xAxisGroup
+        .transition()
+        .duration(1000)
+        .call(d3.axisBottom(scales.xScale));
+      console.log('🔄 ScatterPlot: X 軸更新完成');
+    }
+    
+    const yAxisGroup = container.select('.left-axis');
+    if (!yAxisGroup.empty()) {
+      console.log('🔄 ScatterPlot: 找到 Y 軸組，開始更新');
+      yAxisGroup
+        .transition()
+        .duration(1000)
+        .call(d3.axisLeft(scales.yScale));
+      console.log('🔄 ScatterPlot: Y 軸更新完成');
+    }
+    
+    // 更新散點位置
+    container.selectAll('.dot')
+      .transition()
+      .duration(1000)
+      .attr('cx', (d: any) => scales.xScale(d.x))
+      .attr('cy', (d: any) => scales.yScale(d.y));
+      
+    // 更新趨勢線（如果有的話）
+    if (this.trendlineData) {
+      const lineGenerator = d3.line<{x: number, y: number}>()
+        .x(d => scales.xScale(d.x))
+        .y(d => scales.yScale(d.y));
+        
+      container.select('.trendline')
+        .transition()
+        .duration(1000)
+        .attr('d', lineGenerator(this.trendlineData));
+    }
+
+    console.log('🔄 ScatterPlot: 圖表更新完成');
+  }
+
+  /**
+   * 處理十字游標移動 (ScatterPlot 最近點查找)
+   */
+  private handleCrosshairMove(
+    event: MouseEvent,
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    focus: d3.Selection<SVGCircleElement, unknown, null, undefined>,
+    focusText: d3.Selection<SVGTextElement, unknown, null, undefined>,
+    scales: { xScale: any; yScale: any },
+    crosshairConfig?: Partial<any>
+  ): void {
+    const [mouseX, mouseY] = d3.pointer(event, container.node());
+    const xValue = scales.xScale.invert(mouseX);
+    const yValue = scales.yScale.invert(mouseY);
+    
+    // 查找最近的散點
+    if (this.processedData.length === 0) return;
+    
+    // 使用歐幾里得距離查找最近點
+    let minDistance = Infinity;
+    let nearestPoint: any = null;
+    
+    this.processedData.forEach(d => {
+      const dx = scales.xScale(d.x) - mouseX;
+      const dy = scales.yScale(d.y) - mouseY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestPoint = d;
+      }
+    });
+    
+    if (nearestPoint && minDistance < 50) { // 只在 50px 範圍內顯示
+      const x = scales.xScale(nearestPoint.x);
+      const y = scales.yScale(nearestPoint.y);
+
+      focus.attr('cx', x).attr('cy', y);
+
+      const textContent = crosshairConfig?.formatText 
+        ? crosshairConfig.formatText(nearestPoint)
+        : `X: ${nearestPoint.x.toFixed(2)}, Y: ${nearestPoint.y.toFixed(2)}`;
+      
+      focusText
+        .text(textContent)
+        .attr('x', x + 10)
+        .attr('y', y - 10);
+    } else {
+      // 如果沒有找到近點，隱藏焦點
+      focus.style('opacity', 0);
+      focusText.style('opacity', 0);
+    }
   }
 
   public getChartType(): string {
