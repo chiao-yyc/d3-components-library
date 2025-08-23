@@ -6,6 +6,7 @@ import LoadingSpinner from './components/LoadingSpinner'
 // 使用 lazy loading 優化性能
 const Home = lazy(() => import('./pages/Home'))
 const BarChartDemo = lazy(() => import('./pages/BarChartDemo'))
+const BarChartDemoV2 = lazy(() => import('./pages/BarChartDemoV2'))
 const LineChartDemo = lazy(() => import('./pages/LineChartDemo'))
 const ScatterPlotDemo = lazy(() => import('./pages/ScatterPlotDemo'))
 const PieChartDemo = lazy(() => import('./pages/PieChartDemo'))
@@ -42,6 +43,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/bar-chart" element={<BarChartDemo />} />
+          <Route path="/bar-chart-v2" element={<BarChartDemoV2 />} />
           <Route path="/line-chart" element={<LineChartDemo />} />
           <Route path="/scatter-plot" element={<ScatterPlotDemo />} />
           <Route path="/pie-chart" element={<PieChartDemo />} />

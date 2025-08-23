@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { PieChart } from '@registry/components/basic/pie-chart'
+import { PieChart } from '../components/ui'
 
 // 範例資料
 const sampleData = [
@@ -347,7 +347,7 @@ export default function PieChartDemo() {
         </h2>
         
         <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { PieChart } from '@registry/components/basic/pie-chart'
+          <code>{`import { PieChart } from '../components/ui'
 
 const data = [
   { category: '產品A', sales: 45000 },
