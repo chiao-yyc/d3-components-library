@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart'
+import { FunnelChartV2 as FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart-v2'
 
 // 銷售漏斗資料
 const salesFunnelData = [

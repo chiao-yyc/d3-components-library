@@ -34,6 +34,12 @@ export interface BoxPlotRenderOptions {
   // 數據相關
   categoryIndex?: number;
   jitterWidth?: number;
+  
+  // 動畫相關
+  animate?: boolean;
+  animationDuration?: number;
+  animationDelay?: number;
+  animationEasing?: string;
 }
 
 /**
@@ -85,43 +91,71 @@ export class BoxPlotRenderer {
       
       // 繪製箱體
       if (showQuartiles) {
-        boxGroup.append('rect')
+        const rect = boxGroup.append('rect')
           .attr('class', 'box-rect')
           .attr('x', centerX - boxWidth / 2)
-          .attr('y', yLinearScale(statistics.q3))
           .attr('width', boxWidth)
-          .attr('height', yLinearScale(statistics.q1) - yLinearScale(statistics.q3))
           .attr('fill', boxFill)
           .attr('fill-opacity', boxFillOpacity)
           .attr('stroke', boxStroke)
           .attr('stroke-width', boxStrokeWidth);
+          
+        if (options.animate) {
+          rect
+            .attr('y', yLinearScale(statistics.median))
+            .attr('height', 0)
+            .transition()
+            .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100)
+            .duration(options.animationDuration || 800)
+            .ease(d3.easeBackOut)
+            .attr('y', yLinearScale(statistics.q3))
+            .attr('height', yLinearScale(statistics.q1) - yLinearScale(statistics.q3));
+        } else {
+          rect
+            .attr('y', yLinearScale(statistics.q3))
+            .attr('height', yLinearScale(statistics.q1) - yLinearScale(statistics.q3));
+        }
       }
 
       // 繪製鬚線
       if (showWhiskers) {
-        this.renderWhiskers(boxGroup, statistics, orientation, centerX, centerY, whiskerWidth, boxStroke, boxStrokeWidth, xScale, yScale);
+        this.renderWhiskers(boxGroup, statistics, orientation, centerX, centerY, whiskerWidth, boxStroke, boxStrokeWidth, xScale, yScale, options);
       }
 
       // 繪製中位數線
       if (showMedian) {
-        boxGroup.append('line')
+        const medianLine = boxGroup.append('line')
           .attr('class', 'median-line')
-          .attr('x1', centerX - boxWidth / 2)
-          .attr('x2', centerX + boxWidth / 2)
           .attr('y1', yLinearScale(statistics.median))
           .attr('y2', yLinearScale(statistics.median))
           .attr('stroke', medianStroke)
           .attr('stroke-width', medianStrokeWidth);
+          
+        if (options.animate) {
+          medianLine
+            .attr('x1', centerX)
+            .attr('x2', centerX)
+            .transition()
+            .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 200)
+            .duration(options.animationDuration || 600)
+            .ease(d3.easeBackOut)
+            .attr('x1', centerX - boxWidth / 2)
+            .attr('x2', centerX + boxWidth / 2);
+        } else {
+          medianLine
+            .attr('x1', centerX - boxWidth / 2)
+            .attr('x2', centerX + boxWidth / 2);
+        }
       }
 
       // 繪製平均值標記
       if (showMean && statistics.mean !== undefined) {
-        this.renderMeanMarker(boxGroup, statistics, orientation, centerX, centerY, meanStyle, boxStroke, boxStrokeWidth, xScale, yScale);
+        this.renderMeanMarker(boxGroup, statistics, orientation, centerX, centerY, meanStyle, boxStroke, boxStrokeWidth, xScale, yScale, options);
       }
 
       // 繪製異常值
       if (showOutliers) {
-        this.renderOutliers(boxGroup, statistics.outliers, orientation, centerX, centerY, outlierRadius, outlierColor, boxStroke, categoryIndex, jitterWidth, boxWidth, xScale, yScale);
+        this.renderOutliers(boxGroup, statistics.outliers, orientation, centerX, centerY, outlierRadius, outlierColor, boxStroke, categoryIndex, jitterWidth, boxWidth, xScale, yScale, options);
       }
     } else {
       // 水平方向的實現
@@ -129,43 +163,71 @@ export class BoxPlotRenderer {
       
       // 繪製箱體
       if (showQuartiles) {
-        boxGroup.append('rect')
+        const rect = boxGroup.append('rect')
           .attr('class', 'box-rect')
-          .attr('x', xLinearScale(statistics.q1))
           .attr('y', centerY - boxWidth / 2)
-          .attr('width', xLinearScale(statistics.q3) - xLinearScale(statistics.q1))
           .attr('height', boxWidth)
           .attr('fill', boxFill)
           .attr('fill-opacity', boxFillOpacity)
           .attr('stroke', boxStroke)
           .attr('stroke-width', boxStrokeWidth);
+          
+        if (options.animate) {
+          rect
+            .attr('x', xLinearScale(statistics.median))
+            .attr('width', 0)
+            .transition()
+            .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100)
+            .duration(options.animationDuration || 800)
+            .ease(d3.easeBackOut)
+            .attr('x', xLinearScale(statistics.q1))
+            .attr('width', xLinearScale(statistics.q3) - xLinearScale(statistics.q1));
+        } else {
+          rect
+            .attr('x', xLinearScale(statistics.q1))
+            .attr('width', xLinearScale(statistics.q3) - xLinearScale(statistics.q1));
+        }
       }
 
       // 繪製鬚線
       if (showWhiskers) {
-        this.renderWhiskers(boxGroup, statistics, orientation, centerX, centerY, whiskerWidth, boxStroke, boxStrokeWidth, xScale, yScale);
+        this.renderWhiskers(boxGroup, statistics, orientation, centerX, centerY, whiskerWidth, boxStroke, boxStrokeWidth, xScale, yScale, options);
       }
 
       // 繪製中位數線
       if (showMedian) {
-        boxGroup.append('line')
+        const medianLine = boxGroup.append('line')
           .attr('class', 'median-line')
           .attr('x1', xLinearScale(statistics.median))
           .attr('x2', xLinearScale(statistics.median))
-          .attr('y1', centerY - boxWidth / 2)
-          .attr('y2', centerY + boxWidth / 2)
           .attr('stroke', medianStroke)
           .attr('stroke-width', medianStrokeWidth);
+          
+        if (options.animate) {
+          medianLine
+            .attr('y1', centerY)
+            .attr('y2', centerY)
+            .transition()
+            .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 200)
+            .duration(options.animationDuration || 600)
+            .ease(d3.easeBackOut)
+            .attr('y1', centerY - boxWidth / 2)
+            .attr('y2', centerY + boxWidth / 2);
+        } else {
+          medianLine
+            .attr('y1', centerY - boxWidth / 2)
+            .attr('y2', centerY + boxWidth / 2);
+        }
       }
 
       // 繪製平均值標記
       if (showMean && statistics.mean !== undefined) {
-        this.renderMeanMarker(boxGroup, statistics, orientation, centerX, centerY, meanStyle, boxStroke, boxStrokeWidth, xScale, yScale);
+        this.renderMeanMarker(boxGroup, statistics, orientation, centerX, centerY, meanStyle, boxStroke, boxStrokeWidth, xScale, yScale, options);
       }
 
       // 繪製異常值
       if (showOutliers) {
-        this.renderOutliers(boxGroup, statistics.outliers, orientation, centerX, centerY, outlierRadius, outlierColor, boxStroke, categoryIndex, jitterWidth, boxWidth, xScale, yScale);
+        this.renderOutliers(boxGroup, statistics.outliers, orientation, centerX, centerY, outlierRadius, outlierColor, boxStroke, categoryIndex, jitterWidth, boxWidth, xScale, yScale, options);
       }
     }
   }
@@ -199,7 +261,10 @@ export class BoxPlotRenderer {
       medianStrokeWidth = 3,
       meanStyle = 'diamond',
       outlierRadius = 3,
-      jitterWidth = 0.6
+      jitterWidth = 0.6,
+      animate = true,
+      animationDuration = 800,
+      animationDelay = 0
     } = options;
 
     const { xScale, yScale } = scales;
@@ -248,7 +313,10 @@ export class BoxPlotRenderer {
         outlierRadius,
         outlierColor: color,
         categoryIndex: i,
-        jitterWidth
+        jitterWidth,
+        animate,
+        animationDuration,
+        animationDelay
       });
     });
   }
@@ -266,56 +334,157 @@ export class BoxPlotRenderer {
     stroke: string,
     strokeWidth: number,
     xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>,
-    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>
+    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>,
+    options?: { animate?: boolean; animationDuration?: number; animationDelay?: number; categoryIndex?: number }
   ): void {
     if (orientation === 'vertical') {
       const yLinearScale = yScale as d3.ScaleLinear<number, number>;
       
       // 上下 whisker 主線
-      group.append('line')
+      const upperWhisker = group.append('line')
         .attr('x1', centerX).attr('x2', centerX)
-        .attr('y1', yLinearScale(statistics.q3)).attr('y2', yLinearScale(statistics.max))
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
+      
+      const lowerWhisker = group.append('line')
         .attr('x1', centerX).attr('x2', centerX)
-        .attr('y1', yLinearScale(statistics.q1)).attr('y2', yLinearScale(statistics.min))
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        upperWhisker
+          .attr('y1', yLinearScale(statistics.q3))
+          .attr('y2', yLinearScale(statistics.q3))
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 400)
+          .duration(options.animationDuration || 600)
+          .ease(d3.easeBackOut)
+          .attr('y2', yLinearScale(statistics.max));
+          
+        lowerWhisker
+          .attr('y1', yLinearScale(statistics.q1))
+          .attr('y2', yLinearScale(statistics.q1))
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 400)
+          .duration(options.animationDuration || 600)
+          .ease(d3.easeBackOut)
+          .attr('y2', yLinearScale(statistics.min));
+      } else {
+        upperWhisker
+          .attr('y1', yLinearScale(statistics.q3))
+          .attr('y2', yLinearScale(statistics.max));
+        lowerWhisker
+          .attr('y1', yLinearScale(statistics.q1))
+          .attr('y2', yLinearScale(statistics.min));
+      }
 
       // whisker 端點
-      group.append('line')
-        .attr('x1', centerX - whiskerWidth / 2).attr('x2', centerX + whiskerWidth / 2)
+      const upperCap = group.append('line')
         .attr('y1', yLinearScale(statistics.max)).attr('y2', yLinearScale(statistics.max))
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
-        .attr('x1', centerX - whiskerWidth / 2).attr('x2', centerX + whiskerWidth / 2)
+        
+      const lowerCap = group.append('line')
         .attr('y1', yLinearScale(statistics.min)).attr('y2', yLinearScale(statistics.min))
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        upperCap
+          .attr('x1', centerX).attr('x2', centerX)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 500)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('x1', centerX - whiskerWidth / 2)
+          .attr('x2', centerX + whiskerWidth / 2);
+          
+        lowerCap
+          .attr('x1', centerX).attr('x2', centerX)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 500)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('x1', centerX - whiskerWidth / 2)
+          .attr('x2', centerX + whiskerWidth / 2);
+      } else {
+        upperCap
+          .attr('x1', centerX - whiskerWidth / 2)
+          .attr('x2', centerX + whiskerWidth / 2);
+        lowerCap
+          .attr('x1', centerX - whiskerWidth / 2)
+          .attr('x2', centerX + whiskerWidth / 2);
+      }
     } else {
       const xLinearScale = xScale as d3.ScaleLinear<number, number>;
       
       // 左右 whisker 主線
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.q1)).attr('x2', xLinearScale(statistics.min))
+      const leftWhisker = group.append('line')
         .attr('y1', centerY).attr('y2', centerY)
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
-        .attr('x1', xLinearScale(statistics.q3)).attr('x2', xLinearScale(statistics.max))
+      
+      const rightWhisker = group.append('line')
         .attr('y1', centerY).attr('y2', centerY)
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        leftWhisker
+          .attr('x1', xLinearScale(statistics.q1))
+          .attr('x2', xLinearScale(statistics.q1))
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 400)
+          .duration(options.animationDuration || 600)
+          .ease(d3.easeBackOut)
+          .attr('x2', xLinearScale(statistics.min));
+          
+        rightWhisker
+          .attr('x1', xLinearScale(statistics.q3))
+          .attr('x2', xLinearScale(statistics.q3))
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 400)
+          .duration(options.animationDuration || 600)
+          .ease(d3.easeBackOut)
+          .attr('x2', xLinearScale(statistics.max));
+      } else {
+        leftWhisker
+          .attr('x1', xLinearScale(statistics.q1))
+          .attr('x2', xLinearScale(statistics.min));
+        rightWhisker
+          .attr('x1', xLinearScale(statistics.q3))
+          .attr('x2', xLinearScale(statistics.max));
+      }
 
       // whisker 端點
-      group.append('line')
+      const leftCap = group.append('line')
         .attr('x1', xLinearScale(statistics.min)).attr('x2', xLinearScale(statistics.min))
-        .attr('y1', centerY - whiskerWidth / 2).attr('y2', centerY + whiskerWidth / 2)
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
-
-      group.append('line')
+        
+      const rightCap = group.append('line')
         .attr('x1', xLinearScale(statistics.max)).attr('x2', xLinearScale(statistics.max))
-        .attr('y1', centerY - whiskerWidth / 2).attr('y2', centerY + whiskerWidth / 2)
         .attr('stroke', stroke).attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        leftCap
+          .attr('y1', centerY).attr('y2', centerY)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 500)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('y1', centerY - whiskerWidth / 2)
+          .attr('y2', centerY + whiskerWidth / 2);
+          
+        rightCap
+          .attr('y1', centerY).attr('y2', centerY)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 500)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('y1', centerY - whiskerWidth / 2)
+          .attr('y2', centerY + whiskerWidth / 2);
+      } else {
+        leftCap
+          .attr('y1', centerY - whiskerWidth / 2)
+          .attr('y2', centerY + whiskerWidth / 2);
+        rightCap
+          .attr('y1', centerY - whiskerWidth / 2)
+          .attr('y2', centerY + whiskerWidth / 2);
+      }
     }
   }
 
@@ -332,7 +501,8 @@ export class BoxPlotRenderer {
     stroke: string,
     strokeWidth: number,
     xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>,
-    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>
+    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>,
+    options?: { animate?: boolean; animationDuration?: number; animationDelay?: number; categoryIndex?: number }
   ): void {
     if (statistics.mean === undefined) return;
 
@@ -350,24 +520,61 @@ export class BoxPlotRenderer {
     const size = 6;
     
     if (style === 'diamond') {
-      group.append('path')
-        .attr('d', `M ${meanX} ${meanY - size} L ${meanX + size} ${meanY} L ${meanX} ${meanY + size} L ${meanX - size} ${meanY} Z`)
+      const diamond = group.append('path')
         .attr('fill', '#fff')
         .attr('stroke', stroke)
         .attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        diamond
+          .attr('d', `M ${meanX} ${meanY} L ${meanX} ${meanY} L ${meanX} ${meanY} L ${meanX} ${meanY} Z`)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 600)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('d', `M ${meanX} ${meanY - size} L ${meanX + size} ${meanY} L ${meanX} ${meanY + size} L ${meanX - size} ${meanY} Z`);
+      } else {
+        diamond.attr('d', `M ${meanX} ${meanY - size} L ${meanX + size} ${meanY} L ${meanX} ${meanY + size} L ${meanX - size} ${meanY} Z`);
+      }
     } else if (style === 'circle') {
-      group.append('circle')
-        .attr('cx', meanX).attr('cy', meanY).attr('r', 4)
+      const circle = group.append('circle')
+        .attr('cx', meanX).attr('cy', meanY)
         .attr('fill', '#fff')
         .attr('stroke', stroke)
         .attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        circle
+          .attr('r', 0)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 600)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('r', 4);
+      } else {
+        circle.attr('r', 4);
+      }
     } else {
-      group.append('rect')
-        .attr('x', meanX - 4).attr('y', meanY - 4)
-        .attr('width', 8).attr('height', 8)
+      const rect = group.append('rect')
         .attr('fill', '#fff')
         .attr('stroke', stroke)
         .attr('stroke-width', strokeWidth);
+        
+      if (options?.animate) {
+        rect
+          .attr('x', meanX).attr('y', meanY)
+          .attr('width', 0).attr('height', 0)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 600)
+          .duration(options.animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('x', meanX - 4).attr('y', meanY - 4)
+          .attr('width', 8).attr('height', 8);
+      } else {
+        rect
+          .attr('x', meanX - 4).attr('y', meanY - 4)
+          .attr('width', 8).attr('height', 8);
+      }
     }
   }
 
@@ -387,7 +594,8 @@ export class BoxPlotRenderer {
     jitterWidth: number,
     boxWidth: number,
     xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>,
-    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>
+    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>,
+    options?: { animate?: boolean; animationDuration?: number; animationDelay?: number; categoryIndex?: number }
   ): void {
     outliers.forEach((outlier, outlierIndex) => {
       let outlierX: number, outlierY: number;
@@ -406,15 +614,26 @@ export class BoxPlotRenderer {
         outlierY = centerY + (jitterOffset - 0.5) * boxWidth * jitterWidth;
       }
 
-      group.append('circle')
+      const outlierCircle = group.append('circle')
         .attr('class', 'outlier')
         .attr('cx', outlierX)
         .attr('cy', outlierY)
-        .attr('r', radius)
         .attr('fill', color)
         .attr('fill-opacity', 0.6)
         .attr('stroke', stroke)
         .attr('stroke-width', 1);
+        
+      if (options?.animate) {
+        outlierCircle
+          .attr('r', 0)
+          .transition()
+          .delay((options.animationDelay || 0) + (options.categoryIndex || 0) * 100 + 700 + outlierIndex * 50)
+          .duration(options.animationDuration || 300)
+          .ease(d3.easeBackOut)
+          .attr('r', radius);
+      } else {
+        outlierCircle.attr('r', radius);
+      }
     });
   }
 }

@@ -167,7 +167,10 @@ export class D3ViolinPlot extends BaseChart<ViolinPlotProps> {
       boxPlotStrokeWidth = 2,
       medianStroke = '#000',
       medianStrokeWidth = 3,
-      meanStyle = 'diamond'
+      meanStyle = 'diamond',
+      animate = true,
+      animationDuration = 1000,
+      animationDelay = 100
     } = this.props;
 
     const chartArea = this.createSVGContainer();
@@ -243,13 +246,34 @@ export class D3ViolinPlot extends BaseChart<ViolinPlotProps> {
       }
 
       // 繪製小提琴路徑
-      violinGroup.append('path')
+      const violinPathElement = violinGroup.append('path')
         .attr('class', 'violin-path')
-        .attr('d', violinPath)
         .attr('fill', color)
         .attr('fill-opacity', violinFillOpacity)
         .attr('stroke', violinStroke)
         .attr('stroke-width', violinStrokeWidth);
+        
+      if (animate) {
+        // 初始狀態：從中心線開始
+        let initialPath: string;
+        if (orientation === 'vertical') {
+          const yExtent = d3.extent(d.densityData, p => yScale(p.value)) as [number, number];
+          initialPath = `M ${centerX} ${yExtent[0]} L ${centerX} ${yExtent[1]} Z`;
+        } else {
+          const xExtent = d3.extent(d.densityData, p => xScale(p.value)) as [number, number];
+          initialPath = `M ${xExtent[0]} ${centerY} L ${xExtent[1]} ${centerY} Z`;
+        }
+        
+        violinPathElement
+          .attr('d', initialPath)
+          .transition()
+          .delay(animationDelay + i * 200)
+          .duration(animationDuration)
+          .ease(d3.easeBackOut)
+          .attr('d', violinPath);
+      } else {
+        violinPathElement.attr('d', violinPath);
+      }
 
       // 繪製嵌入的 BoxPlot
       if (showBoxPlot) {
@@ -276,7 +300,10 @@ export class D3ViolinPlot extends BaseChart<ViolinPlotProps> {
           outlierRadius: 2,
           outlierColor: color,
           categoryIndex: i,
-          jitterWidth: 0.5
+          jitterWidth: 0.5,
+          animate,
+          animationDuration: animationDuration * 0.8, // BoxPlot 動畫比小提琴路徑略快
+          animationDelay: animationDelay + i * 200 + 500 // 在小提琴路徑動畫後顯示
         });
       }
     });

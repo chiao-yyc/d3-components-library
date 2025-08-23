@@ -1,6 +1,8 @@
 
 import * as d3 from 'd3';
 import { GaugeChartConfig, ProcessedGaugeDataPoint, GaugeZone, TickData } from './types';
+import { DataProcessor } from '../../../core/data-processor/data-processor';
+import { createColorScale } from '../../../core/color-scheme/color-manager';
 
 const DEFAULT_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#22c55e'];
 
@@ -14,58 +16,86 @@ export class D3GaugeChart {
   private arcGenerator: d3.Arc<any, d3.DefaultArcObject> | null = null;
 
   constructor(container: HTMLElement, config: GaugeChartConfig) {
-    this.container = container;
-    const defaultConfig = {
-      width: 300,
-      height: 200,
-      margin: { top: 30, right: 30, bottom: 50, left: 30 },
-      min: 0,
-      max: 100,
-      startAngle: -90,
-      endAngle: 90,
-      cornerRadius: 0,
-      backgroundColor: '#e5e7eb',
-      foregroundColor: '#3b82f6',
-      colors: DEFAULT_COLORS,
-      showValue: true,
-      showLabel: true,
-      showTicks: true,
-      showMinMax: true,
-      tickCount: 5,
-      fontSize: 14,
-      fontFamily: 'sans-serif',
-      animate: true,
-      animationDuration: 1000,
-      animationEasing: 'easeElasticOut',
-      interactive: true,
-      showTooltip: true,
-    };
+    try {
+      this.container = container;
+      const defaultConfig = {
+        width: 300,
+        height: 200,
+        margin: { top: 30, right: 30, bottom: 50, left: 30 },
+        min: 0,
+        max: 100,
+        startAngle: -90,
+        endAngle: 90,
+        cornerRadius: 0,
+        backgroundColor: '#e5e7eb',
+        foregroundColor: '#3b82f6',
+        colors: DEFAULT_COLORS,
+        showValue: true,
+        showLabel: true,
+        showTicks: true,
+        showMinMax: true,
+        tickCount: 5,
+        fontSize: 14,
+        fontFamily: 'sans-serif',
+        animate: true,
+        animationDuration: 1000,
+        animationEasing: 'easeElasticOut',
+        interactive: true,
+        showTooltip: true,
+      };
 
-    this.config = { ...defaultConfig, ...config };
-    this.svg = d3.select(this.container).append('svg');
-    this.g = this.svg.append('g');
-    this.update(this.config);
+      this.config = { ...defaultConfig, ...config };
+      this.validateConfig();
+      this.svg = d3.select(this.container).append('svg');
+      this.g = this.svg.append('g');
+      this.update(this.config);
+    } catch (error) {
+      this.handleError(error as Error);
+    }
   }
 
   private processData() {
-    const { data, value, min, max, valueKey, labelKey, valueAccessor, labelAccessor, mapping } = this.config;
-    let processedValue = value !== undefined ? value : 0;
-    let processedLabel: string | undefined;
+    try {
+      const { data, value, min, max, valueKey, labelKey, valueAccessor, labelAccessor, mapping } = this.config;
+      let processedValue = value !== undefined ? value : 0;
+      let processedLabel: string | undefined;
 
-    if (data && data.length > 0) {
-      const d = data[0];
-      if (mapping) {
-        processedValue = typeof mapping.value === 'function' ? mapping.value(d) : Number(d[mapping.value]) || 0;
-        processedLabel = mapping.label ? (typeof mapping.label === 'function' ? mapping.label(d) : String(d[mapping.label])) : undefined;
-      } else if (valueAccessor) {
-        processedValue = valueAccessor(d);
-        processedLabel = labelAccessor?.(d);
-      } else if (valueKey) {
-        processedValue = Number(d[valueKey]) || 0;
-        processedLabel = labelKey ? String(d[labelKey]) : undefined;
+      // 使用共用的 DataProcessor 如果有數據
+      if (data && data.length > 0) {
+        const processor = new DataProcessor({
+          mapping: mapping || {
+            x: valueKey || valueAccessor,
+            y: labelKey || labelAccessor
+          },
+          autoDetect: true
+        });
+
+        const result = processor.process(data);
+        
+        if (result.errors.length > 0) {
+          console.warn('GaugeChart data processing warnings:', result.errors);
+        }
+
+        if (result.data.length > 0) {
+          const firstItem = result.data[0];
+          processedValue = Number(firstItem.x) || 0;
+          processedLabel = String(firstItem.y) || undefined;
+        }
       }
+
+      // 確保數值在範圍內
+      processedValue = Math.max(min, Math.min(max, processedValue));
+      
+      this.processedData = { 
+        value: processedValue, 
+        label: processedLabel, 
+        originalData: data?.[0] || { value: processedValue } 
+      };
+    } catch (error) {
+      this.handleError(error as Error);
+      // 使用默認值
+      this.processedData = { value: this.config.min, originalData: {} };
     }
-    this.processedData = { value: Math.max(min, Math.min(max, processedValue)), label: processedLabel, originalData: data?.[0] || { value: processedValue } };
   }
 
   private setupScales() {
@@ -83,9 +113,23 @@ export class D3GaugeChart {
 
     const angleScale = d3.scaleLinear().domain([min, max]).range([startAngleRad, endAngleRad]);
 
-    let colorScale: d3.ScaleLinear<number, string> | null = null;
+    // 使用共用顏色管理器
+    let colorScale: any = null;
     if (!zones) {
-      colorScale = d3.scaleLinear<string>().domain(d3.range(colors.length).map(i => min + (max - min) * i / (colors.length - 1))).range(colors);
+      try {
+        colorScale = createColorScale({
+          type: 'custom',
+          colors: colors,
+          domain: [min, max],
+          interpolate: true
+        });
+      } catch (error) {
+        console.warn('Failed to create color scale, using fallback:', error);
+        // 使用原來的 D3 實現作為備案
+        colorScale = d3.scaleLinear<string>()
+          .domain(d3.range(colors.length).map(i => min + (max - min) * i / (colors.length - 1)))
+          .range(colors);
+      }
     }
 
     this.scales = { angleScale, colorScale, chartWidth, chartHeight, calculatedInnerRadius, calculatedOuterRadius, startAngleRad, endAngleRad };
@@ -132,7 +176,12 @@ export class D3GaugeChart {
       const valueAngle = angleScale(this.processedData.value);
       const valueArc = this.arcGenerator!({ startAngle: startAngleRad, endAngle: valueAngle });
       if (valueArc) {
-        const valuePath = this.g.append('path').attr('d', valueArc).attr('fill', colorScale ? colorScale(this.processedData.value) : foregroundColor).attr('stroke', 'none');
+        const valueColor = colorScale ? 
+          (typeof colorScale.getColor === 'function' ? 
+            colorScale.getColor(this.processedData.value) : 
+            colorScale(this.processedData.value)) : 
+          foregroundColor;
+        const valuePath = this.g.append('path').attr('d', valueArc).attr('fill', valueColor).attr('stroke', 'none');
         if (animate) {
           const initialArc = this.arcGenerator!({ startAngle: startAngleRad, endAngle: startAngleRad });
           if (initialArc) {
@@ -174,6 +223,39 @@ export class D3GaugeChart {
       this.g.append('text').attr('x', Math.cos(minAngle) * labelRadius).attr('y', Math.sin(minAngle) * labelRadius).attr('text-anchor', 'middle').attr('dominant-baseline', 'central').style('font-size', `${fontSize - 2}px`).style('font-family', fontFamily).style('fill', '#6b7280').text(this.config.tickFormat ? this.config.tickFormat(this.config.min) : this.config.min.toString());
       this.g.append('text').attr('x', Math.cos(maxAngle) * labelRadius).attr('y', Math.sin(maxAngle) * labelRadius).attr('text-anchor', 'middle').attr('dominant-baseline', 'central').style('font-size', `${fontSize - 2}px`).style('font-family', fontFamily).style('fill', '#6b7280').text(this.config.tickFormat ? this.config.tickFormat(this.config.max) : this.config.max.toString());
     }
+
+    // 添加互動功能
+    this.setupInteractions();
+  }
+
+  private setupInteractions(): void {
+    const { interactive, showTooltip, tooltipFormat } = this.config;
+    
+    if (interactive && showTooltip) {
+      // 為主要的 arc 添加 tooltip
+      this.g.selectAll('path')
+        .filter((d, i, nodes) => nodes.length > 1 ? i === nodes.length - 1 : true) // 選擇最後一個path（數值arc）
+        .style('cursor', 'pointer')
+        .on('mouseenter', (event) => {
+          const rect = this.container.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          
+          let content = `Value: ${this.processedData.value}`;
+          if (this.processedData.label) {
+            content += `<br>Label: ${this.processedData.label}`;
+          }
+          
+          if (tooltipFormat) {
+            content = tooltipFormat(this.processedData.value, this.processedData.label);
+          }
+          
+          this.createTooltip(x, y, content);
+        })
+        .on('mouseleave', () => {
+          this.hideTooltip();
+        });
+    }
   }
 
   public update(newConfig: Partial<GaugeChartConfig>) {
@@ -185,5 +267,73 @@ export class D3GaugeChart {
 
   public destroy() {
     d3.select(this.container).select('svg').remove();
+  }
+
+  // === 新增共用工具方法 ===
+
+  private validateConfig(): void {
+    const { min, max, width, height, data, value } = this.config;
+
+    if (min >= max) {
+      throw new Error('GaugeChart: min value must be less than max value');
+    }
+
+    if (width <= 0 || height <= 0) {
+      throw new Error('GaugeChart: width and height must be positive numbers');
+    }
+
+    if (value !== undefined && (value < min || value > max)) {
+      console.warn(`GaugeChart: value ${value} is outside the range [${min}, ${max}]`);
+    }
+
+    if (data && !Array.isArray(data)) {
+      throw new Error('GaugeChart: data must be an array');
+    }
+  }
+
+  private handleError(error: Error): void {
+    console.error('GaugeChart Error:', error.message);
+    
+    // 顯示錯誤訊息在圖表區域
+    const errorMessage = d3.select(this.container)
+      .append('div')
+      .style('color', 'red')
+      .style('text-align', 'center')
+      .style('padding', '20px')
+      .style('font-family', 'sans-serif')
+      .text(`Chart Error: ${error.message}`);
+
+    // 可選：觸發回調
+    if (this.config.onError) {
+      this.config.onError(error);
+    }
+  }
+
+  private createTooltip(x: number, y: number, content: string): void {
+    if (!this.config.showTooltip) return;
+
+    // 移除現有tooltip
+    d3.select(this.container).select('.gauge-tooltip').remove();
+
+    // 創建新tooltip
+    d3.select(this.container)
+      .append('div')
+      .attr('class', 'gauge-tooltip')
+      .style('position', 'absolute')
+      .style('left', `${x + 10}px`)
+      .style('top', `${y - 10}px`)
+      .style('background', 'rgba(0, 0, 0, 0.8)')
+      .style('color', 'white')
+      .style('padding', '8px 12px')
+      .style('border-radius', '4px')
+      .style('font-size', '12px')
+      .style('font-family', 'sans-serif')
+      .style('pointer-events', 'none')
+      .style('z-index', '1000')
+      .html(content);
+  }
+
+  private hideTooltip(): void {
+    d3.select(this.container).select('.gauge-tooltip').remove();
   }
 }
