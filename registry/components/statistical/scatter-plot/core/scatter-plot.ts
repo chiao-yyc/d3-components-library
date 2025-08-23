@@ -213,6 +213,7 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       this.scatterGroup.append('path')
         .datum(this.trendlineData)
         .attr('class', 'trendline')
+        .attr('data-testid', 'trendline')
         .attr('d', lineGenerator)
         .attr('fill', 'none')
         .attr('stroke', trendlineColor)
@@ -226,6 +227,7 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       .data(this.processedData)
       .enter().append('circle')
       .attr('class', 'dot')
+      .attr('data-testid', (d, i) => `data-point-${i}`)
       .attr('cx', d => xScale(d.x))
       .attr('cy', d => yScale(d.y))
       .attr('r', d => sizeScale ? sizeScale(d.size!) : radius)
@@ -277,6 +279,9 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       console.log('🎨 ScatterPlot: 開始設置群組交互功能');
       this.setupGroupInteractions(circles);
     }
+
+    // === 添加基本數據交互功能 ===
+    this.setupEventListeners();
 
     // === 添加交互功能 ===
     this.addInteractionFeatures(g);

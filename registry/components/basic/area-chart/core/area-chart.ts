@@ -206,6 +206,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
       .enter()
       .append('path')
       .attr('class', 'area-path')
+      .attr('data-testid', (d, i) => `area-path-${i}`)
       .attr('d', d => areaGenerator(d.values))
       .attr('fill', (d, i) => this.colorScale.getColor(i))
       .attr('fill-opacity', fillOpacity || 0.7)
