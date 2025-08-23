@@ -8,6 +8,7 @@ export type { Margin, DataMapping } from '../../../core/base-chart/types';
 export interface ProcessedScatterDataPoint extends CoreProcessedDataPoint {
   size?: number;
   color?: string;
+  group?: string;  // Added for group functionality
 }
 
 export interface ScatterPlotProps extends BaseChartProps {

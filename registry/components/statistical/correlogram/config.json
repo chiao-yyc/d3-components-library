@@ -1,0 +1,80 @@
+{
+  "name": "correlogram",
+  "type": "statistical",
+  "displayName": "Correlogram",
+  "description": "相關性矩陣視覺化圖表，顯示變數間的相關性",
+  "category": "statistical",
+  "tags": ["correlation", "matrix", "statistical", "analysis"],
+  "preview": "correlogram-preview.png",
+  "dependencies": {
+    "d3": "^7.0.0",
+    "react": "^18.0.0"
+  },
+  "props": {
+    "data": {
+      "type": "array",
+      "required": false,
+      "description": "原始資料陣列"
+    },
+    "correlationMatrix": {
+      "type": "array",
+      "required": false,
+      "description": "相關係數矩陣（二維數組）"
+    },
+    "variables": {
+      "type": "array", 
+      "required": false,
+      "description": "變數名稱陣列"
+    },
+    "showUpperTriangle": {
+      "type": "boolean",
+      "default": true,
+      "description": "顯示上三角（圓圈）"
+    },
+    "showLowerTriangle": {
+      "type": "boolean",
+      "default": true,
+      "description": "顯示下三角（文字）"
+    },
+    "showDiagonal": {
+      "type": "boolean", 
+      "default": true,
+      "description": "顯示對角線（變數名）"
+    },
+    "maxCircleRadius": {
+      "type": "number",
+      "default": 9,
+      "description": "最大圓圈半徑"
+    },
+    "colorScheme": {
+      "type": "string",
+      "default": "default",
+      "options": ["default", "custom"],
+      "description": "配色方案"
+    },
+    "threshold": {
+      "type": "number",
+      "default": 0,
+      "description": "顯示閾值（絕對值）"
+    },
+    "showValues": {
+      "type": "boolean",
+      "default": true,
+      "description": "顯示數值"
+    }
+  },
+  "examples": [
+    {
+      "name": "基礎相關性矩陣",
+      "description": "基本的相關性矩陣視覺化"
+    },
+    {
+      "name": "自定義配色",
+      "description": "使用自定義顏色方案"
+    },
+    {
+      "name": "閾值過濾",
+      "description": "只顯示高於閾值的相關性"
+    }
+  ]
+}

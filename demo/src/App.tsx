@@ -11,6 +11,7 @@ const ScatterPlotDemo = lazy(() => import('./pages/ScatterPlotDemo'))
 const PieChartDemo = lazy(() => import('./pages/PieChartDemo'))
 const AreaChartDemo = lazy(() => import('./pages/AreaChartDemo'))
 const HeatmapDemo = lazy(() => import('./pages/HeatmapDemo'))
+const CorrelogramDemo = lazy(() => import('./pages/CorrelogramDemo'))
 const GaugeChartDemo = lazy(() => import('./pages/GaugeChartDemo'))
 const FunnelChartDemo = lazy(() => import('./pages/FunnelChartDemo'))
 const BoxPlotDemo = lazy(() => import('./pages/BoxPlotDemo'))
@@ -46,6 +47,7 @@ function App() {
           <Route path="/pie-chart" element={<PieChartDemo />} />
           <Route path="/area-chart" element={<AreaChartDemo />} />
           <Route path="/heatmap" element={<HeatmapDemo />} />
+          <Route path="/correlogram" element={<CorrelogramDemo />} />
           <Route path="/gauge-chart" element={<GaugeChartDemo />} />
           <Route path="/funnel-chart" element={<FunnelChartDemo />} />
           <Route path="/box-plot" element={<BoxPlotDemo />} />

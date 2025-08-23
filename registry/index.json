@@ -88,6 +88,20 @@
       "docs": "https://d3-components.com/docs/heatmap"
     },
     {
+      "name": "correlogram",
+      "description": "相關性矩陣視覺化圖表，顯示變數間的相關性係數，支援上下三角顯示模式",
+      "version": "1.0.0",
+      "tags": ["chart", "correlogram", "correlation", "matrix", "statistical"],
+      "variants": ["default", "upper-triangle", "lower-triangle", "threshold-filter"],
+      "dependencies": ["react", "d3", "@types/d3"],
+      "category": "statistical-charts",
+      "complexity": "intermediate",
+      "lastUpdated": "2025-08-22T12:00:00Z",
+      "files": ["correlogram.tsx", "correlogram.css", "types.ts", "index.ts"],
+      "demo": "https://d3-components.com/demo/correlogram",
+      "docs": "https://d3-components.com/docs/correlogram"
+    },
+    {
       "name": "candlestick-chart",
       "description": "專業級股市 K線圖（蠟燭圖）組件，支援 OHLC 數據、成交量、技術分析功能",
       "version": "1.0.0",
@@ -224,7 +238,7 @@
     }
   },
   "stats": {
-    "totalComponents": 13,
+    "totalComponents": 14,
     "totalDownloads": 0,
     "averageRating": 0
   }

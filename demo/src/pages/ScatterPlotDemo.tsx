@@ -11,15 +11,50 @@ const generateCorrelationData = (points: number = 50, correlation: number = 0.7)
     const y = x * correlation + noise + 20
     const size = Math.random() * 50 + 10
     const category = ['A', 'B', 'C'][Math.floor(Math.random() * 3)]
+    const species = ['setosa', 'versicolor', 'virginica'][Math.floor(Math.random() * 3)]
     
     data.push({
       x: Math.round(x * 100) / 100,
       y: Math.round(y * 100) / 100,
       size: Math.round(size * 100) / 100,
       category,
+      species,  // Added for group functionality
       label: `Point ${i + 1}`
     })
   }
+  
+  return data
+}
+
+// 生成鳶尾花數據集（類似參考文件）
+const generateIrisData = () => {
+  const species = ['setosa', 'versicolor', 'virginica']
+  const data = []
+  
+  species.forEach((spec, specIndex) => {
+    for (let i = 0; i < 50; i++) {
+      // 為每個品種生成不同的特徵範圍
+      let sepalLength, petalLength
+      
+      if (spec === 'setosa') {
+        sepalLength = 4.5 + Math.random() * 1.5  // 4.5-6.0
+        petalLength = 1 + Math.random() * 1.5    // 1.0-2.5
+      } else if (spec === 'versicolor') {
+        sepalLength = 5.5 + Math.random() * 1.5  // 5.5-7.0
+        petalLength = 3 + Math.random() * 2      // 3.0-5.0
+      } else {
+        sepalLength = 6 + Math.random() * 2      // 6.0-8.0
+        petalLength = 4.5 + Math.random() * 2.5  // 4.5-7.0
+      }
+      
+      data.push({
+        sepalLength: Math.round(sepalLength * 100) / 100,
+        petalLength: Math.round(petalLength * 100) / 100,
+        species: spec,
+        id: `${spec}-${i + 1}`
+      })
+    }
+  })
   
   return data
 }
@@ -40,6 +75,7 @@ const bubbleData = [
 
 export default function ScatterPlotDemo() {
   const [correlationData] = useState(generateCorrelationData())
+  const [irisData] = useState(generateIrisData())
   const [showTrendline, setShowTrendline] = useState(false)
   const [animate, setAnimate] = useState(false)
   const [opacity, setOpacity] = useState(0.7)
@@ -50,6 +86,13 @@ export default function ScatterPlotDemo() {
   const [enableCrosshair, setEnableCrosshair] = useState(false)
   const [enableDropShadow, setEnableDropShadow] = useState(false)
   const [enableGlowEffect, setEnableGlowEffect] = useState(false)
+  
+  // === 群組功能狀態 ===
+  const [enableGroupHighlight, setEnableGroupHighlight] = useState(false)
+  const [enableGroupFilter, setEnableGroupFilter] = useState(false)
+  const [showGroupLegend, setShowGroupLegend] = useState(false)
+  const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
+  const [hoveredGroup, setHoveredGroup] = useState<string | null>(null)
   
   // 交互回調狀態
   const [zoomDomain, setZoomDomain] = useState<{ x?: [any, any]; y?: [any, any] } | null>(null)
@@ -190,6 +233,86 @@ export default function ScatterPlotDemo() {
             </ul>
           </div>
         </div>
+        
+        {/* === 群組功能控制面板 === */}
+        <div className="mt-6">
+          <h4 className="text-md font-medium text-gray-800 mb-3">🎨 群組功能 (全新功能)</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableGroupHighlight"
+                checked={enableGroupHighlight}
+                onChange={(e) => setEnableGroupHighlight(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableGroupHighlight" className="text-sm font-medium text-gray-700">
+                群組高亮
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="enableGroupFilter"
+                checked={enableGroupFilter}
+                onChange={(e) => setEnableGroupFilter(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="enableGroupFilter" className="text-sm font-medium text-gray-700">
+                群組篩選
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="showGroupLegend"
+                checked={showGroupLegend}
+                onChange={(e) => setShowGroupLegend(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="showGroupLegend" className="text-sm font-medium text-gray-700">
+                顯示圖例
+              </label>
+            </div>
+          </div>
+          
+          {/* 群組狀態顯示 - 固定高度避免佈局跳動 */}
+          <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm h-20">
+            <h4 className="font-medium text-green-800 mb-2">群組狀態:</h4>
+            <div className="space-y-1">
+              {selectedGroup ? (
+                <div className="text-green-700">
+                  <strong>選中群組:</strong> {String(selectedGroup)}
+                </div>
+              ) : (
+                <div className="text-gray-400 text-xs">
+                  尚未選中任何群組
+                </div>
+              )}
+              {hoveredGroup ? (
+                <div className="text-green-700">
+                  <strong>懸停群組:</strong> {String(hoveredGroup)}
+                </div>
+              ) : (
+                <div className="text-gray-400 text-xs">
+                  將滑鼠懸停在散點上查看群組
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm text-green-700">
+            <p className="font-medium mb-2">群組功能說明:</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li><strong>群組高亮:</strong> 滑鼠懸停時高亮同群組的所有散點</li>
+              <li><strong>群組篩選:</strong> 點擊圖例可以篩選顯示特定群組</li>
+              <li><strong>顏色映射:</strong> 每個群組自動分配不同顏色</li>
+              <li><strong>互動動畫:</strong> 平滑的過渡動畫效果</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* 基本散點圖 */}
@@ -256,6 +379,44 @@ export default function ScatterPlotDemo() {
           enableDropShadow={enableDropShadow}
           enableGlowEffect={enableGlowEffect}
           glowColor="#3b82f6"
+        />
+      </div>
+
+      {/* 群組散點圖 - 鳶尾花數據集 */}
+      <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <h3 className="text-xl font-semibold mb-4">
+          🌸 群組散點圖 - 鳶尾花數據集 (群組功能展示)
+          {enableGroupHighlight && <span className="text-sm text-green-600 ml-2">(群組高亮)</span>}
+          {enableGroupFilter && <span className="text-sm text-blue-600 ml-2">(群組篩選)</span>}
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          根據鳶尾花品種進行群組，展示群組高亮和篩選功能 (參考 D3 Gallery scatter_grouped 範例)
+        </p>
+        
+        <ScatterPlot
+          data={irisData}
+          xKey="sepalLength"
+          yKey="petalLength"
+          width={800}
+          height={400}
+          radius={6}
+          opacity={0.7}
+          animate={animate}
+          
+          // === 群組功能 props ===
+          groupBy="species"
+          groupColors={['#440154ff', '#21908dff', '#fde725ff']}  // 使用參考文件的顏色
+          enableGroupHighlight={enableGroupHighlight}  // 啟用高亮功能
+          enableGroupFilter={enableGroupFilter}     // 啟用篩選功能
+          showGroupLegend={showGroupLegend}
+          onGroupSelect={(group, isSelected) => {
+            setSelectedGroup(isSelected ? group : null)
+            console.log('群組選擇:', group, isSelected)
+          }}
+          onGroupHover={(group) => {
+            setHoveredGroup(group)
+            console.log('群組懸停:', group)
+          }}
         />
       </div>
 
@@ -337,6 +498,26 @@ export default function ScatterPlotDemo() {
   radius={6}
   opacity={0.7}
   colors={['#3b82f6']}
+/>`}
+            </pre>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-2">群組散點圖</h4>
+            <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
+{`<ScatterPlot
+  data={irisData}
+  xKey="sepalLength"
+  yKey="petalLength"
+  groupBy="species"
+  groupColors={['#440154ff', '#21908dff', '#fde725ff']}
+  enableGroupHighlight={true}
+  enableGroupFilter={true}
+  showGroupLegend={true}
+  onGroupSelect={(group, isSelected) => 
+    console.log('Group:', group, isSelected)}
+  onGroupHover={(group) => 
+    console.log('Hover:', group)}
 />`}
             </pre>
           </div>
