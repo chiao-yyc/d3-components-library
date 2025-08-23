@@ -6,6 +6,7 @@ import { createColorScale, ColorScale } from '../../../core/color-scheme/color-m
 import { ScatterPlotProps, ProcessedScatterDataPoint } from './types';
 import { createChartClipPath, createStandardDropShadow, createStandardGlow } from '../../../core/base-chart/visual-effects';
 import { BrushZoomController, CrosshairController } from '../../../core/base-chart/interaction-utils';
+import { GroupProcessorResult } from '../../../core/base-chart/chart-group-utils';
 
 export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   private processedData: ProcessedScatterDataPoint[] = [];
@@ -18,16 +19,20 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   private brushZoomController: BrushZoomController | null = null;
   private crosshairController: CrosshairController | null = null;
   private viewportController: any = null;
+  
+  // Group functionality
+  private groupResult: GroupProcessorResult | null = null;
 
   constructor(props: ScatterPlotProps) {
     super(props);
   }
 
   protected processData(): { x: any; y: any; data: ProcessedScatterDataPoint[] } {
-    const { data, mapping, xAccessor, yAccessor, sizeAccessor, colorAccessor, xKey, yKey, sizeKey, colorKey } = this.props;
+    const { data, mapping, xAccessor, yAccessor, sizeAccessor, colorAccessor, xKey, yKey, sizeKey, colorKey, groupBy } = this.props;
     
     if (!data?.length) {
       this.processedData = [];
+      this.groupResult = null;
       return { x: null, y: null, data: [] };
     }
 
@@ -49,8 +54,20 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       size: d.size !== undefined ? Number(d.size) : undefined,
       color: d.color ? String(d.color) : undefined,
       originalData: d.originalData,
-      index
+      index,
+      // Add group information if groupBy is specified
+      group: groupBy ? String(d.originalData[groupBy] || '') : undefined
     } as ProcessedScatterDataPoint));
+    
+    // Process group data if groupBy is specified
+    if (groupBy) {
+      this.groupResult = this.processGroupData(this.processedData.map(d => ({ 
+        ...d.originalData, 
+        [groupBy]: d.group 
+      })));
+    } else {
+      this.groupResult = null;
+    }
     
     return {
       x: this.processedData.map(d => d.x),
@@ -84,9 +101,24 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       sizeScale = d3.scaleSqrt().domain(sizeDomain).range(sizeRange);
     }
 
-    // 顏色比例尺
+    // 顏色比例尺 - 支援群組功能
     const hasColorData = this.processedData.some(d => d.color !== undefined);
-    if (hasColorData) {
+    const hasGroupData = this.groupResult && this.groupResult.groups.length > 0;
+    
+    if (hasGroupData && this.groupResult) {
+      // 使用群組顏色比例尺
+      this.colorScale = {
+        getColor: (value: any, index: number) => {
+          const dataPoint = this.processedData[index];
+          if (dataPoint && dataPoint.group) {
+            return this.groupResult!.colorScale(dataPoint.group);
+          }
+          return this.groupResult!.colorScale(this.groupResult!.groups[0]);
+        },
+        setDomain: () => {},
+        getDomain: () => this.groupResult!.groups
+      };
+    } else if (hasColorData) {
       const colorValues = [...new Set(this.processedData.map(d => d.color).filter(c => c !== undefined))];
       
       if (typeof this.processedData[0]?.color === 'number') {
@@ -189,7 +221,7 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         .attr('opacity', 0.8);
     }
 
-    // 散點圖點
+    // 散點圖點 - 支援群組功能
     const circles = this.scatterGroup.selectAll('.dot')
       .data(this.processedData)
       .enter().append('circle')
@@ -198,8 +230,8 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       .attr('cy', d => yScale(d.y))
       .attr('r', d => sizeScale ? sizeScale(d.size!) : radius)
       .attr('fill', (d, i) => {
-        if (this.colorScale && d.color !== undefined) {
-          return this.colorScale.getColor(d.color, i);
+        if (this.colorScale && (d.color !== undefined || d.group !== undefined)) {
+          return this.colorScale.getColor(d.color || d.group, i);
         }
         const defaultColors = colors || ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
         return defaultColors[i % defaultColors.length];
@@ -207,6 +239,11 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       .attr('stroke', strokeColor)
       .attr('stroke-width', strokeWidth)
       .attr('opacity', animate ? 0 : opacity);
+
+    // 應用群組屬性
+    if (this.props.groupBy) {
+      this.applyGroupAttributes(circles, this.props.groupBy);
+    }
 
     // 動畫
     if (animate) {
@@ -230,8 +267,76 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       }
     });
 
+    // === 添加群組圖例 ===
+    if (this.groupResult && this.props.showGroupLegend) {
+      this.renderGroupLegend(this.scatterGroup, this.groupResult);
+    }
+
+    // === 添加群組互動功能 ===
+    if (this.props.enableGroupHighlight || this.props.enableGroupFilter) {
+      console.log('🎨 ScatterPlot: 開始設置群組交互功能');
+      this.setupGroupInteractions(circles);
+    }
+
     // === 添加交互功能 ===
     this.addInteractionFeatures(g);
+  }
+
+  /**
+   * 設置群組交互功能
+   */
+  private setupGroupInteractions(circles: d3.Selection<SVGCircleElement, ProcessedScatterDataPoint, SVGGElement, unknown>): void {
+    if (!this.props.groupBy) return;
+
+    console.log('🎨 ScatterPlot: 設置群組交互事件');
+
+    if (this.props.enableGroupHighlight) {
+      circles
+        .on('mouseover.group', (event, d) => {
+          const group = d.group;
+          if (group) {
+            console.log('🎯 群組懸停:', group);
+            
+            // 高亮同群組的所有散點 - 僅使用顏色和透明度
+            circles
+              .transition()
+              .duration(200)
+              .style('opacity', (data) => data.group === group ? 1 : 0.3);
+
+            // 調用用戶回調
+            if (this.props.onGroupHover) {
+              this.props.onGroupHover(group);
+            }
+          }
+        })
+        .on('mouseleave.group', (event, d) => {
+          console.log('🎯 群組離開');
+          
+          // 重置所有散點
+          circles
+            .transition()
+            .duration(200)
+            .style('opacity', this.props.opacity || 0.7);
+
+          // 調用用戶回調
+          if (this.props.onGroupHover) {
+            this.props.onGroupHover(null);
+          }
+        });
+    }
+
+    if (this.props.enableGroupFilter) {
+      circles
+        .style('cursor', 'pointer')
+        .on('click.group', (event, d) => {
+          const group = d.group;
+          if (group && this.props.onGroupSelect) {
+            console.log('🎯 群組點擊:', group);
+            // 這裡可以實現群組篩選邏輯
+            this.props.onGroupSelect(group, true);
+          }
+        });
+    }
   }
 
   /**

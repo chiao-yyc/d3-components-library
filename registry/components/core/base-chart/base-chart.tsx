@@ -13,6 +13,23 @@ import {
   createViewportController
 } from './interaction-utils'
 import { createChartClipPath, createStandardDropShadow, createStandardGlow } from './visual-effects'
+import { 
+  GroupDataProcessor, 
+  GroupProcessorResult, 
+  GroupConfig,
+  createGroupHighlightManager,
+  createGroupFilterManager,
+  createGroupLegend,
+  GroupHighlightManager,
+  GroupFilterManager
+} from './chart-group-utils'
+import { 
+  createInteractionComposer, 
+  createTransitionManager,
+  InteractionComposer,
+  TransitionManager,
+  AnimationConfig
+} from './interaction-animation-utils'
 
 export interface BaseChartProps {
   data: any[]
@@ -25,6 +42,16 @@ export interface BaseChartProps {
   animationDuration?: number
   showTooltip?: boolean
   onError?: (error: Error) => void
+  
+  // Group functionality props
+  groupBy?: string
+  groupColors?: string[]
+  enableGroupHighlight?: boolean
+  enableGroupFilter?: boolean
+  showGroupLegend?: boolean
+  groupLegendPosition?: { x: number; y: number }
+  onGroupSelect?: (group: string, isSelected: boolean) => void
+  onGroupHover?: (group: string | null) => void
 }
 
 export interface BaseChartState {
@@ -43,6 +70,13 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected containerRef: React.RefObject<HTMLDivElement> | null = null;
   protected props: TProps
   protected state: BaseChartState
+  
+  // Group functionality managers
+  protected groupProcessor?: GroupDataProcessor
+  protected groupHighlightManager?: GroupHighlightManager
+  protected groupFilterManager?: GroupFilterManager
+  protected interactionComposer?: InteractionComposer
+  protected transitionManager?: TransitionManager
 
   constructor(props: TProps) {
     this.props = props
@@ -51,6 +85,9 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       isLoading: false,
       error: null
     }
+    
+    // Initialize group functionality if enabled
+    this.initializeGroupManagers()
   }
 
   // 抽象方法，子類必須實現
@@ -59,9 +96,44 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected abstract renderChart(): void
   protected abstract getChartType(): string
 
+  // Initialize group managers based on props
+  protected initializeGroupManagers(): void {
+    const { groupBy, groupColors, enableGroupHighlight, enableGroupFilter, animationDuration = 200 } = this.props
+    
+    if (groupBy) {
+      this.groupProcessor = new GroupDataProcessor({
+        groupKey: groupBy,
+        colorScheme: groupColors
+      })
+    }
+    
+    if (enableGroupHighlight || enableGroupFilter) {
+      this.transitionManager = createTransitionManager({
+        duration: animationDuration
+      })
+      
+      this.interactionComposer = createInteractionComposer(
+        {
+          groupSelector: '[data-group]',
+          onHover: this.props.onGroupHover
+        },
+        {
+          multiSelect: true,
+          onSelect: this.props.onGroupSelect
+        },
+        {
+          duration: animationDuration
+        }
+      )
+    }
+  }
+
   // New method to update props and trigger re-render cycle
   public update(newProps: TProps) {
+    
     this.props = newProps; // Update internal props
+    this.initializeGroupManagers(); // Re-initialize group managers with new props
+    
     if (this.svgRef?.current) { // Only proceed if SVG is ready
       try {
         this.processData();
@@ -70,6 +142,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       } catch (error) {
         this.handleError(error as Error);
       }
+    } else {
     }
   }
 
@@ -349,8 +422,84 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     return glowUrl;
   }
 
-  // 渲染方法
-  render(): ReactNode {
+  // === Group functionality methods ===
+
+  /**
+   * Process data with group functionality
+   */
+  protected processGroupData(data: any[]): GroupProcessorResult | null {
+    if (!this.groupProcessor) return null
+    return this.groupProcessor.processGroupData(data)
+  }
+
+  /**
+   * Enable group interactions on a selection
+   */
+  protected enableGroupInteractions(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    selection: d3.Selection<any, any, any, any>
+  ): void {
+    if (!this.interactionComposer) return
+
+    if (this.props.enableGroupHighlight) {
+      this.groupHighlightManager = createGroupHighlightManager(container, {
+        transitionDuration: this.props.animationDuration
+      })
+    }
+
+    if (this.props.enableGroupFilter && this.props.groupBy) {
+      this.groupFilterManager = createGroupFilterManager(this.props.data, this.props.groupBy)
+    }
+
+    this.interactionComposer.enableInteractions(selection)
+  }
+
+  /**
+   * Render group legend
+   */
+  protected renderGroupLegend(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    groupResult: GroupProcessorResult
+  ): d3.Selection<any, any, any, any> | null {
+    if (!this.props.showGroupLegend) return null
+
+    return createGroupLegend(
+      container,
+      groupResult.groups,
+      groupResult.colorScale,
+      {
+        position: this.props.groupLegendPosition,
+        onClick: this.props.onGroupSelect ? (group: string) => {
+          if (this.groupFilterManager) {
+            this.groupFilterManager.toggleGroup(group)
+            const isSelected = this.groupFilterManager.getActiveGroups().includes(group)
+            this.props.onGroupSelect?.(group, isSelected)
+          }
+        } : undefined
+      }
+    )
+  }
+
+  /**
+   * Apply group data attributes to elements
+   */
+  protected applyGroupAttributes(
+    selection: d3.Selection<any, any, any, any>,
+    groupKey: string
+  ): d3.Selection<any, any, any, any> {
+    return selection.attr('data-group', (d: any) => d[groupKey] || '')
+  }
+
+  /**
+   * Get group color for data item
+   */
+  protected getGroupColor(data: any, groupResult: GroupProcessorResult): string {
+    const group = data[this.props.groupBy || ''] || ''
+    return groupResult.colorScale(group)
+  }
+
+  // 渲染方法 - 用於 createChartComponent
+  renderContent(containerRef: React.RefObject<HTMLDivElement>, svgRef: React.RefObject<SVGSVGElement>): ReactNode {
     const { className, style, width, height } = this.props
     const { tooltip, error } = this.state
     
@@ -377,9 +526,9 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     }
 
     return (
-      <div ref={this.containerRef} className={cn('relative', className)} style={style}>
+      <div ref={containerRef} className={cn('relative', className)} style={style}>
         <svg
-          ref={this.svgRef}
+          ref={svgRef}
           width={width}
           height={height}
           className={cn(`${this.getChartType()}-svg`, 'overflow-visible')}
@@ -401,6 +550,11 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       </div>
     )
   }
+
+  // 向下兼容的 render 方法
+  render(): ReactNode {
+    return this.renderContent(this.containerRef, this.svgRef)
+  }
 }
 
 // React 組件包裝器
@@ -408,14 +562,6 @@ export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
   return React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
-    console.log('🚀 createChartComponent 被調用，組件類型:', ChartClass.name);
-    console.log('🚀 props 包含互動功能:', {
-      enableBrushZoom: (props as any).enableBrushZoom,
-      enableCrosshair: (props as any).enableCrosshair,
-      enableClipPath: (props as any).enableClipPath,
-      enableDropShadow: (props as any).enableDropShadow,
-      enableGlowEffect: (props as any).enableGlowEffect
-    });
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
@@ -428,15 +574,23 @@ export function createChartComponent<TProps extends BaseChartProps>(
     const [, forceUpdate] = useState({})
     
     useEffect(() => {
+      
       if (chartInstance.svgRef?.current) {
         chartInstance.update(props); // Call the new update method
       }
-    }, [props, chartInstance, chartInstance.svgRef.current]);
+    }, [props, chartInstance]);
+    
+    // 單獨的 useEffect 用於 SVG ref 變化
+    useEffect(() => {
+      if (chartInstance.svgRef?.current && props) {
+        chartInstance.update(props);
+      }
+    }, [chartInstance.svgRef?.current]);
 
     // 公開實例方法
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])
 
-    return chartInstance.render()
+    return chartInstance.renderContent(containerRef, svgRef)
   })
 }
 

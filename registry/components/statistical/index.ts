@@ -1,5 +1,6 @@
 // Statistical chart components
 export * from './box-plot';
+export * from './correlogram';
 export * from './radar-chart';
 export * from './scatter-plot';
 export * from './tree-map';

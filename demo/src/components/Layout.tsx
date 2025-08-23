@@ -39,7 +39,8 @@ function Layout({ children }: LayoutProps) {
         { path: '/scatter-plot', name: '散點圖', icon: '🔵' },
         { path: '/pie-chart', name: '圓餅圖', icon: '🥧' },
         { path: '/area-chart', name: '區域圖', icon: '🌊' },
-        { path: '/heatmap', name: '熱力圖', icon: '🔥' }
+        { path: '/heatmap', name: '熱力圖', icon: '🔥' },
+        { path: '/correlogram', name: '相關性圖', icon: '🔗' }
       ]
     },
     {
