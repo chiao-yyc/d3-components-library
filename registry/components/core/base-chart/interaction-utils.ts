@@ -380,6 +380,7 @@ export class BrushZoomController {
     // 創建筆刷組
     this.brushGroup = container.append('g')
       .attr('class', 'brush-zoom')
+      .attr('data-testid', 'brush-overlay')
       .call(this.brush);
 
     // 自定義筆刷樣式
@@ -520,7 +521,9 @@ export class CrosshairController {
     const { width, height } = chartDimensions;
 
     // 創建十字游標組
-    const crosshairGroup = container.append('g').attr('class', 'crosshair');
+    const crosshairGroup = container.append('g')
+      .attr('class', 'crosshair')
+      .attr('data-testid', 'crosshair-overlay');
 
     // 創建垂直線
     if (this.config.showLines !== false) {

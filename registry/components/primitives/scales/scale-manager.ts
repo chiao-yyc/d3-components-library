@@ -1,4 +1,13 @@
-import * as d3 from 'd3'
+import { 
+  scaleLinear, 
+  scaleBand, 
+  scaleTime, 
+  scaleOrdinal, 
+  scaleLog, 
+  scaleSqrt, 
+  scalePow,
+  extent
+} from '../../core/d3-utils'
 
 export type ScaleType = 'linear' | 'band' | 'time' | 'ordinal' | 'log' | 'sqrt' | 'pow'
 
@@ -85,28 +94,28 @@ export class ScaleManager {
 
     switch (config.type) {
       case 'linear':
-        scale = d3.scaleLinear()
+        scale = scaleLinear()
         break
       case 'band':
-        scale = d3.scaleBand()
+        scale = scaleBand()
         if (config.padding !== undefined) scale.padding(config.padding)
         if (config.paddingInner !== undefined) scale.paddingInner(config.paddingInner)
         if (config.paddingOuter !== undefined) scale.paddingOuter(config.paddingOuter)
         break
       case 'time':
-        scale = d3.scaleTime()
+        scale = scaleTime()
         break
       case 'ordinal':
-        scale = d3.scaleOrdinal()
+        scale = scaleOrdinal()
         break
       case 'log':
-        scale = d3.scaleLog()
+        scale = scaleLog()
         break
       case 'sqrt':
-        scale = d3.scaleSqrt()
+        scale = scaleSqrt()
         break
       case 'pow':
-        scale = d3.scalePow()
+        scale = scalePow()
         break
       default:
         throw new Error(`Unsupported scale type: ${config.type}`)
@@ -134,9 +143,9 @@ export class ScaleManager {
     if (type === 'band' || type === 'ordinal') {
       domain = Array.from(new Set(values))
     } else if (type === 'time') {
-      domain = d3.extent(values) as [Date, Date]
+      domain = extent(values) as [Date, Date]
     } else {
-      domain = d3.extent(values) as [number, number]
+      domain = extent(values) as [number, number]
     }
 
     if (axis === 'x') {

@@ -306,6 +306,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 
   protected setState(newState: Partial<BaseChartState>) {
     this.state = { ...this.state, ...newState }
+    // 觸發 React 重新渲染的機制將由 createChartComponent 處理
   }
 
   protected handleError(error: Error) {
@@ -565,18 +566,28 @@ export function createChartComponent<TProps extends BaseChartProps>(
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
-    const chartInstance = useMemo(() => new ChartClass(props), []);
+    const [, forceUpdate] = useState({});
+    
+    const chartInstance = useMemo(() => {
+      const instance = new ChartClass(props);
+      
+      // 重寫 setState 以觸發 React 重新渲染
+      const originalSetState = instance.setState.bind(instance);
+      instance.setState = (newState: Partial<BaseChartState>) => {
+        originalSetState(newState);
+        forceUpdate({}); // 強制 React 重新渲染
+      };
+      
+      return instance;
+    }, []);
 
     // Assign refs to the instance
     chartInstance.containerRef = containerRef;
     chartInstance.svgRef = svgRef;
     
-    const [, forceUpdate] = useState({})
-    
     useEffect(() => {
-      
       if (chartInstance.svgRef?.current) {
-        chartInstance.update(props); // Call the new update method
+        chartInstance.update(props);
       }
     }, [props, chartInstance]);
     
@@ -668,3 +679,12 @@ export const chartUtils = {
     return String(value)
   }
 }
+
+// === 新架構導出 ===
+// 框架無關的核心邏輯
+export { BaseChartCore } from './core';
+export type { BaseChartCoreConfig, ChartStateCallbacks } from './core';
+
+// React 包裝層
+export { createReactChartWrapper } from './react-chart-wrapper';
+export type { ReactChartWrapperProps } from './react-chart-wrapper';
