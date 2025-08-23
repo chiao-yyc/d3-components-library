@@ -83,7 +83,7 @@ export class D3PieChart extends BaseChart<PieChartProps> {
   }
 
   protected renderChart(): void {
-    const { innerRadius = 0, cornerRadius = 0, padAngle = 0, animate, animationDuration = 750, colors } = this.props;
+    const { innerRadius = 0, cornerRadius = 0, padAngle = 0, animate, animationDuration = 750, animationType = 'sweep', colors } = this.props;
     const { chartWidth, chartHeight } = this.getChartDimensions();
     const outerRadius = Math.min(chartWidth, chartHeight) / 2 - 10;
 
@@ -119,12 +119,33 @@ export class D3PieChart extends BaseChart<PieChartProps> {
       .attr('stroke-width', 2);
 
     if (animate) {
-      paths.transition()
-        .duration(animationDuration)
-        .attrTween('d', d => {
-          const i = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
-          return t => arc(i(t))!;
-        });
+      const transition = paths.transition().duration(animationDuration);
+      
+      switch (animationType) {
+        case 'fade':
+          paths.style('opacity', 0).attr('d', arc);
+          transition.style('opacity', 1);
+          break;
+          
+        case 'scale':
+          paths.attr('transform', 'scale(0)').attr('d', arc);
+          transition.attr('transform', 'scale(1)');
+          break;
+          
+        case 'rotate':
+          paths.attr('d', arc).style('transform-origin', 'center');
+          paths.style('transform', 'rotate(-90deg)');
+          transition.style('transform', 'rotate(0deg)');
+          break;
+          
+        case 'sweep':
+        default:
+          transition.attrTween('d', d => {
+            const i = d3.interpolate({ startAngle: 0, endAngle: 0 }, d);
+            return t => arc(i(t))!;
+          });
+          break;
+      }
     } else {
       paths.attr('d', arc);
     }

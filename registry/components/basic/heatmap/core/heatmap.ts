@@ -172,7 +172,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
   }
 
   protected renderChart(): void {
-    const { cellRadius, showValues, valueFormat, textColor, showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, animate, animationDuration } = this.props;
+    const { cellRadius, showValues, valueFormat, textColor, showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, animate, animationDuration, showLegend = true, legendPosition = 'right', legendTitle = '值', legendFormat } = this.props;
     const { xScale, yScale, chartHeight } = this.scales;
 
     // 關鍵調試信息
@@ -242,9 +242,119 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
         rotation: yAxisRotation
       }
     });
+
+    // 渲染圖例
+    if (showLegend) {
+      this.renderLegend(g, legendPosition, legendTitle, legendFormat);
+    }
   }
 
   protected getChartType(): string {
     return 'heatmap';
+  }
+
+  private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string, format?: (d: number) => string): void {
+    if (!this.colorScale) return;
+
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    const valueExtent = d3.extent(this.processedData, d => d.value) as [number, number];
+    
+    // 圖例尺寸設定
+    const legendWidth = position === 'left' || position === 'right' ? 20 : Math.min(200, chartWidth * 0.6);
+    const legendHeight = position === 'top' || position === 'bottom' ? 20 : Math.min(150, chartHeight * 0.6);
+    
+    // 根據位置計算圖例座標
+    let legendX: number, legendY: number;
+    let isVertical = position === 'left' || position === 'right';
+    
+    switch (position) {
+      case 'top':
+        legendX = (chartWidth - legendWidth) / 2;
+        legendY = -60;
+        break;
+      case 'bottom':
+        legendX = (chartWidth - legendWidth) / 2;
+        legendY = chartHeight + 60;
+        break;
+      case 'left':
+        legendX = -80;
+        legendY = (chartHeight - legendHeight) / 2;
+        break;
+      case 'right':
+      default:
+        legendX = chartWidth + 20;
+        legendY = (chartHeight - legendHeight) / 2;
+        break;
+    }
+
+    // 創建圖例群組
+    const legendGroup = g.append('g')
+      .attr('class', 'heatmap-legend')
+      .attr('transform', `translate(${legendX}, ${legendY})`);
+
+    // 創建顏色漸層
+    const defs = g.select('svg').select('defs').empty() ? g.select('svg').append('defs') : g.select('svg').select('defs');
+    
+    const gradientId = `heatmap-gradient-${Math.random().toString(36).substr(2, 9)}`;
+    const gradient = defs.append('linearGradient')
+      .attr('id', gradientId)
+      .attr('gradientUnits', 'userSpaceOnUse');
+
+    if (isVertical) {
+      gradient.attr('x1', 0).attr('y1', legendHeight).attr('x2', 0).attr('y2', 0);
+    } else {
+      gradient.attr('x1', 0).attr('y1', 0).attr('x2', legendWidth).attr('y2', 0);
+    }
+
+    // 添加顏色停止點
+    const steps = 10;
+    for (let i = 0; i <= steps; i++) {
+      const ratio = i / steps;
+      const value = valueExtent[0] + ratio * (valueExtent[1] - valueExtent[0]);
+      gradient.append('stop')
+        .attr('offset', `${ratio * 100}%`)
+        .attr('stop-color', this.colorScale.getColor(value));
+    }
+
+    // 繪製漸層矩形
+    legendGroup.append('rect')
+      .attr('width', legendWidth)
+      .attr('height', legendHeight)
+      .style('fill', `url(#${gradientId})`)
+      .attr('stroke', '#ccc')
+      .attr('stroke-width', 1);
+
+    // 添加標題
+    if (title) {
+      legendGroup.append('text')
+        .attr('class', 'legend-title')
+        .attr('x', isVertical ? -10 : legendWidth / 2)
+        .attr('y', isVertical ? -10 : -10)
+        .attr('text-anchor', isVertical ? 'end' : 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', '#333')
+        .text(title);
+    }
+
+    // 添加數值標籤
+    const labelCount = 3;
+    for (let i = 0; i < labelCount; i++) {
+      const ratio = i / (labelCount - 1);
+      const value = valueExtent[0] + ratio * (valueExtent[1] - valueExtent[0]);
+      const displayValue = format ? format(value) : value.toFixed(1);
+
+      const labelX = isVertical ? legendWidth + 5 : ratio * legendWidth;
+      const labelY = isVertical ? legendHeight - ratio * legendHeight + 4 : legendHeight + 15;
+
+      legendGroup.append('text')
+        .attr('class', 'legend-label')
+        .attr('x', labelX)
+        .attr('y', labelY)
+        .attr('text-anchor', isVertical ? 'start' : 'middle')
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .text(displayValue);
+    }
   }
 }

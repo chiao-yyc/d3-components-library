@@ -32,6 +32,9 @@ export default function PieChartDemo() {
   // 控制選項
   const [selectedDataset, setSelectedDataset] = useState('sales')
   const [innerRadius, setInnerRadius] = useState(0)
+  const [outerRadius, setOuterRadius] = useState(120)  // 新增：外半徑控制
+  const [cornerRadius, setCornerRadius] = useState(0)  // 新增：圓角控制
+  const [padAngle, setPadAngle] = useState(0)          // 新增：扇形間距控制
   const [showLabels, setShowLabels] = useState(true)
   const [showLegend, setShowLegend] = useState(true)
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('right')
@@ -42,6 +45,7 @@ export default function PieChartDemo() {
   const [labelThreshold, setLabelThreshold] = useState(5)
   const [showCenterText, setShowCenterText] = useState(true)
   const [hoverEffect, setHoverEffect] = useState<'lift' | 'scale' | 'glow' | 'none'>('lift')
+  const [animationType, setAnimationType] = useState<'fade' | 'scale' | 'rotate' | 'sweep'>('sweep')  // 新增：動畫類型
 
   // 當前資料
   const currentData = useMemo(() => {
@@ -124,6 +128,52 @@ export default function PieChartDemo() {
             </div>
           </div>
 
+          {/* 外半徑 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              外半徑 ({outerRadius})
+            </label>
+            <input
+              type="range"
+              min="80"
+              max="200"
+              value={outerRadius}
+              onChange={(e) => setOuterRadius(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* 圓角半徑 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              圓角半徑 ({cornerRadius})
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="10"
+              value={cornerRadius}
+              onChange={(e) => setCornerRadius(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* 扇形間距 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              扇形間距 ({padAngle.toFixed(3)})
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="0.1"
+              step="0.005"
+              value={padAngle}
+              onChange={(e) => setPadAngle(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
           {/* 顏色主題 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -188,6 +238,23 @@ export default function PieChartDemo() {
               <option value="scale">縮放</option>
               <option value="glow">光暈</option>
               <option value="none">無</option>
+            </select>
+          </div>
+
+          {/* 動畫類型 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              動畫類型
+            </label>
+            <select
+              value={animationType}
+              onChange={(e) => setAnimationType(e.target.value as any)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="fade">淡入</option>
+              <option value="scale">縮放</option>
+              <option value="rotate">旋轉</option>
+              <option value="sweep">掃描</option>
             </select>
           </div>
 
@@ -287,6 +354,9 @@ export default function PieChartDemo() {
             width={600}
             height={400}
             innerRadius={innerRadius}
+            outerRadius={outerRadius}
+            cornerRadius={cornerRadius}
+            padAngle={padAngle}
             colorScheme={colorScheme}
             showLabels={showLabels}
             showLegend={showLegend}
@@ -294,6 +364,7 @@ export default function PieChartDemo() {
             showPercentages={showPercentages}
             labelThreshold={labelThreshold}
             animate={animate}
+            animationType={animationType}
             interactive={interactive}
             showCenterText={showCenterText}
             hoverEffect={hoverEffect}
@@ -361,10 +432,15 @@ const data = [
   width={600}
   height={400}
   innerRadius={${innerRadius}}
+  outerRadius={${outerRadius}}
+  cornerRadius={${cornerRadius}}
+  padAngle={${padAngle}}
   colorScheme="${colorScheme}"
   showLabels={${showLabels}}
   showLegend={${showLegend}}
   legendPosition="${legendPosition}"
+  animationType="${animationType}"
+  hoverEffect="${hoverEffect}"
   animate={${animate}}
   interactive={${interactive}}
   onSliceClick={(data) => console.log('Clicked:', data)}
