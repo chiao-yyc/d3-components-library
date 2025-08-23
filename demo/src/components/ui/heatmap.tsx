@@ -1,9 +1,7 @@
-// UI Wrapper for Heatmap component
-// This file provides a simple import path for the demo environment
-
-export { Heatmap } from '@registry/components/basic/heatmap'
+// 直接引用 Registry 中的組件，支援即時開發預覽
+export { Heatmap as HeatMap } from '@registry/components/basic/heatmap'
 export type { 
-  HeatmapProps, 
+  HeatmapProps as HeatMapProps, 
   HeatmapDataPoint, 
   ProcessedHeatmapDataPoint,
   LegendTick 
