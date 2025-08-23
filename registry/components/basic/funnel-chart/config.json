@@ -7,7 +7,7 @@
   "dependencies": ["react", "d3", "@types/d3"],
   "category": "business-charts",
   "complexity": "intermediate",
-  "files": ["funnel-chart.tsx", "funnel-chart.css", "types.ts", "index.ts"],
+  "files": ["funnel-chart-v2.tsx", "funnel-chart.css", "types.ts", "index.ts", "core/"],
   "props": {
     "data": {
       "type": "array",

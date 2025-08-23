@@ -89,4 +89,5 @@ export interface GaugeChartConfig {
 
   // Events
   onValueChange?: (value: number) => void;
+  onError?: (error: Error) => void;
 }

@@ -1,11 +1,17 @@
 
 import React from 'react';
 import './funnel-chart.css';
-export { FunnelChart } from './funnel-chart';
-export type { FunnelChartProps, FunnelChartDataPoint, ProcessedFunnelDataPoint, FunnelSegment } from './types';
 
-export { D3FunnelChart } from './core';
-export type { FunnelChartConfig as D3FunnelChartConfig } from './core';
+// 新架構版本 (推薦使用)
+export { FunnelChartV2 as FunnelChart } from './funnel-chart-v2';
+export { FunnelChartV2 } from './funnel-chart-v2';
+
+// 核心邏輯（新架構）
+export { FunnelChartCore } from './core/funnel-chart-core';
+export type { FunnelChartCoreConfig } from './core/funnel-chart-core';
+
+// 舊版類型定義（向下兼容）
+export type { FunnelChartProps, FunnelChartDataPoint, ProcessedFunnelDataPoint, FunnelSegment } from './types';
 
 export const TrapezoidFunnelChart = (props: any) => {
   return React.createElement(FunnelChart, { ...props, shape: "trapezoid" });

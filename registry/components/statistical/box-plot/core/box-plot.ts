@@ -148,7 +148,10 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
       pointColorMode = 'uniform',
       jitterWidth = 0.6,
       pointRadius = 2,
-      pointOpacity = 0.6
+      pointOpacity = 0.6,
+      animate = true,
+      animationDuration = 800,
+      animationDelay = 0
     } = this.props;
 
     const chartArea = this.createSVGContainer();
@@ -186,7 +189,10 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
       boxStrokeWidth,
       meanStyle,
       outlierRadius,
-      jitterWidth
+      jitterWidth,
+      animate,
+      animationDuration,
+      animationDelay
     });
 
     // 繪製 showAllPoints 功能（BoxPlot 特有功能，不在共用渲染器中）
@@ -207,7 +213,7 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
             centerX = 0; // 不需要在水平模式下使用
           }
 
-          this.renderAllPoints(boxGroup, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth);
+          this.renderAllPoints(boxGroup, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth, animate, animationDuration, animationDelay);
         }
       });
     }
@@ -225,7 +231,10 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
     jitterWidth: number,
     radius: number,
     opacity: number,
-    boxWidth: number
+    boxWidth: number,
+    animate?: boolean,
+    animationDuration?: number,
+    animationDelay?: number
   ): void {
     const { xScale, yScale } = this.scales;
 
@@ -258,15 +267,26 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
         pointColor = this.colorScale.getColor(categoryIndex);
       }
 
-      group.append('circle')
+      const point = group.append('circle')
         .attr('class', 'data-point')
         .attr('cx', pointX)
         .attr('cy', pointY)
-        .attr('r', radius)
         .attr('fill', pointColor)
         .attr('fill-opacity', opacity)
         .attr('stroke', '#fff')
         .attr('stroke-width', 0.5);
+        
+      if (animate) {
+        point
+          .attr('r', 0)
+          .transition()
+          .delay((animationDelay || 0) + categoryIndex * 100 + 900 + pointIndex * 30)
+          .duration(animationDuration || 400)
+          .ease(d3.easeBackOut)
+          .attr('r', radius);
+      } else {
+        point.attr('r', radius);
+      }
     });
   }
 
