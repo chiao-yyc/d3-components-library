@@ -8,8 +8,9 @@ function BarChartDemo() {
   const [selectedColor, setSelectedColor] = useState('default')
   const [chartWidth, setChartWidth] = useState(600)
   const [chartHeight, setChartHeight] = useState(400)
-  const [showGrid, setShowGrid] = useState(true)
-  const [showAxis, setShowAxis] = useState(true)
+  // 注意：BarChart 組件目前不支援 showGrid 和 showAxis 參數
+  // const [showGrid, setShowGrid] = useState(true)  // 組件不支援
+  // const [showAxis, setShowAxis] = useState(true)   // 組件不支援
   const [showTooltip, setShowTooltip] = useState(true)
   const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 40 })
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
@@ -43,14 +44,15 @@ function BarChartDemo() {
     },
     {
       title: "配置互動功能",
-      content: "啟用提示框、網格線等功能來增強用戶體驗。這些互動元素讓用戶能更好地理解數據。",
+      content: "啟用提示框、標籤顯示等功能來增強用戶體驗。這些互動元素讓用戶能更好地理解數據。",
       code: `<BarChart
   data={data}
   showTooltip={true}
-  showGrid={true}
+  showLabels={true}
   interactive={true}
+  orientation="vertical"
 />`,
-      highlight: "提示框會在滑鼠懸停時顯示詳細的數據信息"
+      highlight: "提示框會在滑鼠懸停時顯示詳細的數據信息，標籤可以直接在圖表上顯示數值"
     }
   ]
 
@@ -206,24 +208,15 @@ function BarChartDemo() {
                     功能開關
                   </label>
                   <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={showGrid}
-                        onChange={(e) => setShowGrid(e.target.checked)}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">顯示網格</span>
+                    {/* 注意：以下參數目前不被 BarChart 組件支援 */}
+                    {/* <label className="flex items-center">
+                      <input type="checkbox" disabled className="mr-2" />
+                      <span className="text-sm text-gray-400">顯示網格 (暫不支援)</span>
                     </label>
                     <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={showAxis}
-                        onChange={(e) => setShowAxis(e.target.checked)}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">顯示軸線</span>
-                    </label>
+                      <input type="checkbox" disabled className="mr-2" />
+                      <span className="text-sm text-gray-400">顯示軸線 (暫不支援)</span>
+                    </label> */}
                     <label className="flex items-center">
                       <input
                         type="checkbox"

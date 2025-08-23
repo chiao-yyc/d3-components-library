@@ -116,7 +116,12 @@ export class D3BarChart extends BaseChart<BarChartProps> {
           this.props.onDataClick?.(d.originalData);
         })
         .on('mouseenter', (event, d) => {
-          d3.select(event.currentTarget).style('opacity', 0.8);
+          const element = d3.select(event.currentTarget);
+          if (animate) {
+            element.transition().duration(200).style('opacity', 0.8);
+          } else {
+            element.interrupt().style('opacity', 0.8);
+          }
           if (showTooltip) {
             const [x, y] = d3.pointer(event, g.node());
             this.createTooltip(x, y, `X: ${d.x}<br/>Y: ${d.y}`);
@@ -124,7 +129,12 @@ export class D3BarChart extends BaseChart<BarChartProps> {
           this.props.onHover?.(d.originalData);
         })
         .on('mouseleave', (event) => {
-          d3.select(event.currentTarget).style('opacity', 1);
+          const element = d3.select(event.currentTarget);
+          if (animate) {
+            element.transition().duration(200).style('opacity', 1);
+          } else {
+            element.interrupt().style('opacity', 1);
+          }
           if (showTooltip) {
             this.hideTooltip();
           }

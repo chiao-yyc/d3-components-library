@@ -40,6 +40,7 @@ export default function LineChartDemo() {
   const [showDots, setShowDots] = useState(false)
   const [showArea, setShowArea] = useState(false)
   const [animate, setAnimate] = useState(false)
+  const [showGrid, setShowGrid] = useState(false)  // 新增：LineChart 支援網格線顯示
   
   // 新增的交互功能狀態
   const [enableBrushZoom, setEnableBrushZoom] = useState(false)
@@ -128,6 +129,19 @@ export default function LineChartDemo() {
               />
               <label htmlFor="animate" className="text-sm font-medium text-gray-700">
                 動畫效果
+              </label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="showGrid"
+                checked={showGrid}
+                onChange={(e) => setShowGrid(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="showGrid" className="text-sm font-medium text-gray-700">
+                顯示網格
               </label>
             </div>
           </div>
@@ -240,6 +254,7 @@ export default function LineChartDemo() {
           curve={curve}
           showDots={showDots}
           showArea={showArea}
+          showGrid={showGrid}
           animate={animate}
           colors={['#3b82f6']}
           onDataClick={(data) => console.log('Clicked:', data)}
