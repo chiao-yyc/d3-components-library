@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
+import { AlignmentStrategy } from '../utils/positioning'
 
 export interface MultiBarData {
   x: any
@@ -20,6 +21,7 @@ export interface MultiBarProps {
   animationDuration?: number
   barWidth?: number
   groupOffset?: number
+  alignment?: AlignmentStrategy
   onBarClick?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
   onBarMouseEnter?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
   onBarMouseLeave?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
@@ -37,6 +39,7 @@ export const MultiBar: React.FC<MultiBarProps> = ({
   animationDuration = 300,
   barWidth,
   groupOffset = 0,
+  alignment = 'center',
   onBarClick,
   onBarMouseEnter,
   onBarMouseLeave

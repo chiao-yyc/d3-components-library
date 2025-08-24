@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
+import { calculateAlignedPosition, AlignmentStrategy } from '../utils/positioning'
 
 export interface LineShapeData {
   x: any
@@ -21,6 +22,7 @@ export interface LineProps {
   showPoints?: boolean
   pointRadius?: number
   pointColor?: string
+  pointAlignment?: AlignmentStrategy
   onLineClick?: (event: React.MouseEvent) => void
   onPointClick?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
   onPointMouseEnter?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
@@ -41,6 +43,7 @@ export const Line: React.FC<LineProps> = ({
   showPoints = false,
   pointRadius = 3,
   pointColor,
+  pointAlignment = 'center',
   onLineClick,
   onPointClick,
   onPointMouseEnter,
@@ -54,11 +57,7 @@ export const Line: React.FC<LineProps> = ({
     const selection = d3.select(lineRef.current)
 
     const lineGenerator = d3.line<LineShapeData>()
-      .x(d => {
-        const x = xScale(d.x)
-        // 如果是 band scale，調整到中心位置
-        return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
-      })
+      .x(d => calculateAlignedPosition(d.x, xScale, pointAlignment))
       .y(d => yScale(d.y))
       .curve(curve)
 
@@ -140,11 +139,7 @@ export const Line: React.FC<LineProps> = ({
           enter => enter
             .append('circle')
             .attr('class', `line-point ${className}`)
-            .attr('cx', d => {
-              const x = xScale(d.x)
-              // 如果是 band scale，調整到中心位置
-              return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
-            })
+            .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
             .attr('cy', d => yScale(d.y))
             .attr('r', 0)
             .attr('fill', pointColor || color)
@@ -164,11 +159,7 @@ export const Line: React.FC<LineProps> = ({
               update
                 .transition()
                 .duration(animationDuration)
-                .attr('cx', d => {
-              const x = xScale(d.x)
-              // 如果是 band scale，調整到中心位置
-              return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
-            })
+                .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
                 .attr('cy', d => yScale(d.y))
                 .attr('r', pointRadius)
                 .attr('fill', pointColor || color)
@@ -176,11 +167,7 @@ export const Line: React.FC<LineProps> = ({
                 .attr('opacity', opacity)
               :
               update
-                .attr('cx', d => {
-              const x = xScale(d.x)
-              // 如果是 band scale，調整到中心位置
-              return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
-            })
+                .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
                 .attr('cy', d => yScale(d.y))
                 .attr('r', pointRadius)
                 .attr('fill', pointColor || color)
@@ -237,6 +224,7 @@ export const Line: React.FC<LineProps> = ({
     showPoints,
     pointRadius,
     pointColor,
+    pointAlignment,
     onLineClick,
     onPointClick,
     onPointMouseEnter,
@@ -244,6 +232,6 @@ export const Line: React.FC<LineProps> = ({
   ])
 
   return (
-    <g ref={lineRef} className={`line ${className}`} style={{ zIndex: 100 }} />
+    <g ref={lineRef} className={`line ${className}`} />
   )
 }

@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react'
+import { ChartType, getChartZIndex, getChartLayerOrder } from './chart-layer-constants'
 
 export interface ChartLayer {
   id: string
   type: string
+  chartType?: ChartType
   zIndex: number
   visible: boolean
   interactive: boolean
@@ -16,12 +18,14 @@ export interface ChartLayer {
 export interface LayerManagerContextValue {
   layers: ChartLayer[]
   addLayer: (layer: Omit<ChartLayer, 'id'>) => string
+  addChartLayer: (layer: Omit<ChartLayer, 'id' | 'zIndex'> & { chartType: ChartType }) => string
   removeLayer: (layerId: string) => void
   updateLayer: (layerId: string, updates: Partial<ChartLayer>) => void
   getLayer: (layerId: string) => ChartLayer | undefined
   setLayerVisibility: (layerId: string, visible: boolean) => void
   setLayerZIndex: (layerId: string, zIndex: number) => void
   getLayersByType: (type: string) => ChartLayer[]
+  getLayersByChartType: (chartType: ChartType) => ChartLayer[]
   sortedLayers: ChartLayer[]
 }
 
@@ -54,6 +58,19 @@ export const LayerManager: React.FC<LayerManagerProps> = ({ children }) => {
     return id
   }, [])
 
+  const addChartLayer = useCallback((layerData: Omit<ChartLayer, 'id' | 'zIndex'> & { chartType: ChartType }): string => {
+    const id = `chart-layer-${++layerIdCounter.current}`
+    const defaultZIndex = getChartZIndex(layerData.chartType)
+    const layer: ChartLayer = {
+      ...layerData,
+      id,
+      zIndex: defaultZIndex
+    }
+    
+    setLayers(prev => [...prev, layer])
+    return id
+  }, [])
+
   const removeLayer = useCallback((layerId: string) => {
     setLayers(prev => prev.filter(layer => layer.id !== layerId))
   }, [])
@@ -80,6 +97,10 @@ export const LayerManager: React.FC<LayerManagerProps> = ({ children }) => {
     return layers.filter(layer => layer.type === type)
   }, [layers])
 
+  const getLayersByChartType = useCallback((chartType: ChartType) => {
+    return layers.filter(layer => layer.chartType === chartType)
+  }, [layers])
+
   const sortedLayers = React.useMemo(() => {
     return [...layers]
       .filter(layer => layer.visible)
@@ -89,12 +110,14 @@ export const LayerManager: React.FC<LayerManagerProps> = ({ children }) => {
   const contextValue: LayerManagerContextValue = {
     layers,
     addLayer,
+    addChartLayer,
     removeLayer,
     updateLayer,
     getLayer,
     setLayerVisibility,
     setLayerZIndex,
     getLayersByType,
+    getLayersByChartType,
     sortedLayers
   }
 

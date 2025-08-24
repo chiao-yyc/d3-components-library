@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
+import { calculateAlignedPosition, AlignmentStrategy } from '../utils/positioning'
 
 export interface ScatterShapeData {
   x: any
@@ -23,6 +24,7 @@ export interface ScatterProps {
   opacity?: number
   strokeWidth?: number
   strokeColor?: string
+  pointAlignment?: AlignmentStrategy
   onPointClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
   onPointMouseEnter?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
   onPointMouseLeave?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
@@ -41,6 +43,7 @@ export const Scatter: React.FC<ScatterProps> = ({
   opacity = 0.7,
   strokeWidth = 1,
   strokeColor = 'white',
+  pointAlignment = 'center',
   onPointClick,
   onPointMouseEnter,
   onPointMouseLeave
@@ -63,7 +66,7 @@ export const Scatter: React.FC<ScatterProps> = ({
           const enterCircles = enter
             .append('circle')
             .attr('class', `scatter-point ${className}`)
-            .attr('cx', d => xScale(d.x))
+            .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
             .attr('cy', d => yScale(d.y))
             .attr('r', d => {
               if (sizeScale && d.size !== undefined) {
@@ -131,7 +134,7 @@ export const Scatter: React.FC<ScatterProps> = ({
         },
         update => {
           const updateCircles = update
-            .attr('cx', d => xScale(d.x))
+            .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
             .attr('cy', d => yScale(d.y))
             .attr('fill', d => {
               if (colorScale && d.color !== undefined) {
@@ -193,6 +196,7 @@ export const Scatter: React.FC<ScatterProps> = ({
     opacity,
     strokeWidth,
     strokeColor,
+    pointAlignment,
     onPointClick,
     onPointMouseEnter,
     onPointMouseLeave

@@ -20,6 +20,7 @@ import {
 import { MultiBar } from '../primitives/shapes/multi-bar'
 import type { ComboChartSeries, EnhancedComboData } from './chart-series-processor'
 import { ChartScaleFactory } from './chart-scale-factory'
+import { CHART_LAYER_ORDER, sortChartsByLayer, type ChartType } from '../primitives/layouts/chart-layer-constants'
 
 // 系列渲染器屬性
 export interface ChartSeriesRendererProps {
@@ -64,11 +65,10 @@ export const ChartSeriesRenderer: React.FC<ChartSeriesRendererProps> = ({
     return null
   }
 
-  // 按類型排序：stackedArea -> area -> bar -> waterfall -> scatter -> line，確保正確的圖層順序
-  const sortedSeries = [...series].sort((a, b) => {
-    const order = { stackedArea: 0, area: 1, bar: 2, waterfall: 3, scatter: 4, line: 5 }
-    return order[a.type] - order[b.type]
-  })
+  // 使用標準化的圖層順序：stackedArea -> area -> bar -> waterfall -> scatter -> line
+  const sortedSeries = sortChartsByLayer(
+    series.map(s => ({ ...s, type: s.type as ChartType }))
+  )
 
   // 處理多 Bar 分組
   const barSeries = sortedSeries.filter(s => s.type === 'bar')

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
+import { calculateAlignedPosition, AlignmentStrategy } from '../utils/positioning'
 
 export interface AreaShapeData {
   x: any
@@ -19,6 +20,7 @@ export interface AreaProps {
   animate?: boolean
   animationDuration?: number
   baseline?: number | ((d: AreaShapeData) => number)
+  alignment?: AlignmentStrategy
   gradient?: {
     id: string
     stops: { offset: string; color: string; opacity?: number }[]
@@ -37,6 +39,7 @@ export const Area: React.FC<AreaProps> = ({
   animate = true,
   animationDuration = 300,
   baseline = 0,
+  alignment = 'center',
   gradient,
   onAreaClick
 }) => {
@@ -48,11 +51,7 @@ export const Area: React.FC<AreaProps> = ({
     const selection = d3.select(areaRef.current)
 
     const areaGenerator = d3.area<AreaShapeData>()
-      .x(d => {
-        const x = xScale(d.x)
-        // 如果是 band scale，調整到中心位置
-        return xScale.bandwidth ? x + xScale.bandwidth() / 2 : x
-      })
+      .x(d => calculateAlignedPosition(d.x, xScale, alignment))
       .y1(d => yScale(d.y))
       .y0(d => {
         if (typeof baseline === 'function') {
@@ -161,6 +160,7 @@ export const Area: React.FC<AreaProps> = ({
     animate,
     animationDuration,
     baseline,
+    alignment,
     gradient,
     onAreaClick
   ])

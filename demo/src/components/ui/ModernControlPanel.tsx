@@ -8,13 +8,84 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { designTokens, commonStyles } from '../../design/design-tokens'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
+// 控制項類型定義
+export interface ControlConfig {
+  type: 'select' | 'range' | 'checkbox'
+  label: string
+}
+
+export interface SelectConfig extends ControlConfig {
+  type: 'select'
+  value: string
+  options: { label: string; value: string }[]
+  onChange: (value: string) => void
+}
+
+export interface RangeConfig extends ControlConfig {
+  type: 'range'
+  value: number
+  min: number
+  max: number
+  step?: number
+  onChange: (value: number) => void
+}
+
+export interface CheckboxConfig extends ControlConfig {
+  type: 'checkbox'
+  checked: boolean
+  onChange: (checked: boolean) => void
+}
+
+export type Control = SelectConfig | RangeConfig | CheckboxConfig
+
 export interface ModernControlPanelProps {
   title?: string
-  children: React.ReactNode
+  children?: React.ReactNode
   className?: string
   collapsible?: boolean
   defaultExpanded?: boolean
   icon?: React.ReactNode
+  // 支援 controls 陣列
+  controls?: Control[]
+}
+
+// 渲染單個控制項的函數
+const renderControl = (control: Control, index: number) => {
+  switch (control.type) {
+    case 'select':
+      return (
+        <SelectControl
+          key={index}
+          label={control.label}
+          value={control.value}
+          options={control.options}
+          onChange={control.onChange}
+        />
+      )
+    case 'range':
+      return (
+        <RangeSlider
+          key={index}
+          label={control.label}
+          value={control.value}
+          min={control.min}
+          max={control.max}
+          step={control.step}
+          onChange={control.onChange}
+        />
+      )
+    case 'checkbox':
+      return (
+        <ToggleControl
+          key={index}
+          label={control.label}
+          checked={control.checked}
+          onChange={control.onChange}
+        />
+      )
+    default:
+      return null
+  }
 }
 
 export const ModernControlPanel: React.FC<ModernControlPanelProps> = ({
@@ -23,7 +94,8 @@ export const ModernControlPanel: React.FC<ModernControlPanelProps> = ({
   className = '',
   collapsible = false,
   defaultExpanded = true,
-  icon
+  icon,
+  controls
 }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
@@ -74,6 +146,14 @@ export const ModernControlPanel: React.FC<ModernControlPanelProps> = ({
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: designTokens.animation.easing.easeOut }}
           >
+            {/* 渲染 controls 陣列 */}
+            {controls && (
+              <div className="space-y-4">
+                {controls.map((control, index) => renderControl(control, index))}
+              </div>
+            )}
+            
+            {/* 渲染 children */}
             {children}
           </motion.div>
         )}

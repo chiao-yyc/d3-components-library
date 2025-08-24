@@ -35,6 +35,10 @@ const AreaScatterComboDemo = lazy(() => import('./pages/AreaScatterComboDemo'))
 const TripleComboDemo = lazy(() => import('./pages/TripleComboDemo'))
 const DynamicComboDemo = lazy(() => import('./pages/DynamicComboDemo'))
 const DataProcessorTestDemo = lazy(() => import('./pages/DataProcessorTestDemo'))
+const ComposablePrimitivesDemo = lazy(() => import('./pages/ComposablePrimitivesDemo'))
+const AlignmentTestDemo = lazy(() => import('./pages/AlignmentTestDemo'))
+const ComboChartDebugDemo = lazy(() => import('./pages/ComboChartDebugDemo'))
+const LayerOrderDebugDemo = lazy(() => import('./pages/LayerOrderDebugDemo'))
 
 function App() {
   return (
@@ -72,6 +76,10 @@ function App() {
           <Route path="/triple-combo" element={<TripleComboDemo />} />
           <Route path="/dynamic-combo" element={<DynamicComboDemo />} />
           <Route path="/data-processor-test" element={<DataProcessorTestDemo />} />
+          <Route path="/composable-primitives" element={<ComposablePrimitivesDemo />} />
+          <Route path="/alignment-test" element={<AlignmentTestDemo />} />
+          <Route path="/combo-debug" element={<ComboChartDebugDemo />} />
+          <Route path="/layer-debug" element={<LayerOrderDebugDemo />} />
         </Routes>
       </Suspense>
     </Layout>
