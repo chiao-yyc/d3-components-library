@@ -10,3 +10,9 @@ coverage/
 test-installation/
 demo/test-install/
 demo/d3-components.json
+
+# 臨時參考檔案
+temp_ref/
+
+# 符號連結
+demo/src/registry

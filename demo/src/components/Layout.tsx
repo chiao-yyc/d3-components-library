@@ -26,6 +26,7 @@ function Layout({ children }: LayoutProps) {
       items: [
         { path: '/', name: '首頁', icon: '🏠' },
         { path: '/simple-components', name: '簡化組件', icon: '🚀' },
+        { path: '/composable-primitives', name: '完全組合式', icon: '🧩' },
         { path: '/gallery', name: '組件庫', icon: '🎨' },
         { path: '/data-mapper', name: '資料映射', icon: '📊' },
         { path: '/modular-test', name: '模組測試', icon: '🔧' }
@@ -73,7 +74,10 @@ function Layout({ children }: LayoutProps) {
     {
       title: '開發工具',
       items: [
-        { path: '/data-processor-test', name: 'DataProcessor 測試', icon: '🔬' }
+        { path: '/data-processor-test', name: 'DataProcessor 測試', icon: '🔬' },
+        { path: '/alignment-test', name: '對齊問題測試', icon: '🎯' },
+        { path: '/combo-debug', name: 'Combo 圖表除錯', icon: '🔧' },
+        { path: '/layer-debug', name: '圖層順序調試', icon: '📚' }
       ]
     }
   ]

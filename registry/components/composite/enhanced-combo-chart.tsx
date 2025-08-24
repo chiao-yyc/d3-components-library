@@ -24,6 +24,7 @@ import {
   type WaterfallShapeData
 } from '../primitives'
 import { MultiBar } from '../primitives/shapes/multi-bar'
+import { sortChartsByLayer, type ChartType } from '../primitives/layouts/chart-layer-constants'
 
 // 增強的數據接口 - 支援統一數據源
 export interface EnhancedComboData {
@@ -753,11 +754,10 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
     return null
   }
 
-  // 按類型排序：stackedArea -> area -> bar -> waterfall -> scatter -> line，確保正確的圖層順序
-  const sortedSeries = [...series].sort((a, b) => {
-    const order = { stackedArea: 0, area: 1, bar: 2, waterfall: 3, scatter: 4, line: 5 }
-    return order[a.type] - order[b.type]
-  })
+  // 使用標準化的圖層順序：stackedArea -> area -> bar -> waterfall -> scatter -> line
+  const sortedSeries = sortChartsByLayer(
+    series.map(s => ({ ...s, type: s.type as ChartType }))
+  )
 
   // 處理多 Bar 分組
   const barSeries = sortedSeries.filter(s => s.type === 'bar')
@@ -888,6 +888,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               yScale={yScale}
               color={seriesConfig.color}
               opacity={seriesConfig.barOpacity || 0.8}
+              alignment="center"
               animate={animate}
               animationDuration={animationDuration}
               className={`enhanced-combo-bar-${originalIndex}`}
@@ -941,6 +942,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               {...commonProps}
               opacity={seriesConfig.areaOpacity || 0.6}
               baseline={seriesConfig.baseline || 0}
+              alignment="start"
               curve={getCurveFunction(seriesConfig.curve || 'monotone')}
               gradient={seriesConfig.gradient}
               onAreaClick={interactive && onSeriesClick ?
@@ -955,6 +957,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               strokeWidth={seriesConfig.strokeWidth || 2}
               showPoints={seriesConfig.showPoints ?? true}
               pointRadius={seriesConfig.pointRadius || 3}
+              pointAlignment="center"
               curve={getCurveFunction(seriesConfig.curve || 'monotone')}
               onLineClick={interactive && onSeriesClick ?
                 (event) => onSeriesClick(seriesConfig, null, event) : undefined}
@@ -1016,6 +1019,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               opacity={seriesConfig.scatterOpacity || 0.7}
               strokeWidth={seriesConfig.scatterStrokeWidth || 1}
               strokeColor={seriesConfig.strokeColor || 'white'}
+              pointAlignment="center"
               animate={animate}
               animationDuration={animationDuration}
               className={`enhanced-combo-scatter-${index}`}

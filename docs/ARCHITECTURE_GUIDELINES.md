@@ -53,19 +53,104 @@
 />
 ```
 
+## 🔄 雙層架構設計理念 (Progressive Chart Library)
+
+D3 Components 採用「**漸進式複雜度**」設計哲學，提供雙層架構同時服務初階和進階使用者：
+
+### 📊 Layer 1: Shadcn 模式 - 預製圖表層
+
+**目標用戶**：初階開發者、產品團隊、快速原型開發
+
+```tsx
+// 🚀 零配置，開箱即用
+import { BarChart } from '@/components/ui/bar-chart'
+
+<BarChart 
+  data={salesData}
+  animate={true}
+  colorScheme="blues"
+/>
+```
+
+**特色**：
+- ✅ **即插即用**：複製貼上即可使用
+- ✅ **合理預設**：內建最佳實踐配置
+- ✅ **快速開發**：適合 MVP 和標準圖表需求
+- ✅ **設計一致**：統一的視覺語言
+
+### 🔧 Layer 2: 組合平台 - 進階客製化層
+
+**目標用戶**：進階開發者、視覺化專家、複雜業務需求
+
+```tsx
+// 🎨 完全組合式，無限彈性
+import { ChartCanvas, XAxis, YAxis, Bar, Line, ScaleManager } from '@/components/primitives'
+
+<ChartCanvas width={800} height={600}>
+  <ScaleManager>
+    <XAxis scale="band" position="bottom" />
+    <YAxis scale="linear" position="left" />
+    <YAxis scale="linear" position="right" />
+    
+    <Bar data={barData} xScale="x" yScale="leftY" />
+    <Line data={lineData} xScale="x" yScale="rightY" />
+    <CustomRenderer data={customData} />
+  </ScaleManager>
+</ChartCanvas>
+```
+
+**特色**：
+- 🔧 **完全控制**：每個視覺元素都可客製化
+- 🎯 **業務專用**：解決複雜特殊需求
+- 🚀 **效能優化**：只載入需要的組件
+- 🔗 **可擴展**：易於添加自訂邏輯
+
+### 📈 漸進式學習路徑
+
+```mermaid
+graph LR
+    A[快速開始<br/>預製組件] --> B[添加配置<br/>客製化樣式]
+    B --> C[混合使用<br/>部分組合式]
+    C --> D[完全組合<br/>自訂渲染]
+    
+    A -.-> |直接跳躍| D
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+```
+
+**學習曲線設計**：
+1. **新手友好**：從預製組件開始，快速看到成果
+2. **自然進階**：需要時可以逐步深入客製化
+3. **專家通道**：經驗豐富者可直接使用組合式 API
+4. **向下兼容**：所有層級共享同一套設計系統
+
 ### 架構分層
 
 ```
 ┌─────────────────────────────────────┐
-│          React Components           │  ← 用戶介面層
+│    🚀 Layer 1: 預製圖表 (Shadcn)     │  ← 用戶友好層
+│  BarChart, LineChart, PieChart...   │
+├─────────────────────────────────────┤
+│  🔧 Layer 2: 組合平台 (Primitives)  │  ← 專家工具層  
+│   ChartCanvas, Axis, Shapes...      │
 ├─────────────────────────────────────┤
 │         BaseChart Abstract          │  ← 抽象層
 ├─────────────────────────────────────┤
 │       D3.js Core Logic Classes      │  ← 圖表邏輯層
 ├─────────────────────────────────────┤
-│      Primitives & Utilities         │  ← 基礎組件層
+│      Scale & Utility Systems        │  ← 基礎設施層
 └─────────────────────────────────────┘
 ```
+
+### 🎯 設計原則
+
+1. **同一套核心**：兩層共享相同的設計系統、色彩規範、動畫原則
+2. **平滑升級**：從 Layer 1 到 Layer 2 無需重寫，只需逐步解構
+3. **性能一致**：兩層都基於相同的高效 D3 實現
+4. **文檔統一**：一套學習材料，多種使用方式
 
 ---
 

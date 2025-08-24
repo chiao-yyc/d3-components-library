@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
+import { calculateBarPosition, AlignmentStrategy } from '../utils/positioning'
 
 export interface BarShapeData {
   x: any
@@ -22,6 +23,8 @@ export interface BarProps {
   className?: string
   animate?: boolean
   animationDuration?: number
+  alignment?: AlignmentStrategy
+  barWidthRatio?: number
   onBarClick?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
   onBarMouseEnter?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
   onBarMouseLeave?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
@@ -37,6 +40,8 @@ export const Bar: React.FC<BarProps> = ({
   className = '',
   animate = true,
   animationDuration = 300,
+  alignment = 'center',
+  barWidthRatio = 0.8,
   onBarClick,
   onBarMouseEnter,
   onBarMouseLeave
@@ -55,8 +60,9 @@ export const Bar: React.FC<BarProps> = ({
     const colorFn = typeof color === 'function' ? color : () => color
 
     if (orientation === 'vertical') {
-      const barWidth = xScale.bandwidth ? xScale.bandwidth() : 
-        Math.abs(xScale(data[1]?.x) - xScale(data[0]?.x)) * 0.8
+      const barWidth = xScale.bandwidth 
+        ? xScale.bandwidth() * barWidthRatio
+        : Math.abs(xScale(data[1]?.x) - xScale(data[0]?.x)) * barWidthRatio
 
       bars
         .join(
@@ -64,8 +70,8 @@ export const Bar: React.FC<BarProps> = ({
             .append('rect')
             .attr('class', `bar-shape ${className}`)
             .attr('x', (d: BarShapeData) => {
-              const x = xScale(d.x)
-              return xScale.bandwidth ? x : x - barWidth / 2
+              const { x } = calculateBarPosition(d.x, xScale, alignment, barWidth)
+              return x
             })
             .attr('y', yScale(0))
             .attr('width', barWidth)
@@ -89,8 +95,8 @@ export const Bar: React.FC<BarProps> = ({
                 .transition()
                 .duration(animationDuration)
                 .attr('x', (d: BarShapeData) => {
-                  const x = xScale(d.x)
-                  return xScale.bandwidth ? x : x - barWidth / 2
+                  const { x } = calculateBarPosition(d.x, xScale, alignment, barWidth)
+                  return x
                 })
                 .attr('y', (d: BarShapeData) => yScale(d.y))
                 .attr('width', barWidth)
@@ -100,8 +106,8 @@ export const Bar: React.FC<BarProps> = ({
               :
               update
                 .attr('x', (d: BarShapeData) => {
-                  const x = xScale(d.x)
-                  return xScale.bandwidth ? x : x - barWidth / 2
+                  const { x } = calculateBarPosition(d.x, xScale, alignment, barWidth)
+                  return x
                 })
                 .attr('y', (d: BarShapeData) => yScale(d.y))
                 .attr('width', barWidth)
@@ -122,8 +128,9 @@ export const Bar: React.FC<BarProps> = ({
             )
         )
     } else {
-      const barHeight = yScale.bandwidth ? yScale.bandwidth() :
-        Math.abs(yScale(data[1]?.y) - yScale(data[0]?.y)) * 0.8
+      const barHeight = yScale.bandwidth 
+        ? yScale.bandwidth() * barWidthRatio
+        : Math.abs(yScale(data[1]?.y) - yScale(data[0]?.y)) * barWidthRatio
 
       bars
         .join(
@@ -132,8 +139,8 @@ export const Bar: React.FC<BarProps> = ({
             .attr('class', `bar-shape ${className}`)
             .attr('x', xScale(0))
             .attr('y', (d: BarShapeData) => {
-              const y = yScale(d.y)
-              return yScale.bandwidth ? y : y - barHeight / 2
+              const { x: y } = calculateBarPosition(d.y, yScale, alignment, barHeight)
+              return y
             })
             .attr('width', 0)
             .attr('height', barHeight)
@@ -155,8 +162,8 @@ export const Bar: React.FC<BarProps> = ({
                 .duration(animationDuration)
                 .attr('x', xScale(0))
                 .attr('y', (d: BarShapeData) => {
-                  const y = yScale(d.y)
-                  return yScale.bandwidth ? y : y - barHeight / 2
+                  const { x: y } = calculateBarPosition(d.y, yScale, alignment, barHeight)
+                  return y
                 })
                 .attr('width', (d: BarShapeData) => xScale(d.x) - xScale(0))
                 .attr('height', barHeight)
@@ -166,8 +173,8 @@ export const Bar: React.FC<BarProps> = ({
               update
                 .attr('x', xScale(0))
                 .attr('y', (d: BarShapeData) => {
-                  const y = yScale(d.y)
-                  return yScale.bandwidth ? y : y - barHeight / 2
+                  const { x: y } = calculateBarPosition(d.y, yScale, alignment, barHeight)
+                  return y
                 })
                 .attr('width', (d: BarShapeData) => xScale(d.x) - xScale(0))
                 .attr('height', barHeight)
@@ -219,6 +226,8 @@ export const Bar: React.FC<BarProps> = ({
     className,
     animate,
     animationDuration,
+    alignment,
+    barWidthRatio,
     onBarClick,
     onBarMouseEnter,
     onBarMouseLeave
