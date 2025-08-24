@@ -78,6 +78,7 @@ export {
   symbolStar,
   curveBasis,
   curveCardinal,
+  curveCatmullRom,
   curveLinear,
   curveMonotoneX,
   curveMonotoneY,
@@ -92,7 +93,6 @@ export type {
   Arc,
   Pie,
   Stack,
-  StackSeries,
   Symbol,
   CurveFactory
 } from 'd3-shape';
@@ -280,6 +280,7 @@ import {
   rollup as rollupFn 
 } from 'd3-array';
 import { interpolate as interpolateFn } from 'd3-interpolate';
+import { easeCubicInOut } from 'd3-ease';
 
 /**
  * 創建安全的 D3 選擇器

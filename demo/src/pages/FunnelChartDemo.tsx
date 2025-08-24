@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { FunnelChartV2 as FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart-v2'
+import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 
 // 銷售漏斗資料
 const salesFunnelData = [
@@ -496,14 +497,63 @@ export default function FunnelChartDemo() {
         </div>
       </div>
 
+      {/* 流線型漏斗圖展示 */}
+      <div className="bg-white rounded-lg border p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          流線型漏斗圖
+        </h2>
+        <p className="text-gray-600 mb-6">採用平滑曲線設計的現代漏斗圖，支援漸變效果和動畫，適合展示流程轉換</p>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 調查問卷漏斗 */}
+          <div className="text-center">
+            <h3 className="text-md font-medium text-gray-800 mb-3">調查問卷轉換</h3>
+            <ExactFunnelChart
+              data={[
+                { step: 1, value: 62259, label: 'Survey Started' },
+                { step: 2, value: 25465, label: 'Completed Survey' },
+                { step: 3, value: 405, label: 'Click End Card*' }
+              ]}
+              width={400}
+              height={250}
+              background="#2a2a2a"
+              gradient1="#FF6B6B"
+              gradient2="#4ECDC4"
+            />
+          </div>
+
+          {/* 產品試用漏斗 */}
+          <div className="text-center">
+            <h3 className="text-md font-medium text-gray-800 mb-3">產品試用流程</h3>
+            <ExactFunnelChart
+              data={[
+                { step: 1, value: 15000, label: 'Trial Sign Up' },
+                { step: 2, value: 8500, label: 'Active Trial' },
+                { step: 3, value: 3200, label: 'Feature Usage' },
+                { step: 4, value: 1800, label: 'Conversion' }
+              ]}
+              width={400}
+              height={250}
+              background="#1a1a1a"
+              gradient1="#8B5CF6"
+              gradient2="#06B6D4"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* 使用範例 */}
       <div className="bg-white rounded-lg border p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           程式碼範例
         </h2>
         
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { FunnelChart } from '@registry/components/basic/funnel-chart'
+        <div className="space-y-4">
+          {/* 傳統漏斗圖範例 */}
+          <div>
+            <h3 className="text-md font-medium text-gray-800 mb-2">1. 傳統漏斗圖</h3>
+            <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
+              <code>{`import { FunnelChart } from '@registry/components/basic/funnel-chart'
 
 const data = [
   { stage: '潛在客戶', count: 10000 },
@@ -537,7 +587,35 @@ const data = [
   interactive={${interactive}}
   onSegmentClick={(data) => console.log('Clicked:', data)}
 />`}</code>
-        </pre>
+            </pre>
+          </div>
+
+          {/* 流線型範例 */}
+          <div>
+            <h3 className="text-md font-medium text-gray-800 mb-2">2. 流線型漏斗圖</h3>
+            <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
+              <code>{`import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
+
+const surveyData = [
+  { step: 1, value: 62259, label: 'Survey Started' },
+  { step: 2, value: 25465, label: 'Completed Survey' },
+  { step: 3, value: 405, label: 'Click End Card*' }
+]
+
+<ExactFunnelChart
+  data={surveyData}
+  width={400}
+  height={250}
+  background="#2a2a2a"
+  gradient1="#FF6B6B"
+  gradient2="#4ECDC4"
+  values="#ffffff"
+  labels="#cccccc"
+  percentages="#888888"
+/>`}</code>
+            </pre>
+          </div>
+        </div>
       </div>
     </div>
   )
