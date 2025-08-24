@@ -1,5 +1,26 @@
+/**
+ * RadarChartDemo - 現代化雷達圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
+
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { RadarChart } from '@registry/components/statistical/radar-chart/radar-chart'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartPieIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 // 員工技能評估數據
 const skillAssessmentData = [
@@ -132,23 +153,35 @@ const marketAnalysisData = [
 ]
 
 export default function RadarChartDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('skills')
+  const [chartWidth, setChartWidth] = useState(600)
+  const [chartHeight, setChartHeight] = useState(600)
   const [radius, setRadius] = useState(180)
+  
+  // 網格設定
   const [levels, setLevels] = useState(5)
   const [startAngle, setStartAngle] = useState(-90)
   const [clockwise, setClockwise] = useState(true)
+  
+  // 視覺元素
   const [showGrid, setShowGrid] = useState(true)
   const [showGridLabels, setShowGridLabels] = useState(true)
   const [showAxes, setShowAxes] = useState(true)
   const [showAxisLabels, setShowAxisLabels] = useState(true)
   const [showDots, setShowDots] = useState(true)
   const [showArea, setShowArea] = useState(true)
+  
+  // 樣式設定
   const [strokeWidth, setStrokeWidth] = useState(2)
   const [areaOpacity, setAreaOpacity] = useState(0.25)
   const [dotRadius, setDotRadius] = useState(4)
+  
+  // 圖例設定
   const [showLegend, setShowLegend] = useState(true)
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('bottom')
+  
+  // 顏色和動畫
   const [colorScheme, setColorScheme] = useState<'custom' | 'blues' | 'greens' | 'oranges' | 'reds' | 'purples'>('custom')
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
@@ -218,432 +251,374 @@ export default function RadarChartDemo() {
     }
   }, [selectedDataset])
 
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: config.title },
+    { label: '數據項目', value: currentData.length },
+    { label: '維度數量', value: currentAxes.length },
+    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const getTableColumns = (): DataTableColumn[] => {
+    const columns: DataTableColumn[] = [
+      { key: config.labelKey, title: config.labelKey === 'name' ? '姓名' : config.labelKey === 'product' ? '產品' : config.labelKey === 'student' ? '學生' : config.labelKey === 'company' ? '公司' : '名稱', sortable: true }
+    ]
+    
+    currentAxes.forEach(axis => {
+      columns.push({
+        key: axis,
+        title: axis,
+        sortable: true,
+        formatter: (value) => value.toFixed(0),
+        align: 'right'
+      })
+    })
+    
+    // 平均分欄位
+    columns.push({
+      key: '_average',
+      title: '平均分',
+      sortable: false,
+      formatter: (value, row) => {
+        if (!row) return '-'
+        const values = currentAxes.map(axis => row[axis] || 0)
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length
+        return average.toFixed(1)
+      },
+      align: 'right'
+    })
+    
+    return columns
+  }
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Radar Chart Demo
-        </h1>
-        <p className="text-gray-600">
-          雷達圖組件展示 - 適用於多維數據可視化、能力評估和績效比較
-        </p>
-      </div>
+    <DemoPageTemplate
+      title="RadarChart Demo"
+      description="現代化雷達圖組件展示 - 適用於多維數據可視化、能力評估和績效比較"
+    >
 
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="skills">員工技能評估</option>
-              <option value="products">產品特性比較</option>
-              <option value="academic">學科成績表現</option>
-              <option value="market">市場競爭分析</option>
-            </select>
-          </div>
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={2}>
+              <SelectControl
+                label="數據集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'skills', label: '員工技能評估' },
+                  { value: 'products', label: '產品特性比較' },
+                  { value: 'academic', label: '學科成績表現' },
+                  { value: 'market', label: '市場競爭分析' }
+                ]}
+              />
+              
+              <SelectControl
+                label="顏色主題"
+                value={colorScheme}
+                onChange={setColorScheme}
+                options={[
+                  { value: 'custom', label: '自訂' },
+                  { value: 'blues', label: '藍色系' },
+                  { value: 'greens', label: '綠色系' },
+                  { value: 'oranges', label: '橙色系' },
+                  { value: 'reds', label: '紅色系' },
+                  { value: 'purples', label: '紫色系' }
+                ]}
+              />
+            </ControlGroup>
 
-          {/* 半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              雷達圖半徑 ({radius}px)
-            </label>
-            <input
-              type="range"
-              min="100"
-              max="250"
-              value={radius}
-              onChange={(e) => setRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
+            {/* 尺寸設定 */}
+            <ControlGroup title="尺寸配置" icon="📏" cols={3}>
+              <RangeSlider
+                label="圖表寬度"
+                value={chartWidth}
+                min={400}
+                max={800}
+                step={50}
+                onChange={setChartWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="圖表高度"
+                value={chartHeight}
+                min={400}
+                max={800}
+                step={50}
+                onChange={setChartHeight}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="雷達半徑"
+                value={radius}
+                min={100}
+                max={250}
+                step={10}
+                onChange={setRadius}
+                suffix="px"
+              />
+            </ControlGroup>
 
-          {/* 網格層級 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              網格層級數 ({levels})
-            </label>
-            <input
-              type="range"
-              min="3"
-              max="10"
-              value={levels}
-              onChange={(e) => setLevels(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
 
-          {/* 起始角度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              起始角度 ({startAngle}°)
-            </label>
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              value={startAngle}
-              onChange={(e) => setStartAngle(Number(e.target.value))}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              -90° = 頂部開始，0° = 右側開始
-            </p>
-          </div>
-
-          {/* 線條寬度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              線條寬度 ({strokeWidth}px)
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              value={strokeWidth}
-              onChange={(e) => setStrokeWidth(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 區域透明度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              區域透明度 ({(areaOpacity * 100).toFixed(0)}%)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="0.8"
-              step="0.05"
-              value={areaOpacity}
-              onChange={(e) => setAreaOpacity(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 數據點半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              數據點半徑 ({dotRadius}px)
-            </label>
-            <input
-              type="range"
-              min="2"
-              max="8"
-              value={dotRadius}
-              onChange={(e) => setDotRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 圖例位置 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圖例位置
-            </label>
-            <select
-              value={legendPosition}
-              onChange={(e) => setLegendPosition(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="top">頂部</option>
-              <option value="bottom">底部</option>
-              <option value="left">左側</option>
-              <option value="right">右側</option>
-            </select>
-          </div>
-
-          {/* 顏色主題 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色主題
-            </label>
-            <select
-              value={colorScheme}
-              onChange={(e) => setColorScheme(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="custom">自訂</option>
-              <option value="blues">藍色系</option>
-              <option value="greens">綠色系</option>
-              <option value="oranges">橙色系</option>
-              <option value="reds">紅色系</option>
-              <option value="purples">紫色系</option>
-            </select>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="clockwise"
+            {/* 網格設定 */}
+            <ControlGroup title="網格配置" icon="🕸️" cols={3}>
+              <RangeSlider
+                label="網格層級"
+                value={levels}
+                min={3}
+                max={10}
+                step={1}
+                onChange={setLevels}
+              />
+              
+              <RangeSlider
+                label="起始角度"
+                value={startAngle}
+                min={-180}
+                max={180}
+                step={15}
+                onChange={setStartAngle}
+                suffix="°"
+                description="-90° = 頂部開始"
+              />
+              
+              <ToggleControl
+                label="順時針方向"
                 checked={clockwise}
-                onChange={(e) => setClockwise(e.target.checked)}
-                className="mr-2"
+                onChange={setClockwise}
+                description="雷達圖方向設定"
               />
-              <label htmlFor="clockwise" className="text-sm text-gray-700">
-                順時針方向
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showGrid"
-                checked={showGrid}
-                onChange={(e) => setShowGrid(e.target.checked)}
-                className="mr-2"
+            </ControlGroup>
+
+            {/* 樣式設定 */}
+            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+              <RangeSlider
+                label="線條寬度"
+                value={strokeWidth}
+                min={1}
+                max={5}
+                step={0.5}
+                onChange={setStrokeWidth}
+                suffix="px"
               />
-              <label htmlFor="showGrid" className="text-sm text-gray-700">
-                顯示網格
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showGridLabels"
-                checked={showGridLabels}
-                onChange={(e) => setShowGridLabels(e.target.checked)}
-                className="mr-2"
+              
+              <RangeSlider
+                label="區域透明度"
+                value={areaOpacity}
+                min={0}
+                max={0.8}
+                step={0.05}
+                onChange={setAreaOpacity}
+                formatter={(value) => `${(value * 100).toFixed(0)}%`}
               />
-              <label htmlFor="showGridLabels" className="text-sm text-gray-700">
-                顯示網格標籤
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showAxes"
-                checked={showAxes}
-                onChange={(e) => setShowAxes(e.target.checked)}
-                className="mr-2"
+              
+              <RangeSlider
+                label="數據點大小"
+                value={dotRadius}
+                min={2}
+                max={8}
+                step={1}
+                onChange={setDotRadius}
+                suffix="px"
               />
-              <label htmlFor="showAxes" className="text-sm text-gray-700">
-                顯示軸線
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showAxisLabels"
-                checked={showAxisLabels}
-                onChange={(e) => setShowAxisLabels(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="showAxisLabels" className="text-sm text-gray-700">
-                顯示軸標籤
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showDots"
-                checked={showDots}
-                onChange={(e) => setShowDots(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="showDots" className="text-sm text-gray-700">
-                顯示數據點
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showArea"
-                checked={showArea}
-                onChange={(e) => setShowArea(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="showArea" className="text-sm text-gray-700">
-                顯示區域填充
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLegend"
+            </ControlGroup>
+
+            {/* 圖例設定 */}
+            <ControlGroup title="圖例配置" icon="📋" cols={2}>
+              <ToggleControl
+                label="顯示圖例"
                 checked={showLegend}
-                onChange={(e) => setShowLegend(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLegend}
+                description="顯示或隱藏圖例"
               />
-              <label htmlFor="showLegend" className="text-sm text-gray-700">
-                顯示圖例
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
+              
+              <SelectControl
+                label="圖例位置"
+                value={legendPosition}
+                onChange={setLegendPosition}
+                options={[
+                  { value: 'top', label: '頂部' },
+                  { value: 'bottom', label: '底部' },
+                  { value: 'left', label: '左側' },
+                  { value: 'right', label: '右側' }
+                ]}
+              />
+            </ControlGroup>
+
+
+            {/* 顯示選項 */}
+            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+              <ToggleControl
+                label="顯示網格"
+                checked={showGrid}
+                onChange={setShowGrid}
+                description="顯示雷達圖網格線"
+              />
+              
+              <ToggleControl
+                label="顯示網格標籤"
+                checked={showGridLabels}
+                onChange={setShowGridLabels}
+                description="顯示網格數值標籤"
+              />
+              
+              <ToggleControl
+                label="顯示軸線"
+                checked={showAxes}
+                onChange={setShowAxes}
+                description="顯示各維度軸線"
+              />
+              
+              <ToggleControl
+                label="顯示軸標籤"
+                checked={showAxisLabels}
+                onChange={setShowAxisLabels}
+                description="顯示維度名稱標籤"
+              />
+              
+              <ToggleControl
+                label="顯示數據點"
+                checked={showDots}
+                onChange={setShowDots}
+                description="顯示數據節點圓點"
+              />
+              
+              <ToggleControl
+                label="顯示區域填充"
+                checked={showArea}
+                onChange={setShowArea}
+                description="填充雷達圖區域"
+              />
+            </ControlGroup>
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="動畫效果"
                 checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+                onChange={setAnimate}
+                description="圖表進入和更新動畫"
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
+              
+              <ToggleControl
+                label="互動功能"
                 checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
+                onChange={setInteractive}
+                description="鼠標懸停和點擊交互"
               />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
-            </div>
+            </ControlGroup>
           </div>
-        </div>
-      </div>
+        </ModernControlPanel>
+      </ContentSection>
 
       {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {config.title}
-        </h2>
-        <p className="text-gray-600 mb-6">{config.description}</p>
-        
-        <div className="flex justify-center">
-          <RadarChart
-            data={currentData}
-            axes={currentAxes}
-            labelKey={config.labelKey}
-            width={600}
-            height={600}
-            radius={radius}
-            levels={levels}
-            startAngle={startAngle}
-            clockwise={clockwise}
-            showGrid={showGrid}
-            showGridLabels={showGridLabels}
-            showAxes={showAxes}
-            showAxisLabels={showAxisLabels}
-            showDots={showDots}
-            showArea={showArea}
-            strokeWidth={strokeWidth}
-            areaOpacity={areaOpacity}
-            dotRadius={dotRadius}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-            colors={colorScheme === 'custom' ? config.colors : undefined}
-            colorScheme={colorScheme}
-            animate={animate}
-            interactive={interactive}
-            onSeriesClick={(data) => {
-              console.log('Series clicked:', data)
-              alert(`點擊了: ${data.label}`)
-            }}
-            onSeriesHover={(data) => {
-              console.log('Series hovered:', data)
-            }}
-            onDotClick={(value, series) => {
-              console.log('Dot clicked:', value, series)
-              alert(`${series.label} - ${value.axis}: ${value.originalValue}`)
-            }}
-            onDotHover={(value, series) => {
-              if (value && series) {
-                console.log('Dot hovered:', value, series)
-              }
-            }}
-          />
-        </div>
-      </div>
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title={config.title}
+          subtitle={config.description}
+          actions={
+            <div className="flex items-center gap-2">
+              <ChartPieIcon className="w-5 h-5 text-indigo-500" />
+              <span className="text-sm text-gray-600">雷達圖</span>
+            </div>
+          }
+        >
+          <div className="flex justify-center">
+            <motion.div
+              key={`${chartWidth}-${chartHeight}-${selectedDataset}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <RadarChart
+                data={currentData}
+                axes={currentAxes}
+                labelKey={config.labelKey}
+                width={chartWidth}
+                height={chartHeight}
+                radius={radius}
+                levels={levels}
+                startAngle={startAngle}
+                clockwise={clockwise}
+                showGrid={showGrid}
+                showGridLabels={showGridLabels}
+                showAxes={showAxes}
+                showAxisLabels={showAxisLabels}
+                showDots={showDots}
+                showArea={showArea}
+                strokeWidth={strokeWidth}
+                areaOpacity={areaOpacity}
+                dotRadius={dotRadius}
+                showLegend={showLegend}
+                legendPosition={legendPosition}
+                colors={colorScheme === 'custom' ? config.colors : undefined}
+                colorScheme={colorScheme}
+                animate={animate}
+                interactive={interactive}
+                onSeriesClick={(data) => {
+                  console.log('Series clicked:', data)
+                }}
+                onSeriesHover={(data) => {
+                  console.log('Series hovered:', data)
+                }}
+                onDotClick={(value, series) => {
+                  console.log('Dot clicked:', value, series)
+                }}
+                onDotHover={(value, series) => {
+                  if (value && series) {
+                    console.log('Dot hovered:', value, series)
+                  }
+                }}
+              />
+            </motion.div>
+          </div>
+          
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
 
-      {/* 數據詳情表格 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          資料詳情
-        </h2>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-4 py-2 text-left font-medium text-gray-700">
-                  {config.labelKey === 'name' ? '姓名' : 
-                   config.labelKey === 'product' ? '產品' :
-                   config.labelKey === 'student' ? '學生' : 
-                   config.labelKey === 'company' ? '公司' : '名稱'}
-                </th>
-                {currentAxes.map((axis, index) => (
-                  <th key={index} className="px-4 py-2 text-left font-medium text-gray-700">
-                    {axis}
-                  </th>
-                ))}
-                <th className="px-4 py-2 text-left font-medium text-gray-700">平均分</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.map((row: any, index: number) => {
-                const values = currentAxes.map(axis => row[axis])
-                const average = values.reduce((sum: number, val: number) => sum + val, 0) / values.length
-                
-                return (
-                  <tr key={index} className="border-t border-gray-200">
-                    <td className="px-4 py-2 text-gray-900 font-medium">
-                      {row[config.labelKey]}
-                    </td>
-                    {currentAxes.map((axis, axisIndex) => (
-                      <td key={axisIndex} className="px-4 py-2 text-gray-900">
-                        {row[axis]}
-                      </td>
-                    ))}
-                    <td className="px-4 py-2 text-gray-900 font-medium">
-                      {average.toFixed(1)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* 數據詳情 */}
+      <ContentSection delay={0.2}>
+        <DataTable
+          title="數據詳情"
+          data={currentData.map(row => ({ ...row, _average: 0 }))}
+          columns={getTableColumns()}
+          maxRows={8}
+          showIndex
+        />
+      </ContentSection>
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { RadarChart } from '@registry/components/statistical/radar-chart'
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { RadarChart } from '@registry/components/statistical/radar-chart'
 
+// ${config.title}數據
 const data = [
-  { name: '張小明', 技術能力: 85, 溝通能力: 75, 領導力: 60 },
-  { name: '李小華', 技術能力: 70, 溝通能力: 95, 領導力: 85 }
+  { ${config.labelKey}: '${currentData[0]?.[config.labelKey]}', ${currentAxes.slice(0, 3).map(axis => `${axis}: ${currentData[0]?.[axis]}`).join(', ')} },
+  { ${config.labelKey}: '${currentData[1]?.[config.labelKey]}', ${currentAxes.slice(0, 3).map(axis => `${axis}: ${currentData[1]?.[axis]}`).join(', ')} },
+  // ... more data
 ]
 
-const axes = ['技術能力', '溝通能力', '領導力', '創新思維', '團隊合作']
+const axes = ${JSON.stringify(currentAxes)}
 
 <RadarChart
   data={data}
   axes={axes}
   labelKey="${config.labelKey}"
-  width={600}
-  height={600}
+  width={${chartWidth}}
+  height={${chartHeight}}
   radius={${radius}}
   levels={${levels}}
   startAngle={${startAngle}}
@@ -664,42 +639,73 @@ const axes = ['技術能力', '溝通能力', '領導力', '創新思維', '團�
   interactive={${interactive}}
   onSeriesClick={(data) => console.log('Clicked:', data)}
   onDotClick={(value, series) => console.log('Dot:', value, series)}
-/>`}</code>
-        </pre>
-      </div>
+/>`}
+        />
+      </ContentSection>
 
-      {/* 雷達圖應用指南 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          雷達圖應用指南
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">適用場景</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li><strong>人才評估:</strong> 員工技能、能力評估</li>
-              <li><strong>產品比較:</strong> 多維度產品特性分析</li>
-              <li><strong>績效分析:</strong> 團隊、部門績效對比</li>
-              <li><strong>學習評量:</strong> 學科成績、學習成果</li>
-              <li><strong>市場分析:</strong> 企業競爭力評估</li>
-              <li><strong>品質控制:</strong> 產品品質多維度評估</li>
-            </ul>
+      {/* 功能說明 */}
+      <ContentSection delay={0.4}>
+        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">RadarChart 功能特點</h3>
           </div>
           
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">設計要點</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li><strong>軸數量:</strong> 建議 3-8 個維度，避免過於複雜</li>
-              <li><strong>數值範圍:</strong> 確保各維度數值在相同範圍內</li>
-              <li><strong>顏色選擇:</strong> 使用對比明顯的顏色區分系列</li>
-              <li><strong>透明度:</strong> 適當的區域透明度避免重疊遮擋</li>
-              <li><strong>標籤清晰:</strong> 軸標籤要簡潔明瞭</li>
-              <li><strong>互動性:</strong> 提供詳細的提示信息</li>
-            </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">適用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  人才評估：員工技能、能力評估
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  產品比較：多維度產品特性分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  績效分析：團隊、部門績效對比
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  學習評量：學科成績、學習成果
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  市場分析：企業競爭力評估
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">設計要點</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  維度數量：建議 3-8 個，避免過於複雜
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  數值範圍：確保各維度數值在相同範圍
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  顏色選擇：使用對比明顯的顏色區分
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  透明度控制：避免重疊遮擋
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  互動體驗：提供詳細的提示信息
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

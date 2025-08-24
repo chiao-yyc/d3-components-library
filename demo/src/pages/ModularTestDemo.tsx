@@ -33,8 +33,8 @@ export default function ModularTestDemo() {
     <div className="max-w-7xl mx-auto p-6 space-y-8">
       {/* 標題 */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          模組化組件測試
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          🧪 模組化核心測試平台
         </h1>
         <p className="text-gray-600">
           測試新的核心模組：data-processor, color-scheme, chart-tooltip

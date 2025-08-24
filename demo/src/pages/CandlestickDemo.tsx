@@ -1,5 +1,26 @@
+/**
+ * CandlestickDemo - 現代化K線圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
+
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
 
 // 生成模擬股票數據
 function generateStockData(days: number = 60, initialPrice: number = 100) {
@@ -40,7 +61,9 @@ function generateStockData(days: number = 60, initialPrice: number = 100) {
       high: Math.round(high * 100) / 100,
       low: Math.round(low * 100) / 100,
       close: Math.round(close * 100) / 100,
-      volume
+      volume,
+      change: Math.round((close - open) * 100) / 100,
+      changePercent: open !== 0 ? Math.round(((close - open) / open) * 10000) / 100 : 0
     })
     
     currentPrice = close
@@ -71,85 +94,142 @@ const tsmc2024Data = [
   { date: '2024-01-25', open: 651, high: 658, low: 648, close: 654, volume: 24987654 },
   { date: '2024-01-26', open: 654, high: 660, low: 651, close: 657, volume: 23210987 },
   { date: '2024-01-29', open: 657, high: 663, low: 654, close: 659, volume: 27654321 }
-]
-
-// 虛擬貨幣數據（較高波動性）
-const btcSimData = generateStockData(30, 45000).map(d => ({
+].map(d => ({
   ...d,
-  open: Math.round(d.open * 450),
-  high: Math.round(d.high * 450),
-  low: Math.round(d.low * 450),
-  close: Math.round(d.close * 450),
-  volume: Math.floor(d.volume / 100)
+  change: d.close - d.open,
+  changePercent: d.open !== 0 ? Math.round(((d.close - d.open) / d.open) * 10000) / 100 : 0
 }))
 
+// 資料集選項
+const datasetOptions = [
+  { value: 'tsmc', label: '台積電 (2024年1月)', description: '真實台積電股價數據展示' },
+  { value: 'tech', label: '科技股模擬', description: '高科技股票模擬走勢' },
+  { value: 'crypto', label: '加密貨幣模擬', description: '比特幣等虛擬貨幣走勢' }
+]
+
+// 顏色模式選項
+const colorModeOptions = [
+  { value: 'tw', label: '台股模式（紅漲綠跌）' },
+  { value: 'us', label: '美股模式（綠漲紅跌）' },
+  { value: 'custom', label: '自訂顏色' }
+]
+
 export default function CandlestickDemo() {
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('tsmc')
   const [colorMode, setColorMode] = useState<'tw' | 'us' | 'custom'>('tw')
+  
+  // 圖表設定
+  const [chartWidth, setChartWidth] = useState(800)
+  const [chartHeight, setChartHeight] = useState(500)
+  const [candleWidth, setCandleWidth] = useState(8)
+  
+  // 顯示選項
   const [showVolume, setShowVolume] = useState(true)
-  const [dimensions, setDimensions] = useState({ width: 800, height: 500 })
+  const [showGrid, setShowGrid] = useState(true)
+  const [showTooltip, setShowTooltip] = useState(true)
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
+  
   const containerRef = useRef<HTMLDivElement>(null)
-  // 簡化版本暫時移除複雜配置
 
-  // 選擇數據集
-  const currentData = useMemo(() => {
-    let data
+  // 當前資料和配置
+  const { currentData, config, analysis } = useMemo(() => {
+    let data, title, description, priceUnit
+    
     switch (selectedDataset) {
       case 'tsmc':
         data = tsmc2024Data
+        title = '台積電股價走勢'
+        description = '2024年1月台積電真實股價數據展示'
+        priceUnit = 'TWD'
         break
       case 'tech':
-        data = generateStockData(45, 150)
+        data = generateStockData(45, 150).map(d => ({
+          ...d,
+          change: d.close - d.open,
+          changePercent: d.open !== 0 ? Math.round(((d.close - d.open) / d.open) * 10000) / 100 : 0
+        }))
+        title = '科技股模擬走勢'
+        description = '高科技股票模擬數據，展示中等波動性'
+        priceUnit = 'USD'
         break
       case 'crypto':
-        data = btcSimData
+        data = generateStockData(30, 45000).map(d => ({
+          date: d.date,
+          open: Math.round(d.open * 450),
+          high: Math.round(d.high * 450),
+          low: Math.round(d.low * 450),
+          close: Math.round(d.close * 450),
+          volume: Math.floor(d.volume / 100),
+          change: Math.round((d.close - d.open) * 450 * 100) / 100,
+          changePercent: d.open !== 0 ? Math.round(((d.close - d.open) / d.open) * 10000) / 100 : 0
+        }))
+        title = '比特幣價格走勢'
+        description = '加密貨幣模擬數據，展示高波動性特征'
+        priceUnit = 'USD'
         break
       default:
         data = tsmc2024Data
+        title = '台積電股價走勢'
+        description = '2024年1月台積電真實股價數據展示'
+        priceUnit = 'TWD'
     }
-    return data
-  }, [selectedDataset])
 
-  // 統計數據
-  const dataStats = useMemo(() => {
-    if (!currentData.length) return null
+    // 統計分析
+    const prices = data.map(d => d.close)
+    const volumes = data.map(d => d.volume)
+    const changes = data.map(d => d.change)
     
-    const prices = currentData.map(d => d.close)
-    const volumes = currentData.map(d => d.volume)
+    const priceStats = {
+      min: Math.min(...prices),
+      max: Math.max(...prices),
+      avg: prices.reduce((sum, p) => sum + p, 0) / prices.length,
+      range: Math.max(...prices) - Math.min(...prices)
+    }
+    
+    const volumeStats = {
+      total: volumes.reduce((sum, v) => sum + v, 0),
+      avg: volumes.reduce((sum, v) => sum + v, 0) / volumes.length,
+      max: Math.max(...volumes)
+    }
+    
+    const performanceStats = {
+      totalChange: data[data.length - 1].close - data[0].open,
+      totalChangePercent: data[0].open !== 0 ? 
+        ((data[data.length - 1].close - data[0].open) / data[0].open) * 100 : 0,
+      upDays: changes.filter(c => c > 0).length,
+      downDays: changes.filter(c => c < 0).length,
+      flatDays: changes.filter(c => c === 0).length
+    }
     
     return {
-      count: currentData.length,
-      priceRange: {
-        min: Math.min(...prices),
-        max: Math.max(...prices)
-      },
-      totalVolume: volumes.reduce((sum, v) => sum + v, 0),
-      avgVolume: volumes.reduce((sum, v) => sum + v, 0) / volumes.length
+      currentData: data,
+      config: { title, description, priceUnit },
+      analysis: {
+        dataset: datasetOptions.find(d => d.value === selectedDataset)!,
+        totalDays: data.length,
+        priceStats,
+        volumeStats,
+        performanceStats
+      }
     }
-  }, [currentData])
+  }, [selectedDataset])
 
   // 響應式尺寸偵測
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect()
-        const width = Math.max(400, rect.width - 48) // 48px for padding
-        const height = Math.max(300, Math.min(600, width * 0.65)) // 適當的寬高比
-        setDimensions({ width, height })
+        const width = Math.max(400, rect.width - 48)
+        setChartWidth(width)
       }
     }
 
-    // 初始計算
     updateDimensions()
-
-    // 監聽視窗大小變化
-    const handleResize = () => {
-      updateDimensions()
-    }
-    
+    const handleResize = () => updateDimensions()
     window.addEventListener('resize', handleResize)
     
-    // ResizeObserver 用於更精確的容器大小偵測
     let resizeObserver: ResizeObserver | null = null
     if (containerRef.current && 'ResizeObserver' in window) {
       resizeObserver = new ResizeObserver(updateDimensions)
@@ -164,227 +244,416 @@ export default function CandlestickDemo() {
     }
   }, [])
 
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: config.title },
+    { label: '交易日數', value: analysis.totalDays },
+    { label: '顏色模式', value: colorModeOptions.find(c => c.value === colorMode)?.label || '' },
+    { label: '總漲跌', value: `${analysis.performanceStats.totalChangePercent.toFixed(2)}%`, 
+      color: analysis.performanceStats.totalChange >= 0 ? '#10b981' : '#ef4444' },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: 'date', title: '日期', sortable: true },
+    { 
+      key: 'open', 
+      title: '開盤', 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { 
+      key: 'high', 
+      title: '最高', 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { 
+      key: 'low', 
+      title: '最低', 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { 
+      key: 'close', 
+      title: '收盤', 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { 
+      key: 'changePercent', 
+      title: '漲跌幅', 
+      sortable: true,
+      formatter: (value) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`,
+      align: 'right'
+    },
+    { 
+      key: 'volume', 
+      title: '成交量', 
+      sortable: true,
+      formatter: (value) => (value / 1000000).toFixed(1) + 'M',
+      align: 'right'
+    }
+  ]
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          K線圖（蠟燭圖）示範
-        </h1>
-        <p className="text-gray-600">
-          專業級股市 K線圖組件，支援 OHLC 數據、成交量顯示和技術分析功能
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="CandlestickChart Demo"
+      description="專業級K線圖組件展示 - 支援OHLC數據、成交量顯示和技術分析功能"
+    >
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表配置
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* 數據集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              數據集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="tsmc">台積電 (2024年1月)</option>
-              <option value="tech">科技股模擬</option>
-              <option value="crypto">比特幣模擬</option>
-            </select>
-          </div>
-
-          {/* 顏色模式 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色模式
-            </label>
-            <select
-              value={colorMode}
-              onChange={(e) => setColorMode(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="tw">台股模式（紅漲綠跌）</option>
-              <option value="us">美股模式（綠漲紅跌）</option>
-              <option value="custom">自訂顏色</option>
-            </select>
-          </div>
-
-          {/* 功能開關 */}
-          <div className="space-y-2">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={showVolume}
-                onChange={(e) => setShowVolume(e.target.checked)}
-                className="mr-2"
-              />
-              <span className="text-sm text-gray-700">顯示成交量（開發中）</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* 主要 K線圖 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {selectedDataset === 'tsmc' ? '台積電股價走勢' : 
-           selectedDataset === 'tech' ? '科技股模擬走勢' : 
-           '比特幣價格走勢'}
-        </h2>
-        
-        <div 
-          ref={containerRef}
-          className="w-full flex justify-center overflow-hidden"
-          style={{ minHeight: '300px' }}
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
         >
-          <CandlestickChart
-            data={currentData}
-            width={dimensions.width}
-            height={dimensions.height}
-            colorMode={colorMode}
-            showVolume={showVolume}
-            onCandleClick={(data) => {
-              const change = data.close - data.open
-              const changePercent = data.open !== 0 ? (change / data.open) * 100 : 0
-              alert(`${new Date(data.date).toLocaleDateString()}\n開盤: ${data.open}\n收盤: ${data.close}\n漲跌: ${change.toFixed(2)} (${changePercent.toFixed(2)}%)`)
-            }}
-          />
-        </div>
-      </div>
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="數據集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={datasetOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                description={datasetOptions.find(d => d.value === selectedDataset)?.description}
+              />
+              
+              <SelectControl
+                label="顏色模式"
+                value={colorMode}
+                onChange={(value) => setColorMode(value as 'tw' | 'us' | 'custom')}
+                options={colorModeOptions}
+              />
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  價格單位
+                </label>
+                <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600">
+                  {config.priceUnit}
+                </div>
+              </div>
+            </ControlGroup>
 
-      {/* 統計資訊 */}
-      {dataStats && (
-        <div className="bg-white rounded-lg border p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            數據統計
-          </h2>
+            {/* 圖表配置 */}
+            <ControlGroup title="圖表配置" icon="📊" cols={3}>
+              <RangeSlider
+                label="圖表寬度"
+                value={chartWidth}
+                min={400}
+                max={1200}
+                step={50}
+                onChange={setChartWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="圖表高度"
+                value={chartHeight}
+                min={300}
+                max={800}
+                step={25}
+                onChange={setChartHeight}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="蠟燭寬度"
+                value={candleWidth}
+                min={4}
+                max={16}
+                step={1}
+                onChange={setCandleWidth}
+                suffix="px"
+              />
+            </ControlGroup>
+
+            {/* 顯示選項 */}
+            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+              <ToggleControl
+                label="顯示成交量"
+                checked={showVolume}
+                onChange={setShowVolume}
+                description="在圖表下方顯示成交量柱狀圖"
+              />
+              
+              <ToggleControl
+                label="顯示格線"
+                checked={showGrid}
+                onChange={setShowGrid}
+                description="顯示背景格線輔助線"
+              />
+              
+              <ToggleControl
+                label="工具提示"
+                checked={showTooltip}
+                onChange={setShowTooltip}
+                description="懸停時顯示詳細價格信息"
+              />
+              
+              <ToggleControl
+                label="動畫效果"
+                checked={animate}
+                onChange={setAnimate}
+                description="K線載入和更新動畫"
+              />
+            </ControlGroup>
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+              <ToggleControl
+                label="互動功能"
+                checked={interactive}
+                onChange={setInteractive}
+                description="啟用點擊和懸停交互功能"
+              />
+            </ControlGroup>
+          </div>
+        </ModernControlPanel>
+      </ContentSection>
+
+      {/* 圖表展示 */}
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle={config.description}
+          actions={
+            <div className="flex items-center gap-2">
+              <CurrencyDollarIcon className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-600">K線圖</span>
+            </div>
+          }
+        >
+          <div 
+            ref={containerRef}
+            className="flex justify-center overflow-hidden"
+          >
+            <motion.div
+              key={`${selectedDataset}-${colorMode}-${chartWidth}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CandlestickChart
+                data={currentData}
+                width={chartWidth}
+                height={chartHeight}
+                colorMode={colorMode}
+                showVolume={showVolume}
+                candleWidth={candleWidth}
+                showGrid={showGrid}
+                showTooltip={showTooltip}
+                animate={animate}
+                interactive={interactive}
+                onCandleClick={(data) => {
+                  if (interactive) {
+                    console.log('K線點擊:', data)
+                  }
+                }}
+              />
+            </motion.div>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{dataStats.count}</div>
-              <div className="text-sm text-gray-600">交易日數</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
-                {dataStats.priceRange.max.toLocaleString()}
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
+
+      {/* 統計分析 */}
+      <ContentSection delay={0.2}>
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-blue-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">市場統計分析</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 價格統計 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">價格區間</h4>
+              <div className="space-y-2 text-sm">
+                <div>最高: <span className="font-medium text-green-600">{analysis.priceStats.max.toLocaleString()}</span></div>
+                <div>最低: <span className="font-medium text-red-600">{analysis.priceStats.min.toLocaleString()}</span></div>
+                <div>平均: <span className="font-medium">{Math.round(analysis.priceStats.avg).toLocaleString()}</span></div>
+                <div>波幅: <span className="font-medium">{Math.round(analysis.priceStats.range).toLocaleString()}</span></div>
               </div>
-              <div className="text-sm text-gray-600">最高價</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {dataStats.priceRange.min.toLocaleString()}
+            </motion.div>
+
+            {/* 成交量統計 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">成交量</h4>
+              <div className="space-y-2 text-sm">
+                <div>總量: <span className="font-medium">{(analysis.volumeStats.total / 1000000).toFixed(0)}M</span></div>
+                <div>日均: <span className="font-medium">{(analysis.volumeStats.avg / 1000000).toFixed(1)}M</span></div>
+                <div>最高: <span className="font-medium">{(analysis.volumeStats.max / 1000000).toFixed(1)}M</span></div>
               </div>
-              <div className="text-sm text-gray-600">最低價</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {Math.round(dataStats.avgVolume).toLocaleString()}
+            </motion.div>
+
+            {/* 績效統計 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">整體績效</h4>
+              <div className="space-y-2 text-sm">
+                <div>總漲跌: <span className={`font-medium ${analysis.performanceStats.totalChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {analysis.performanceStats.totalChangePercent.toFixed(2)}%
+                </span></div>
+                <div>漲跌額: <span className="font-medium">{analysis.performanceStats.totalChange.toFixed(2)}</span></div>
               </div>
-              <div className="text-sm text-gray-600">平均成交量</div>
-            </div>
+            </motion.div>
+
+            {/* 交易日統計 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">交易統計</h4>
+              <div className="space-y-2 text-sm">
+                <div>上漲: <span className="font-medium text-green-600">{analysis.performanceStats.upDays}天</span></div>
+                <div>下跌: <span className="font-medium text-red-600">{analysis.performanceStats.downDays}天</span></div>
+                <div>平盤: <span className="font-medium text-gray-600">{analysis.performanceStats.flatDays}天</span></div>
+              </div>
+            </motion.div>
           </div>
         </div>
-      )}
+      </ContentSection>
 
-      {/* 不同配置展示 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 美股風格 */}
-        <div className="bg-white rounded-lg border p-4">
-          <h3 className="text-md font-semibold text-gray-900 mb-3">
-            美股風格（綠漲紅跌）
-          </h3>
-          <CandlestickChart
-            data={currentData.slice(-15)}
-            width={400}
-            height={300}
-            colorMode="us"
-          />
-        </div>
+      {/* 數據詳情 */}
+      <ContentSection delay={0.3}>
+        <DataTable
+          title="數據詳情"
+          data={currentData.slice(-10)}
+          columns={tableColumns}
+          maxRows={10}
+          showIndex
+        />
+      </ContentSection>
 
-        {/* 極簡風格 */}
-        <div className="bg-white rounded-lg border p-4">
-          <h3 className="text-md font-semibold text-gray-900 mb-3">
-            極簡風格（自訂顏色）
-          </h3>
-          <CandlestickChart
-            data={currentData.slice(-15)}
-            width={400}
-            height={300}
-            colorMode="tw"
-          />
-        </div>
-      </div>
+      {/* 代碼範例 */}
+      <ContentSection delay={0.4}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
+
+const data = [
+  { date: '2024-01-02', open: 593, high: 598, low: 590, close: 596, volume: 15234567 },
+  { date: '2024-01-03', open: 596, high: 605, low: 594, close: 602, volume: 18456789 },
+  // ... more data
+]
+
+<CandlestickChart
+  data={data}
+  width={${chartWidth}}
+  height={${chartHeight}}
+  colorMode="${colorMode}"
+  showVolume={${showVolume}}
+  candleWidth={${candleWidth}}
+  showGrid={${showGrid}}
+  showTooltip={${showTooltip}}
+  animate={${animate}}
+  interactive={${interactive}}
+  onCandleClick={(data) => console.log('K線點擊:', data)}
+/>`}
+        />
+      </ContentSection>
 
       {/* 功能說明 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          K線圖功能特色
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">📊 完整 OHLC 數據</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• 開盤價、最高價、最低價、收盤價</li>
-              <li>• 自動數據驗證和清理</li>
-              <li>• 支援多種日期格式</li>
-              <li>• 智能欄位偵測</li>
-            </ul>
+      <ContentSection delay={0.5}>
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">CandlestickChart 功能特點</h3>
           </div>
           
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">🎨 彈性視覺配置</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• 台股/美股顏色模式</li>
-              <li>• 可調整蠟燭寬度</li>
-              <li>• 成交量圖表整合</li>
-              <li>• 格線和軸線設定</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">⚡ 互動功能</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• 詳細數據提示框</li>
-              <li>• 點擊和懸停事件</li>
-              <li>• 平滑動畫效果</li>
-              <li>• 響應式設計</li>
-            </ul>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">核心功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                  完整OHLC數據支援
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  台股/美股顏色模式
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  成交量圖表整合
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  可調整蠟燭寬度
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">視覺特性</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  智能格線系統
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  詳細工具提示
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  平滑動畫效果
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  響應式設計
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  股票技術分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  外匯市場分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  加密貨幣監控
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-lime-500 rounded-full" />
+                  商品期貨分析
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* 技術說明 */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          K線圖說明
-        </h2>
-        
-        <div className="prose text-sm text-gray-600">
-          <p>
-            K線圖（Candlestick Chart），又稱蠟燭圖或陰陽燭，是股票、期貨、外匯等金融市場中最常用的價格走勢圖表。
-            每根K線包含四個重要價格：開盤價（Open）、最高價（High）、最低價（Low）、收盤價（Close），簡稱 OHLC。
-          </p>
-          
-          <p className="mt-3">
-            <strong>顏色慣例：</strong>
-          </p>
-          <ul className="mt-1">
-            <li><strong>台股模式：</strong>紅色代表上漲，綠色代表下跌</li>
-            <li><strong>美股模式：</strong>綠色代表上漲，紅色代表下跌</li>
-            <li><strong>十字星：</strong>開盤價與收盤價相近，表示市場猶豫不決</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

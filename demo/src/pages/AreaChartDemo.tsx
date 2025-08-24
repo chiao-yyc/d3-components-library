@@ -1,5 +1,26 @@
+/**
+ * AreaChartDemo - 現代化區域圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
+
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { AreaChart } from '@registry/components/basic/area-chart'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarIcon, SwatchIcon } from '@heroicons/react/24/outline'
 
 // 時間序列資料
 const timeSeriesData = [
@@ -36,33 +57,32 @@ const productData = [
 ]
 
 export default function AreaChartDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('timeSeries')
   const [stackMode, setStackMode] = useState<'none' | 'stack' | 'percent'>('none')
   const [curve, setCurve] = useState<'linear' | 'monotone' | 'cardinal' | 'basis' | 'step'>('monotone')
+  const [colorScheme, setColorScheme] = useState<'custom' | 'category10' | 'set3' | 'pastel' | 'dark'>('custom')
+  
+  // 視覺設定
   const [fillOpacity, setFillOpacity] = useState(0.7)
   const [strokeWidth, setStrokeWidth] = useState(2)
-  const [colorScheme, setColorScheme] = useState<'custom' | 'category10' | 'set3' | 'pastel' | 'dark'>('custom')
   const [gradient, setGradient] = useState(true)
   const [showGrid, setShowGrid] = useState(true)
   const [showDots, setShowDots] = useState(false)
   const [showLegend, setShowLegend] = useState(true)
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('top')
+  
+  // 交互功能
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
-  
-  // === 新增的交互功能狀態 ===
   const [enableBrushZoom, setEnableBrushZoom] = useState(false)
   const [enableCrosshair, setEnableCrosshair] = useState(false)
-  const [enableDropShadow, setEnableDropShadow] = useState(false)
-  const [enableGlowEffect, setEnableGlowEffect] = useState(false)
   
   // 交互回調狀態
   const [zoomDomain, setZoomDomain] = useState<[any, any] | null>(null)
-  const [crosshairData, setCrosshairData] = useState<any>(null)
 
   // 當前資料和映射
-  const { currentData, mapping } = useMemo(() => {
+  const { currentData, mapping, datasetInfo } = useMemo(() => {
     switch (selectedDataset) {
       case 'timeSeries':
         // 轉換為長格式用於多系列
@@ -73,7 +93,8 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: transformed,
-          mapping: { x: 'date', y: 'value', category: 'category' }
+          mapping: { x: 'date', y: 'value', category: 'category' },
+          datasetInfo: { name: '財務時間序列', points: timeSeriesData.length, series: 3 }
         }
       
       case 'multiSeries':
@@ -84,7 +105,8 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: deviceData,
-          mapping: { x: 'month', y: 'users', category: 'device' }
+          mapping: { x: 'month', y: 'users', category: 'device' },
+          datasetInfo: { name: '設備使用量', points: multiSeriesData.length, series: 3 }
         }
       
       case 'product':
@@ -95,297 +117,280 @@ export default function AreaChartDemo() {
         ])
         return {
           currentData: productSales,
-          mapping: { x: 'quarter', y: 'sales', category: 'product' }
+          mapping: { x: 'quarter', y: 'sales', category: 'product' },
+          datasetInfo: { name: '產品銷售', points: productData.length, series: 3 }
         }
       
       default:
         return {
           currentData: [],
-          mapping: { x: 'x', y: 'y' }
+          mapping: { x: 'x', y: 'y' },
+          datasetInfo: { name: '', points: 0, series: 0 }
         }
     }
   }, [selectedDataset])
 
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: datasetInfo.name },
+    { label: '數據點', value: datasetInfo.points },
+    { label: '系列數', value: datasetInfo.series },
+    { label: '堆疊模式', value: stackMode === 'none' ? '無' : stackMode === 'stack' ? '累積' : '百分比' },
+    { label: '曲線類型', value: curve },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: mapping.x, title: mapping.x, sortable: true },
+    { 
+      key: mapping.y, 
+      title: mapping.y, 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { key: mapping.category || 'category', title: '類別', sortable: true }
+  ]
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Area Chart Demo
-        </h1>
-        <p className="text-gray-600">
-          區域圖組件展示 - 支援堆疊模式、多系列資料和動畫效果
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="AreaChart Demo"
+      description="現代化區域圖組件展示 - 支援堆疊模式、多系列資料和動畫效果"
+    >
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="timeSeries">財務時間序列</option>
-              <option value="multiSeries">設備使用量</option>
-              <option value="product">產品銷售</option>
-            </select>
-          </div>
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="資料集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'timeSeries', label: '財務時間序列' },
+                  { value: 'multiSeries', label: '設備使用量' },
+                  { value: 'product', label: '產品銷售' }
+                ]}
+              />
+              
+              <SelectControl
+                label="堆疊模式"
+                value={stackMode}
+                onChange={(value) => setStackMode(value as any)}
+                options={[
+                  { value: 'none', label: '無堆疊' },
+                  { value: 'stack', label: '累積堆疊' },
+                  { value: 'percent', label: '百分比堆疊' }
+                ]}
+              />
+              
+              <SelectControl
+                label="曲線類型"
+                value={curve}
+                onChange={(value) => setCurve(value as any)}
+                options={[
+                  { value: 'linear', label: '線性' },
+                  { value: 'monotone', label: '平滑' },
+                  { value: 'cardinal', label: '基數樣條' },
+                  { value: 'basis', label: '基樣條' },
+                  { value: 'step', label: '階梯' }
+                ]}
+              />
+            </ControlGroup>
 
-          {/* 堆疊模式 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              堆疊模式
-            </label>
-            <select
-              value={stackMode}
-              onChange={(e) => setStackMode(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="none">無堆疊</option>
-              <option value="stack">累積堆疊</option>
-              <option value="percent">百分比堆疊</option>
-            </select>
-          </div>
+            {/* 視覺配置 */}
+            <ControlGroup title="視覺配置" icon="🎨" cols={3}>
+              <RangeSlider
+                label="填充透明度"
+                value={fillOpacity}
+                min={0.1}
+                max={1}
+                step={0.1}
+                onChange={setFillOpacity}
+              />
+              
+              <RangeSlider
+                label="線條寬度"
+                value={strokeWidth}
+                min={1}
+                max={5}
+                onChange={setStrokeWidth}
+                suffix="px"
+              />
+              
+              <SelectControl
+                label="顏色主題"
+                value={colorScheme}
+                onChange={(value) => setColorScheme(value as any)}
+                options={[
+                  { value: 'custom', label: '自訂' },
+                  { value: 'category10', label: 'Category10' },
+                  { value: 'set3', label: 'Set3' },
+                  { value: 'pastel', label: 'Pastel' },
+                  { value: 'dark', label: 'Dark' }
+                ]}
+              />
+            </ControlGroup>
 
-          {/* 曲線類型 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              曲線類型
-            </label>
-            <select
-              value={curve}
-              onChange={(e) => setCurve(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="linear">線性</option>
-              <option value="monotone">平滑</option>
-              <option value="cardinal">基數樣條</option>
-              <option value="basis">基樣條</option>
-              <option value="step">階梯</option>
-            </select>
-          </div>
-
-          {/* 填充透明度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              填充透明度 ({fillOpacity.toFixed(1)})
-            </label>
-            <input
-              type="range"
-              min="0.1"
-              max="1"
-              step="0.1"
-              value={fillOpacity}
-              onChange={(e) => setFillOpacity(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 線條寬度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              線條寬度 ({strokeWidth}px)
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="5"
-              value={strokeWidth}
-              onChange={(e) => setStrokeWidth(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 顏色主題 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色主題
-            </label>
-            <select
-              value={colorScheme}
-              onChange={(e) => setColorScheme(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="custom">自訂</option>
-              <option value="category10">Category10</option>
-              <option value="set3">Set3</option>
-              <option value="pastel">Pastel</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-
-          {/* 圖例位置 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圖例位置
-            </label>
-            <select
-              value={legendPosition}
-              onChange={(e) => setLegendPosition(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="top">上方</option>
-              <option value="bottom">下方</option>
-              <option value="left">左側</option>
-              <option value="right">右側</option>
-            </select>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="gradient"
+            {/* 顯示選項 */}
+            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+              <ToggleControl
+                label="漸變填充"
                 checked={gradient}
-                onChange={(e) => setGradient(e.target.checked)}
-                className="mr-2"
+                onChange={setGradient}
+                description="區域使用漸變填充效果"
               />
-              <label htmlFor="gradient" className="text-sm text-gray-700">
-                漸變填充
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showGrid"
+              
+              <ToggleControl
+                label="顯示網格"
                 checked={showGrid}
-                onChange={(e) => setShowGrid(e.target.checked)}
-                className="mr-2"
+                onChange={setShowGrid}
+                description="顯示背景網格線"
               />
-              <label htmlFor="showGrid" className="text-sm text-gray-700">
-                顯示網格
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showDots"
+              
+              <ToggleControl
+                label="顯示資料點"
                 checked={showDots}
-                onChange={(e) => setShowDots(e.target.checked)}
-                className="mr-2"
+                onChange={setShowDots}
+                description="在線上顯示數據點"
               />
-              <label htmlFor="showDots" className="text-sm text-gray-700">
-                顯示資料點
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLegend"
+              
+              <ToggleControl
+                label="顯示圖例"
                 checked={showLegend}
-                onChange={(e) => setShowLegend(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLegend}
+                description="顯示系列圖例"
               />
-              <label htmlFor="showLegend" className="text-sm text-gray-700">
-                顯示圖例
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
+            </ControlGroup>
+
+            {/* 圖例配置 */}
+            {showLegend && (
+              <ControlGroup title="圖例配置" icon="📊" cols={1}>
+                <SelectControl
+                  label="圖例位置"
+                  value={legendPosition}
+                  onChange={(value) => setLegendPosition(value as any)}
+                  options={[
+                    { value: 'top', label: '上方' },
+                    { value: 'bottom', label: '下方' },
+                    { value: 'left', label: '左側' },
+                    { value: 'right', label: '右側' }
+                  ]}
+                />
+              </ControlGroup>
+            )}
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="動畫效果"
                 checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+                onChange={setAnimate}
+                description="圖表進入和更新動畫"
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
+              
+              <ToggleControl
+                label="互動功能"
                 checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
+                onChange={setInteractive}
+                description="鼠標懸停和點擊交互"
               />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
+              
+              <ToggleControl
+                label="筆刷縮放"
+                checked={enableBrushZoom}
+                onChange={setEnableBrushZoom}
+                description="拖拽選取區域進行縮放"
+              />
+              
+              <ToggleControl
+                label="十字游標"
+                checked={enableCrosshair}
+                onChange={setEnableCrosshair}
+                description="顯示十字游標和數據詳情"
+              />
+            </ControlGroup>
+          </div>
+        </ModernControlPanel>
+      </ContentSection>
+
+      {/* 圖表展示 */}
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle="即時預覽配置效果"
+          actions={
+            <div className="flex items-center gap-2">
+              <SwatchIcon className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-600">區域圖</span>
             </div>
+          }
+        >
+          <div className="flex justify-center">
+            <motion.div
+              key={`${selectedDataset}-${stackMode}-${curve}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AreaChart
+                data={currentData}
+                mapping={mapping}
+                width={800}
+                height={400}
+                stackMode={stackMode}
+                curve={curve}
+                fillOpacity={fillOpacity}
+                strokeWidth={strokeWidth}
+                colorScheme={colorScheme}
+                gradient={gradient}
+                showGrid={showGrid}
+                showDots={showDots}
+                showLegend={showLegend}
+                legendPosition={legendPosition}
+                animate={animate}
+                interactive={interactive}
+                onDataClick={(data, series) => {
+                  console.log('Area data clicked:', data, series)
+                }}
+                onDataHover={(data, series) => {
+                  console.log('Area data hovered:', data, series)
+                }}
+                // 新增的交互功能
+                enableBrushZoom={enableBrushZoom}
+                onZoom={(domain) => {
+                  setZoomDomain(domain)
+                  console.log('AreaChart 縮放:', domain)
+                }}
+                onZoomReset={() => {
+                  setZoomDomain(null)
+                  console.log('AreaChart 縮放重置')
+                }}
+                enableCrosshair={enableCrosshair}
+                crosshairConfig={{
+                  showCircle: true,
+                  showLines: true,
+                  showText: true,
+                  formatText: (data) => `日期: ${data.x}\n數值: ${data.y.toFixed(2)}`
+                }}
+              />
+            </motion.div>
           </div>
           
-          {/* === 新增的交互功能控制 === */}
-          <div>
-            <h3 className="text-sm font-medium text-gray-800 mb-3">🎯 交互功能 (新增)</h3>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="enableBrushZoom"
-                  checked={enableBrushZoom}
-                  onChange={(e) => setEnableBrushZoom(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="enableBrushZoom" className="text-sm text-gray-700">
-                  筆刷縮放
-                </label>
+          <StatusDisplay items={statusItems} />
+          
+          {/* 交互狀態顯示 */}
+          {zoomDomain && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="font-medium text-blue-800">縮放狀態</span>
               </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="enableCrosshair"
-                  checked={enableCrosshair}
-                  onChange={(e) => setEnableCrosshair(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="enableCrosshair" className="text-sm text-gray-700">
-                  十字游標
-                </label>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="enableDropShadow"
-                  checked={enableDropShadow}
-                  onChange={(e) => setEnableDropShadow(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="enableDropShadow" className="text-sm text-gray-700">
-                  陰影效果
-                </label>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="enableGlowEffect"
-                  checked={enableGlowEffect}
-                  onChange={(e) => setEnableGlowEffect(e.target.checked)}
-                  className="mr-2"
-                />
-                <label htmlFor="enableGlowEffect" className="text-sm text-gray-700">
-                  光暈效果
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* 交互狀態顯示 */}
-        {(zoomDomain || crosshairData) && (
-          <div className="mt-4 p-3 bg-blue-50 rounded text-sm">
-            <h4 className="font-medium text-blue-800 mb-2">交互狀態:</h4>
-            {zoomDomain && (
               <div className="text-blue-700">
                 <strong>縮放範圍:</strong> {
                   zoomDomain[0] instanceof Date 
@@ -397,129 +402,40 @@ export default function AreaChartDemo() {
                     : zoomDomain[1]?.toString()
                 }
               </div>
-            )}
-            {crosshairData && (
-              <div className="text-green-700">
-                <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表預覽
-        </h2>
-        
-        <div className="flex justify-center">
-          <AreaChart
-            data={currentData}
-            mapping={mapping}
-            width={800}
-            height={400}
-            stackMode={stackMode}
-            curve={curve}
-            fillOpacity={fillOpacity}
-            strokeWidth={strokeWidth}
-            colorScheme={colorScheme}
-            gradient={gradient}
-            showGrid={showGrid}
-            showDots={showDots}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-            animate={animate}
-            interactive={interactive}
-            onDataClick={(data, series) => {
-              console.log('Area data clicked:', data, series)
-              alert(`點擊了: ${series} - ${String(data.x)} (${data.y})`)
-            }}
-            onDataHover={(data, series) => {
-              console.log('Area data hovered:', data, series)
-            }}
-            
-            // === 新增的交互功能 props ===
-            enableBrushZoom={enableBrushZoom}
-            onZoom={(domain) => {
-              setZoomDomain(domain)
-              console.log('AreaChart 縮放:', domain)
-            }}
-            onZoomReset={() => {
-              setZoomDomain(null)
-              console.log('AreaChart 縮放重置')
-            }}
-            enableCrosshair={enableCrosshair}
-            crosshairConfig={{
-              showCircle: true,
-              showLines: true,
-              showText: true,
-              formatText: (data) => `日期: ${data.x}\n數值: ${data.y.toFixed(2)}`
-            }}
-            enableDropShadow={enableDropShadow}
-            enableGlowEffect={enableGlowEffect}
-            glowColor="#3b82f6"
-          />
-        </div>
-      </div>
-
-      {/* 資料表格 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          當前資料 (前10筆)
-        </h2>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                {Object.keys(currentData[0] || {}).map(key => (
-                  <th key={key} className="px-4 py-2 text-left font-medium text-gray-700">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.slice(0, 10).map((row, index) => (
-                <tr key={index} className="border-t border-gray-200">
-                  {Object.values(row).map((value, i) => (
-                    <td key={i} className="px-4 py-2 text-gray-900">
-                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {currentData.length > 10 && (
-            <div className="text-center text-gray-500 text-sm mt-2">
-              ... 還有 {currentData.length - 10} 筆資料
             </div>
           )}
-        </div>
-      </div>
+        </ChartContainer>
+      </ContentSection>
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { AreaChart } from '@registry/components/basic/area-chart'
+      {/* 數據詳情 */}
+      <ContentSection delay={0.2}>
+        <DataTable
+          title="當前資料"
+          data={currentData.slice(0, 15)}
+          columns={tableColumns}
+          maxRows={10}
+          showIndex
+        />
+      </ContentSection>
+
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { AreaChart } from '@registry/components/basic/area-chart'
 
 const data = [
   { date: '2023-01', revenue: 120000, category: '營收' },
   { date: '2023-01', expenses: 80000, category: '支出' },
   { date: '2023-02', revenue: 135000, category: '營收' },
   { date: '2023-02', expenses: 85000, category: '支出' }
+  // ... more data
 ]
 
 <AreaChart
   data={data}
-  mapping={{ x: 'date', y: 'value', category: 'category' }}
+  mapping={{ x: '${mapping.x}', y: '${mapping.y}', category: '${mapping.category}' }}
   width={800}
   height={400}
   stackMode="${stackMode}"
@@ -534,10 +450,69 @@ const data = [
   legendPosition="${legendPosition}"
   animate={${animate}}
   interactive={${interactive}}
+  enableBrushZoom={${enableBrushZoom}}
+  enableCrosshair={${enableCrosshair}}
   onDataClick={(data, series) => console.log('Clicked:', data, series)}
-/>`}</code>
-        </pre>
-      </div>
-    </div>
+  onZoom={(domain) => console.log('Zoom:', domain)}
+/>`}
+        />
+      </ContentSection>
+
+      {/* 功能說明 */}
+      <ContentSection delay={0.4}>
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">AreaChart 功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">核心功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  多種堆疊模式（無堆疊、累積、百分比）
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  豐富的曲線插值選項
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  漸變填充和透明度控制
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  靈活的圖例配置
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">交互特性</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  筆刷縮放功能
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  十字游標數據追踪
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  多系列數據支援
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  平滑動畫過渡
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

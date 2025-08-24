@@ -1,5 +1,18 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { HeatMap } from '../components/ui'
+import DemoPageTemplate from '../components/ui/DemoPageTemplate'
+import ModernControlPanel, { ControlGroup, RangeSlider, SelectControl, ToggleControl } from '../components/ui/ModernControlPanel'
+import DataTable from '../components/ui/DataTable'
+import { designTokens } from '../design/design-tokens'
+import { 
+  Square3Stack3DIcon,
+  ChartBarSquareIcon,
+  CogIcon,
+  EyeIcon,
+  PaintBrushIcon,
+  AdjustmentsHorizontalIcon
+} from '@heroicons/react/24/outline'
 
 // 相關性矩陣資料
 const correlationData = [
@@ -85,21 +98,31 @@ const ratingData = [
 ]
 
 export default function HeatmapDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('correlation')
+  const [chartWidth, setChartWidth] = useState(700)
+  const [chartHeight, setChartHeight] = useState(500)
+  
+  // 樣式配置
   const [colorScheme, setColorScheme] = useState<'blues' | 'greens' | 'reds' | 'oranges' | 'purples' | 'greys'>('blues')
   const [cellRadius, setCellRadius] = useState(0)
   const [cellPadding, setCellPadding] = useState(2)
+  
+  // 軸線配置
+  const [xAxisRotation, setXAxisRotation] = useState(-45)
+  const [yAxisRotation, setYAxisRotation] = useState(0)
+  
+  // 顯示配置
   const [showValues, setShowValues] = useState(false)
   const [showLegend, setShowLegend] = useState(true)
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('right')
-  const [xAxisRotation, setXAxisRotation] = useState(-45)
-  const [yAxisRotation, setYAxisRotation] = useState(0)
+  
+  // 動畫交互
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
 
   // 當前資料和配置
-  const { currentData, mapping, config } = useMemo(() => {
+  const { currentData, mapping, config, datasetInfo } = useMemo(() => {
     switch (selectedDataset) {
       case 'correlation':
         return {
@@ -109,6 +132,12 @@ export default function HeatmapDemo() {
             domain: [-1, 1] as [number, number],
             legendTitle: '相關係數',
             valueFormat: (d: number) => d.toFixed(2)
+          },
+          datasetInfo: {
+            name: '相關性矩陣',
+            description: '展示各變數間的相關性強度，數值範圍從 -1 到 1',
+            totalPoints: correlationData.length,
+            features: ['負相關檢測', '對角線自相關', '鏡射對稱性']
           }
         }
       
@@ -120,6 +149,12 @@ export default function HeatmapDemo() {
             domain: undefined,
             legendTitle: '銷售額',
             valueFormat: (d: number) => d.toFixed(0)
+          },
+          datasetInfo: {
+            name: '產品銷售熱力圖',
+            description: '展示不同產品在各月份的銷售表現',
+            totalPoints: salesData.length,
+            features: ['時間序列分析', '產品對比', '季節性趨勢']
           }
         }
       
@@ -131,6 +166,12 @@ export default function HeatmapDemo() {
             domain: [1, 5] as [number, number],
             legendTitle: '評分',
             valueFormat: (d: number) => d.toFixed(1)
+          },
+          datasetInfo: {
+            name: '用戶評分矩陣',
+            description: '展示用戶對不同項目的評分分布',
+            totalPoints: ratingData.length,
+            features: ['推薦系統', '評分分析', '偏好模式']
           }
         }
       
@@ -138,294 +179,501 @@ export default function HeatmapDemo() {
         return {
           currentData: [],
           mapping: { x: 'x', y: 'y', value: 'value' },
-          config: {}
+          config: {},
+          datasetInfo: { name: '', description: '', totalPoints: 0, features: [] }
         }
     }
   }, [selectedDataset])
 
+  // 數據統計
+  const dataStats = useMemo(() => {
+    const values = currentData.map(d => d[mapping.value as keyof typeof d] as number)
+    return {
+      total: currentData.length,
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: values.reduce((a, b) => a + b, 0) / values.length,
+      uniqueX: new Set(currentData.map(d => d[mapping.x as keyof typeof d])).size,
+      uniqueY: new Set(currentData.map(d => d[mapping.y as keyof typeof d])).size
+    }
+  }, [currentData, mapping])
+
+  // 控制面板配置
+  const controlGroups = [
+    {
+      title: '基本設定',
+      icon: CogIcon,
+      controls: [
+        {
+          type: 'select' as const,
+          label: '資料集',
+          value: selectedDataset,
+          onChange: setSelectedDataset,
+          options: [
+            { value: 'correlation', label: '相關性矩陣' },
+            { value: 'sales', label: '產品銷售' },
+            { value: 'rating', label: '用戶評分' }
+          ]
+        }
+      ]
+    },
+    {
+      title: '尺寸配置',
+      icon: AdjustmentsHorizontalIcon,
+      controls: [
+        {
+          type: 'range' as const,
+          label: '圖表寬度',
+          value: chartWidth,
+          onChange: setChartWidth,
+          min: 400,
+          max: 1200,
+          step: 50
+        },
+        {
+          type: 'range' as const,
+          label: '圖表高度',
+          value: chartHeight,
+          onChange: setChartHeight,
+          min: 300,
+          max: 800,
+          step: 50
+        }
+      ]
+    },
+    {
+      title: '樣式配置',
+      icon: PaintBrushIcon,
+      controls: [
+        {
+          type: 'select' as const,
+          label: '顏色主題',
+          value: colorScheme,
+          onChange: setColorScheme,
+          options: [
+            { value: 'blues', label: '藍色系' },
+            { value: 'greens', label: '綠色系' },
+            { value: 'reds', label: '紅色系' },
+            { value: 'oranges', label: '橙色系' },
+            { value: 'purples', label: '紫色系' },
+            { value: 'greys', label: '灰色系' }
+          ]
+        },
+        {
+          type: 'range' as const,
+          label: '格子圓角',
+          value: cellRadius,
+          onChange: setCellRadius,
+          min: 0,
+          max: 10,
+          step: 1,
+          suffix: 'px'
+        },
+        {
+          type: 'range' as const,
+          label: '格子間距',
+          value: cellPadding,
+          onChange: setCellPadding,
+          min: 0,
+          max: 10,
+          step: 1,
+          suffix: 'px'
+        }
+      ]
+    },
+    {
+      title: '軸線配置',
+      icon: ChartBarSquareIcon,
+      controls: [
+        {
+          type: 'range' as const,
+          label: 'X軸標籤旋轉',
+          value: xAxisRotation,
+          onChange: setXAxisRotation,
+          min: -90,
+          max: 90,
+          step: 15,
+          suffix: '°'
+        },
+        {
+          type: 'range' as const,
+          label: 'Y軸標籤旋轉',
+          value: yAxisRotation,
+          onChange: setYAxisRotation,
+          min: -90,
+          max: 90,
+          step: 15,
+          suffix: '°'
+        }
+      ]
+    },
+    {
+      title: '顯示配置',
+      icon: EyeIcon,
+      controls: [
+        {
+          type: 'toggle' as const,
+          label: '顯示數值',
+          value: showValues,
+          onChange: setShowValues
+        },
+        {
+          type: 'toggle' as const,
+          label: '顯示圖例',
+          value: showLegend,
+          onChange: setShowLegend
+        },
+        {
+          type: 'select' as const,
+          label: '圖例位置',
+          value: legendPosition,
+          onChange: setLegendPosition,
+          options: [
+            { value: 'top', label: '上方' },
+            { value: 'bottom', label: '下方' },
+            { value: 'left', label: '左側' },
+            { value: 'right', label: '右側' }
+          ],
+          disabled: !showLegend
+        }
+      ]
+    },
+    {
+      title: '動畫交互',
+      icon: Square3Stack3DIcon,
+      controls: [
+        {
+          type: 'toggle' as const,
+          label: '動畫效果',
+          value: animate,
+          onChange: setAnimate
+        },
+        {
+          type: 'toggle' as const,
+          label: '互動功能',
+          value: interactive,
+          onChange: setInteractive
+        }
+      ]
+    }
+  ]
+
+  // DataTable 欄位配置
+  const dataTableColumns = [
+    {
+      key: mapping.x,
+      title: 'X軸',
+      sortable: true,
+      align: 'left' as const
+    },
+    {
+      key: mapping.y,
+      title: 'Y軸',
+      sortable: true,
+      align: 'left' as const
+    },
+    {
+      key: mapping.value,
+      title: '數值',
+      sortable: true,
+      align: 'right' as const,
+      formatter: (value: number) => (
+        <span className={`px-2 py-1 rounded text-xs font-medium ${
+          value > dataStats.avg 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800'
+        }`}>
+          {config.valueFormat ? config.valueFormat(value) : value.toFixed(2)}
+        </span>
+      )
+    }
+  ]
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Heatmap Demo
-        </h1>
-        <p className="text-gray-600">
-          熱力圖組件展示 - 適用於矩陣資料視覺化和相關性分析
-        </p>
-      </div>
+    <DemoPageTemplate
+      title="熱力圖展示"
+      description="矩陣數據視覺化工具，適用於相關性分析、銷售分布等多維度數據展示"
+    >
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* 控制面板 */}
+        <div className="xl:col-span-1">
+          <ModernControlPanel title="熱力圖設定" icon={<Square3Stack3DIcon className="w-5 h-5" />}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
+              <SelectControl
+                label="資料集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'correlation', label: '相關性矩陣' },
+                  { value: 'sales', label: '產品銷售' },
+                  { value: 'rating', label: '用戶評分' }
+                ]}
+              />
+            </ControlGroup>
 
-      {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="correlation">相關性矩陣</option>
-              <option value="sales">產品銷售</option>
-              <option value="rating">用戶評分</option>
-            </select>
-          </div>
+            <ControlGroup title="尺寸配置" icon={<AdjustmentsHorizontalIcon className="w-4 h-4" />} cols={1}>
+              <RangeSlider
+                label="圖表寬度"
+                value={chartWidth}
+                onChange={setChartWidth}
+                min={400}
+                max={1200}
+                step={50}
+              />
+              <RangeSlider
+                label="圖表高度"
+                value={chartHeight}
+                onChange={setChartHeight}
+                min={300}
+                max={800}
+                step={50}
+              />
+            </ControlGroup>
 
-          {/* 顏色主題 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色主題
-            </label>
-            <select
-              value={colorScheme}
-              onChange={(e) => setColorScheme(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="blues">藍色</option>
-              <option value="greens">綠色</option>
-              <option value="reds">紅色</option>
-              <option value="oranges">橙色</option>
-              <option value="purples">紫色</option>
-              <option value="greys">灰色</option>
-            </select>
-          </div>
+            <ControlGroup title="樣式配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
+              <SelectControl
+                label="顏色主題"
+                value={colorScheme}
+                onChange={setColorScheme}
+                options={[
+                  { value: 'blues', label: '藍色系' },
+                  { value: 'greens', label: '綠色系' },
+                  { value: 'reds', label: '紅色系' },
+                  { value: 'oranges', label: '橙色系' },
+                  { value: 'purples', label: '紫色系' },
+                  { value: 'greys', label: '灰色系' }
+                ]}
+              />
+              <RangeSlider
+                label="格子圓角"
+                value={cellRadius}
+                onChange={setCellRadius}
+                min={0}
+                max={10}
+                step={1}
+                suffix="px"
+              />
+              <RangeSlider
+                label="格子間距"
+                value={cellPadding}
+                onChange={setCellPadding}
+                min={0}
+                max={10}
+                step={1}
+                suffix="px"
+              />
+            </ControlGroup>
 
-          {/* 格子圓角 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              格子圓角 ({cellRadius}px)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              value={cellRadius}
-              onChange={(e) => setCellRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
+            <ControlGroup title="軸線配置" icon={<ChartBarSquareIcon className="w-4 h-4" />} cols={1}>
+              <RangeSlider
+                label="X軸標籤旋轉"
+                value={xAxisRotation}
+                onChange={setXAxisRotation}
+                min={-90}
+                max={90}
+                step={15}
+                suffix="°"
+              />
+              <RangeSlider
+                label="Y軸標籤旋轉"
+                value={yAxisRotation}
+                onChange={setYAxisRotation}
+                min={-90}
+                max={90}
+                step={15}
+                suffix="°"
+              />
+            </ControlGroup>
 
-          {/* 格子間距 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              格子間距 ({cellPadding}px)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              value={cellPadding}
-              onChange={(e) => setCellPadding(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* X軸旋轉 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              X軸標籤旋轉 ({xAxisRotation}°)
-            </label>
-            <input
-              type="range"
-              min="-90"
-              max="90"
-              value={xAxisRotation}
-              onChange={(e) => setXAxisRotation(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* Y軸旋轉 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Y軸標籤旋轉 ({yAxisRotation}°)
-            </label>
-            <input
-              type="range"
-              min="-90"
-              max="90"
-              value={yAxisRotation}
-              onChange={(e) => setYAxisRotation(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 圖例位置 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圖例位置
-            </label>
-            <select
-              value={legendPosition}
-              onChange={(e) => setLegendPosition(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="top">上方</option>
-              <option value="bottom">下方</option>
-              <option value="left">左側</option>
-              <option value="right">右側</option>
-            </select>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showValues"
+            <ControlGroup title="顯示配置" icon={<EyeIcon className="w-4 h-4" />} cols={1}>
+              <ToggleControl
+                label="顯示數值"
                 checked={showValues}
-                onChange={(e) => setShowValues(e.target.checked)}
-                className="mr-2"
+                onChange={setShowValues}
               />
-              <label htmlFor="showValues" className="text-sm text-gray-700">
-                顯示數值
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLegend"
+              <ToggleControl
+                label="顯示圖例"
                 checked={showLegend}
-                onChange={(e) => setShowLegend(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLegend}
               />
-              <label htmlFor="showLegend" className="text-sm text-gray-700">
-                顯示圖例
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
+              <SelectControl
+                label="圖例位置"
+                value={legendPosition}
+                onChange={setLegendPosition}
+                options={[
+                  { value: 'top', label: '上方' },
+                  { value: 'bottom', label: '下方' },
+                  { value: 'left', label: '左側' },
+                  { value: 'right', label: '右側' }
+                ]}
+              />
+            </ControlGroup>
+
+            <ControlGroup title="動畫交互" icon={<Square3Stack3DIcon className="w-4 h-4" />} cols={1}>
+              <ToggleControl
+                label="動畫效果"
                 checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+                onChange={setAnimate}
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
+              <ToggleControl
+                label="互動功能"
+                checked={interactive}
+                onChange={setInteractive}
+              />
+            </ControlGroup>
+          </ModernControlPanel>
+          
+          {/* 數據資訊卡片 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className={`${designTokens.colors.cardBg} backdrop-blur-md rounded-2xl border ${designTokens.colors.border} p-4 space-y-3 mt-4`}
+          >
+            <div className="flex items-center gap-2">
+              <ChartBarSquareIcon className="w-5 h-5 text-blue-500" />
+              <h3 className={`${designTokens.typography.heading3} text-gray-800`}>
+                數據統計
+              </h3>
             </div>
             
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
-                checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">數據集</span>
+                <span className="font-medium text-gray-900">{datasetInfo.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">總點數</span>
+                <span className="font-medium text-gray-900">{dataStats.total}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">X軸類別</span>
+                <span className="font-medium text-gray-900">{dataStats.uniqueX}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Y軸類別</span>
+                <span className="font-medium text-gray-900">{dataStats.uniqueY}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">數值範圍</span>
+                <span className="font-medium text-gray-900">
+                  {dataStats.min.toFixed(2)} ~ {dataStats.max.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">平均值</span>
+                <span className="font-medium text-gray-900">{dataStats.avg.toFixed(2)}</span>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表預覽
-        </h2>
-        
-        <div className="flex justify-center">
-          <HeatMap
-            data={currentData}
-            mapping={mapping}
-            width={700}
-            height={500}
-            colorScheme={colorScheme}
-            cellRadius={cellRadius}
-            cellPadding={cellPadding}
-            showValues={showValues}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-            legendTitle={config.legendTitle}
-            xAxisRotation={xAxisRotation}
-            yAxisRotation={yAxisRotation}
-            animate={animate}
-            interactive={interactive}
-            domain={config.domain}
-            valueFormat={config.valueFormat}
-            onCellClick={(data) => {
-              console.log('Heatmap cell clicked:', data)
-              alert(`點擊了: (${data.x}, ${data.y}) = ${data.value}`)
-            }}
-            onCellHover={(data) => {
-              console.log('Heatmap cell hovered:', data)
-            }}
-          />
-        </div>
-      </div>
-
-      {/* 資料表格 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          當前資料 (前15筆)
-        </h2>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                {Object.keys(currentData[0] || {}).map(key => (
-                  <th key={key} className="px-4 py-2 text-left font-medium text-gray-700">
-                    {key}
-                  </th>
+            
+            <div className="border-t border-gray-100 pt-3">
+              <div className="text-xs text-gray-500 mb-2">數據集特點</div>
+              <div className="flex flex-wrap gap-1">
+                {datasetInfo.features.map((feature, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-blue-50 text-blue-600 rounded-full text-xs"
+                  >
+                    {feature}
+                  </span>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.slice(0, 15).map((row, index) => (
-                <tr key={index} className="border-t border-gray-200">
-                  {Object.values(row).map((value, i) => (
-                    <td key={i} className="px-4 py-2 text-gray-900">
-                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          
-          {currentData.length > 15 && (
-            <div className="text-center text-gray-500 text-sm mt-2">
-              ... 還有 {currentData.length - 15} 筆資料
+              </div>
             </div>
-          )}
+          </motion.div>
         </div>
-      </div>
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { HeatMap } from '../components/ui'
+        {/* 主內容區 */}
+        <div className="xl:col-span-3 space-y-6">
+          {/* 圖表區域 */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className={`${designTokens.colors.cardBg} backdrop-blur-md rounded-2xl border ${designTokens.colors.border} overflow-hidden`}
+          >
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className={`${designTokens.typography.heading3} text-gray-800`}>
+                    {datasetInfo.name}
+                  </h3>
+                  <p className={`${designTokens.typography.body} text-gray-600 mt-1`}>
+                    {datasetInfo.description}
+                  </p>
+                </div>
+                <div className="text-right text-sm text-gray-500">
+                  {chartWidth} × {chartHeight}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="flex justify-center">
+                <HeatMap
+                  data={currentData}
+                  mapping={mapping}
+                  width={chartWidth}
+                  height={chartHeight}
+                  colorScheme={colorScheme}
+                  cellRadius={cellRadius}
+                  cellPadding={cellPadding}
+                  showValues={showValues}
+                  showLegend={showLegend}
+                  legendPosition={legendPosition}
+                  legendTitle={config.legendTitle}
+                  xAxisRotation={xAxisRotation}
+                  yAxisRotation={yAxisRotation}
+                  animate={animate}
+                  interactive={interactive}
+                  domain={config.domain}
+                  valueFormat={config.valueFormat}
+                  onCellClick={(data) => {
+                    console.log('Heatmap cell clicked:', data)
+                  }}
+                  onCellHover={(data) => {
+                    console.log('Heatmap cell hovered:', data)
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 數據表格 */}
+          <DataTable
+            title="數據詳情"
+            data={currentData}
+            columns={dataTableColumns}
+            maxRows={10}
+          />
+
+          {/* 代碼示例 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className={`${designTokens.colors.cardBg} backdrop-blur-md rounded-2xl border ${designTokens.colors.border}`}
+          >
+            <div className="p-6 border-b border-gray-100">
+              <h3 className={`${designTokens.typography.heading3} text-gray-800`}>
+                代碼示例
+              </h3>
+            </div>
+            <div className="p-6">
+              <pre className={`${designTokens.colors.codeBg} rounded-xl p-4 overflow-x-auto text-sm`}>
+                <code className="text-gray-800">{`import { HeatMap } from '@/components/ui'
 
 const data = [
-  { x: 'A', y: '1', value: 0.8 },
-  { x: 'A', y: '2', value: 0.6 },
-  { x: 'B', y: '1', value: 0.9 },
-  { x: 'B', y: '2', value: 0.4 }
+  { ${mapping.x}: 'A', ${mapping.y}: '1', ${mapping.value}: 0.8 },
+  { ${mapping.x}: 'A', ${mapping.y}: '2', ${mapping.value}: 0.6 },
+  { ${mapping.x}: 'B', ${mapping.y}: '1', ${mapping.value}: 0.9 },
+  { ${mapping.x}: 'B', ${mapping.y}: '2', ${mapping.value}: 0.4 }
 ]
 
-<Heatmap
+<HeatMap
   data={data}
-  mapping={{ x: 'x', y: 'y', value: 'value' }}
-  width={700}
-  height={500}
+  mapping={{ x: '${mapping.x}', y: '${mapping.y}', value: '${mapping.value}' }}
+  width={${chartWidth}}
+  height={${chartHeight}}
   colorScheme="${colorScheme}"
   cellRadius={${cellRadius}}
   cellPadding={${cellPadding}}
@@ -437,9 +685,13 @@ const data = [
   animate={${animate}}
   interactive={${interactive}}
   onCellClick={(data) => console.log('Clicked:', data)}
+  onCellHover={(data) => console.log('Hovered:', data)}
 />`}</code>
-        </pre>
+              </pre>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
 }

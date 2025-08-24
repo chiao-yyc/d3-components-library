@@ -1,6 +1,22 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import {
+  DemoPageTemplate,
+  ModernControlPanel,
+  ChartContainer,
+  DataTable,
+  CodeExample
+} from '../components/ui'
+import {
+  ChartBarSquareIcon,
+  ComputerDesktopIcon,
+  BanknotesIcon,
+  CogIcon,
+  EyeIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline'
 
 const MultiBarLineComboDemo: React.FC = () => {
   // 場景 1: 業務指標比較 - 多個業務部門的銷售與利潤
@@ -147,158 +163,301 @@ const MultiBarLineComboDemo: React.FC = () => {
   const currentSeries = getCurrentSeries()
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Multi-Bar + Line 組合圖表
-        </h1>
-        <p className="text-gray-600 mb-6">
-          展示多個 Bar 系列與 Line 系列的組合，支援分組條形圖與雙軸配置。適用於比較多個類別數據的同時顯示趨勢指標。
-        </p>
-
-        {/* 場景選擇 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { key: 'business', label: '📊 業務指標', desc: '多部門銷售與KPI' },
-            { key: 'system', label: '🖥️ 系統監控', desc: '多服務器負載監控' },
-            { key: 'financial', label: '💰 金融分析', desc: '投資組合表現分析' },
-          ].map((scenario) => (
-            <button
-              key={scenario.key}
-              onClick={() => {
-                setActiveScenario(scenario.key as any)
-                setActiveSeriesIds(new Set())
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeScenario === scenario.key
-                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-medium">{scenario.label}</div>
-              <div className="text-xs text-gray-500">{scenario.desc}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* 系列控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">系列控制</h3>
-            <button
-              onClick={resetSeries}
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-            >
-              顯示全部
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(activeScenario === 'business' ? businessSeries : 
-              activeScenario === 'system' ? systemSeries : financialSeries).map((series) => (
-              <button
-                key={series.dataKey}
-                onClick={() => toggleSeries(series.dataKey)}
-                className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
-                  activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
-                    ? 'bg-white border-2 text-gray-700'
-                    : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
-                }`}
-                style={{
-                  borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
-                    ? series.color 
-                    : undefined
-                }}
-              >
-                <div 
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: series.color }}
-                />
-                {series.name}
-                <span className="text-xs opacity-60">
-                  ({series.type === 'bar' ? '條' : '線'})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">{config.title}</h2>
+    <DemoPageTemplate
+      title="Multi-Bar + Line 組合圖表 📊"
+      description="展示多個 Bar 系列與 Line 系列的完美組合，支援智能分組條形圖與雙軸配置，適用於企業級多維度數據比較與趨勢分析。"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div className="mb-4">
-          <EnhancedComboChart
-            data={getCurrentData()}
-            series={currentSeries}
-            xKey={getCurrentXKey()}
-            width={900}
-            height={500}
-            margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-            leftAxis={{
-              label: config.leftAxis.label,
-              gridlines: true,
-            }}
-            rightAxis={{
-              label: config.rightAxis.label,
-              gridlines: false,
-            }}
-            xAxis={{
-              label: config.xAxis.label,
-            }}
-            animate={true}
-            className="multi-bar-line-combo"
-          />
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel title="場景控制" icon={<CogIcon className="h-5 w-5" />}>
+            <div className="space-y-6">
+              
+              {/* 場景選擇 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <SparklesIcon className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-semibold text-gray-700">選擇演示場景</h3>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { 
+                      key: 'business', 
+                      label: '業務指標', 
+                      icon: <ChartBarSquareIcon className="h-4 w-4" />,
+                      desc: '多部門銷售與KPI',
+                      color: 'blue'
+                    },
+                    { 
+                      key: 'system', 
+                      label: '系統監控', 
+                      icon: <ComputerDesktopIcon className="h-4 w-4" />,
+                      desc: '多服務器負載監控',
+                      color: 'green' 
+                    },
+                    { 
+                      key: 'financial', 
+                      label: '金融分析', 
+                      icon: <BanknotesIcon className="h-4 w-4" />,
+                      desc: '投資組合表現分析',
+                      color: 'purple'
+                    },
+                  ].map((scenario) => (
+                    <motion.button
+                      key={scenario.key}
+                      onClick={() => {
+                        setActiveScenario(scenario.key as any)
+                        setActiveSeriesIds(new Set())
+                      }}
+                      whileHover={{ scale: 1.02, x: 2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 text-left ${
+                        activeScenario === scenario.key
+                          ? `bg-${scenario.color}-100 border-${scenario.color}-300 text-${scenario.color}-700`
+                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        {scenario.icon}
+                        <span className="font-medium text-sm">{scenario.label}</span>
+                      </div>
+                      <div className="text-xs opacity-70">{scenario.desc}</div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 系列控制 */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <EyeIcon className="h-4 w-4 text-purple-500" />
+                    <h3 className="text-sm font-semibold text-gray-700">系列控制</h3>
+                  </div>
+                  <button
+                    onClick={resetSeries}
+                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-600"
+                  >
+                    顯示全部
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-2">
+                  {(activeScenario === 'business' ? businessSeries : 
+                    activeScenario === 'system' ? systemSeries : financialSeries).map((series) => (
+                    <motion.button
+                      key={series.dataKey}
+                      onClick={() => toggleSeries(series.dataKey)}
+                      whileHover={{ x: 2 }}
+                      className={`w-full p-2 rounded-lg text-xs transition-all duration-200 text-left ${
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                          ? 'bg-white border-2 shadow-sm'
+                          : 'bg-gray-100 border border-gray-300 opacity-60'
+                      }`}
+                      style={{
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                          ? series.color 
+                          : undefined
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-sm" 
+                          style={{ backgroundColor: series.color }}
+                        />
+                        <span className="font-medium flex-1">{series.name}</span>
+                        <span className="text-xs opacity-60">
+                          ({series.type === 'bar' ? '條' : '線'})
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ModernControlPanel>
         </div>
 
-        {/* 數據統計 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="font-medium text-blue-800">Bar 系列數量</div>
-            <div className="text-blue-600">
-              {currentSeries.filter(s => s.type === 'bar').length} 個分組條形圖
-            </div>
-          </div>
-          <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">Line 系列數量</div>
-            <div className="text-green-600">
-              {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
-            </div>
-          </div>
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="font-medium text-purple-800">資料點數量</div>
-            <div className="text-purple-600">
-              {getCurrentData().length} 個時間點
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
 
-      {/* 技術說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">技術特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">🔧 Multi-Bar 分組渲染</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 使用 barGroupKey 進行條形圖分組</li>
-              <li>• 自動計算組內偏移量和條寬度</li>
-              <li>• 支援無限數量的分組條形圖</li>
-              <li>• 智能處理重疊和間距</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">📊 雙軸與圖層管理</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 左右軸獨立配置和刻度</li>
-              <li>• 智能圖層排序：area → bar → line</li>
-              <li>• Z-index 管理確保線條可見性</li>
-              <li>• 動畫和交互事件支援</li>
-            </ul>
-          </div>
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeScenario}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ChartContainer 
+              title={config.title}
+              description={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點`}
+            >
+              <div className="h-[600px] w-full bg-gradient-to-br from-gray-50 to-white rounded-lg p-6">
+                <EnhancedComboChart
+                  data={getCurrentData()}
+                  series={currentSeries}
+                  xKey={getCurrentXKey()}
+                  width={800}
+                  height={500}
+                  margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                  leftAxis={{
+                    label: config.leftAxis.label,
+                    gridlines: true,
+                  }}
+                  rightAxis={{
+                    label: config.rightAxis.label,
+                    gridlines: false,
+                  }}
+                  xAxis={{
+                    label: config.xAxis.label,
+                  }}
+                  animate={true}
+                  className="multi-bar-line-combo"
+                />
+              </div>
+            </ChartContainer>
+          </motion.div>
+
+          {/* 數據統計卡片 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                  <ChartBarSquareIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="font-semibold text-blue-800">Bar 系列</div>
+              </div>
+              <div className="text-blue-700 text-lg font-bold">
+                {currentSeries.filter(s => s.type === 'bar').length} 個分組條形圖
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">~</span>
+                </div>
+                <div className="font-semibold text-green-800">Line 系列</div>
+              </div>
+              <div className="text-green-700 text-lg font-bold">
+                {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">#</span>
+                </div>
+                <div className="font-semibold text-purple-800">資料點</div>
+              </div>
+              <div className="text-purple-700 text-lg font-bold">
+                {getCurrentData().length} 個時間點
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* 技術特色說明 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 backdrop-blur-sm border border-white/20"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">🔧 技術特色</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div 
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-white/50 shadow-sm"
+              >
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <ChartBarSquareIcon className="h-5 w-5 text-blue-500" />
+                  Multi-Bar 分組渲染
+                </h4>
+                <ul className="text-gray-600 space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    使用 barGroupKey 進行條形圖分組
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    自動計算組內偏移量和條寬度
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    支援無限數量的分組條形圖
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    智能處理重疊和間距
+                  </li>
+                </ul>
+              </motion.div>
+              
+              <motion.div 
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-white/50 shadow-sm"
+              >
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <CogIcon className="h-5 w-5 text-purple-500" />
+                  雙軸與圖層管理
+                </h4>
+                <ul className="text-gray-600 space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
+                    左右軸獨立配置和刻度
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
+                    智能圖層排序：area → bar → line
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
+                    Z-index 管理確保線條可見性
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></span>
+                    動畫和交互事件支援
+                  </li>
+                </ul>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* 資料表格 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <DataTable
+              title={`${config.title} - 資料預覽`}
+              description="當前場景的示範資料，展示前8筆記錄"
+              data={getCurrentData().slice(0, 8)}
+              columns={Object.keys(getCurrentData()[0] || {}).map(key => ({
+                key,
+                title: key,
+                sortable: true
+              }))}
+            />
+          </motion.div>
         </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 

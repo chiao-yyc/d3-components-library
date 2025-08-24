@@ -135,8 +135,8 @@ export const EnhancedComboChartDemo: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          增強版組合圖表演示
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+          📊 Enhanced ComboChart 增強版組合圖表演示
         </h1>
         <p className="text-gray-600 mb-6">
           展示增強版 ComboChart 的進階功能：靈活數據映射、多軸配置、互動控制

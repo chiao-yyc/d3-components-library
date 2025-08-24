@@ -1,9 +1,30 @@
-import React, { useState } from 'react';
-import { TreeMap } from '../../../registry/components/statistical/tree-map';
-import type { HierarchyDataItem, StratifiedDataItem } from '../../../registry/components/statistical/tree-map/types';
+/**
+ * TreeMapDemo - 現代化樹狀圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
 
-// 階層數據示例
-const hierarchyData: HierarchyDataItem = {
+import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { TreeMap } from '../../../registry/components/statistical/tree-map'
+import type { HierarchyDataItem, StratifiedDataItem } from '../../../registry/components/statistical/tree-map/types'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, Squares2X2Icon, BuildingOffice2Icon } from '@heroicons/react/24/outline'
+
+// 公司組織架構數據
+const companyData: HierarchyDataItem = {
   name: "公司",
   children: [
     {
@@ -12,7 +33,7 @@ const hierarchyData: HierarchyDataItem = {
         { name: "前端開發", value: 50 },
         { name: "後端開發", value: 80 },
         { name: "移動開發", value: 30 },
-        { name: "測試", value: 25 }
+        { name: "測試QA", value: 25 }
       ]
     },
     {
@@ -28,47 +49,21 @@ const hierarchyData: HierarchyDataItem = {
       children: [
         { name: "市場營銷", value: 18 },
         { name: "商務拓展", value: 22 },
-        { name: "客服", value: 15 }
+        { name: "客戶服務", value: 15 }
       ]
     },
     {
       name: "管理部",
       children: [
         { name: "人力資源", value: 8 },
-        { name: "財務", value: 6 },
-        { name: "行政", value: 5 }
+        { name: "財務會計", value: 6 },
+        { name: "行政管理", value: 5 }
       ]
     }
   ]
-};
+}
 
-// 平面化數據示例
-const stratifiedData: StratifiedDataItem[] = [
-  { id: "company", value: 0 },
-  { id: "company.tech", parent: "company", value: 0 },
-  { id: "company.product", parent: "company", value: 0 },
-  { id: "company.marketing", parent: "company", value: 0 },
-  { id: "company.admin", parent: "company", value: 0 },
-  
-  { id: "company.tech.frontend", parent: "company.tech", value: 50 },
-  { id: "company.tech.backend", parent: "company.tech", value: 80 },
-  { id: "company.tech.mobile", parent: "company.tech", value: 30 },
-  { id: "company.tech.testing", parent: "company.tech", value: 25 },
-  
-  { id: "company.product.pm", parent: "company.product", value: 15 },
-  { id: "company.product.design", parent: "company.product", value: 20 },
-  { id: "company.product.analytics", parent: "company.product", value: 12 },
-  
-  { id: "company.marketing.marketing", parent: "company.marketing", value: 18 },
-  { id: "company.marketing.bd", parent: "company.marketing", value: 22 },
-  { id: "company.marketing.cs", parent: "company.marketing", value: 15 },
-  
-  { id: "company.admin.hr", parent: "company.admin", value: 8 },
-  { id: "company.admin.finance", parent: "company.admin", value: 6 },
-  { id: "company.admin.operations", parent: "company.admin", value: 5 }
-];
-
-// 市場佔有率數據
+// 全球市場份額數據
 const marketShareData: HierarchyDataItem = {
   name: "全球智慧手機市場",
   children: [
@@ -78,7 +73,7 @@ const marketShareData: HierarchyDataItem = {
         { name: "iPhone 15", value: 15.2 },
         { name: "iPhone 14", value: 12.8 },
         { name: "iPhone 13", value: 8.5 },
-        { name: "其他", value: 3.5 }
+        { name: "其他型號", value: 3.5 }
       ]
     },
     {
@@ -87,15 +82,15 @@ const marketShareData: HierarchyDataItem = {
         { name: "Galaxy S24", value: 8.2 },
         { name: "Galaxy A系列", value: 12.5 },
         { name: "Galaxy Note", value: 4.3 },
-        { name: "其他", value: 5.0 }
+        { name: "其他型號", value: 5.0 }
       ]
     },
     {
       name: "小米",
       children: [
-        { name: "Redmi", value: 6.8 },
+        { name: "Redmi系列", value: 6.8 },
         { name: "Mi系列", value: 4.2 },
-        { name: "其他", value: 2.0 }
+        { name: "其他型號", value: 2.0 }
       ]
     },
     {
@@ -116,165 +111,764 @@ const marketShareData: HierarchyDataItem = {
       ]
     }
   ]
-};
+}
+
+// 投資組合數據
+const portfolioData: HierarchyDataItem = {
+  name: "投資組合",
+  children: [
+    {
+      name: "股票",
+      children: [
+        { name: "科技股", value: 35.5 },
+        { name: "金融股", value: 28.2 },
+        { name: "醫療股", value: 15.8 },
+        { name: "能源股", value: 12.3 }
+      ]
+    },
+    {
+      name: "債券",
+      children: [
+        { name: "政府債券", value: 18.5 },
+        { name: "公司債券", value: 12.8 },
+        { name: "市政債券", value: 8.7 }
+      ]
+    },
+    {
+      name: "另類投資",
+      children: [
+        { name: "房地產", value: 15.2 },
+        { name: "商品期貨", value: 8.5 },
+        { name: "私募股權", value: 6.3 }
+      ]
+    },
+    {
+      name: "現金等價物",
+      children: [
+        { name: "貨幣基金", value: 8.5 },
+        { name: "定期存款", value: 5.2 }
+      ]
+    }
+  ]
+}
+
+// 平面化數據（Stratified 格式）
+const stratifiedData: StratifiedDataItem[] = [
+  { id: "root", value: 0 },
+  { id: "tech", parent: "root", value: 0 },
+  { id: "business", parent: "root", value: 0 },
+  { id: "support", parent: "root", value: 0 },
+  
+  { id: "frontend", parent: "tech", value: 45 },
+  { id: "backend", parent: "tech", value: 60 },
+  { id: "mobile", parent: "tech", value: 35 },
+  { id: "devops", parent: "tech", value: 25 },
+  
+  { id: "sales", parent: "business", value: 40 },
+  { id: "marketing", parent: "business", value: 30 },
+  { id: "product", parent: "business", value: 25 },
+  
+  { id: "hr", parent: "support", value: 15 },
+  { id: "finance", parent: "support", value: 12 },
+  { id: "legal", parent: "support", value: 8 }
+]
+
+// 資料集選項
+const datasetOptions = [
+  { value: 'company', label: '公司組織架構', description: '展示企業部門人力資源分佈' },
+  { value: 'market', label: '市場份額分析', description: '全球智慧手機市場佔有率' },
+  { value: 'portfolio', label: '投資組合配置', description: '資產配置和投資比例' },
+  { value: 'stratified', label: '平面化結構', description: '使用 Stratified 數據格式' }
+]
+
+// 顏色策略選項
+const colorStrategyOptions = [
+  { value: 'custom', label: '按索引（預設）', description: '使用固定顏色序列' },
+  { value: 'depth', label: '按層級深度', description: '不同層級使用不同顏色' },
+  { value: 'parent', label: '按父節點', description: '相同父節點使用相似顏色' },
+  { value: 'value', label: '按數值大小', description: '數值越大顏色越深' }
+]
+
+// 瓦片算法選項
+const tileAlgorithmOptions = [
+  { value: 'squarify', label: 'Squarify', description: '最佳長寬比，預設推薦' },
+  { value: 'binary', label: 'Binary', description: '二分法分割' },
+  { value: 'dice', label: 'Dice', description: '垂直分割' },
+  { value: 'slice', label: 'Slice', description: '水平分割' }
+]
+
+// 標籤對齊選項
+const labelAlignmentOptions = [
+  { value: 'center', label: '中央對齊' },
+  { value: 'top-left', label: '左上角' },
+  { value: 'top-right', label: '右上角' },
+  { value: 'bottom-left', label: '左下角' },
+  { value: 'bottom-right', label: '右下角' }
+]
 
 export default function TreeMapDemo() {
-  const [selectedDataset, setSelectedDataset] = useState<'company' | 'market' | 'stratified'>('company');
-  const [selectedStrategy, setSelectedStrategy] = useState<'depth' | 'parent' | 'value' | 'custom'>('custom');
-  const [selectedTile, setSelectedTile] = useState<'squarify' | 'binary' | 'dice' | 'slice'>('squarify');
+  // 基本設定
+  const [selectedDataset, setSelectedDataset] = useState<'company' | 'market' | 'portfolio' | 'stratified'>('company')
+  const [colorStrategy, setColorStrategy] = useState<'depth' | 'parent' | 'value' | 'custom'>('custom')
+  const [tileAlgorithm, setTileAlgorithm] = useState<'squarify' | 'binary' | 'dice' | 'slice'>('squarify')
   
-  const getCurrentData = () => {
-    switch (selectedDataset) {
-      case 'market':
-        return { data: [marketShareData], format: 'hierarchy' as const };
-      case 'stratified':
-        return { data: stratifiedData, format: 'stratified' as const };
-      case 'company':
-      default:
-        return { data: [hierarchyData], format: 'hierarchy' as const };
-    }
-  };
+  // 圖表設定
+  const [chartWidth, setChartWidth] = useState(800)
+  const [chartHeight, setChartHeight] = useState(500)
+  const [padding, setPadding] = useState(2)
+  const [strokeWidth, setStrokeWidth] = useState(1)
+  
+  // 樣式設定
+  const [strokeColor, setStrokeColor] = useState('#ffffff')
+  const [opacity, setOpacity] = useState(0.8)
+  const [fontSize, setFontSize] = useState(12)
+  const [labelAlignment, setLabelAlignment] = useState<'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'>('center')
+  
+  // 顯示選項
+  const [showLabels, setShowLabels] = useState(true)
+  const [showValues, setShowValues] = useState(true)
+  const [showTooltip, setShowTooltip] = useState(true)
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
 
-  const { data, format } = getCurrentData();
+  // 當前資料和配置
+  const { currentData, config, analysis } = useMemo(() => {
+    let data, format, title, description, totalValue = 0
+    
+    switch (selectedDataset) {
+      case 'company':
+        data = [companyData]
+        format = 'hierarchy' as const
+        title = '公司組織架構'
+        description = '展示各部門人力資源配置和規模'
+        break
+      case 'market':
+        data = [marketShareData]
+        format = 'hierarchy' as const
+        title = '全球智慧手機市場'
+        description = '各品牌市場份額分佈情況'
+        break
+      case 'portfolio':
+        data = [portfolioData]
+        format = 'hierarchy' as const
+        title = '投資組合配置'
+        description = '資產配置比例和投資分佈'
+        break
+      case 'stratified':
+        data = stratifiedData
+        format = 'stratified' as const
+        title = '平面化數據結構'
+        description = '使用 Stratified 格式的層級數據'
+        break
+      default:
+        data = [companyData]
+        format = 'hierarchy' as const
+        title = '公司組織架構'
+        description = '展示各部門人力資源配置和規模'
+    }
+
+    // 計算統計數據
+    const calculateHierarchyStats = (node: any): { leafCount: number, maxDepth: number, totalValue: number } => {
+      if (node.children) {
+        let leafCount = 0
+        let maxDepth = 0
+        let totalValue = 0
+        
+        node.children.forEach((child: any) => {
+          const childStats = calculateHierarchyStats(child)
+          leafCount += childStats.leafCount
+          maxDepth = Math.max(maxDepth, childStats.maxDepth)
+          totalValue += childStats.totalValue
+        })
+        
+        return { leafCount, maxDepth: maxDepth + 1, totalValue }
+      } else {
+        return { leafCount: 1, maxDepth: 0, totalValue: node.value || 0 }
+      }
+    }
+
+    let leafCount = 0, maxDepth = 0
+    if (format === 'hierarchy' && Array.isArray(data)) {
+      const stats = calculateHierarchyStats(data[0])
+      leafCount = stats.leafCount
+      maxDepth = stats.maxDepth
+      totalValue = stats.totalValue
+    } else if (format === 'stratified') {
+      leafCount = (data as StratifiedDataItem[]).filter(d => d.value && d.value > 0).length
+      totalValue = (data as StratifiedDataItem[]).reduce((sum, d) => sum + (d.value || 0), 0)
+      const depths = (data as StratifiedDataItem[]).map(d => (d.id.split('.').length - 1))
+      maxDepth = Math.max(...depths)
+    }
+    
+    return {
+      currentData: data,
+      config: { title, description, format },
+      analysis: {
+        dataset: datasetOptions.find(d => d.value === selectedDataset)!,
+        leafNodes: leafCount,
+        maxDepth,
+        totalValue,
+        algorithm: tileAlgorithmOptions.find(t => t.value === tileAlgorithm)!,
+        colorStrategy: colorStrategyOptions.find(c => c.value === colorStrategy)!
+      }
+    }
+  }, [selectedDataset, tileAlgorithm, colorStrategy])
+
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: config.title },
+    { label: '葉節點數', value: analysis.leafNodes },
+    { label: '最大深度', value: analysis.maxDepth },
+    { label: '瓦片算法', value: analysis.algorithm.label },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格（展示葉節點數據）
+  const tableData = useMemo(() => {
+    const extractLeafNodes = (node: any, parentName = ''): any[] => {
+      if (node.children) {
+        return node.children.flatMap((child: any) => 
+          extractLeafNodes(child, node.name ? `${parentName} > ${node.name}` : parentName)
+        )
+      } else {
+        return [{
+          name: node.name,
+          parent: parentName,
+          value: node.value,
+          percentage: analysis.totalValue > 0 ? ((node.value / analysis.totalValue) * 100).toFixed(1) + '%' : '0%'
+        }]
+      }
+    }
+
+    if (config.format === 'hierarchy' && Array.isArray(currentData)) {
+      return extractLeafNodes(currentData[0])
+    } else if (config.format === 'stratified') {
+      return (currentData as StratifiedDataItem[])
+        .filter(d => d.value && d.value > 0)
+        .map(d => ({
+          name: d.id.split('.').pop() || d.id,
+          parent: d.parent || 'root',
+          value: d.value,
+          percentage: analysis.totalValue > 0 ? ((d.value / analysis.totalValue) * 100).toFixed(1) + '%' : '0%'
+        }))
+    }
+    return []
+  }, [currentData, config.format, analysis.totalValue])
+
+  const tableColumns: DataTableColumn[] = [
+    { key: 'name', title: '節點名稱', sortable: true },
+    { key: 'parent', title: '父節點', sortable: true },
+    { 
+      key: 'value', 
+      title: '數值', 
+      sortable: true,
+      formatter: (value) => value.toLocaleString(),
+      align: 'right'
+    },
+    { 
+      key: 'percentage', 
+      title: '佔比', 
+      sortable: true,
+      align: 'right'
+    }
+  ]
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">TreeMap 階層樹狀圖示例</h1>
-        <p className="text-gray-600">
-          展示階層數據的比例關係，支援多種數據格式和視覺化選項
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="TreeMap Demo"
+      description="階層樹狀圖組件展示 - 支援多種數據格式、瓦片算法和視覺化選項"
+    >
       {/* 控制面板 */}
-      <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-        <h3 className="text-lg font-semibold">控制選項</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">數據集</label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value as any)}
-              className="w-full p-2 border border-gray-300 rounded"
-            >
-              <option value="company">公司組織架構</option>
-              <option value="market">市場佔有率</option>
-              <option value="stratified">平面化數據</option>
-            </select>
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="數據集"
+                value={selectedDataset}
+                onChange={(value) => setSelectedDataset(value as any)}
+                options={datasetOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                description={datasetOptions.find(d => d.value === selectedDataset)?.description}
+              />
+              
+              <SelectControl
+                label="顏色策略"
+                value={colorStrategy}
+                onChange={(value) => setColorStrategy(value as any)}
+                options={colorStrategyOptions}
+                description={colorStrategyOptions.find(c => c.value === colorStrategy)?.description}
+              />
+              
+              <SelectControl
+                label="瓦片算法"
+                value={tileAlgorithm}
+                onChange={(value) => setTileAlgorithm(value as any)}
+                options={tileAlgorithmOptions}
+                description={tileAlgorithmOptions.find(t => t.value === tileAlgorithm)?.description}
+              />
+            </ControlGroup>
+
+            {/* 圖表配置 */}
+            <ControlGroup title="圖表配置" icon="📊" cols={3}>
+              <RangeSlider
+                label="圖表寬度"
+                value={chartWidth}
+                min={400}
+                max={1200}
+                step={50}
+                onChange={setChartWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="圖表高度"
+                value={chartHeight}
+                min={300}
+                max={800}
+                step={25}
+                onChange={setChartHeight}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="內邊距"
+                value={padding}
+                min={0}
+                max={10}
+                step={1}
+                onChange={setPadding}
+                suffix="px"
+              />
+            </ControlGroup>
+
+            {/* 樣式配置 */}
+            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  邊框顏色
+                </label>
+                <input
+                  type="color"
+                  value={strokeColor}
+                  onChange={(e) => setStrokeColor(e.target.value)}
+                  className="w-full h-10 rounded border border-gray-300"
+                />
+              </div>
+              
+              <RangeSlider
+                label="邊框寬度"
+                value={strokeWidth}
+                min={0}
+                max={5}
+                step={0.5}
+                onChange={setStrokeWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="透明度"
+                value={opacity}
+                min={0.1}
+                max={1}
+                step={0.1}
+                onChange={setOpacity}
+                formatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
+            </ControlGroup>
+
+            {/* 標籤配置 */}
+            <ControlGroup title="標籤配置" icon="🏷️" cols={3}>
+              <RangeSlider
+                label="字體大小"
+                value={fontSize}
+                min={8}
+                max={20}
+                step={1}
+                onChange={setFontSize}
+                suffix="px"
+              />
+              
+              <SelectControl
+                label="標籤對齊"
+                value={labelAlignment}
+                onChange={(value) => setLabelAlignment(value as any)}
+                options={labelAlignmentOptions}
+              />
+              
+              <div className="flex flex-col gap-2">
+                <ToggleControl
+                  label="顯示標籤"
+                  checked={showLabels}
+                  onChange={setShowLabels}
+                />
+                <ToggleControl
+                  label="顯示數值"
+                  checked={showValues}
+                  onChange={setShowValues}
+                />
+              </div>
+            </ControlGroup>
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="工具提示"
+                checked={showTooltip}
+                onChange={setShowTooltip}
+                description="懸停時顯示詳細信息"
+              />
+              
+              <ToggleControl
+                label="動畫效果"
+                checked={animate}
+                onChange={setAnimate}
+                description="樹狀圖載入和變換動畫"
+              />
+              
+              <ToggleControl
+                label="互動功能"
+                checked={interactive}
+                onChange={setInteractive}
+                description="點擊和懸停交互"
+              />
+            </ControlGroup>
           </div>
+        </ModernControlPanel>
+      </ContentSection>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">顏色策略</label>
-            <select
-              value={selectedStrategy}
-              onChange={(e) => setSelectedStrategy(e.target.value as any)}
-              className="w-full p-2 border border-gray-300 rounded"
+      {/* 圖表展示 */}
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle={config.description}
+          actions={
+            <div className="flex items-center gap-2">
+              <Squares2X2Icon className="w-5 h-5 text-indigo-500" />
+              <span className="text-sm text-gray-600">樹狀圖</span>
+            </div>
+          }
+        >
+          <div className="flex justify-center overflow-x-auto">
+            <motion.div
+              key={`${selectedDataset}-${tileAlgorithm}-${colorStrategy}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
             >
-              <option value="depth">按層級深度</option>
-              <option value="parent">按父節點</option>
-              <option value="value">按數值大小</option>
-              <option value="custom">按索引（預設）</option>
-            </select>
+              <TreeMap
+                data={currentData}
+                dataFormat={config.format}
+                width={chartWidth}
+                height={chartHeight}
+                colorStrategy={colorStrategy}
+                tile={tileAlgorithm}
+                showLabels={showLabels}
+                showValues={showValues}
+                labelAlignment={labelAlignment}
+                fontSize={fontSize}
+                padding={padding}
+                strokeColor={strokeColor}
+                strokeWidth={strokeWidth}
+                opacity={opacity}
+                showTooltip={showTooltip}
+                animate={animate}
+                interactive={interactive}
+                onNodeClick={(node, event) => {
+                  if (interactive) {
+                    console.log('TreeMap 節點點擊:', node)
+                  }
+                }}
+                onNodeHover={(node, event) => {
+                  if (interactive) {
+                    console.log('TreeMap 節點懸停:', node)
+                  }
+                }}
+              />
+            </motion.div>
           </div>
+          
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">瓦片算法</label>
-            <select
-              value={selectedTile}
-              onChange={(e) => setSelectedTile(e.target.value as any)}
-              className="w-full p-2 border border-gray-300 rounded"
+      {/* 統計分析 */}
+      <ContentSection delay={0.2}>
+        <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">層級結構分析</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 數據統計 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
             >
-              <option value="squarify">Squarify（預設）</option>
-              <option value="binary">Binary</option>
-              <option value="dice">Dice</option>
-              <option value="slice">Slice</option>
-            </select>
+              <h4 className="font-semibold text-gray-900 mb-3">數據統計</h4>
+              <div className="space-y-2 text-sm">
+                <div>葉節點: <span className="font-medium text-indigo-600">{analysis.leafNodes}</span></div>
+                <div>最大層級: <span className="font-medium text-blue-600">{analysis.maxDepth}</span></div>
+                <div>總數值: <span className="font-medium">{analysis.totalValue.toLocaleString()}</span></div>
+              </div>
+            </motion.div>
+
+            {/* 算法信息 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">算法配置</h4>
+              <div className="space-y-2 text-sm">
+                <div>瓦片算法: <span className="font-medium">{analysis.algorithm.label}</span></div>
+                <div>顏色策略: <span className="font-medium">{analysis.colorStrategy.label}</span></div>
+                <div>數據格式: <span className="font-medium">{config.format === 'hierarchy' ? '階層' : '平面化'}</span></div>
+              </div>
+            </motion.div>
+
+            {/* 視覺配置 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">視覺設定</h4>
+              <div className="space-y-2 text-sm">
+                <div>尺寸: <span className="font-medium">{chartWidth} × {chartHeight}</span></div>
+                <div>字體: <span className="font-medium">{fontSize}px</span></div>
+                <div>透明度: <span className="font-medium">{(opacity * 100).toFixed(0)}%</span></div>
+              </div>
+            </motion.div>
+
+            {/* 功能狀態 */}
+            <motion.div 
+              className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h4 className="font-semibold text-gray-900 mb-3">功能狀態</h4>
+              <div className="space-y-2 text-sm">
+                <div>標籤: <span className={`font-medium ${showLabels ? 'text-green-600' : 'text-gray-500'}`}>{showLabels ? '開啟' : '關閉'}</span></div>
+                <div>數值: <span className={`font-medium ${showValues ? 'text-green-600' : 'text-gray-500'}`}>{showValues ? '開啟' : '關閉'}</span></div>
+                <div>交互: <span className={`font-medium ${interactive ? 'text-green-600' : 'text-gray-500'}`}>{interactive ? '開啟' : '關閉'}</span></div>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </ContentSection>
 
-      {/* TreeMap 圖表 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4">
-          {selectedDataset === 'company' && '公司組織架構 TreeMap'}
-          {selectedDataset === 'market' && '智慧手機市場佔有率 TreeMap'}
-          {selectedDataset === 'stratified' && '平面化數據 TreeMap'}
-        </h3>
-        
-        <div className="overflow-x-auto">
-          <TreeMap
-          data={data}
-          dataFormat={format}
-          width={800}
-          height={500}
-          colorStrategy={selectedStrategy}
-          tile={selectedTile}
-          showLabels={true}
-          showValues={true}
-          labelAlignment="center"
-          fontSize={12}
-          padding={2}
-          strokeColor="#ffffff"
-          strokeWidth={1}
-          opacity={0.8}
-          showTooltip={true}
-          animate={true}
-          interactive={true}
-          onNodeClick={(node, event) => {
-            console.log('Clicked node:', node);
-          }}
-          onNodeHover={(node, event) => {
-            console.log('Hovered node:', node);
-          }}
-          />
+      {/* 數據詳情 */}
+      <ContentSection delay={0.3}>
+        <DataTable
+          title="節點數據詳情"
+          data={tableData.slice(0, 12)}
+          columns={tableColumns}
+          maxRows={12}
+          showIndex
+        />
+      </ContentSection>
+
+      {/* 比較展示 */}
+      <ContentSection delay={0.4}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ChartContainer
+            title="不同算法比較"
+            subtitle="Squarify vs Binary 算法效果"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-2">Squarify 算法</h5>
+                <TreeMap
+                  data={[companyData]}
+                  width={180}
+                  height={120}
+                  tile="squarify"
+                  colorStrategy="depth"
+                  showLabels={false}
+                  showValues={false}
+                  fontSize={8}
+                />
+              </div>
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-2">Binary 算法</h5>
+                <TreeMap
+                  data={[companyData]}
+                  width={180}
+                  height={120}
+                  tile="binary"
+                  colorStrategy="depth"
+                  showLabels={false}
+                  showValues={false}
+                  fontSize={8}
+                />
+              </div>
+            </div>
+          </ChartContainer>
+
+          <ChartContainer
+            title="顏色策略比較"
+            subtitle="按深度 vs 按數值的顏色映射"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-2">按層級深度</h5>
+                <TreeMap
+                  data={[marketShareData]}
+                  width={180}
+                  height={120}
+                  colorStrategy="depth"
+                  showLabels={false}
+                  showValues={true}
+                  fontSize={8}
+                />
+              </div>
+              <div>
+                <h5 className="text-sm font-medium text-gray-700 mb-2">按數值大小</h5>
+                <TreeMap
+                  data={[marketShareData]}
+                  width={180}
+                  height={120}
+                  colorStrategy="value"
+                  showLabels={false}
+                  showValues={true}
+                  fontSize={8}
+                />
+              </div>
+            </div>
+          </ChartContainer>
         </div>
-      </div>
+      </ContentSection>
 
-      {/* 功能展示 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4">基本 TreeMap</h3>
-          <TreeMap
-            data={[hierarchyData]}
-            width={350}
-            height={250}
-            showLabels={true}
-            showValues={false}
-            colorStrategy="depth"
-            tile="squarify"
-          />
+      {/* 代碼範例 */}
+      <ContentSection delay={0.5}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { TreeMap } from '@registry/components/statistical/tree-map'
+
+const data = [{
+  name: "公司",
+  children: [
+    {
+      name: "技術部", 
+      children: [
+        { name: "前端開發", value: 50 },
+        { name: "後端開發", value: 80 }
+      ]
+    }
+    // ... more data
+  ]
+}]
+
+<TreeMap
+  data={data}
+  dataFormat="${config.format}"
+  width={${chartWidth}}
+  height={${chartHeight}}
+  colorStrategy="${colorStrategy}"
+  tile="${tileAlgorithm}"
+  showLabels={${showLabels}}
+  showValues={${showValues}}
+  labelAlignment="${labelAlignment}"
+  fontSize={${fontSize}}
+  padding={${padding}}
+  strokeColor="${strokeColor}"
+  strokeWidth={${strokeWidth}}
+  opacity={${opacity}}
+  animate={${animate}}
+  interactive={${interactive}}
+  onNodeClick={(node) => console.log('點擊節點:', node)}
+/>`}
+        />
+      </ContentSection>
+
+      {/* 功能說明 */}
+      <ContentSection delay={0.6}>
+        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">TreeMap 功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">數據支援</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  階層式數據結構
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  平面化 Stratified 格式
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  自動數據驗證
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  動態數據更新
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">算法特性</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  四種瓦片分割算法
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  智能顏色映射策略
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  最佳長寬比優化
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  高效能空間劃分
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  組織架構分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  市場份額展示
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-lime-500 rounded-full" />
+                  資產配置視覺化
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-rose-500 rounded-full" />
+                  文件系統結構
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
-
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <h3 className="text-lg font-semibold mb-4">數值顏色映射</h3>
-          <TreeMap
-            data={[marketShareData]}
-            width={350}
-            height={250}
-            showLabels={true}
-            showValues={true}
-            colorStrategy="value"
-            tile="binary"
-            labelAlignment="top-left"
-            fontSize={10}
-          />
-        </div>
-      </div>
-
-      {/* 說明文字 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-blue-800 mb-2">TreeMap 特點</h3>
-        <ul className="text-blue-700 space-y-1 text-sm">
-          <li>• 支援階層和平面化兩種數據格式</li>
-          <li>• 提供多種瓦片分割算法（Squarify、Binary、Dice、Slice等）</li>
-          <li>• 彈性的顏色映射策略（按層級、父節點、數值）</li>
-          <li>• 智能標籤顯示和位置調整</li>
-          <li>• 工具提示和鼠標交互支援</li>
-          <li>• 平滑的動畫過渡效果</li>
-          <li>• 完全響應式設計</li>
-        </ul>
-      </div>
-    </div>
-  );
+      </ContentSection>
+    </DemoPageTemplate>
+  )
 }
