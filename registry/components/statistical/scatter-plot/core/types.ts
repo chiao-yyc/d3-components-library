@@ -3,7 +3,7 @@ import { BaseChartProps } from '../../../core/base-chart/base-chart';
 import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/interaction-utils';
 
-export type { Margin, DataMapping } from '../../../core/base-chart/types';
+import type { Margin, DataMapping } from '../../../core/base-chart/types';
 
 export interface ProcessedScatterDataPoint extends CoreProcessedDataPoint {
   size?: number;
@@ -13,15 +13,29 @@ export interface ProcessedScatterDataPoint extends CoreProcessedDataPoint {
 
 export interface ScatterPlotProps extends BaseChartProps {
   // ScatterPlot 特有的屬性
-  xKey?: string;
-  yKey?: string;
-  sizeKey?: string;
-  colorKey?: string;
-  xAccessor?: (d: any) => number;
-  yAccessor?: (d: any) => number;
-  sizeAccessor?: (d: any) => number;
-  colorAccessor?: (d: any) => string;
+  
+  // 數據映射配置 (推薦)
   mapping?: DataMapping;
+  
+  // 向下兼容的廢棄屬性 - Key-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xKey?: string;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yKey?: string;
+  /** @deprecated 請使用 mapping.size 替代。將在 v1.0.0 版本中移除。 */
+  sizeKey?: string;
+  /** @deprecated 請使用 mapping.color 替代。將在 v1.0.0 版本中移除。 */
+  colorKey?: string;
+  
+  // 向下兼容的廢棄屬性 - Accessor-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xAccessor?: (d: any) => number;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yAccessor?: (d: any) => number;
+  /** @deprecated 請使用 mapping.size 替代。將在 v1.0.0 版本中移除。 */
+  sizeAccessor?: (d: any) => number;
+  /** @deprecated 請使用 mapping.color 替代。將在 v1.0.0 版本中移除。 */
+  colorAccessor?: (d: any) => string;
 
   // Scatter 特定樣式
   radius?: number;

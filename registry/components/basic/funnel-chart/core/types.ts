@@ -89,7 +89,13 @@ export interface FunnelChartConfig {
   showTooltip?: boolean;
   tooltipFormat?: (data: ProcessedFunnelDataPoint) => string;
 
-  // Events
+  // Events - 標準事件命名
+  onDataClick?: (data: ProcessedFunnelDataPoint) => void;
+  onDataHover?: (data: ProcessedFunnelDataPoint | null) => void;
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onSegmentClick?: (data: ProcessedFunnelDataPoint) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onSegmentHover?: (data: ProcessedFunnelDataPoint | null) => void;
 }

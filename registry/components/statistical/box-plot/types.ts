@@ -40,16 +40,28 @@ export interface BoxPlotBox {
 export interface BoxPlotProps extends BaseChartProps {
   // 資料相關
   data: BoxPlotDataPoint[]
-  labelKey?: string
-  valueKey?: string
-  valuesKey?: string // 用於已聚合的資料
-  categoryKey?: string // 替代 labelKey 的新字段，與其他組件保持一致
-  labelAccessor?: (d: BoxPlotDataPoint) => string
-  valueAccessor?: (d: BoxPlotDataPoint) => number[]
+  
+  // 數據映射配置 (推薦)
   mapping?: {
     label: string | ((d: BoxPlotDataPoint) => string)
     values: string | ((d: BoxPlotDataPoint) => number[])
   }
+  
+  // 向下兼容的廢棄屬性 - Key-based 模式
+  /** @deprecated 請使用 mapping.label 替代。將在 v1.0.0 版本中移除。 */
+  labelKey?: string
+  /** @deprecated 請使用 mapping.values 替代。將在 v1.0.0 版本中移除。 */
+  valueKey?: string
+  /** @deprecated 請使用 mapping.values 替代。將在 v1.0.0 版本中移除。 */
+  valuesKey?: string // 用於已聚合的資料
+  /** @deprecated 請使用 mapping.label 替代。將在 v1.0.0 版本中移除。 */
+  categoryKey?: string // 替代 labelKey 的新字段，與其他組件保持一致
+  
+  // 向下兼容的廢棄屬性 - Accessor-based 模式
+  /** @deprecated 請使用 mapping.label 替代。將在 v1.0.0 版本中移除。 */
+  labelAccessor?: (d: BoxPlotDataPoint) => string
+  /** @deprecated 請使用 mapping.values 替代。將在 v1.0.0 版本中移除。 */
+  valueAccessor?: (d: BoxPlotDataPoint) => number[]
   
   // 箱形圖樣式
   orientation?: 'vertical' | 'horizontal'
@@ -87,9 +99,15 @@ export interface BoxPlotProps extends BaseChartProps {
   animationDelay?: number
   animationEasing?: string
   
-  // 互動
+  // 互動 - 標準事件命名
   tooltipFormat?: (data: ProcessedBoxPlotDataPoint) => ReactNode
+  onDataClick?: (data: ProcessedBoxPlotDataPoint) => void
+  onDataHover?: (data: ProcessedBoxPlotDataPoint | null) => void
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
   onBoxClick?: (data: ProcessedBoxPlotDataPoint) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBoxHover?: (data: ProcessedBoxPlotDataPoint | null) => void
   
   // 新增功能 - 顯示所有數值散點

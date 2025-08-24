@@ -3,7 +3,7 @@ import { BaseChartProps } from '../../../core/base-chart/base-chart';
 import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/interaction-utils';
 
-export type { Margin, DataMapping } from '../../../core/base-chart/types';
+import type { Margin, DataMapping } from '../../../core/base-chart/types';
 
 export interface ProcessedAreaDataPoint extends CoreProcessedDataPoint {
   category?: string;
@@ -19,13 +19,25 @@ export interface AreaSeriesData {
 
 export interface AreaChartProps extends BaseChartProps {
   // AreaChart 特有的屬性
-  xKey?: string;
-  yKey?: string;
-  categoryKey?: string;
-  xAccessor?: (d: any) => Date | number | string;
-  yAccessor?: (d: any) => number;
-  categoryAccessor?: (d: any) => string;
+  
+  // 數據映射配置 (推薦)
   mapping?: DataMapping;
+  
+  // 向下兼容的廢棄屬性 - Key-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xKey?: string;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yKey?: string;
+  /** @deprecated 請使用 mapping.category 替代。將在 v1.0.0 版本中移除。 */
+  categoryKey?: string;
+  
+  // 向下兼容的廢棄屬性 - Accessor-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xAccessor?: (d: any) => Date | number | string;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yAccessor?: (d: any) => number;
+  /** @deprecated 請使用 mapping.category 替代。將在 v1.0.0 版本中移除。 */
+  categoryAccessor?: (d: any) => string;
   
   // Area 特定樣式
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';

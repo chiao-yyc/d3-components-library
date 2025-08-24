@@ -3,17 +3,13 @@
  * 完全框架無關，可用於 React、Vue、Angular 等任何框架
  */
 
-import { 
-  select,
-  Selection
-} from '../../d3-utils';
-import { 
+import * as d3 from 'd3';
+import type { 
   ChartData, 
   BaseChartData,
   BaseChartCoreConfig,
   ChartStateCallbacks,
-  ChartDimensions,
-  D3Selection
+  ChartDimensions
 } from '../../types';
 
 /**
@@ -82,7 +78,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
    */
   public destroy(): void {
     if (this.svgElement) {
-      select(this.svgElement).selectAll('*').remove();
+      d3.select(this.svgElement).selectAll('*').remove();
     }
     this.containerElement = null;
     this.svgElement = null;
@@ -141,12 +137,12 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     };
   }
 
-  protected createSVGContainer(): D3Selection<SVGGElement> {
+  protected createSVGContainer(): d3.Selection<SVGGElement, unknown, null, undefined> {
     if (!this.svgElement) {
       throw new Error('SVG element not initialized');
     }
 
-    const svg = select(this.svgElement);
+    const svg = d3.select(this.svgElement);
     const { margin } = this.getChartDimensions();
 
     // 清除現有內容
