@@ -153,11 +153,14 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
   }
 
   protected createScales(): void {
-    // 創建顏色比例尺
+    // 創建顏色比例尺 - 使用 d3.schemeCategory10 作為默認顏色
     this.colorScale = createColorScale({
       type: 'custom',
-      colors: this.props.colors || ['#69b3a2', '#ff7f7f', '#87ceeb', '#ffd700', '#dda0dd'],
-      domain: [0, 4], // Default domain
+      colors: this.props.colors || [
+        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+      ], // d3.schemeCategory10
+      domain: [0, 9], // Updated domain for 10 colors
       interpolate: false
     });
     
@@ -169,11 +172,11 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
       const parents = [...new Set(this.nodes.map(d => d.parent?.data?.id || d.parent?.data?.name || 'root'))];
       // 更新 colorScale 的 domain，會在 getColor 時自動應用
     } else if (this.props.colorStrategy === 'value') {
-      // 對於數值映射，重新創建顏色比例尺
+      // 對於數值映射，重新創建顏色比例尺 - 使用更好閱讀性的顏色
       const valueExtent = d3.extent(this.nodes, (d: TreeMapNode) => d.value || 0) as [number, number];
       this.colorScale = createColorScale({
         type: 'custom',
-        colors: ['#f7fbff', '#08519c'],
+        colors: ['#fee5d9', '#fb6a4a', '#de2d26', '#a50f15'], // 暖色調漸變，更好的對比度
         domain: valueExtent,
         interpolate: true
       });
@@ -229,6 +232,11 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
 
   private renderRectangles(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
     // 使用 this.colorScale.getColor() 遵循 BarChart 的模式
+    // 創建索引映射
+    const nodeIndexMap = new Map();
+    this.nodes.forEach((node, index) => {
+      nodeIndexMap.set(node, index);
+    });
     
     const fillFunction = (d: TreeMapNode): string => {
       if (this.props.customColorMapper) {
@@ -252,7 +260,9 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
           return this.colorScale.getColor(d.value || 0);
         case 'custom':
         default:
-          return this.colorScale.getColor(0);
+          // 使用索引來分配不同顏色，如同 BarChart 模式
+          const index = nodeIndexMap.get(d) || 0;
+          return this.colorScale.getColor(index);
       }
     };
 

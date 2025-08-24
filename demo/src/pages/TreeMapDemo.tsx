@@ -120,7 +120,7 @@ const marketShareData: HierarchyDataItem = {
 
 export default function TreeMapDemo() {
   const [selectedDataset, setSelectedDataset] = useState<'company' | 'market' | 'stratified'>('company');
-  const [selectedStrategy, setSelectedStrategy] = useState<'depth' | 'parent' | 'value'>('depth');
+  const [selectedStrategy, setSelectedStrategy] = useState<'depth' | 'parent' | 'value' | 'custom'>('custom');
   const [selectedTile, setSelectedTile] = useState<'squarify' | 'binary' | 'dice' | 'slice'>('squarify');
   
   const getCurrentData = () => {
@@ -174,6 +174,7 @@ export default function TreeMapDemo() {
               <option value="depth">按層級深度</option>
               <option value="parent">按父節點</option>
               <option value="value">按數值大小</option>
+              <option value="custom">按索引（預設）</option>
             </select>
           </div>
 
