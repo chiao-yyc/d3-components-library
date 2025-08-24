@@ -1,12 +1,63 @@
 /**
  * 統一的 D3 組件 UI 入口
- * 集中管理所有 Registry 組件的 Demo 引用
+ * 集中管理所有 Registry 組件的 Demo 引用 + 現代化 UI 組件
  * 
  * 設計原則：
  * - 保持與 Registry 組件的即時同步
  * - 統一的類型定義和介面
  * - 支援 Tree-shaking 優化
+ * - 現代化設計系統組件
  */
+
+// === 現代化 UI 組件 ===
+// 核心模板和容器
+export { DemoPageTemplate, ContentSection, GridContainer } from './DemoPageTemplate'
+export { ChartContainer, StatusDisplay } from './ChartContainer'
+
+// 控制面板組件
+export { 
+  ModernControlPanel,
+  ControlGroup,
+  ControlItem,
+  RangeSlider,
+  SelectControl,
+  ToggleControl
+} from './ModernControlPanel'
+
+// 數據展示組件
+export { DataTable } from './DataTable'
+export { CodeExample, CodeExamples } from './CodeExample'
+
+// 類型導出
+export type { 
+  DemoPageTemplateProps,
+  ContentSectionProps,
+  GridContainerProps 
+} from './DemoPageTemplate'
+
+export type {
+  ChartContainerProps,
+  StatusDisplayProps
+} from './ChartContainer'
+
+export type {
+  ModernControlPanelProps,
+  ControlGroupProps,
+  ControlItemProps,
+  RangeSliderProps,
+  SelectControlProps,
+  ToggleControlProps
+} from './ModernControlPanel'
+
+export type {
+  DataTableColumn,
+  DataTableProps
+} from './DataTable'
+
+export type {
+  CodeExampleProps,
+  CodeExamplesProps
+} from './CodeExample'
 
 // === 基礎圖表組件 ===
 export { BarChart, type BarChartProps } from './bar-chart'

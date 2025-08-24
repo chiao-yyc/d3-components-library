@@ -1,5 +1,26 @@
+/**
+ * PieChartDemo - 現代化圓餅圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
+
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { PieChart } from '../components/ui'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartPieIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 // 範例資料
 const sampleData = [
@@ -29,23 +50,33 @@ const expenseData = [
 ]
 
 export default function PieChartDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('sales')
+  const [chartWidth, setChartWidth] = useState(600)
+  const [chartHeight, setChartHeight] = useState(400)
+  
+  // 半徑設定
   const [innerRadius, setInnerRadius] = useState(0)
-  const [outerRadius, setOuterRadius] = useState(120)  // 新增：外半徑控制
-  const [cornerRadius, setCornerRadius] = useState(0)  // 新增：圓角控制
-  const [padAngle, setPadAngle] = useState(0)          // 新增：扇形間距控制
+  const [outerRadius, setOuterRadius] = useState(120)
+  const [cornerRadius, setCornerRadius] = useState(0)
+  const [padAngle, setPadAngle] = useState(0)
+  
+  // 顏色和主題
+  const [colorScheme, setColorScheme] = useState<'custom' | 'category10' | 'set3' | 'pastel' | 'dark'>('custom')
+  
+  // 標籤和圖例
   const [showLabels, setShowLabels] = useState(true)
   const [showLegend, setShowLegend] = useState(true)
   const [legendPosition, setLegendPosition] = useState<'top' | 'bottom' | 'left' | 'right'>('right')
-  const [colorScheme, setColorScheme] = useState<'custom' | 'category10' | 'set3' | 'pastel' | 'dark'>('custom')
-  const [animate, setAnimate] = useState(true)
-  const [interactive, setInteractive] = useState(true)
   const [showPercentages, setShowPercentages] = useState(true)
   const [labelThreshold, setLabelThreshold] = useState(5)
   const [showCenterText, setShowCenterText] = useState(true)
+  
+  // 動畫和交互
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
+  const [animationType, setAnimationType] = useState<'fade' | 'scale' | 'rotate' | 'sweep'>('sweep')
   const [hoverEffect, setHoverEffect] = useState<'lift' | 'scale' | 'glow' | 'none'>('lift')
-  const [animationType, setAnimationType] = useState<'fade' | 'scale' | 'rotate' | 'sweep'>('sweep')  // 新增：動畫類型
 
   // 當前資料
   const currentData = useMemo(() => {
@@ -75,362 +106,351 @@ export default function PieChartDemo() {
     }
   }, [selectedDataset])
 
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: selectedDataset === 'sales' ? '產品銷售額' : selectedDataset === 'market' ? '市場佔有率' : '支出分析' },
+    { label: '數據項目', value: currentData.length },
+    { label: '圖表類型', value: innerRadius > 0 ? '甜甜圈圖' : '圓餅圖' },
+    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const getTableColumns = (): DataTableColumn[] => {
+    const columns: DataTableColumn[] = []
+    
+    if (currentData.length > 0) {
+      Object.keys(currentData[0]).forEach(key => {
+        const isNumeric = typeof currentData[0][key as keyof typeof currentData[0]] === 'number'
+        columns.push({
+          key,
+          title: key,
+          sortable: true,
+          formatter: isNumeric ? (value) => value.toLocaleString() : undefined,
+          align: isNumeric ? 'right' : 'left'
+        })
+      })
+    }
+    
+    return columns
+  }
+
+  // 計算總計
+  const getDatasetTotal = () => {
+    const valueKey = mapping.value
+    return currentData.reduce((sum, item) => sum + (item[valueKey as keyof typeof item] as number), 0)
+  }
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Pie Chart Demo
-        </h1>
-        <p className="text-gray-600">
-          圓餅圖組件展示 - 支援甜甜圈模式、動畫和互動功能
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="PieChart Demo"
+      description="現代化圓餅圖組件展示 - 支援甜甜圈模式、豐富的動畫效果和互動功能"
+    >
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="sales">產品銷售額</option>
-              <option value="market">市場佔有率</option>
-              <option value="expense">支出分析</option>
-            </select>
-          </div>
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="數據集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'sales', label: '產品銷售額' },
+                  { value: 'market', label: '市場佔有率' },
+                  { value: 'expense', label: '支出分析' }
+                ]}
+              />
+              
+              <SelectControl
+                label="顏色主題"
+                value={colorScheme}
+                onChange={setColorScheme}
+                options={[
+                  { value: 'custom', label: '自訂' },
+                  { value: 'category10', label: 'Category10' },
+                  { value: 'set3', label: 'Set3' },
+                  { value: 'pastel', label: 'Pastel' },
+                  { value: 'dark', label: 'Dark' }
+                ]}
+              />
+            </ControlGroup>
 
-          {/* 內半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              內半徑 ({innerRadius})
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={innerRadius}
-              onChange={(e) => setInnerRadius(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              0 = 圓餅圖, &gt;0 = 甜甜圈圖
-            </div>
-          </div>
+            {/* 尺寸設定 */}
+            <ControlGroup title="尺寸配置" icon="📏" cols={2}>
+              <RangeSlider
+                label="圖表寬度"
+                value={chartWidth}
+                min={400}
+                max={800}
+                step={50}
+                onChange={setChartWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="圖表高度"
+                value={chartHeight}
+                min={300}
+                max={600}
+                step={25}
+                onChange={setChartHeight}
+                suffix="px"
+              />
+            </ControlGroup>
 
-          {/* 外半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              外半徑 ({outerRadius})
-            </label>
-            <input
-              type="range"
-              min="80"
-              max="200"
-              value={outerRadius}
-              onChange={(e) => setOuterRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
+            {/* 半徑配置 */}
+            <ControlGroup title="半徑配置" icon="⚪" cols={4}>
+              <RangeSlider
+                label="內半徑"
+                value={innerRadius}
+                min={0}
+                max={100}
+                step={5}
+                onChange={setInnerRadius}
+                description="0 = 圓餅圖, >0 = 甜甜圈圖"
+              />
+              
+              <RangeSlider
+                label="外半徑"
+                value={outerRadius}
+                min={80}
+                max={200}
+                step={10}
+                onChange={setOuterRadius}
+              />
+              
+              <RangeSlider
+                label="圓角半徑"
+                value={cornerRadius}
+                min={0}
+                max={10}
+                step={1}
+                onChange={setCornerRadius}
+              />
+              
+              <RangeSlider
+                label="扇形間距"
+                value={padAngle}
+                min={0}
+                max={0.1}
+                step={0.005}
+                onChange={setPadAngle}
+                formatter={(value) => value.toFixed(3)}
+              />
+            </ControlGroup>
 
-          {/* 圓角半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圓角半徑 ({cornerRadius})
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              value={cornerRadius}
-              onChange={(e) => setCornerRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 扇形間距 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              扇形間距 ({padAngle.toFixed(3)})
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="0.1"
-              step="0.005"
-              value={padAngle}
-              onChange={(e) => setPadAngle(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 顏色主題 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色主題
-            </label>
-            <select
-              value={colorScheme}
-              onChange={(e) => setColorScheme(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="custom">自訂</option>
-              <option value="category10">Category10</option>
-              <option value="set3">Set3</option>
-              <option value="pastel">Pastel</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-
-          {/* 圖例位置 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圖例位置
-            </label>
-            <select
-              value={legendPosition}
-              onChange={(e) => setLegendPosition(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="top">上方</option>
-              <option value="bottom">下方</option>
-              <option value="left">左側</option>
-              <option value="right">右側</option>
-            </select>
-          </div>
-
-          {/* 標籤閾值 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              標籤顯示閾值 ({labelThreshold}%)
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="20"
-              value={labelThreshold}
-              onChange={(e) => setLabelThreshold(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 懸停效果 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              懸停效果
-            </label>
-            <select
-              value={hoverEffect}
-              onChange={(e) => setHoverEffect(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="lift">上升</option>
-              <option value="scale">縮放</option>
-              <option value="glow">光暈</option>
-              <option value="none">無</option>
-            </select>
-          </div>
-
-          {/* 動畫類型 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              動畫類型
-            </label>
-            <select
-              value={animationType}
-              onChange={(e) => setAnimationType(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="fade">淡入</option>
-              <option value="scale">縮放</option>
-              <option value="rotate">旋轉</option>
-              <option value="sweep">掃描</option>
-            </select>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLabels"
+            {/* 標籤和圖例 */}
+            <ControlGroup title="標籤圖例" icon="📝" cols={3}>
+              <ToggleControl
+                label="顯示標籤"
                 checked={showLabels}
-                onChange={(e) => setShowLabels(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLabels}
+                description="在扇形上顯示數據標籤"
               />
-              <label htmlFor="showLabels" className="text-sm text-gray-700">
-                顯示標籤
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLegend"
+              
+              <ToggleControl
+                label="顯示圖例"
                 checked={showLegend}
-                onChange={(e) => setShowLegend(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLegend}
+                description="顯示圖表圖例"
               />
-              <label htmlFor="showLegend" className="text-sm text-gray-700">
-                顯示圖例
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showPercentages"
+              
+              <SelectControl
+                label="圖例位置"
+                value={legendPosition}
+                onChange={setLegendPosition}
+                options={[
+                  { value: 'top', label: '上方' },
+                  { value: 'bottom', label: '下方' },
+                  { value: 'left', label: '左側' },
+                  { value: 'right', label: '右側' }
+                ]}
+              />
+              
+              <ToggleControl
+                label="顯示百分比"
                 checked={showPercentages}
-                onChange={(e) => setShowPercentages(e.target.checked)}
-                className="mr-2"
+                onChange={setShowPercentages}
+                description="在標籤中顯示百分比"
               />
-              <label htmlFor="showPercentages" className="text-sm text-gray-700">
-                顯示百分比
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
-                checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+              
+              <RangeSlider
+                label="標籤顯示閾值"
+                value={labelThreshold}
+                min={0}
+                max={20}
+                step={1}
+                onChange={setLabelThreshold}
+                suffix="%"
+                description="小於此百分比的標籤不顯示"
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
-                checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
-              />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showCenterText"
+              
+              <ToggleControl
+                label="中心文字"
                 checked={showCenterText}
-                onChange={(e) => setShowCenterText(e.target.checked)}
-                className="mr-2"
+                onChange={setShowCenterText}
+                description="甜甜圈圖中心顯示文字"
               />
-              <label htmlFor="showCenterText" className="text-sm text-gray-700">
-                顯示中心文字 (甜甜圈)
-              </label>
-            </div>
+            </ControlGroup>
+
+            {/* 動畫和交互 */}
+            <ControlGroup title="動畫交互" icon="🎬" cols={2}>
+              <ToggleControl
+                label="動畫效果"
+                checked={animate}
+                onChange={setAnimate}
+                description="圖表進入和更新動畫"
+              />
+              
+              <SelectControl
+                label="動畫類型"
+                value={animationType}
+                onChange={setAnimationType}
+                options={[
+                  { value: 'fade', label: '淡入' },
+                  { value: 'scale', label: '縮放' },
+                  { value: 'rotate', label: '旋轉' },
+                  { value: 'sweep', label: '掃描' }
+                ]}
+              />
+              
+              <ToggleControl
+                label="互動功能"
+                checked={interactive}
+                onChange={setInteractive}
+                description="鼠標懸停和點擊交互"
+              />
+              
+              <SelectControl
+                label="懸停效果"
+                value={hoverEffect}
+                onChange={setHoverEffect}
+                options={[
+                  { value: 'lift', label: '上升' },
+                  { value: 'scale', label: '縮放' },
+                  { value: 'glow', label: '光暈' },
+                  { value: 'none', label: '無' }
+                ]}
+              />
+            </ControlGroup>
           </div>
-        </div>
-      </div>
+        </ModernControlPanel>
+      </ContentSection>
 
       {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表預覽
-        </h2>
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle="即時預覽配置效果"
+          actions={
+            <div className="flex items-center gap-2">
+              <ChartPieIcon className="w-5 h-5 text-purple-500" />
+              <span className="text-sm text-gray-600">{innerRadius > 0 ? '甜甜圈圖' : '圓餅圖'}</span>
+            </div>
+          }
+        >
+          <div className="flex justify-center">
+            <motion.div
+              key={`${chartWidth}-${chartHeight}-${selectedDataset}-${innerRadius}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <PieChart
+                data={currentData}
+                mapping={mapping}
+                width={chartWidth}
+                height={chartHeight}
+                innerRadius={innerRadius}
+                outerRadius={outerRadius}
+                cornerRadius={cornerRadius}
+                padAngle={padAngle}
+                colorScheme={colorScheme}
+                showLabels={showLabels}
+                showLegend={showLegend}
+                legendPosition={legendPosition}
+                showPercentages={showPercentages}
+                labelThreshold={labelThreshold}
+                animate={animate}
+                animationType={animationType}
+                interactive={interactive}
+                showCenterText={showCenterText}
+                hoverEffect={hoverEffect}
+                onSliceClick={(data) => {
+                  console.log('Pie slice clicked:', data)
+                }}
+                onSliceHover={(data) => {
+                  console.log('Pie slice hovered:', data)
+                }}
+              />
+            </motion.div>
+          </div>
+          
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
+
+      {/* 數據詳情 */}
+      <ContentSection delay={0.2}>
+        <DataTable
+          title="數據詳情"
+          data={currentData}
+          columns={getTableColumns()}
+          maxRows={8}
+          showIndex
+        />
         
-        <div className="flex justify-center">
-          <PieChart
-            data={currentData}
-            mapping={mapping}
-            width={600}
-            height={400}
-            innerRadius={innerRadius}
-            outerRadius={outerRadius}
-            cornerRadius={cornerRadius}
-            padAngle={padAngle}
-            colorScheme={colorScheme}
-            showLabels={showLabels}
-            showLegend={showLegend}
-            legendPosition={legendPosition}
-            showPercentages={showPercentages}
-            labelThreshold={labelThreshold}
-            animate={animate}
-            animationType={animationType}
-            interactive={interactive}
-            showCenterText={showCenterText}
-            hoverEffect={hoverEffect}
-            onSliceClick={(data) => {
-              console.log('Pie slice clicked:', data)
-              alert(`點擊了: ${data.label} (${data.value})`)
-            }}
-            onSliceHover={(data) => {
-              console.log('Pie slice hovered:', data)
-            }}
-          />
+        {/* 數據統計摘要 */}
+        <div className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+          <h4 className="font-semibold text-purple-800 mb-3">數據摘要</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="text-center">
+              <div className="text-lg font-bold text-purple-600">{currentData.length}</div>
+              <div className="text-purple-700">項目數量</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-pink-600">{getDatasetTotal().toLocaleString()}</div>
+              <div className="text-pink-700">數據總計</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-indigo-600">{(getDatasetTotal() / currentData.length).toFixed(0)}</div>
+              <div className="text-indigo-700">平均值</div>
+            </div>
+            <div className="text-center">
+              <div className="text-lg font-bold text-teal-600">{Math.max(...currentData.map(item => item[mapping.value as keyof typeof item] as number)).toLocaleString()}</div>
+              <div className="text-teal-700">最大值</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </ContentSection>
 
-      {/* 資料表格 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          當前資料
-        </h2>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                {Object.keys(currentData[0] || {}).map(key => (
-                  <th key={key} className="px-4 py-2 text-left font-medium text-gray-700">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.map((row, index) => (
-                <tr key={index} className="border-t border-gray-200">
-                  {Object.values(row).map((value, i) => (
-                    <td key={i} className="px-4 py-2 text-gray-900">
-                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { PieChart } from '../components/ui'
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { PieChart } from '../components/ui'
-
+// ${selectedDataset === 'sales' ? '產品銷售額' : selectedDataset === 'market' ? '市場佔有率' : '支出分析'}數據
 const data = [
-  { category: '產品A', sales: 45000 },
-  { category: '產品B', sales: 32000 },
-  { category: '產品C', sales: 28000 }
+  { ${mapping.label}: '${currentData[0]?.[mapping.label as keyof typeof currentData[0]]}', ${mapping.value}: ${currentData[0]?.[mapping.value as keyof typeof currentData[0]]}${mapping.color ? `, ${mapping.color}: '${currentData[0]?.[mapping.color as keyof typeof currentData[0]]}'` : ''} },
+  { ${mapping.label}: '${currentData[1]?.[mapping.label as keyof typeof currentData[1]]}', ${mapping.value}: ${currentData[1]?.[mapping.value as keyof typeof currentData[1]]}${mapping.color ? `, ${mapping.color}: '${currentData[1]?.[mapping.color as keyof typeof currentData[1]]}'` : ''} },
+  // ... more data
 ]
 
 <PieChart
   data={data}
-  mapping={{ label: 'category', value: 'sales' }}
-  width={600}
-  height={400}
+  mapping={{
+    label: '${mapping.label}',
+    value: '${mapping.value}'${mapping.color ? `,\n    color: '${mapping.color}'` : ''}
+  }}
+  width={${chartWidth}}
+  height={${chartHeight}}
   innerRadius={${innerRadius}}
   outerRadius={${outerRadius}}
   cornerRadius={${cornerRadius}}
@@ -439,14 +459,74 @@ const data = [
   showLabels={${showLabels}}
   showLegend={${showLegend}}
   legendPosition="${legendPosition}"
-  animationType="${animationType}"
-  hoverEffect="${hoverEffect}"
+  showPercentages={${showPercentages}}
+  labelThreshold={${labelThreshold}}
   animate={${animate}}
+  animationType="${animationType}"
   interactive={${interactive}}
+  showCenterText={${showCenterText}}
+  hoverEffect="${hoverEffect}"
   onSliceClick={(data) => console.log('Clicked:', data)}
-/>`}</code>
-        </pre>
-      </div>
-    </div>
+  onSliceHover={(data) => console.log('Hovered:', data)}
+/>`}
+        />
+      </ContentSection>
+
+      {/* 功能說明 */}
+      <ContentSection delay={0.4}>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">PieChart 功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">核心功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  圓餅圖和甜甜圈圖模式切換
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  豐富的顏色主題和配色方案
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  靈活的半徑和間距配置
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  智能標籤顯示和閾值控制
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">交互特性</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  多種動畫類型：淡入、縮放、旋轉、掃描
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  懸停效果：上升、縮放、光暈
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  圓角和扇形間距自定義
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  中心文字和圖例位置配置
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

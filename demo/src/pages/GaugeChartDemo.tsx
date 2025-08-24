@@ -1,485 +1,523 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { GaugeChart } from '@registry/components/basic/gauge-chart/gauge-chart'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon } from '@heroicons/react/24/outline'
 
 // KPI 資料
 const kpiData = [
-  { metric: 'CPU 使用率', value: 78, unit: '%', min: 0, max: 100 },
-  { metric: '記憶體使用率', value: 65, unit: '%', min: 0, max: 100 },
-  { metric: '磁碟使用率', value: 42, unit: '%', min: 0, max: 100 },
-  { metric: '網路頻寬', value: 156, unit: 'Mbps', min: 0, max: 200 }
+  { metric: 'CPU 使用率', value: 78, unit: '%', min: 0, max: 100, status: 'warning' },
+  { metric: '記憶體使用率', value: 65, unit: '%', min: 0, max: 100, status: 'normal' },
+  { metric: '磁碟使用率', value: 42, unit: '%', min: 0, max: 100, status: 'good' },
+  { metric: '網路頻寬', value: 156, unit: 'Mbps', min: 0, max: 200, status: 'warning' }
 ]
 
 // 業績資料  
 const salesData = [
-  { quarter: 'Q1', target: 1000000, actual: 850000, unit: '元' },
-  { quarter: 'Q2', target: 1200000, actual: 1180000, unit: '元' },
-  { quarter: 'Q3', target: 1100000, actual: 920000, unit: '元' },
-  { quarter: 'Q4', target: 1500000, actual: 1320000, unit: '元' }
+  { quarter: 'Q1', target: 1000000, actual: 850000, unit: '元', achievement: 85 },
+  { quarter: 'Q2', target: 1200000, actual: 1180000, unit: '元', achievement: 98.3 },
+  { quarter: 'Q3', target: 1100000, actual: 920000, unit: '元', achievement: 83.6 },
+  { quarter: 'Q4', target: 1500000, actual: 1320000, unit: '元', achievement: 88 }
 ]
 
 // 溫度資料
 const temperatureData = [
-  { sensor: '室內溫度', value: 23.5, unit: '°C', min: -10, max: 50 },
-  { sensor: '室外溫度', value: 28.2, unit: '°C', min: -10, max: 50 },
-  { sensor: 'CPU 溫度', value: 65.8, unit: '°C', min: 0, max: 100 },
-  { sensor: '硬碟溫度', value: 42.1, unit: '°C', min: 0, max: 100 }
+  { sensor: '室內溫度', value: 23.5, unit: '°C', min: -10, max: 50, level: 'optimal' },
+  { sensor: '室外溫度', value: 28.2, unit: '°C', min: -10, max: 50, level: 'normal' },
+  { sensor: 'CPU 溫度', value: 65.8, unit: '°C', min: 0, max: 100, level: 'warm' },
+  { sensor: '硬碟溫度', value: 42.1, unit: '°C', min: 0, max: 100, level: 'normal' }
+]
+
+// 資料集選項
+const datasetOptions = [
+  { value: 'kpi', label: '系統監控 KPI', description: 'CPU、記憶體、磁碟等系統指標' },
+  { value: 'sales', label: '業績達成率', description: '季度目標達成情況' },
+  { value: 'temperature', label: '溫度監控', description: '各種感測器溫度數據' }
 ]
 
 export default function GaugeChartDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('kpi')
   const [selectedIndex, setSelectedIndex] = useState(0)
+  
+  // 儀表盤設定
   const [startAngle, setStartAngle] = useState(-90)
   const [endAngle, setEndAngle] = useState(90)
-  const [showValue, setShowValue] = useState(true)
-  const [showLabel, setShowLabel] = useState(true)
-  const [showTicks, setShowTicks] = useState(true)
-  const [showMinMax, setShowMinMax] = useState(true)
   const [tickCount, setTickCount] = useState(5)
-  const [animate, setAnimate] = useState(true)
-  const [interactive, setInteractive] = useState(true)
+  const [cornerRadius, setCornerRadius] = useState(0)
+  
+  // 顏色設定
   const [needleColor, setNeedleColor] = useState('#374151')
   const [backgroundColor, setBackgroundColor] = useState('#e5e7eb')
   const [foregroundColor, setForegroundColor] = useState('#3b82f6')
   const [useZones, setUseZones] = useState(false)
-  const [cornerRadius, setCornerRadius] = useState(0)
+  
+  // 顯示選項
+  const [showValue, setShowValue] = useState(true)
+  const [showLabel, setShowLabel] = useState(true)
+  const [showTicks, setShowTicks] = useState(true)
+  const [showMinMax, setShowMinMax] = useState(true)
+  
+  // 交互功能
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
 
   // 當前資料和配置
-  const { currentData, config } = useMemo(() => {
+  const { currentData, config, analysis } = useMemo(() => {
+    let data, configData, title, description
+    
     switch (selectedDataset) {
       case 'kpi':
         const kpi = kpiData[selectedIndex]
-        return {
-          currentData: [kpi],
-          config: {
-            mapping: { value: 'value', label: 'metric' },
-            min: kpi.min,
-            max: kpi.max,
-            valueFormat: (value: number) => `${value.toFixed(1)}${kpi.unit}`,
-            zones: useZones ? [
-              { min: kpi.min, max: kpi.max * 0.6, color: '#22c55e', label: '良好' },
-              { min: kpi.max * 0.6, max: kpi.max * 0.8, color: '#f59e0b', label: '警告' },
-              { min: kpi.max * 0.8, max: kpi.max, color: '#ef4444', label: '危險' }
-            ] : undefined
-          }
+        data = [kpi]
+        title = kpi.metric
+        description = `目前 ${kpi.metric} 為 ${kpi.value}${kpi.unit}`
+        configData = {
+          mapping: { value: 'value', label: 'metric' },
+          min: kpi.min,
+          max: kpi.max,
+          valueFormat: (value: number) => `${value.toFixed(1)}${kpi.unit}`,
+          zones: useZones ? [
+            { min: kpi.min, max: kpi.max * 0.6, color: '#22c55e', label: '良好' },
+            { min: kpi.max * 0.6, max: kpi.max * 0.8, color: '#f59e0b', label: '警告' },
+            { min: kpi.max * 0.8, max: kpi.max, color: '#ef4444', label: '危險' }
+          ] : undefined
         }
+        break
       
       case 'sales':
         const sales = salesData[selectedIndex]
         const percentage = (sales.actual / sales.target) * 100
-        return {
-          currentData: [{ ...sales, percentage }],
-          config: {
-            mapping: { value: 'percentage', label: 'quarter' },
-            min: 0,
-            max: 120,
-            valueFormat: (value: number) => `${value.toFixed(1)}%`,
-            zones: useZones ? [
-              { min: 0, max: 80, color: '#ef4444', label: '未達標' },
-              { min: 80, max: 100, color: '#f59e0b', label: '接近目標' },
-              { min: 100, max: 120, color: '#22c55e', label: '超標' }
-            ] : undefined
-          }
+        data = [{ ...sales, percentage }]
+        title = `${sales.quarter} 業績達成`
+        description = `目標 ${(sales.target / 10000).toFixed(0)}萬，實際 ${(sales.actual / 10000).toFixed(0)}萬`
+        configData = {
+          mapping: { value: 'percentage', label: 'quarter' },
+          min: 0,
+          max: 120,
+          valueFormat: (value: number) => `${value.toFixed(1)}%`,
+          zones: useZones ? [
+            { min: 0, max: 80, color: '#ef4444', label: '未達標' },
+            { min: 80, max: 100, color: '#f59e0b', label: '接近目標' },
+            { min: 100, max: 120, color: '#22c55e', label: '超標' }
+          ] : undefined
         }
+        break
       
       case 'temperature':
         const temp = temperatureData[selectedIndex]
-        return {
-          currentData: [temp],
-          config: {
-            mapping: { value: 'value', label: 'sensor' },
-            min: temp.min,
-            max: temp.max,
-            valueFormat: (value: number) => `${value.toFixed(1)}${temp.unit}`,
-            zones: useZones ? [
-              { min: temp.min, max: temp.min + (temp.max - temp.min) * 0.6, color: '#3b82f6', label: '正常' },
-              { min: temp.min + (temp.max - temp.min) * 0.6, max: temp.min + (temp.max - temp.min) * 0.8, color: '#f59e0b', label: '偏高' },
-              { min: temp.min + (temp.max - temp.min) * 0.8, max: temp.max, color: '#ef4444', label: '過熱' }
-            ] : undefined
-          }
+        data = [temp]
+        title = temp.sensor
+        description = `目前溫度 ${temp.value}${temp.unit}`
+        configData = {
+          mapping: { value: 'value', label: 'sensor' },
+          min: temp.min,
+          max: temp.max,
+          valueFormat: (value: number) => `${value.toFixed(1)}${temp.unit}`,
+          zones: useZones ? [
+            { min: temp.min, max: temp.min + (temp.max - temp.min) * 0.6, color: '#3b82f6', label: '正常' },
+            { min: temp.min + (temp.max - temp.min) * 0.6, max: temp.min + (temp.max - temp.min) * 0.8, color: '#f59e0b', label: '偏高' },
+            { min: temp.min + (temp.max - temp.min) * 0.8, max: temp.max, color: '#ef4444', label: '過熱' }
+          ] : undefined
         }
+        break
       
       default:
-        return {
-          currentData: [],
-          config: {}
-        }
+        return { currentData: [], config: {}, analysis: null }
+    }
+    
+    return {
+      currentData: data,
+      config: { ...configData, title, description },
+      analysis: {
+        dataset: datasetOptions.find(d => d.value === selectedDataset)!,
+        totalItems: selectedDataset === 'kpi' ? kpiData.length : 
+                   selectedDataset === 'sales' ? salesData.length : temperatureData.length,
+        currentIndex: selectedIndex + 1
+      }
     }
   }, [selectedDataset, selectedIndex, useZones])
 
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: analysis?.dataset.label || '' },
+    { label: '當前項目', value: `${analysis?.currentIndex}/${analysis?.totalItems}` },
+    { label: '角度範圍', value: `${startAngle}° ~ ${endAngle}°` },
+    { label: '區間顏色', value: useZones ? '開啟' : '關閉', color: useZones ? '#10b981' : '#6b7280' },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { 
+      key: selectedDataset === 'kpi' ? 'metric' : 
+           selectedDataset === 'sales' ? 'quarter' : 'sensor', 
+      title: '項目', 
+      sortable: true 
+    },
+    { 
+      key: selectedDataset === 'kpi' ? 'value' :
+           selectedDataset === 'sales' ? 'achievement' : 'value',
+      title: selectedDataset === 'sales' ? '達成率 (%)' : '數值', 
+      sortable: true,
+      formatter: (value, row) => {
+        if (selectedDataset === 'kpi') {
+          return `${value}${row?.unit || ''}`
+        } else if (selectedDataset === 'sales') {
+          return `${value}%`
+        } else {
+          return `${value}${row?.unit || ''}`
+        }
+      },
+      align: 'right'
+    }
+  ]
+
+  const tableData = selectedDataset === 'kpi' ? kpiData :
+                   selectedDataset === 'sales' ? salesData :
+                   temperatureData
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Gauge Chart Demo
-        </h1>
-        <p className="text-gray-600">
-          儀表盤組件展示 - 支援多區間、動畫效果和自訂樣式
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="GaugeChart Demo"
+      description="儀表盤組件展示 - 支援多區間、動畫效果和自訂樣式"
+    >
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => {
-                setSelectedDataset(e.target.value)
-                setSelectedIndex(0)
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="kpi">系統監控 KPI</option>
-              <option value="sales">業績達成率</option>
-              <option value="temperature">溫度監控</option>
-            </select>
-          </div>
-
-          {/* 資料項目選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料項目
-            </label>
-            <select
-              value={selectedIndex}
-              onChange={(e) => setSelectedIndex(Number(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {selectedDataset === 'kpi' && kpiData.map((item, i) => (
-                <option key={i} value={i}>{item.metric}</option>
-              ))}
-              {selectedDataset === 'sales' && salesData.map((item, i) => (
-                <option key={i} value={i}>{item.quarter}</option>
-              ))}
-              {selectedDataset === 'temperature' && temperatureData.map((item, i) => (
-                <option key={i} value={i}>{item.sensor}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* 起始角度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              起始角度 ({startAngle}°)
-            </label>
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              step="15"
-              value={startAngle}
-              onChange={(e) => setStartAngle(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 結束角度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              結束角度 ({endAngle}°)
-            </label>
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              step="15"
-              value={endAngle}
-              onChange={(e) => setEndAngle(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 刻度數量 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              刻度數量 ({tickCount})
-            </label>
-            <input
-              type="range"
-              min="3"
-              max="10"
-              value={tickCount}
-              onChange={(e) => setTickCount(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 圓角半徑 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圓角半徑 ({cornerRadius})
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="10"
-              value={cornerRadius}
-              onChange={(e) => setCornerRadius(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 指針顏色 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              指針顏色
-            </label>
-            <div className="flex space-x-2">
-              {['#374151', '#ef4444', '#f59e0b', '#22c55e', '#3b82f6'].map(color => (
-                <button
-                  key={color}
-                  onClick={() => setNeedleColor(color)}
-                  className={`w-8 h-8 rounded border-2 ${needleColor === color ? 'border-gray-800' : 'border-gray-300'}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 背景顏色 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              背景顏色
-            </label>
-            <div className="flex space-x-2">
-              {['#e5e7eb', '#f3f4f6', '#d1d5db', '#9ca3af'].map(color => (
-                <button
-                  key={color}
-                  onClick={() => setBackgroundColor(color)}
-                  className={`w-8 h-8 rounded border-2 ${backgroundColor === color ? 'border-gray-800' : 'border-gray-300'}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 前景顏色 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              前景顏色
-            </label>
-            <div className="flex space-x-2">
-              {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'].map(color => (
-                <button
-                  key={color}
-                  onClick={() => setForegroundColor(color)}
-                  className={`w-8 h-8 rounded border-2 ${foregroundColor === color ? 'border-gray-800' : 'border-gray-300'}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="useZones"
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="資料集"
+                value={selectedDataset}
+                onChange={(value) => {
+                  setSelectedDataset(value)
+                  setSelectedIndex(0)
+                }}
+                options={datasetOptions.map(opt => ({ value: opt.value, label: opt.label }))}
+                description={datasetOptions.find(d => d.value === selectedDataset)?.description}
+              />
+              
+              <SelectControl
+                label="項目選擇"
+                value={selectedIndex.toString()}
+                onChange={(value) => setSelectedIndex(parseInt(value))}
+                options={
+                  selectedDataset === 'kpi' ? kpiData.map((item, index) => ({ 
+                    value: index.toString(), 
+                    label: item.metric 
+                  })) :
+                  selectedDataset === 'sales' ? salesData.map((item, index) => ({ 
+                    value: index.toString(), 
+                    label: `${item.quarter} (${item.achievement}%)` 
+                  })) :
+                  temperatureData.map((item, index) => ({ 
+                    value: index.toString(), 
+                    label: `${item.sensor} (${item.value}${item.unit})` 
+                  }))
+                }
+              />
+              
+              <ToggleControl
+                label="使用區間顏色"
                 checked={useZones}
-                onChange={(e) => setUseZones(e.target.checked)}
-                className="mr-2"
+                onChange={setUseZones}
+                description="依據數值範圍顯示不同顏色"
               />
-              <label htmlFor="useZones" className="text-sm text-gray-700">
-                使用多區間
-              </label>
-            </div>
+            </ControlGroup>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showValue"
+            {/* 儀表盤配置 */}
+            <ControlGroup title="儀表盤配置" icon="📊" cols={3}>
+              <RangeSlider
+                label="起始角度"
+                value={startAngle}
+                min={-180}
+                max={0}
+                step={15}
+                onChange={setStartAngle}
+                suffix="°"
+              />
+              
+              <RangeSlider
+                label="結束角度"
+                value={endAngle}
+                min={0}
+                max={180}
+                step={15}
+                onChange={setEndAngle}
+                suffix="°"
+              />
+              
+              <RangeSlider
+                label="刻度數量"
+                value={tickCount}
+                min={3}
+                max={10}
+                step={1}
+                onChange={setTickCount}
+              />
+            </ControlGroup>
+
+            {/* 樣式設定 */}
+            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  指針顏色
+                </label>
+                <input
+                  type="color"
+                  value={needleColor}
+                  onChange={(e) => setNeedleColor(e.target.value)}
+                  className="w-full h-10 rounded border border-gray-300"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  背景顏色
+                </label>
+                <input
+                  type="color"
+                  value={backgroundColor}
+                  onChange={(e) => setBackgroundColor(e.target.value)}
+                  className="w-full h-10 rounded border border-gray-300"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  前景顏色
+                </label>
+                <input
+                  type="color"
+                  value={foregroundColor}
+                  onChange={(e) => setForegroundColor(e.target.value)}
+                  className="w-full h-10 rounded border border-gray-300"
+                />
+              </div>
+            </ControlGroup>
+
+            {/* 顯示選項 */}
+            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+              <ToggleControl
+                label="顯示數值"
                 checked={showValue}
-                onChange={(e) => setShowValue(e.target.checked)}
-                className="mr-2"
+                onChange={setShowValue}
+                description="在儀表盤中央顯示數值"
               />
-              <label htmlFor="showValue" className="text-sm text-gray-700">
-                顯示數值
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showLabel"
+              
+              <ToggleControl
+                label="顯示標籤"
                 checked={showLabel}
-                onChange={(e) => setShowLabel(e.target.checked)}
-                className="mr-2"
+                onChange={setShowLabel}
+                description="顯示指標名稱"
               />
-              <label htmlFor="showLabel" className="text-sm text-gray-700">
-                顯示標籤
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showTicks"
+              
+              <ToggleControl
+                label="顯示刻度"
                 checked={showTicks}
-                onChange={(e) => setShowTicks(e.target.checked)}
-                className="mr-2"
+                onChange={setShowTicks}
+                description="顯示刻度線和數字"
               />
-              <label htmlFor="showTicks" className="text-sm text-gray-700">
-                顯示刻度
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showMinMax"
+              
+              <ToggleControl
+                label="顯示最小最大值"
                 checked={showMinMax}
-                onChange={(e) => setShowMinMax(e.target.checked)}
-                className="mr-2"
+                onChange={setShowMinMax}
+                description="顯示數值範圍"
               />
-              <label htmlFor="showMinMax" className="text-sm text-gray-700">
-                顯示最值
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
+            </ControlGroup>
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="動畫效果"
                 checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+                onChange={setAnimate}
+                description="指針移動動畫效果"
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
+              
+              <ToggleControl
+                label="互動功能"
                 checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
+                onChange={setInteractive}
+                description="鼠標懸停效果"
               />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
-            </div>
+            </ControlGroup>
           </div>
-        </div>
-      </div>
+        </ModernControlPanel>
+      </ContentSection>
 
       {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表預覽
-        </h2>
-        
-        <div className="flex justify-center">
-          <GaugeChart
-            data={currentData}
-            mapping={config.mapping}
-            min={config.min}
-            max={config.max}
-            width={400}
-            height={350}
-            startAngle={startAngle}
-            endAngle={endAngle}
-            zones={config.zones}
-            cornerRadius={cornerRadius}
-            needleColor={needleColor}
-            backgroundColor={backgroundColor}
-            foregroundColor={foregroundColor}
-            showValue={showValue}
-            showLabel={showLabel}
-            showTicks={showTicks}
-            showMinMax={showMinMax}
-            tickCount={tickCount}
-            animate={animate}
-            interactive={interactive}
-            valueFormat={config.valueFormat}
-            onValueChange={(value) => {
-              console.log('Value changed:', value)
-            }}
-          />
-        </div>
-      </div>
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle={config.description}
+          actions={
+            <div className="flex items-center gap-2">
+              <ChartBarSquareIcon className="w-5 h-5 text-orange-500" />
+              <span className="text-sm text-gray-600">儀表盤</span>
+            </div>
+          }
+        >
+          <div className="flex justify-center">
+            <motion.div
+              key={`${selectedDataset}-${selectedIndex}-${startAngle}-${endAngle}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <GaugeChart
+                data={currentData}
+                mapping={config.mapping}
+                min={config.min}
+                max={config.max}
+                width={400}
+                height={300}
+                startAngle={startAngle}
+                endAngle={endAngle}
+                showValue={showValue}
+                showLabel={showLabel}
+                showTicks={showTicks}
+                showMinMax={showMinMax}
+                tickCount={tickCount}
+                animate={animate}
+                interactive={interactive}
+                needleColor={needleColor}
+                backgroundColor={backgroundColor}
+                foregroundColor={foregroundColor}
+                zones={config.zones}
+                cornerRadius={cornerRadius}
+                valueFormat={config.valueFormat}
+                onValueChange={(value) => console.log('Value changed:', value)}
+              />
+            </motion.div>
+          </div>
+          
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
 
-      {/* 資料表格 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          當前資料
-        </h2>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                {Object.keys(currentData[0] || {}).map(key => (
-                  <th key={key} className="px-4 py-2 text-left font-medium text-gray-700">
-                    {key}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {currentData.map((row, index) => (
-                <tr key={index} className="border-t border-gray-200">
-                  {Object.values(row).map((value, i) => (
-                    <td key={i} className="px-4 py-2 text-gray-900">
-                      {typeof value === 'number' ? value.toLocaleString() : String(value)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* 數據詳情 */}
+      <ContentSection delay={0.2}>
+        <DataTable
+          title="數據詳情"
+          data={tableData}
+          columns={tableColumns}
+          maxRows={8}
+          showIndex
+        />
+      </ContentSection>
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { GaugeChart } from '@registry/components/basic/gauge-chart'
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { GaugeChart } from '@registry/components/basic/gauge-chart/gauge-chart'
 
 const data = [{
-  metric: 'CPU 使用率',
-  value: 78,
-  unit: '%'
+  ${config.mapping?.label || 'label'}: '${config.title}',
+  ${config.mapping?.value || 'value'}: ${currentData[0]?.[config.mapping?.value || 'value'] || 0}
 }]
 
 <GaugeChart
   data={data}
-  mapping={{ value: 'value', label: 'metric' }}
-  min={0}
-  max={100}
+  mapping={{ value: '${config.mapping?.value}', label: '${config.mapping?.label}' }}
+  min={${config.min}}
+  max={${config.max}}
   width={400}
   height={300}
   startAngle={${startAngle}}
   endAngle={${endAngle}}
-  zones={${useZones ? '[{min:0,max:60,color:"green"},{min:60,max:80,color:"yellow"},{min:80,max:100,color:"red"}]' : 'undefined'}}
+  showValue={${showValue}}
+  showLabel={${showLabel}}
+  showTicks={${showTicks}}
+  showMinMax={${showMinMax}}
+  tickCount={${tickCount}}
+  animate={${animate}}
+  interactive={${interactive}}
   needleColor="${needleColor}"
   backgroundColor="${backgroundColor}"
   foregroundColor="${foregroundColor}"
-  showValue={${showValue}}
-  showTicks={${showTicks}}
-  animate={${animate}}
-  interactive={${interactive}}
-  valueFormat={(value) => \`\${value.toFixed(1)}%\`}
-/>`}</code>
-        </pre>
-      </div>
-    </div>
+  ${useZones && config.zones ? `zones={${JSON.stringify(config.zones, null, 2)}}` : ''}
+  onValueChange={(value) => console.log('Value changed:', value)}
+/>`}
+        />
+      </ContentSection>
+
+      {/* 功能說明 */}
+      <ContentSection delay={0.4}>
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-amber-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">GaugeChart 功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">核心功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  可自訂角度範圍和刻度數量
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                  支援多區間顏色配置
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  豐富的顯示選項控制
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  平滑的指針動畫效果
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  系統監控儀表板
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  KPI 達成率展示
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  設備狀態監控
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  績效評估顯示
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

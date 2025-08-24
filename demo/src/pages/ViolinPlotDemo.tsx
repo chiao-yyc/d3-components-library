@@ -1,5 +1,20 @@
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample
+} from '../components/ui'
+import { CogIcon, ChartPieIcon } from '@heroicons/react/24/outline'
 
 // 生成正常分佈數據
 function generateNormalData(mean: number, std: number, count: number): number[] {
@@ -122,26 +137,40 @@ const biodiversityData = [
 ]
 
 export default function ViolinPlotDemo() {
-  // 控制選項
+  // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('drug')
+  const [chartWidth, setChartWidth] = useState(700)
+  const [chartHeight, setChartHeight] = useState(600)
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
+  
+  // 小提琴配置
   const [violinWidth, setViolinWidth] = useState(80)
   const [resolution, setResolution] = useState(100)
+  const [violinFillOpacity, setViolinFillOpacity] = useState(0.7)
+  
+  // 核密度估計
+  const [kdeMethod, setKdeMethod] = useState<'gaussian' | 'epanechnikov' | 'triangular'>('gaussian')
+  const [smoothing, setSmoothing] = useState(1)
+  
+  // 箱形圖配置
   const [showBoxPlot, setShowBoxPlot] = useState(true)
   const [boxPlotWidth, setBoxPlotWidth] = useState(15)
+  
+  // 樣式配置
+  const [colorScheme, setColorScheme] = useState<'custom' | 'blues' | 'greens' | 'oranges' | 'reds' | 'purples'>('custom')
+  
+  // 顯示控制
   const [showMedian, setShowMedian] = useState(true)
   const [showMean, setShowMean] = useState(true)
   const [showQuartiles, setShowQuartiles] = useState(true)
   const [showOutliers, setShowOutliers] = useState(true)
-  const [kdeMethod, setKdeMethod] = useState<'gaussian' | 'epanechnikov' | 'triangular'>('gaussian')
-  const [smoothing, setSmoothing] = useState(1)
-  const [violinFillOpacity, setViolinFillOpacity] = useState(0.7)
-  const [colorScheme, setColorScheme] = useState<'custom' | 'blues' | 'greens' | 'oranges' | 'reds' | 'purples'>('custom')
+  
+  // 動畫交互
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
 
   // 當前資料和配置
-  const { currentData, config } = useMemo(() => {
+  const { currentData, config, datasetInfo } = useMemo(() => {
     switch (selectedDataset) {
       case 'drug':
         return {
@@ -152,6 +181,12 @@ export default function ViolinPlotDemo() {
             colors: ['#ef4444', '#f97316', '#eab308', '#22c55e'],
             yLabel: '療效指標',
             xLabel: '試驗組別'
+          },
+          datasetInfo: {
+            name: '藥物試驗',
+            description: '分析不同劑量對治療效果的影響，包含雙峰分佈',
+            totalGroups: drugTrialData.length,
+            features: ['劑量反應', '雙峰分佈', '療效評估']
           }
         }
       
@@ -164,6 +199,12 @@ export default function ViolinPlotDemo() {
             colors: ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981'],
             yLabel: '學習成績',
             xLabel: '教學方法'
+          },
+          datasetInfo: {
+            name: '學習成效',
+            description: '比較傳統與現代教學方法的學習效果',
+            totalGroups: learningData.length,
+            features: ['教學評估', '個人化學習', '成效對比']
           }
         }
       
@@ -176,6 +217,12 @@ export default function ViolinPlotDemo() {
             colors: ['#16a34a', '#0891b2', '#dc2626', '#7c2d12'],
             yLabel: '年化收益率 (%)',
             xLabel: '投資策略'
+          },
+          datasetInfo: {
+            name: '投資收益',
+            description: '分析不同風險級別投資策略的收益分佈',
+            totalGroups: financeData.length,
+            features: ['風險評估', '收益分析', '策略比較']
           }
         }
       
@@ -188,404 +235,400 @@ export default function ViolinPlotDemo() {
             colors: ['#15803d', '#059669', '#ca8a04', '#9a3412'],
             yLabel: '物種數量',
             xLabel: '棲息地類型'
+          },
+          datasetInfo: {
+            name: '生物多樣性',
+            description: '評估不同環境對生物多樣性的影響',
+            totalGroups: biodiversityData.length,
+            features: ['生態評估', '環境影響', '物種保護']
           }
         }
       
       default:
         return {
           currentData: drugTrialData,
-          config: {
-            title: '小提琴圖',
-            description: '',
-            colors: [],
-            yLabel: '數值',
-            xLabel: '分組'
-          }
+          config: { title: '小提琴圖', description: '', colors: [], yLabel: '數值', xLabel: '分組' },
+          datasetInfo: { name: '', description: '', totalGroups: 0, features: [] }
         }
     }
   }, [selectedDataset])
 
+  // 數據鍵值映射
+  const dataKeys = useMemo(() => {
+    return {
+      labelKey: selectedDataset === 'drug' ? 'group' : 
+               selectedDataset === 'learning' ? 'method' :
+               selectedDataset === 'finance' ? 'strategy' : 'habitat',
+      valuesKey: selectedDataset === 'drug' ? 'measurements' : 
+                selectedDataset === 'learning' ? 'scores' :
+                selectedDataset === 'finance' ? 'returns' : 'species_count'
+    }
+  }, [selectedDataset])
+
+  // 分佈分析
+  const distributionAnalysis = useMemo(() => {
+    const analysis = currentData.map((group: any) => {
+      const values = group[dataKeys.valuesKey]
+      const groupLabel = group[dataKeys.labelKey]
+      
+      // 統計計算
+      const sorted = [...values].sort((a: number, b: number) => a - b)
+      const n = sorted.length
+      const mean = values.reduce((sum: number, val: number) => sum + val, 0) / n
+      const median = n % 2 === 0 
+        ? (sorted[Math.floor(n / 2) - 1] + sorted[Math.floor(n / 2)]) / 2
+        : sorted[Math.floor(n / 2)]
+      const variance = values.reduce((sum: number, val: number) => sum + Math.pow(val - mean, 2), 0) / n
+      const std = Math.sqrt(variance)
+      
+      // 分佈特徵
+      const skewness = mean > median ? '右偏' : mean < median ? '左偏' : '對稱'
+      const range = [Math.min(...values), Math.max(...values)]
+      
+      return {
+        label: groupLabel,
+        count: n,
+        mean: mean,
+        median: median,
+        std: std,
+        skewness: skewness,
+        min: range[0],
+        max: range[1],
+        range: range[1] - range[0]
+      }
+    })
+
+    const totalSamples = analysis.reduce((sum, stat) => sum + stat.count, 0)
+    const avgMean = analysis.reduce((sum, stat) => sum + stat.mean, 0) / analysis.length
+    const avgStd = analysis.reduce((sum, stat) => sum + stat.std, 0) / analysis.length
+
+    return {
+      groups: analysis,
+      summary: {
+        totalSamples,
+        avgMean,
+        avgStd,
+        groups: analysis.length
+      }
+    }
+  }, [currentData, dataKeys])
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* 標題 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Violin Plot Demo
-        </h1>
-        <p className="text-gray-600">
-          小提琴圖組件展示 - 結合核密度估計和箱形圖的進階統計分析
-        </p>
-      </div>
-
+    <DemoPageTemplate
+      title="ViolinPlot Demo"
+      description="小提琴圖組件展示 - 結合核密度估計和箱形圖的進階統計分析"
+    >
       {/* 控制面板 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          圖表設定
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* 資料集選擇 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              資料集
-            </label>
-            <select
-              value={selectedDataset}
-              onChange={(e) => setSelectedDataset(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="drug">藥物試驗</option>
-              <option value="learning">學習成效</option>
-              <option value="finance">投資收益</option>
-              <option value="biodiversity">生物多樣性</option>
-            </select>
-          </div>
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="資料集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'drug', label: '藥物試驗' },
+                  { value: 'learning', label: '學習成效' },
+                  { value: 'finance', label: '投資收益' },
+                  { value: 'biodiversity', label: '生物多樣性' }
+                ]}
+              />
+              
+              <SelectControl
+                label="圖表方向"
+                value={orientation}
+                onChange={(value) => setOrientation(value as 'vertical' | 'horizontal')}
+                options={[
+                  { value: 'vertical', label: '垂直' },
+                  { value: 'horizontal', label: '水平' }
+                ]}
+              />
+              
+              <SelectControl
+                label="顏色主題"
+                value={colorScheme}
+                onChange={(value) => setColorScheme(value as any)}
+                options={[
+                  { value: 'custom', label: '自訂' },
+                  { value: 'blues', label: '藍色系' },
+                  { value: 'greens', label: '綠色系' },
+                  { value: 'oranges', label: '橙色系' },
+                  { value: 'reds', label: '紅色系' },
+                  { value: 'purples', label: '紫色系' }
+                ]}
+              />
+            </ControlGroup>
 
-          {/* 方向 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              圖表方向
-            </label>
-            <select
-              value={orientation}
-              onChange={(e) => setOrientation(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="vertical">垂直</option>
-              <option value="horizontal">水平</option>
-            </select>
-          </div>
+            {/* KDE 設定 */}
+            <ControlGroup title="核密度估計" icon="📊" cols={2}>
+              <SelectControl
+                label="KDE 方法"
+                value={kdeMethod}
+                onChange={(value) => setKdeMethod(value as any)}
+                options={[
+                  { value: 'gaussian', label: '高斯核 (最常用)' },
+                  { value: 'epanechnikov', label: 'Epanechnikov (最優)' },
+                  { value: 'triangular', label: '三角核 (快速)' }
+                ]}
+                description={{
+                  gaussian: '最常用，適合大多數數據分佈',
+                  epanechnikov: '理論上最優，邊界平滑',
+                  triangular: '簡單實用，計算快速'
+                }[kdeMethod]}
+              />
+              
+              <RangeSlider
+                label="解析度"
+                value={resolution}
+                min={50}
+                max={200}
+                step={10}
+                onChange={setResolution}
+                description="更高解析度 = 更平滑曲線，但計算較慢"
+              />
+            </ControlGroup>
 
-          {/* KDE 方法 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              核密度估計方法
-            </label>
-            <select
-              value={kdeMethod}
-              onChange={(e) => setKdeMethod(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="gaussian">高斯核</option>
-              <option value="epanechnikov">Epanechnikov核</option>
-              <option value="triangular">三角核</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              {kdeMethod === 'gaussian' && '最常用，適合大多數數據分佈'}
-              {kdeMethod === 'epanechnikov' && '理論上最優，邊界平滑'}
-              {kdeMethod === 'triangular' && '簡單實用，計算快速'}
-            </p>
-          </div>
+            {/* 小提琴設定 */}
+            <ControlGroup title="小提琴配置" icon="🎻" cols={3}>
+              <RangeSlider
+                label="最大寬度"
+                value={violinWidth}
+                min={40}
+                max={120}
+                step={5}
+                onChange={setViolinWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="平滑因子"
+                value={smoothing}
+                min={0.5}
+                max={2}
+                step={0.1}
+                onChange={setSmoothing}
+                description="值越大 = 曲線越平滑"
+              />
+              
+              <RangeSlider
+                label="填充透明度"
+                value={violinFillOpacity}
+                min={0.3}
+                max={1}
+                step={0.1}
+                onChange={setViolinFillOpacity}
+                formatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
+            </ControlGroup>
 
-          {/* 小提琴寬度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              小提琴最大寬度 ({violinWidth}px)
-            </label>
-            <input
-              type="range"
-              min="40"
-              max="120"
-              value={violinWidth}
-              onChange={(e) => setViolinWidth(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
+            {/* 箱形圖設定 */}
+            <ControlGroup title="箱形圖配置" icon="📦" cols={1}>
+              <RangeSlider
+                label="箱形圖寬度"
+                value={boxPlotWidth}
+                min={5}
+                max={30}
+                step={1}
+                onChange={setBoxPlotWidth}
+                suffix="px"
+              />
+            </ControlGroup>
 
-          {/* 解析度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              密度計算解析度 ({resolution})
-            </label>
-            <input
-              type="range"
-              min="50"
-              max="200"
-              value={resolution}
-              onChange={(e) => setResolution(Number(e.target.value))}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              更高解析度 = 更平滑曲線，但計算較慢
-            </p>
-          </div>
-
-          {/* 平滑因子 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              平滑因子 ({smoothing.toFixed(1)})
-            </label>
-            <input
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={smoothing}
-              onChange={(e) => setSmoothing(Number(e.target.value))}
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              值越大 = 曲線越平滑，細節越少
-            </p>
-          </div>
-
-          {/* 箱形圖寬度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              箱形圖寬度 ({boxPlotWidth}px)
-            </label>
-            <input
-              type="range"
-              min="5"
-              max="30"
-              value={boxPlotWidth}
-              onChange={(e) => setBoxPlotWidth(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 填充透明度 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              填充透明度 ({(violinFillOpacity * 100).toFixed(0)}%)
-            </label>
-            <input
-              type="range"
-              min="0.3"
-              max="1"
-              step="0.1"
-              value={violinFillOpacity}
-              onChange={(e) => setViolinFillOpacity(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* 顏色主題 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              顏色主題
-            </label>
-            <select
-              value={colorScheme}
-              onChange={(e) => setColorScheme(e.target.value as any)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="custom">自訂</option>
-              <option value="blues">藍色系</option>
-              <option value="greens">綠色系</option>
-              <option value="oranges">橙色系</option>
-              <option value="reds">紅色系</option>
-              <option value="purples">紫色系</option>
-            </select>
-          </div>
-
-          {/* 切換選項 */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showBoxPlot"
+            {/* 顯示選項 */}
+            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+              <ToggleControl
+                label="顯示箱形圖"
                 checked={showBoxPlot}
-                onChange={(e) => setShowBoxPlot(e.target.checked)}
-                className="mr-2"
+                onChange={setShowBoxPlot}
+                description="在小提琴中央顯示箱形圖"
               />
-              <label htmlFor="showBoxPlot" className="text-sm text-gray-700">
-                顯示箱形圖
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showMedian"
+              
+              <ToggleControl
+                label="顯示中位數"
                 checked={showMedian}
-                onChange={(e) => setShowMedian(e.target.checked)}
-                className="mr-2"
+                onChange={setShowMedian}
+                description="顯示中位數線"
               />
-              <label htmlFor="showMedian" className="text-sm text-gray-700">
-                顯示中位數
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showMean"
+              
+              <ToggleControl
+                label="顯示平均值"
                 checked={showMean}
-                onChange={(e) => setShowMean(e.target.checked)}
-                className="mr-2"
+                onChange={setShowMean}
+                description="顯示平均值點"
               />
-              <label htmlFor="showMean" className="text-sm text-gray-700">
-                顯示平均值
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showQuartiles"
+              
+              <ToggleControl
+                label="顯示四分位數"
                 checked={showQuartiles}
-                onChange={(e) => setShowQuartiles(e.target.checked)}
-                className="mr-2"
+                onChange={setShowQuartiles}
+                description="顯示25%和75%分位數"
               />
-              <label htmlFor="showQuartiles" className="text-sm text-gray-700">
-                顯示四分位數
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="showOutliers"
+            </ControlGroup>
+
+            {/* 高級選項 */}
+            <ControlGroup title="進階功能" icon="🔧" cols={2}>
+              <ToggleControl
+                label="顯示異常值"
                 checked={showOutliers}
-                onChange={(e) => setShowOutliers(e.target.checked)}
-                className="mr-2"
+                onChange={setShowOutliers}
+                description="顯示統計異常值點"
               />
-              <label htmlFor="showOutliers" className="text-sm text-gray-700">
-                顯示異常值
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="animate"
+              
+              <ToggleControl
+                label="動畫效果"
                 checked={animate}
-                onChange={(e) => setAnimate(e.target.checked)}
-                className="mr-2"
+                onChange={setAnimate}
+                description="圖表載入和更新動畫"
               />
-              <label htmlFor="animate" className="text-sm text-gray-700">
-                動畫效果
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="interactive"
+              
+              <ToggleControl
+                label="互動功能"
                 checked={interactive}
-                onChange={(e) => setInteractive(e.target.checked)}
-                className="mr-2"
+                onChange={setInteractive}
+                description="懸停和點擊交互"
               />
-              <label htmlFor="interactive" className="text-sm text-gray-700">
-                互動功能
-              </label>
-            </div>
+            </ControlGroup>
           </div>
-        </div>
-      </div>
+        </ModernControlPanel>
+      </ContentSection>
 
       {/* 圖表展示 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          {config.title}
-        </h2>
-        <p className="text-gray-600 mb-6">{config.description}</p>
-        
-        <div className="flex justify-center">
-          <ViolinPlot
-            data={currentData}
-            labelKey={selectedDataset === 'drug' ? 'group' : 
-                     selectedDataset === 'learning' ? 'method' :
-                     selectedDataset === 'finance' ? 'strategy' : 'habitat'}
-            valuesKey={selectedDataset === 'drug' ? 'measurements' : 
-                      selectedDataset === 'learning' ? 'scores' :
-                      selectedDataset === 'finance' ? 'returns' : 'species_count'}
-            width={orientation === 'vertical' ? 700 : 800}
-            height={orientation === 'vertical' ? 600 : 500}
-            orientation={orientation}
-            violinWidth={violinWidth}
-            resolution={resolution}
-            showBoxPlot={showBoxPlot}
-            boxPlotWidth={boxPlotWidth}
-            showMedian={showMedian}
-            showMean={showMean}
-            showQuartiles={showQuartiles}
-            showOutliers={showOutliers}
-            kdeMethod={kdeMethod}
-            smoothing={smoothing}
-            violinFillOpacity={violinFillOpacity}
-            colors={colorScheme === 'custom' ? config.colors : undefined}
-            colorScheme={colorScheme}
-            animate={animate}
-            interactive={interactive}
-            onViolinClick={(data) => {
-              console.log('Violin clicked:', data)
-              alert(`點擊了: ${data.label}\n樣本數: ${data.statistics.count}\n中位數: ${data.statistics.median.toFixed(2)}\n平均值: ${data.statistics.mean?.toFixed(2)}\n標準差: ${data.statistics.std?.toFixed(2)}`)
-            }}
-            onViolinHover={(data) => {
-              console.log('Violin hovered:', data)
-            }}
-          />
-        </div>
-      </div>
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle={config.description}
+          actions={
+            <div className="flex items-center gap-2">
+              <ChartPieIcon className="w-5 h-5 text-purple-500" />
+              <span className="text-sm text-gray-600">小提琴圖</span>
+            </div>
+          }
+        >
+          <div className="flex justify-center">
+            <motion.div
+              key={`${orientation}-${selectedDataset}-${violinWidth}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ViolinPlot
+                data={currentData}
+                labelKey={dataKeys.labelKey}
+                valuesKey={dataKeys.valuesKey}
+                width={orientation === 'vertical' ? 700 : 800}
+                height={orientation === 'vertical' ? 600 : 500}
+                orientation={orientation}
+                violinWidth={violinWidth}
+                resolution={resolution}
+                showBoxPlot={showBoxPlot}
+                boxPlotWidth={boxPlotWidth}
+                showMedian={showMedian}
+                showMean={showMean}
+                showQuartiles={showQuartiles}
+                showOutliers={showOutliers}
+                kdeMethod={kdeMethod}
+                smoothing={smoothing}
+                violinFillOpacity={violinFillOpacity}
+                colors={colorScheme === 'custom' ? config.colors : undefined}
+                colorScheme={colorScheme}
+                animate={animate}
+                interactive={interactive}
+                onViolinClick={(data) => {
+                  console.log('Violin clicked:', data)
+                }}
+                onViolinHover={(data) => {
+                  console.log('Violin hovered:', data)
+                }}
+              />
+            </motion.div>
+          </div>
+          
+          <StatusDisplay items={[
+            { label: '數據集', value: config.title },
+            { label: '分組數', value: currentData.length },
+            { label: '圖表方向', value: orientation === 'vertical' ? '垂直' : '水平' },
+            { label: 'KDE方法', value: kdeMethod },
+            { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+          ]} />
+        </ChartContainer>
+      </ContentSection>
 
-      {/* 分佈分析說明 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          分佈特徵分析
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentData.map((group: any, index: number) => {
-            const values = selectedDataset === 'drug' ? group.measurements : 
-                          selectedDataset === 'learning' ? group.scores :
-                          selectedDataset === 'finance' ? group.returns : group.species_count
-            
-            const groupLabel = selectedDataset === 'drug' ? group.group : 
-                             selectedDataset === 'learning' ? group.method :
-                             selectedDataset === 'finance' ? group.strategy : group.habitat
-            
-            // 簡化統計計算
-            const sorted = [...values].sort((a: number, b: number) => a - b)
-            const n = sorted.length
-            const mean = values.reduce((sum: number, val: number) => sum + val, 0) / n
-            const median = n % 2 === 0 
-              ? (sorted[Math.floor(n / 2) - 1] + sorted[Math.floor(n / 2)]) / 2
-              : sorted[Math.floor(n / 2)]
-            const variance = values.reduce((sum: number, val: number) => sum + Math.pow(val - mean, 2), 0) / n
-            const std = Math.sqrt(variance)
-            
-            // 偏度計算（簡化）
-            const skewness = mean > median ? '右偏' : mean < median ? '左偏' : '對稱'
-            
-            return (
-              <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-semibold text-gray-900 mb-2" style={{ color: config.colors[index] }}>
-                  {groupLabel}
-                </h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <div>樣本數: {n}</div>
-                  <div>平均值: {mean.toFixed(2)}</div>
-                  <div>中位數: {median.toFixed(2)}</div>
-                  <div>標準差: {std.toFixed(2)}</div>
-                  <div>分佈特徵: {skewness}</div>
-                  <div>範圍: {Math.min(...values).toFixed(2)} ~ {Math.max(...values).toFixed(2)}</div>
-                </div>
-              </div>
-            )
-          })}
+      {/* 統計分析 */}
+      <ContentSection delay={0.2}>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">分佈特徵分析</h3>
+          </div>
+          
+          {distributionAnalysis && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {currentData.map((group: any, index: number) => {
+                const values = group[dataKeys.valuesKey]
+                const groupLabel = group[dataKeys.labelKey]
+                
+                const sorted = [...values].sort((a: number, b: number) => a - b)
+                const n = sorted.length
+                const mean = values.reduce((sum: number, val: number) => sum + val, 0) / n
+                const median = n % 2 === 0 
+                  ? (sorted[Math.floor(n / 2) - 1] + sorted[Math.floor(n / 2)]) / 2
+                  : sorted[Math.floor(n / 2)]
+                const variance = values.reduce((sum: number, val: number) => sum + Math.pow(val - mean, 2), 0) / n
+                const std = Math.sqrt(variance)
+                const skewness = mean > median ? '右偏' : mean < median ? '左偏' : '對稱'
+                
+                return (
+                  <motion.div 
+                    key={index} 
+                    className="p-5 bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <div 
+                        className="w-4 h-4 rounded-full" 
+                        style={{ backgroundColor: config.colors[index] }}
+                      />
+                      <h4 className="font-semibold text-gray-900">{groupLabel}</h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                      <div>樣本數: <span className="font-medium">{n}</span></div>
+                      <div>平均值: <span className="font-medium">{mean.toFixed(2)}</span></div>
+                      <div>中位數: <span className="font-medium">{median.toFixed(2)}</span></div>
+                      <div>標準差: <span className="font-medium">{std.toFixed(2)}</span></div>
+                      <div>分佈: <span className="font-medium">{skewness}</span></div>
+                      <div>範圍: <span className="font-medium">{Math.min(...values).toFixed(2)} ~ {Math.max(...values).toFixed(2)}</span></div>
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
         </div>
-      </div>
+      </ContentSection>
 
-      {/* 使用範例 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          程式碼範例
-        </h2>
-        
-        <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm">
-          <code>{`import { ViolinPlot } from '@registry/components/statistical/violin-plot'
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { ViolinPlot } from '@registry/components/statistical/violin-plot'
 
 const data = [
-  { group: '對照組', measurements: [85, 92, 78, 88, 95, 82] },
-  { group: '實驗組', measurements: [95, 98, 89, 92, 101, 88] }
+  { ${dataKeys.labelKey}: '對照組', ${dataKeys.valuesKey}: [85, 92, 78, 88, 95, 82] },
+  { ${dataKeys.labelKey}: '實驗組', ${dataKeys.valuesKey}: [95, 98, 89, 92, 101, 88] }
 ]
 
 <ViolinPlot
   data={data}
-  labelKey="group"
-  valuesKey="measurements"
+  labelKey="${dataKeys.labelKey}"
+  valuesKey="${dataKeys.valuesKey}"
   width={${orientation === 'vertical' ? 700 : 800}}
   height={${orientation === 'vertical' ? 600 : 500}}
   orientation="${orientation}"
@@ -600,42 +643,9 @@ const data = [
   animate={${animate}}
   interactive={${interactive}}
   onViolinClick={(data) => console.log('Clicked:', data)}
-/>`}</code>
-        </pre>
-      </div>
-
-      {/* 小提琴圖解讀指南 */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          小提琴圖解讀指南
-        </h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">圖形元素</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li><strong>小提琴形狀:</strong> 顯示數據的密度分佈</li>
-              <li><strong>寬度:</strong> 代表該數值出現的頻率</li>
-              <li><strong>箱形圖:</strong> 顯示四分位數統計</li>
-              <li><strong>中位數線:</strong> 粗黑線表示中位數</li>
-              <li><strong>平均值點:</strong> 白色圓點表示平均值</li>
-              <li><strong>異常值:</strong> 散點表示離群值</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">分析要點</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li><strong>對稱性:</strong> 形狀是否對稱</li>
-              <li><strong>峰值:</strong> 單峰或多峰分佈</li>
-              <li><strong>尾部:</strong> 長尾或短尾特徵</li>
-              <li><strong>離散度:</strong> 分佈的集中程度</li>
-              <li><strong>比較:</strong> 多組間的差異</li>
-              <li><strong>異常值:</strong> 需要特別關注的數據點</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+/>`}
+        />
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }

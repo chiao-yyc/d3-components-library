@@ -1,5 +1,26 @@
+/**
+ * ScatterPlotDemo - 現代化散點圖示例
+ * 展示使用新設計系統的完整 Demo 頁面
+ */
+
 import { useState } from 'react'
-import { ScatterPlot } from '../components/ui/scatter-plot'
+import { motion } from 'framer-motion'
+import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon, SparklesIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 // 生成相關性資料
 const generateCorrelationData = (points: number = 50, correlation: number = 0.7) => {
@@ -74,470 +95,529 @@ const bubbleData = [
 ]
 
 export default function ScatterPlotDemo() {
+  // 數據集狀態
+  const [selectedDataset, setSelectedDataset] = useState<'correlation' | 'iris' | 'bubble'>('correlation')
   const [correlationData] = useState(generateCorrelationData())
   const [irisData] = useState(generateIrisData())
-  const [showTrendline, setShowTrendline] = useState(false)
-  const [animate, setAnimate] = useState(false)
+  
+  // 圖表配置
+  const [chartWidth, setChartWidth] = useState(800)
+  const [chartHeight, setChartHeight] = useState(400)
+  const [radius, setRadius] = useState(6)
   const [opacity, setOpacity] = useState(0.7)
   
-  // === 新增的交互功能狀態 ===
+  // 視覺效果
+  const [showTrendline, setShowTrendline] = useState(false)
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
+  const [showTooltip, setShowTooltip] = useState(true)
+  
+  // 交互功能
   const [enableBrushZoom, setEnableBrushZoom] = useState(false)
   const [brushDirection, setBrushDirection] = useState<'x' | 'y' | 'xy'>('xy')
   const [enableCrosshair, setEnableCrosshair] = useState(false)
   const [enableDropShadow, setEnableDropShadow] = useState(false)
   const [enableGlowEffect, setEnableGlowEffect] = useState(false)
   
-  // === 群組功能狀態 ===
+  // 群組功能
   const [enableGroupHighlight, setEnableGroupHighlight] = useState(false)
   const [enableGroupFilter, setEnableGroupFilter] = useState(false)
   const [showGroupLegend, setShowGroupLegend] = useState(false)
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null)
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null)
   
-  // 交互回調狀態
+  // 交互狀態
   const [zoomDomain, setZoomDomain] = useState<{ x?: [any, any]; y?: [any, any] } | null>(null)
   const [crosshairData, setCrosshairData] = useState<any>(null)
+  
+  // 邊距設定
+  const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 50 })
+
+  // 獲取當前數據集
+  const getCurrentData = () => {
+    switch (selectedDataset) {
+      case 'iris': return irisData
+      case 'bubble': return bubbleData
+      default: return correlationData
+    }
+  }
+  
+  const getCurrentConfig = () => {
+    switch (selectedDataset) {
+      case 'iris': 
+        return { xKey: 'sepalLength', yKey: 'petalLength', groupBy: 'species' }
+      case 'bubble':
+        return { xKey: 'gdp', yKey: 'happiness', sizeKey: 'population', colorKey: 'country' }
+      default:
+        return { xKey: 'x', yKey: 'y', colorKey: 'category' }
+    }
+  }
+
+  const currentData = getCurrentData()
+  const currentConfig = getCurrentConfig()
+  
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '數據集', value: selectedDataset === 'correlation' ? '相關性數據' : selectedDataset === 'iris' ? '鳶尾花數據' : 'GDP-幸福指數' },
+    { label: '數據點數', value: currentData.length },
+    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '點大小', value: radius },
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+  ]
+
+  // 數據表格列定義
+  const getTableColumns = (): DataTableColumn[] => {
+    const config = getCurrentConfig()
+    const columns: DataTableColumn[] = [
+      { key: config.xKey, title: config.xKey, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value },
+      { key: config.yKey, title: config.yKey, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value, align: 'right' }
+    ]
+    
+    if (config.groupBy) {
+      columns.push({ key: config.groupBy, title: config.groupBy, sortable: true })
+    }
+    
+    if (config.sizeKey) {
+      columns.push({ key: config.sizeKey, title: config.sizeKey, sortable: true, formatter: (value) => value.toLocaleString(), align: 'right' })
+    }
+    
+    return columns
+  }
 
   return (
-    <div className="p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">ScatterPlot Demo</h1>
-        <p className="text-gray-600">展示 ScatterPlot 組件的各種功能和配置選項</p>
-      </div>
+    <DemoPageTemplate
+      title="ScatterPlot Demo"
+      description="現代化散點圖組件展示 - 支援群組功能、交互縮放和多種視覺效果"
+    >
 
       {/* 控制面板 */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">控制面板</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="showTrendline"
-              checked={showTrendline}
-              onChange={(e) => setShowTrendline(e.target.checked)}
-              className="rounded"
-            />
-            <label htmlFor="showTrendline" className="text-sm font-medium text-gray-700">
-              顯示趨勢線
-            </label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="animate"
-              checked={animate}
-              onChange={(e) => setAnimate(e.target.checked)}
-              className="rounded"
-            />
-            <label htmlFor="animate" className="text-sm font-medium text-gray-700">
-              動畫效果
-            </label>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              透明度: {opacity}
-            </label>
-            <input
-              type="range"
-              min="0.1"
-              max="1"
-              step="0.1"
-              value={opacity}
-              onChange={(e) => setOpacity(parseFloat(e.target.value))}
-              className="w-full"
-            />
-          </div>
-        </div>
-        
-        {/* === 新增的交互功能控制 === */}
-        <div className="mt-6">
-          <h4 className="text-md font-medium text-gray-800 mb-3">🎯 交互功能 (新增)</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableBrushZoom"
+      <ContentSection>
+        <ModernControlPanel 
+          title="控制面板" 
+          icon={<CogIcon className="w-5 h-5" />}
+        >
+          <div className="space-y-8">
+            {/* 基本設定 */}
+            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+              <SelectControl
+                label="數據集"
+                value={selectedDataset}
+                onChange={setSelectedDataset}
+                options={[
+                  { value: 'correlation', label: '相關性數據' },
+                  { value: 'iris', label: '鳶尾花數據' },
+                  { value: 'bubble', label: 'GDP-幸福指數' }
+                ]}
+              />
+              
+              <RangeSlider
+                label="點大小"
+                value={radius}
+                min={2}
+                max={15}
+                step={1}
+                onChange={setRadius}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="透明度"
+                value={opacity}
+                min={0.1}
+                max={1}
+                step={0.1}
+                onChange={setOpacity}
+              />
+            </ControlGroup>
+
+            {/* 尺寸設定 */}
+            <ControlGroup title="尺寸配置" icon="📏" cols={2}>
+              <RangeSlider
+                label="寬度"
+                value={chartWidth}
+                min={600}
+                max={1000}
+                step={50}
+                onChange={setChartWidth}
+                suffix="px"
+              />
+              
+              <RangeSlider
+                label="高度"
+                value={chartHeight}
+                min={300}
+                max={600}
+                step={25}
+                onChange={setChartHeight}
+                suffix="px"
+              />
+            </ControlGroup>
+
+            {/* 邊距設定 */}
+            <ControlGroup title="邊距設定" icon="📐" cols={4}>
+              <RangeSlider
+                label="上"
+                value={margin.top}
+                min={0}
+                max={50}
+                onChange={(value) => setMargin(prev => ({ ...prev, top: value }))}
+              />
+              
+              <RangeSlider
+                label="右"
+                value={margin.right}
+                min={0}
+                max={80}
+                onChange={(value) => setMargin(prev => ({ ...prev, right: value }))}
+              />
+              
+              <RangeSlider
+                label="下"
+                value={margin.bottom}
+                min={20}
+                max={80}
+                onChange={(value) => setMargin(prev => ({ ...prev, bottom: value }))}
+              />
+              
+              <RangeSlider
+                label="左"
+                value={margin.left}
+                min={20}
+                max={100}
+                onChange={(value) => setMargin(prev => ({ ...prev, left: value }))}
+              />
+            </ControlGroup>
+
+            {/* 基本功能 */}
+            <ControlGroup title="基本功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="動畫效果"
+                checked={animate}
+                onChange={setAnimate}
+                description="圖表進入和更新時的動畫效果"
+              />
+              
+              <ToggleControl
+                label="互動功能"
+                checked={interactive}
+                onChange={setInteractive}
+                description="鼠標懸停和點擊交互"
+              />
+              
+              <ToggleControl
+                label="顯示提示"
+                checked={showTooltip}
+                onChange={setShowTooltip}
+                description="懸停時顯示數據詳情"
+              />
+              
+              <ToggleControl
+                label="顯示趨勢線"
+                checked={showTrendline}
+                onChange={setShowTrendline}
+                description="顯示數據趨勢線"
+              />
+            </ControlGroup>
+
+            {/* 交互功能 */}
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+              <ToggleControl
+                label="筆刷縮放"
                 checked={enableBrushZoom}
-                onChange={(e) => setEnableBrushZoom(e.target.checked)}
-                className="rounded"
+                onChange={setEnableBrushZoom}
+                description="拖拽選取區域進行縮放"
               />
-              <label htmlFor="enableBrushZoom" className="text-sm font-medium text-gray-700">
-                筆刷縮放
-              </label>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                縮放方向
-              </label>
-              <select 
-                value={brushDirection} 
-                onChange={(e) => setBrushDirection(e.target.value as any)}
-                className="w-full p-2 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="x">X 軸</option>
-                <option value="y">Y 軸</option>
-                <option value="xy">XY 雙軸 (特色)</option>
-              </select>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableCrosshair"
+              
+              <SelectControl
+                label="縮放方向"
+                value={brushDirection}
+                onChange={(value) => setBrushDirection(value as 'x' | 'y' | 'xy')}
+                options={[
+                  { value: 'x', label: 'X 軸' },
+                  { value: 'y', label: 'Y 軸' },
+                  { value: 'xy', label: 'XY 雙軸' }
+                ]}
+              />
+              
+              <ToggleControl
+                label="十字游標"
                 checked={enableCrosshair}
-                onChange={(e) => setEnableCrosshair(e.target.checked)}
-                className="rounded"
+                onChange={setEnableCrosshair}
+                description="顯示數據點詳細信息"
               />
-              <label htmlFor="enableCrosshair" className="text-sm font-medium text-gray-700">
-                十字游標
-              </label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableDropShadow"
+              
+              <ToggleControl
+                label="陰影效果"
                 checked={enableDropShadow}
-                onChange={(e) => setEnableDropShadow(e.target.checked)}
-                className="rounded"
+                onChange={setEnableDropShadow}
+                description="為數據點添加陰影"
               />
-              <label htmlFor="enableDropShadow" className="text-sm font-medium text-gray-700">
-                陰影效果
-              </label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableGlowEffect"
+              
+              <ToggleControl
+                label="光暈效果"
                 checked={enableGlowEffect}
-                onChange={(e) => setEnableGlowEffect(e.target.checked)}
-                className="rounded"
+                onChange={setEnableGlowEffect}
+                description="為數據點添加光暈"
               />
-              <label htmlFor="enableGlowEffect" className="text-sm font-medium text-gray-700">
-                光暈效果
-              </label>
-            </div>
-          </div>
-          
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-            <p className="font-medium mb-2">使用說明:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li><strong>筆刷縮放:</strong> 拖拽選取區域進行縮放，雙擊重置</li>
-              <li><strong>XY 雙軸縮放:</strong> ScatterPlot 的特色功能，可同時縮放 X 和 Y 軸</li>
-              <li><strong>十字游標:</strong> 滑鼠移動時顯示最近散點的詳細信息</li>
-              <li><strong>視覺效果:</strong> 陰影和光暈效果增強視覺表現</li>
-            </ul>
-          </div>
-        </div>
-        
-        {/* === 群組功能控制面板 === */}
-        <div className="mt-6">
-          <h4 className="text-md font-medium text-gray-800 mb-3">🎨 群組功能 (全新功能)</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableGroupHighlight"
+            </ControlGroup>
+
+            {/* 群組功能 */}
+            <ControlGroup title="群組功能" icon="🎨" cols={2}>
+              <ToggleControl
+                label="群組高亮"
                 checked={enableGroupHighlight}
-                onChange={(e) => setEnableGroupHighlight(e.target.checked)}
-                className="rounded"
+                onChange={setEnableGroupHighlight}
+                description="懸停時高亮同群組數據點"
               />
-              <label htmlFor="enableGroupHighlight" className="text-sm font-medium text-gray-700">
-                群組高亮
-              </label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="enableGroupFilter"
+              
+              <ToggleControl
+                label="群組篩選"
                 checked={enableGroupFilter}
-                onChange={(e) => setEnableGroupFilter(e.target.checked)}
-                className="rounded"
+                onChange={setEnableGroupFilter}
+                description="點擊圖例篩選特定群組"
               />
-              <label htmlFor="enableGroupFilter" className="text-sm font-medium text-gray-700">
-                群組篩選
-              </label>
+              
+              <ToggleControl
+                label="顯示圖例"
+                checked={showGroupLegend}
+                onChange={setShowGroupLegend}
+                description="顯示群組顏色圖例"
+              />
+            </ControlGroup>
+            
+            {/* 群組狀態顯示 */}
+            {(selectedGroup || hoveredGroup) && (
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-4 border border-emerald-100">
+                <h4 className="font-semibold text-emerald-800 mb-2">群組狀態</h4>
+                <div className="space-y-2 text-sm">
+                  {selectedGroup && (
+                    <div className="text-emerald-700">
+                      <strong>選中群組:</strong> {String(selectedGroup)}
+                    </div>
+                  )}
+                  {hoveredGroup && (
+                    <div className="text-teal-700">
+                      <strong>懸停群組:</strong> {String(hoveredGroup)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </ModernControlPanel>
+      </ContentSection>
+
+      {/* 圖表展示 */}
+      <ContentSection delay={0.1}>
+        <ChartContainer
+          title="圖表預覽"
+          subtitle="即時預覽配置效果"
+          actions={
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-5 h-5 text-purple-500" />
+              <span className="text-sm text-gray-600">散點圖</span>
+              {enableBrushZoom && <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{brushDirection} 軸縮放</span>}
+              {enableCrosshair && <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">十字游標</span>}
+            </div>
+          }
+        >
+          {/* 交互狀態顯示 */}
+          {(zoomDomain || crosshairData) && (
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+              <h4 className="font-semibold text-blue-800 mb-2">交互狀態</h4>
+              <div className="space-y-2 text-sm">
+                {zoomDomain && (
+                  <div className="text-blue-700">
+                    <strong>縮放範圍:</strong> 
+                    {zoomDomain.x && ` X: ${zoomDomain.x[0]?.toFixed(2)} - ${zoomDomain.x[1]?.toFixed(2)}`}
+                    {zoomDomain.y && ` Y: ${zoomDomain.y[0]?.toFixed(2)} - ${zoomDomain.y[1]?.toFixed(2)}`}
+                  </div>
+                )}
+                {crosshairData && (
+                  <div className="text-green-700">
+                    <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <div className="flex justify-center">
+            <motion.div
+              key={`${chartWidth}-${chartHeight}-${selectedDataset}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ScatterPlot
+                data={currentData}
+                xKey={currentConfig.xKey}
+                yKey={currentConfig.yKey}
+                colorKey={currentConfig.colorKey}
+                sizeKey={currentConfig.sizeKey}
+                groupBy={currentConfig.groupBy}
+                width={chartWidth}
+                height={chartHeight}
+                radius={radius}
+                opacity={opacity}
+                showTrendline={showTrendline}
+                animate={animate}
+                interactive={interactive}
+                showTooltip={showTooltip}
+                margin={margin}
+                colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
+                onDataClick={(data) => console.log('Clicked:', data)}
+                onHover={(data) => console.log('Hovered:', data)}
+                
+                // 交互功能
+                enableBrushZoom={enableBrushZoom}
+                brushZoomConfig={{
+                  direction: brushDirection,
+                  resetOnDoubleClick: true
+                }}
+                onZoom={(domain) => {
+                  setZoomDomain(domain)
+                  console.log('ScatterPlot 縮放:', domain)
+                }}
+                onZoomReset={() => {
+                  setZoomDomain(null)
+                  console.log('ScatterPlot 縮放重置')
+                }}
+                enableCrosshair={enableCrosshair}
+                crosshairConfig={{
+                  showCircle: true,
+                  showLines: true,
+                  showText: true,
+                  formatText: (data) => `X: ${data[currentConfig.xKey]?.toFixed?.(2) || data[currentConfig.xKey]}\nY: ${data[currentConfig.yKey]?.toFixed?.(2) || data[currentConfig.yKey]}`
+                }}
+                enableDropShadow={enableDropShadow}
+                enableGlowEffect={enableGlowEffect}
+                glowColor="#3b82f6"
+                
+                // 群組功能
+                enableGroupHighlight={enableGroupHighlight && !!currentConfig.groupBy}
+                enableGroupFilter={enableGroupFilter && !!currentConfig.groupBy}
+                showGroupLegend={showGroupLegend && !!currentConfig.groupBy}
+                groupColors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981']}
+                onGroupSelect={(group, isSelected) => {
+                  setSelectedGroup(isSelected ? group : null)
+                  console.log('群組選擇:', group, isSelected)
+                }}
+                onGroupHover={(group) => {
+                  setHoveredGroup(group)
+                  console.log('群組懸停:', group)
+                }}
+              />
+            </motion.div>
+          </div>
+          
+          <StatusDisplay items={statusItems} />
+        </ChartContainer>
+      </ContentSection>
+
+      {/* 數據詳情 */}
+      <ContentSection delay={0.2}>
+        <DataTable
+          title="數據詳情"
+          data={currentData}
+          columns={getTableColumns()}
+          maxRows={8}
+          showIndex
+        />
+      </ContentSection>
+
+      {/* 代碼範例 */}
+      <ContentSection delay={0.3}>
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+
+// ${selectedDataset === 'correlation' ? '相關性數據' : selectedDataset === 'iris' ? '鳶尾花數據' : 'GDP-幸福指數數據'}
+const data = [
+  { ${currentConfig.xKey}: ${currentData[0]?.[currentConfig.xKey]}, ${currentConfig.yKey}: ${currentData[0]?.[currentConfig.yKey]}${currentConfig.groupBy ? `, ${currentConfig.groupBy}: '${currentData[0]?.[currentConfig.groupBy]}'` : ''}${currentConfig.sizeKey ? `, ${currentConfig.sizeKey}: ${currentData[0]?.[currentConfig.sizeKey]}` : ''} },
+  // ... more data
+]
+
+<ScatterPlot
+  data={data}
+  xKey="${currentConfig.xKey}"
+  yKey="${currentConfig.yKey}"${currentConfig.colorKey ? `\n  colorKey="${currentConfig.colorKey}"` : ''}${currentConfig.sizeKey ? `\n  sizeKey="${currentConfig.sizeKey}"` : ''}${currentConfig.groupBy ? `\n  groupBy="${currentConfig.groupBy}"` : ''}
+  width={${chartWidth}}
+  height={${chartHeight}}
+  radius={${radius}}
+  opacity={${opacity}}
+  animate={${animate}}
+  interactive={${interactive}}
+  showTooltip={${showTooltip}}
+  showTrendline={${showTrendline}}${currentConfig.groupBy ? `\n  enableGroupHighlight={${enableGroupHighlight}}\n  enableGroupFilter={${enableGroupFilter}}\n  showGroupLegend={${showGroupLegend}}` : ''}
+  margin={{
+    top: ${margin.top},
+    right: ${margin.right},
+    bottom: ${margin.bottom},
+    left: ${margin.left}
+  }}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}
+  onDataClick={(data) => console.log('Clicked:', data)}
+  onHover={(data) => console.log('Hovered:', data)}
+/>`}
+        />
+      </ContentSection>
+
+      {/* 功能說明 */}
+      <ContentSection delay={0.4}>
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">ScatterPlot 功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">核心功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  支援多種數據集和映射模式
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  智能群組高亮和篩選功能
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  筆刷縮放和十字游標交互
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  趨勢線和相關性分析
+                </li>
+              </ul>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="showGroupLegend"
-                checked={showGroupLegend}
-                onChange={(e) => setShowGroupLegend(e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="showGroupLegend" className="text-sm font-medium text-gray-700">
-                顯示圖例
-              </label>
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">交互特性</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  多維度泡泡圖展示
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  視覺效果：陰影和光暈
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  響應式設計和動畫過渡
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  豐富的事件回調支援
+                </li>
+              </ul>
             </div>
-          </div>
-          
-          {/* 群組狀態顯示 - 固定高度避免佈局跳動 */}
-          <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm h-20">
-            <h4 className="font-medium text-green-800 mb-2">群組狀態:</h4>
-            <div className="space-y-1">
-              {selectedGroup ? (
-                <div className="text-green-700">
-                  <strong>選中群組:</strong> {String(selectedGroup)}
-                </div>
-              ) : (
-                <div className="text-gray-400 text-xs">
-                  尚未選中任何群組
-                </div>
-              )}
-              {hoveredGroup ? (
-                <div className="text-green-700">
-                  <strong>懸停群組:</strong> {String(hoveredGroup)}
-                </div>
-              ) : (
-                <div className="text-gray-400 text-xs">
-                  將滑鼠懸停在散點上查看群組
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="mt-4 p-3 bg-green-50 rounded-lg text-sm text-green-700">
-            <p className="font-medium mb-2">群組功能說明:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li><strong>群組高亮:</strong> 滑鼠懸停時高亮同群組的所有散點</li>
-              <li><strong>群組篩選:</strong> 點擊圖例可以篩選顯示特定群組</li>
-              <li><strong>顏色映射:</strong> 每個群組自動分配不同顏色</li>
-              <li><strong>互動動畫:</strong> 平滑的過渡動畫效果</li>
-            </ul>
           </div>
         </div>
-      </div>
-
-      {/* 基本散點圖 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">
-          🎯 交互功能散點圖 (新增功能測試)
-          {enableBrushZoom && <span className="text-sm text-blue-600 ml-2">({brushDirection} 軸縮放)</span>}
-          {enableCrosshair && <span className="text-sm text-green-600 ml-2">(十字游標)</span>}
-        </h3>
-        
-        {/* 交互狀態顯示 */}
-        {(zoomDomain || crosshairData) && (
-          <div className="mb-4 p-3 bg-blue-50 rounded text-sm">
-            <h4 className="font-medium text-blue-800 mb-2">交互狀態:</h4>
-            {zoomDomain && (
-              <div className="text-blue-700">
-                <strong>縮放範圍:</strong> 
-                {zoomDomain.x && ` X: ${zoomDomain.x[0]?.toFixed(2)} - ${zoomDomain.x[1]?.toFixed(2)}`}
-                {zoomDomain.y && ` Y: ${zoomDomain.y[0]?.toFixed(2)} - ${zoomDomain.y[1]?.toFixed(2)}`}
-              </div>
-            )}
-            {crosshairData && (
-              <div className="text-green-700">
-                <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
-              </div>
-            )}
-          </div>
-        )}
-        
-        <ScatterPlot
-          data={correlationData}
-          xKey="x"
-          yKey="y"
-          width={800}
-          height={400}
-          radius={6}
-          opacity={opacity}
-          showTrendline={showTrendline}
-          animate={animate}
-          colors={['#3b82f6']}
-          onDataClick={(data) => console.log('Clicked:', data)}
-          
-          // === 新增的交互功能 props ===
-          enableBrushZoom={enableBrushZoom}
-          brushZoomConfig={{
-            direction: brushDirection,
-            resetOnDoubleClick: true
-          }}
-          onZoom={(domain) => {
-            setZoomDomain(domain)
-            console.log('ScatterPlot 縮放:', domain)
-          }}
-          onZoomReset={() => {
-            setZoomDomain(null)
-            console.log('ScatterPlot 縮放重置')
-          }}
-          enableCrosshair={enableCrosshair}
-          crosshairConfig={{
-            showCircle: true,
-            showLines: true,
-            showText: true,
-            formatText: (data) => `X: ${data.x.toFixed(2)}\nY: ${data.y.toFixed(2)}\n類別: ${data.category}`
-          }}
-          enableDropShadow={enableDropShadow}
-          enableGlowEffect={enableGlowEffect}
-          glowColor="#3b82f6"
-        />
-      </div>
-
-      {/* 群組散點圖 - 鳶尾花數據集 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">
-          🌸 群組散點圖 - 鳶尾花數據集 (群組功能展示)
-          {enableGroupHighlight && <span className="text-sm text-green-600 ml-2">(群組高亮)</span>}
-          {enableGroupFilter && <span className="text-sm text-blue-600 ml-2">(群組篩選)</span>}
-        </h3>
-        <p className="text-sm text-gray-600 mb-4">
-          根據鳶尾花品種進行群組，展示群組高亮和篩選功能 (參考 D3 Gallery scatter_grouped 範例)
-        </p>
-        
-        <ScatterPlot
-          data={irisData}
-          xKey="sepalLength"
-          yKey="petalLength"
-          width={800}
-          height={400}
-          radius={6}
-          opacity={0.7}
-          animate={animate}
-          
-          // === 群組功能 props ===
-          groupBy="species"
-          groupColors={['#440154ff', '#21908dff', '#fde725ff']}  // 使用參考文件的顏色
-          enableGroupHighlight={enableGroupHighlight}  // 啟用高亮功能
-          enableGroupFilter={enableGroupFilter}     // 啟用篩選功能
-          showGroupLegend={showGroupLegend}
-          onGroupSelect={(group, isSelected) => {
-            setSelectedGroup(isSelected ? group : null)
-            console.log('群組選擇:', group, isSelected)
-          }}
-          onGroupHover={(group) => {
-            setHoveredGroup(group)
-            console.log('群組懸停:', group)
-          }}
-        />
-      </div>
-
-      {/* 顏色分類散點圖 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">顏色分類散點圖</h3>
-        <ScatterPlot
-          data={correlationData}
-          xKey="x"
-          yKey="y"
-          colorKey="category"
-          width={800}
-          height={400}
-          radius={7}
-          opacity={0.8}
-          colors={['#3b82f6', '#ef4444', '#10b981']}
-          animate={animate}
-        />
-      </div>
-
-      {/* 泡泡圖 (大小映射) */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">泡泡圖 - GDP vs 幸福指數</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          泡泡大小代表人口數量，顏色代表不同國家
-        </p>
-        <ScatterPlot
-          data={bubbleData}
-          xKey="gdp"
-          yKey="happiness"
-          sizeKey="population"
-          colorKey="country"
-          width={800}
-          height={500}
-          sizeRange={[8, 25]}
-          opacity={0.7}
-          colors={['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6b7280']}
-          showTrendline={true}
-          tooltipFormat={(d) => `
-            <div>
-              <div><strong>${d.originalData.country}</strong></div>
-              <div>GDP: $${d.x.toFixed(0)} per capita</div>
-              <div>Happiness: ${d.y.toFixed(1)}</div>
-              <div>Population: ${d.originalData.population}M</div>
-            </div>
-          `}
-        />
-      </div>
-
-      {/* 相關性分析 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h3 className="text-xl font-semibold mb-4">相關性分析（含趨勢線）</h3>
-        <ScatterPlot
-          data={correlationData}
-          xKey="x"
-          yKey="y"
-          width={800}
-          height={400}
-          radius={5}
-          opacity={0.6}
-          showTrendline={true}
-          trendlineColor="#ef4444"
-          trendlineWidth={3}
-          colors={['#6366f1']}
-        />
-      </div>
-
-      {/* 程式碼範例 */}
-      <div className="bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-xl font-semibold mb-4">使用範例</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold mb-2">基本散點圖</h4>
-            <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
-{`<ScatterPlot
-  data={data}
-  xKey="x"
-  yKey="y"
-  radius={6}
-  opacity={0.7}
-  colors={['#3b82f6']}
-/>`}
-            </pre>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-2">群組散點圖</h4>
-            <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
-{`<ScatterPlot
-  data={irisData}
-  xKey="sepalLength"
-  yKey="petalLength"
-  groupBy="species"
-  groupColors={['#440154ff', '#21908dff', '#fde725ff']}
-  enableGroupHighlight={true}
-  enableGroupFilter={true}
-  showGroupLegend={true}
-  onGroupSelect={(group, isSelected) => 
-    console.log('Group:', group, isSelected)}
-  onGroupHover={(group) => 
-    console.log('Hover:', group)}
-/>`}
-            </pre>
-          </div>
-          
-          <div>
-            <h4 className="font-semibold mb-2">泡泡圖</h4>
-            <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs overflow-x-auto">
-{`<ScatterPlot
-  data={data}
-  xKey="gdp"
-  yKey="happiness"
-  sizeKey="population"
-  colorKey="country"
-  sizeRange={[8, 25]}
-  showTrendline={true}
-/>`}
-            </pre>
-          </div>
-        </div>
-      </div>
-    </div>
+      </ContentSection>
+    </DemoPageTemplate>
   )
 }
