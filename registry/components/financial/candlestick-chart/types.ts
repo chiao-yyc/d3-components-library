@@ -57,9 +57,15 @@ export interface CandlestickChartProps {
   tooltipFormat?: (data: ProcessedOHLCData) => React.ReactNode
   
   /** 事件處理 */
-  onCandleClick?: (data: ProcessedOHLCData) => void
-  onCandleHover?: (data: ProcessedOHLCData | null) => void
+  onDataClick?: (data: ProcessedOHLCData) => void
+  onDataHover?: (data: ProcessedOHLCData | null) => void
   onDateRangeChange?: (startDate: Date, endDate: Date) => void
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
+  onCandleClick?: (data: ProcessedOHLCData) => void
+  /** @deprecated 請使用 onDataHover 替代 */
+  onCandleHover?: (data: ProcessedOHLCData | null) => void
   
   /** 樣式類名 */
   className?: string

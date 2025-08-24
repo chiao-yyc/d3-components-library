@@ -22,13 +22,22 @@ export interface ProcessedDataPoint {
 export interface LineChartConfig {
   data: any[];
 
-  // Data mapping
-  xKey?: string;
-  yKey?: string;
-  seriesKey?: string;
-  xAccessor?: (d: any) => any;
-  yAccessor?: (d: any) => any;
+  // 數據映射配置 (推薦)
   mapping?: DataMapping;
+
+  // 向下兼容的廢棄屬性 - Key-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xKey?: string;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yKey?: string;
+  /** @deprecated 請使用 mapping.series 替代。將在 v1.0.0 版本中移除。 */
+  seriesKey?: string;
+  
+  // 向下兼容的廢棄屬性 - Accessor-based 模式
+  /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
+  xAccessor?: (d: any) => any;
+  /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
+  yAccessor?: (d: any) => any;
 
   // Dimensions
   width?: number;

@@ -77,6 +77,13 @@ export interface HeatmapConfig {
   tooltipFormat?: (d: ProcessedHeatmapDataPoint) => string;
 
   // Events
+  // 標準事件命名
+  onDataClick?: (d: ProcessedHeatmapDataPoint) => void;
+  onDataHover?: (d: ProcessedHeatmapDataPoint | null) => void;
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onCellClick?: (d: ProcessedHeatmapDataPoint) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onCellHover?: (d: ProcessedHeatmapDataPoint | null) => void;
 }

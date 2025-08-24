@@ -43,8 +43,10 @@ export function CandlestickChart({
   interactive = true,
   showTooltip = true,
   tooltipFormat,
-  onCandleClick,
-  onCandleHover,
+  onDataClick,
+  onDataHover,
+  onCandleClick, // 向下兼容
+  onCandleHover, // 向下兼容
   onDateRangeChange,
   className,
   style,
@@ -387,7 +389,8 @@ export function CandlestickChart({
             showTooltipFn(position, { data: d.data, series: 'Candlestick' })
           }
           
-          onCandleHover?.(d.data)
+          // 優先使用新的標準命名，再回退到舊命名
+          (onDataHover || onCandleHover)?.(d.data)
         })
         .on('mouseleave', function() {
           // 暫時註解掉hover視覺效果恢復
@@ -396,10 +399,11 @@ export function CandlestickChart({
           // d3.select(this).select('.wick')
           //   .attr('stroke-width', wickWidth)
           hideTooltip()
-          onCandleHover?.(null)
+          (onDataHover || onCandleHover)?.(null)
         })
         .on('click', function(event, d) {
-          onCandleClick?.(d.data)
+          // 優先使用新的標準命名，再回退到舊命名
+          (onDataClick || onCandleClick)?.(d.data)
         })
     }
 

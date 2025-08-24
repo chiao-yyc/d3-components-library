@@ -30,5 +30,11 @@ export interface SimpleAreaChartProps {
   areaOpacity?: number;
   showGrid?: boolean;
   className?: string;
+  
+  // 標準事件命名
+  onDataClick?: (data: SimpleAreaChartData) => void;
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onAreaClick?: (data: SimpleAreaChartData) => void;
 }

@@ -47,8 +47,14 @@ export interface PieChartProps extends BaseChartProps {
   // Tooltip
   tooltipFormat?: (d: ProcessedPieDataPoint) => string;
 
-  // Events
+  // Events - 標準事件命名
+  onDataClick?: (d: ProcessedPieDataPoint) => void;
+  onDataHover?: (d: ProcessedPieDataPoint | null) => void;
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onSliceClick?: (d: ProcessedPieDataPoint) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onSliceHover?: (d: ProcessedPieDataPoint | null) => void;
 }
 

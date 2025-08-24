@@ -68,8 +68,18 @@ export interface TreeMapSpecificProps {
   tooltipContent?: (d: any) => string;
   enableZoom?: boolean;
   enableDrill?: boolean;
+  
+  // 標準事件命名
+  onDataClick?: (d: any, event: Event) => void;
+  onDataHover?: (d: any, event: Event) => void;
+  onDataLeave?: (d: any, event: Event) => void;
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
   onNodeClick?: (d: any, event: Event) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onNodeHover?: (d: any, event: Event) => void;
+  /** @deprecated 請使用 onDataLeave 替代 */
   onNodeLeave?: (d: any, event: Event) => void;
 
   // 動畫相關
@@ -163,8 +173,17 @@ export interface TreeMapRenderOptions {
   nodes: TreeMapNode[];
   options: TreeMapProps;
   colorScale: d3.ScaleOrdinal<string, string>;
+  // 標準事件命名
+  onDataClick?: (d: TreeMapNode, event: Event) => void;
+  onDataHover?: (d: TreeMapNode, event: Event) => void;
+  onDataLeave?: (d: TreeMapNode, event: Event) => void;
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
   onNodeClick?: (d: TreeMapNode, event: Event) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onNodeHover?: (d: TreeMapNode, event: Event) => void;
+  /** @deprecated 請使用 onDataLeave 替代 */
   onNodeLeave?: (d: TreeMapNode, event: Event) => void;
 }
 

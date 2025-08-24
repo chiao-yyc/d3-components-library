@@ -95,9 +95,15 @@ export interface ViolinPlotProps extends BaseChartProps {
   animationDelay?: number;
   animationEasing?: string;
   
-  // 互動
+  // 互動 - 標準事件命名
   tooltipFormat?: (data: ProcessedViolinDataPoint) => ReactNode;
+  onDataClick?: (data: ProcessedViolinDataPoint) => void;
+  onDataHover?: (data: ProcessedViolinDataPoint | null) => void;
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
   onViolinClick?: (data: ProcessedViolinDataPoint) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onViolinHover?: (data: ProcessedViolinDataPoint | null) => void;
   
   // 平均值樣式

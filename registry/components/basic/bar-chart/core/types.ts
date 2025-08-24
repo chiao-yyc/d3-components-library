@@ -1,54 +1,10 @@
+/**
+ * BarChart Core 類型定義
+ */
 
-// Pure TypeScript types for the core chart logic
-export interface Margin {
-  top: number;
-  right: number;
-  bottom: number;
-  left: number;
-}
+import type { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
 
-export interface DataMapping {
-  x: string | ((d: any) => any);
-  y: string | ((d: any) => any);
-  color?: string | ((d: any) => any);
-}
-
-export interface ProcessedDataPoint {
-  x: any;
-  y: number;
-  originalData: any;
-  index: number;
-}
-
-export interface BarChartConfig {
-  data: any[];
-  
-  // Data mapping
-  xKey?: string;
-  yKey?: string;
-  xAccessor?: (d: any) => any;
-  yAccessor?: (d: any) => any;
-  mapping?: DataMapping;
-  
-  // Dimensions
-  width?: number;
-  height?: number;
-  margin?: Margin;
-  
-  // Appearance
-  orientation?: 'vertical' | 'horizontal';
-  colors?: string[];
-  
-  // Behavior
-  animate?: boolean;
-  animationDuration?: number;
-  interactive?: boolean;
-  
-  // Tooltip
-  showTooltip?: boolean;
-  tooltipFormat?: (data: ProcessedDataPoint) => string;
-  
-  // Events
-  onDataClick?: (data: any) => void;
-  onHover?: (data: any) => void;
+// BarChart 處理後的數據點
+export interface ProcessedDataPoint extends CoreProcessedDataPoint {
+  // BarChart 特有的處理屬性（如果需要）
 }
