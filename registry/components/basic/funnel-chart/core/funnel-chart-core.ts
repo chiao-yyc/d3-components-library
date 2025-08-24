@@ -73,8 +73,14 @@ export interface FunnelChartCoreConfig extends BaseChartCoreConfig<FunnelChartDa
   fontSize?: number;
   fontFamily?: string;
   
-  // 事件
+  // 事件 - 標準命名
+  onDataClick?: (data: FunnelDataPoint, event: MouseEvent) => void;
+  onDataHover?: (data: FunnelDataPoint | null, event: MouseEvent) => void;
+  
+  // 向下兼容的廢棄事件 (將在未來版本中移除)
+  /** @deprecated 請使用 onDataClick 替代 */
   onSegmentClick?: (data: FunnelDataPoint, event: MouseEvent) => void;
+  /** @deprecated 請使用 onDataHover 替代 */
   onSegmentHover?: (data: FunnelDataPoint | null, event: MouseEvent) => void;
   
   // 動畫配置
@@ -308,10 +314,14 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
     if (interactive) {
       segments
         .on('click', (event, d: FunnelSegment) => {
-          config.onSegmentClick?.(d.data, event);
+          // 優先使用新的事件處理器，向下兼容舊的
+          config.onDataClick?.(d.data, event);
+          config.onSegmentClick?.(d.data, event); // 向下兼容
         })
         .on('mouseover', (event, d: FunnelSegment) => {
-          config.onSegmentHover?.(d.data, event);
+          // 優先使用新的事件處理器，向下兼容舊的
+          config.onDataHover?.(d.data, event);
+          config.onSegmentHover?.(d.data, event); // 向下兼容
           this.showTooltip(
             event.pageX || 0, 
             event.pageY || 0, 
@@ -319,7 +329,9 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
           );
         })
         .on('mouseout', (event) => {
-          config.onSegmentHover?.(null, event);
+          // 優先使用新的事件處理器，向下兼容舊的
+          config.onDataHover?.(null, event);
+          config.onSegmentHover?.(null, event); // 向下兼容
           this.hideTooltip();
         });
     }

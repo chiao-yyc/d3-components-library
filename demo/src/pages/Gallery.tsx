@@ -5,7 +5,7 @@ import { PieChart } from '@registry/components/basic/pie-chart'
 import { AreaChart } from '@registry/components/basic/area-chart'
 import { Heatmap } from '@registry/components/basic/heatmap'
 import { FunnelChart } from '@registry/components/basic/funnel-chart'
-import { ObservableFunnelChart } from '@registry/components/basic/observable-funnel-chart'
+import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 import { basicBarData } from '../data/sample-data'
 
 // 生成範例資料
@@ -483,16 +483,16 @@ function Gallery() {
                     深色主題漏斗圖
                   </h4>
                   <div className="flex justify-center">
-                    <ObservableFunnelChart
+                    <ExactFunnelChart
                       data={observableFunnelData}
                       width={350}
                       height={300}
                       background="#2a2a2a"
                       gradient1="#FF6B6B"
                       gradient2="#4ECDC4"
-                      valueColor="#ffffff"
-                      labelColor="#cccccc"
-                      percentageColor="#888888"
+                      values="#ffffff"
+                      labels="#cccccc"
+                      percentages="#888888"
                       showValues={true}
                       showLabels={true}
                       showPercentages={true}
@@ -509,16 +509,16 @@ function Gallery() {
                     淺色主題漏斗圖
                   </h4>
                   <div className="flex justify-center">
-                    <ObservableFunnelChart
+                    <ExactFunnelChart
                       data={observableFunnelData}
                       width={350}
                       height={300}
                       background="#ffffff"
                       gradient1="#3b82f6"
                       gradient2="#10b981"
-                      valueColor="#1f2937"
-                      labelColor="#374151"
-                      percentageColor="#6b7280"
+                      values="#1f2937"
+                      labels="#374151"
+                      percentages="#6b7280"
                       showValues={true}
                       showLabels={true}
                       showPercentages={true}
