@@ -39,6 +39,8 @@ const ComposablePrimitivesDemo = lazy(() => import('./pages/ComposablePrimitives
 const AlignmentTestDemo = lazy(() => import('./pages/AlignmentTestDemo'))
 const ComboChartDebugDemo = lazy(() => import('./pages/ComboChartDebugDemo'))
 const LayerOrderDebugDemo = lazy(() => import('./pages/LayerOrderDebugDemo'))
+const ResponsiveChartDemo = lazy(() => import('./pages/ResponsiveChartDemo'))
+const ResponsiveTestDemo = lazy(() => import('./pages/ResponsiveTestDemo'))
 
 function App() {
   return (
@@ -80,6 +82,8 @@ function App() {
           <Route path="/alignment-test" element={<AlignmentTestDemo />} />
           <Route path="/combo-debug" element={<ComboChartDebugDemo />} />
           <Route path="/layer-debug" element={<LayerOrderDebugDemo />} />
+          <Route path="/responsive-chart" element={<ResponsiveChartDemo />} />
+          <Route path="/responsive-test" element={<ResponsiveTestDemo />} />
         </Routes>
       </Suspense>
     </Layout>

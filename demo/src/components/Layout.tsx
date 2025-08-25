@@ -77,7 +77,9 @@ function Layout({ children }: LayoutProps) {
         { path: '/data-processor-test', name: 'DataProcessor 測試', icon: '🔬' },
         { path: '/alignment-test', name: '對齊問題測試', icon: '🎯' },
         { path: '/combo-debug', name: 'Combo 圖表除錯', icon: '🔧' },
-        { path: '/layer-debug', name: '圖層順序調試', icon: '📚' }
+        { path: '/layer-debug', name: '圖層順序調試', icon: '📚' },
+        { path: '/responsive-chart', name: '響應式圖表系統', icon: '📱' },
+        { path: '/responsive-test', name: '響應式容器測試', icon: '🧪' }
       ]
     }
   ]

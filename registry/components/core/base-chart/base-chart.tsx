@@ -1,6 +1,7 @@
 import React, { ReactNode, useMemo, useRef, useEffect, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../../utils/cn'
+import { ResponsiveChartContainer } from '../../primitives/canvas/responsive-chart-container'
 import { renderAxis, renderGrid, renderLegend, renderArcLabels, renderBarLabels, renderPointLabels, AxisConfig, GridConfig, LegendConfig, LabelConfig, BarLabelConfig, PointLabelConfig } from './chart-utils'
 import { 
   BrushZoomController, 
@@ -43,6 +44,15 @@ export interface BaseChartProps {
   showTooltip?: boolean
   onError?: (error: Error) => void
   
+  // Responsive props
+  responsive?: boolean
+  aspect?: number
+  minWidth?: number
+  maxWidth?: number
+  minHeight?: number
+  maxHeight?: number
+  containerWidth?: number  // For debugging purposes
+  
   // Group functionality props
   groupBy?: string
   groupColors?: string[]
@@ -79,6 +89,12 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected transitionManager?: TransitionManager
 
   constructor(props: TProps) {
+    console.log('🎯 BaseChart constructor called with props:', {
+      responsive: props.responsive,
+      width: props.width, 
+      height: props.height,
+      containerWidth: (props as any).containerWidth
+    })
     this.props = props
     this.state = {
       tooltip: null,
@@ -500,9 +516,17 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   }
 
   // 渲染方法 - 用於 createChartComponent
-  renderContent(containerRef: React.RefObject<HTMLDivElement>, svgRef: React.RefObject<SVGSVGElement>): ReactNode {
-    const { className, style, width, height } = this.props
+  renderContent(containerRef: React.RefObject<HTMLDivElement>, svgRef: React.RefObject<SVGSVGElement>, overrideProps?: Partial<BaseChartProps>): ReactNode {
+    const currentProps = overrideProps ? { ...this.props, ...overrideProps } : this.props
+    const { className, style, width, height, responsive } = currentProps
     const { tooltip, error } = this.state
+    
+    console.log('🎨 renderContent called:', {
+      originalProps: { width: this.props.width, height: this.props.height },
+      overrideProps,
+      finalProps: { width, height },
+      responsive
+    })
     
     if (error) {
       return (
@@ -526,17 +550,20 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       )
     }
 
+    const containerStyle = responsive ? { ...style, width: '100%' } : style
+
     return (
-      <div ref={containerRef} className={cn('relative', className)} style={style}>
+      <div ref={containerRef} className={cn('relative', className)} style={containerStyle}>
         <svg
           ref={svgRef}
           width={width}
           height={height}
           className={cn(`${this.getChartType()}-svg`, 'overflow-visible')}
+          style={responsive ? { maxWidth: '100%', height: 'auto' } : {}}
         />
         
         {/* 工具提示 */}
-        {tooltip && tooltip.visible && this.props.showTooltip && (
+        {tooltip && tooltip.visible && currentProps.showTooltip && (
           <div
             className="absolute z-50 pointer-events-none px-3 py-2 text-sm bg-gray-800 text-white rounded shadow-lg whitespace-nowrap"
             style={{
@@ -562,14 +589,31 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
-  return React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
+  const ForwardedComponent = React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
+    console.log('🎯 createChartComponent: forwardRef render function called!')
+    console.log('🎯 createChartComponent: rendering with props:', { responsive: props.responsive, width: props.width, height: props.height })
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const [, forceUpdate] = useState({});
+    const [responsiveDimensions, setResponsiveDimensions] = useState<{ width: number; height: number } | null>(null);
+    
+    // 監聽 props 變化
+    useEffect(() => {
+      console.log('🎯 createChartComponent: props changed via useEffect:', { responsive: props.responsive, width: props.width, height: props.height })
+      console.log('🎯 createChartComponent: will enter responsive mode?', props.responsive)
+    }, [props.responsive, props.width, props.height])
+    
+    // 計算最終的 props (包含響應式尺寸)
+    const finalProps = useMemo(() => {
+      if (props.responsive && responsiveDimensions) {
+        return { ...props, width: responsiveDimensions.width, height: responsiveDimensions.height }
+      }
+      return props
+    }, [props, responsiveDimensions])
     
     const chartInstance = useMemo(() => {
-      const instance = new ChartClass(props);
+      const instance = new ChartClass(finalProps);
       
       // 重寫 setState 以觸發 React 重新渲染
       const originalSetState = instance.setState.bind(instance);
@@ -587,22 +631,70 @@ export function createChartComponent<TProps extends BaseChartProps>(
     
     useEffect(() => {
       if (chartInstance.svgRef?.current) {
-        chartInstance.update(props);
+        chartInstance.update(finalProps);
       }
-    }, [props, chartInstance]);
+    }, [finalProps, chartInstance]);
     
     // 單獨的 useEffect 用於 SVG ref 變化
     useEffect(() => {
-      if (chartInstance.svgRef?.current && props) {
-        chartInstance.update(props);
+      if (chartInstance.svgRef?.current && finalProps) {
+        chartInstance.update(finalProps);
       }
     }, [chartInstance.svgRef?.current]);
 
     // 公開實例方法
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])
 
+    // 如果啟用響應式模式，使用 ResponsiveChartContainer
+    if (props.responsive) {
+      console.log('🎯 BaseChart: entering responsive mode with ResponsiveChartContainer')
+      
+      return (
+        <ResponsiveChartContainer
+          aspect={props.aspect}
+          minWidth={props.minWidth}
+          maxWidth={props.maxWidth}
+          minHeight={props.minHeight}
+          maxHeight={props.maxHeight}
+          className={props.className}
+          style={props.style}
+        >
+          {(dimensions: { width: number; height: number }) => {
+            console.log('📊 BaseChart render function called with dimensions:', dimensions)
+            console.log('📊 Current props:', { width: props.width, height: props.height, responsive: props.responsive })
+            
+            // 更新響應式尺寸狀態
+            if (!responsiveDimensions || 
+                responsiveDimensions.width !== dimensions.width || 
+                responsiveDimensions.height !== dimensions.height) {
+              console.log('📊 Updating responsiveDimensions state:', dimensions)
+              setResponsiveDimensions(dimensions)
+              
+              // 當尺寸改變時，同步更新圖表實例
+              if (chartInstance.svgRef?.current && dimensions.width > 0 && dimensions.height > 0) {
+                const updatedProps = { ...props, width: dimensions.width, height: dimensions.height }
+                console.log('📊 Updating chartInstance with props:', updatedProps)
+                setTimeout(() => chartInstance.update(updatedProps), 0)
+              }
+            }
+            
+            // 使用最新的尺寸渲染
+            const currentProps = { ...props, width: dimensions.width, height: dimensions.height }
+            console.log('📊 Rendering with currentProps:', currentProps)
+            return chartInstance.renderContent(containerRef, svgRef, currentProps)
+          }}
+        </ResponsiveChartContainer>
+      )
+    }
+
     return chartInstance.renderContent(containerRef, svgRef)
   })
+  
+  // 添加顯示名稱和調試信息
+  ForwardedComponent.displayName = `createChartComponent(${ChartClass.name})`
+  console.log('🎯 createChartComponent created:', ForwardedComponent.displayName)
+  
+  return ForwardedComponent
 }
 
 // 默認配置
