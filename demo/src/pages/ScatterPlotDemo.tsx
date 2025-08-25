@@ -130,8 +130,7 @@ export default function ScatterPlotDemo() {
   const [zoomDomain, setZoomDomain] = useState<{ x?: [any, any]; y?: [any, any] } | null>(null)
   const [crosshairData, setCrosshairData] = useState<any>(null)
   
-  // 邊距設定
-  const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 50 })
+  // 邊距設定移除，使用系統預設
 
   // 獲取當前數據集
   const getCurrentData = () => {
@@ -253,40 +252,6 @@ export default function ScatterPlotDemo() {
               />
             </ControlGroup>
 
-            {/* 邊距設定 */}
-            <ControlGroup title="邊距設定" icon="📐" cols={4}>
-              <RangeSlider
-                label="上"
-                value={margin.top}
-                min={0}
-                max={50}
-                onChange={(value) => setMargin(prev => ({ ...prev, top: value }))}
-              />
-              
-              <RangeSlider
-                label="右"
-                value={margin.right}
-                min={0}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, right: value }))}
-              />
-              
-              <RangeSlider
-                label="下"
-                value={margin.bottom}
-                min={20}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, bottom: value }))}
-              />
-              
-              <RangeSlider
-                label="左"
-                value={margin.left}
-                min={20}
-                max={100}
-                onChange={(value) => setMargin(prev => ({ ...prev, left: value }))}
-              />
-            </ControlGroup>
 
             {/* 基本功能 */}
             <ControlGroup title="基本功能" icon="🎯" cols={2}>
@@ -464,7 +429,6 @@ export default function ScatterPlotDemo() {
                 animate={animate}
                 interactive={interactive}
                 showTooltip={showTooltip}
-                margin={margin}
                 colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
                 onDataClick={(data) => console.log('Clicked:', data)}
                 onHover={(data) => console.log('Hovered:', data)}
@@ -550,13 +514,7 @@ const data = [
   animate={${animate}}
   interactive={${interactive}}
   showTooltip={${showTooltip}}
-  showTrendline={${showTrendline}}${currentConfig.groupBy ? `\n  enableGroupHighlight={${enableGroupHighlight}}\n  enableGroupFilter={${enableGroupFilter}}\n  showGroupLegend={${showGroupLegend}}` : ''}
-  margin={{
-    top: ${margin.top},
-    right: ${margin.right},
-    bottom: ${margin.bottom},
-    left: ${margin.left}
-  }}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}
+  showTrendline={${showTrendline}}${currentConfig.groupBy ? `\n  enableGroupHighlight={${enableGroupHighlight}}\n  enableGroupFilter={${enableGroupFilter}}\n  showGroupLegend={${showGroupLegend}}` : ''}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
 />`}

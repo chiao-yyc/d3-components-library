@@ -10,6 +10,7 @@ export interface CandlestickChartProps {
   /** 圖表尺寸 */
   width?: number
   height?: number
+  responsive?: boolean  // 新增：響應式支援
   margin?: {
     top: number
     right: number

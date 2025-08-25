@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { BaseChartProps } from '../../core/base-chart/types'
 
 export interface GaugeChartDataPoint {
   [key: string]: any
@@ -17,7 +18,7 @@ export interface GaugeZone {
   label?: string
 }
 
-export interface GaugeChartProps {
+export interface GaugeChartProps extends Omit<BaseChartProps, 'data'> {
   // 資料相關
   data?: GaugeChartDataPoint[]
   value?: number
@@ -32,15 +33,13 @@ export interface GaugeChartProps {
     label?: string | ((d: GaugeChartDataPoint) => string)
   }
 
-  // 尺寸和佈局
-  width?: number
-  height?: number
-  margin?: {
-    top: number
-    right: number
-    bottom: number
-    left: number
-  }
+  // 響應式屬性繼承自 BaseChartProps：
+  // responsive?: boolean
+  // aspect?: number  
+  // minWidth?: number
+  // maxWidth?: number
+  // minHeight?: number
+  // maxHeight?: number
   
   // 儀表盤外觀
   innerRadius?: number

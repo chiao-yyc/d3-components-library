@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { ChartContainer } from '@/components/ui/ChartContainer'
 import { DemoPageTemplate } from '@/components/ui/DemoPageTemplate'
 import { ModernControlPanel } from '@/components/ui/ModernControlPanel'
+import { ResponsiveChartContainer } from '@/registry/components/primitives/canvas/responsive-chart-container'
 import { ChartCanvas } from '@/registry/components/primitives/canvas'
 import { Bar } from '@/registry/components/primitives/shapes/bar'
 import { Line } from '@/registry/components/primitives/shapes/line'
@@ -23,183 +24,209 @@ export default function AlignmentTestDemo() {
   const [showGrid, setShowGrid] = useState(true)
   const [showGuides, setShowGuides] = useState(false)
 
-  // 創建 scales
-  const { xScale, yScale } = useMemo(() => {
-    const xScale = d3.scaleBand()
-      .domain(testData.map(d => d.category))
-      .range([0, 800 - 60 - 40])  // width - left margin - right margin
-      .padding(0.1)
-    
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(testData, d => Math.max(d.barValue, d.lineValue, d.scatterValue)) || 200])
-      .range([400 - 20 - 60, 0])  // height - top margin - bottom margin
-      .nice()
-    
-    return { xScale, yScale }
-  }, [])
+  // 響應式圖表組件
+  const ResponsiveAlignmentChart: React.FC<{ width: number; height: number }> = ({ width, height }) => {
+    // 使用 ChartCanvas 預設 margin: { top: 20, right: 20, bottom: 40, left: 40 }
+    const margin = { top: 20, right: 20, bottom: 40, left: 40 }
+    const chartWidth = width - margin.left - margin.right
+    const chartHeight = height - margin.top - margin.bottom
 
-  // 生成對齊測試輔助線
-  const AlignmentGuides: React.FC<{ xScale: any; height: number }> = ({ xScale, height }) => {
-    if (!showGuides || !xScale.domain) return null
-    
-    return (
-      <g className="alignment-guides">
-        {xScale.domain().map((value: any) => {
-          // 計算對齊位置
-          let x: number
-          const baseX = xScale(value)
-          
-          if (xScale.bandwidth) {
-            const bandwidth = xScale.bandwidth()
-            switch (alignment) {
-              case 'start':
-                x = baseX
-                break
-              case 'center':
-                x = baseX + bandwidth / 2
-                break
-              case 'end':
-                x = baseX + bandwidth
-                break
-              default:
-                x = baseX + bandwidth / 2
+    // 創建響應式 scales
+    const { xScale, yScale } = useMemo(() => {
+      const xScale = d3.scaleBand()
+        .domain(testData.map(d => d.category))
+        .range([0, chartWidth])
+        .padding(0.1)
+      
+      const yScale = d3.scaleLinear()
+        .domain([0, d3.max(testData, d => Math.max(d.barValue, d.lineValue, d.scatterValue)) || 200])
+        .range([chartHeight, 0])
+        .nice()
+      
+      return { xScale, yScale }
+    }, [chartWidth, chartHeight])
+
+    // 生成對齊測試輔助線
+    const AlignmentGuides: React.FC<{ xScale: any; height: number }> = ({ xScale, height }) => {
+      if (!showGuides || !xScale.domain) return null
+      
+      return (
+        <g className="alignment-guides">
+          {xScale.domain().map((value: any) => {
+            // 計算對齊位置
+            let x: number
+            const baseX = xScale(value)
+            
+            if (xScale.bandwidth) {
+              const bandwidth = xScale.bandwidth()
+              switch (alignment) {
+                case 'start':
+                  x = baseX
+                  break
+                case 'center':
+                  x = baseX + bandwidth / 2
+                  break
+                case 'end':
+                  x = baseX + bandwidth
+                  break
+                default:
+                  x = baseX + bandwidth / 2
+              }
+            } else {
+              x = baseX
             }
-          } else {
-            x = baseX
-          }
-          
-          return (
-            <line
-              key={value}
-              x1={x}
-              x2={x}
-              y1={0}
-              y2={height}
-              stroke="#ff0000"
-              strokeWidth={1}
-              strokeDasharray="2,2"
+            
+            return (
+              <line
+                key={value}
+                x1={x}
+                x2={x}
+                y1={0}
+                y2={height}
+                stroke="#ff0000"
+                strokeWidth={1}
+                strokeDasharray="2,2"
+                opacity={0.8}
+              />
+            )
+          })}
+        </g>
+      )
+    }
+
+    return (
+      <ChartCanvas 
+        width={width} 
+        height={height}
+        margin={margin}
+      >
+        <svg width={width} height={height}>
+          <g transform={`translate(${margin.left}, ${margin.top})`}>
+            {/* X軸 */}
+            <g transform={`translate(0, ${chartHeight})`}>
+              {xScale.domain().map((tick: any) => {
+                const x = xScale(tick)! + xScale.bandwidth()! / 2
+                return (
+                  <g key={tick}>
+                    <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
+                    <text x={x} y={20} textAnchor="middle" fontSize={12} fill="#666">
+                      {tick}
+                    </text>
+                  </g>
+                )
+              })}
+              <line x1={0} x2={chartWidth} y1={0} y2={0} stroke="#666" />
+            </g>
+            
+            {/* Y軸 */}
+            <g>
+              {yScale.ticks(5).map((tick: any) => {
+                const y = yScale(tick)
+                return (
+                  <g key={tick}>
+                    <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
+                    <text x={-10} y={y + 4} textAnchor="end" fontSize={12} fill="#666">
+                      {tick}
+                    </text>
+                    {showGrid && (
+                      <line 
+                        x1={0} 
+                        x2={chartWidth} 
+                        y1={y} 
+                        y2={y} 
+                        stroke="#e5e7eb" 
+                        strokeDasharray="2,2" 
+                      />
+                    )}
+                  </g>
+                )
+              })}
+              <line x1={0} x2={0} y1={0} y2={chartHeight} stroke="#666" />
+            </g>
+            
+            {/* 條形圖 */}
+            <Bar 
+              data={testData.map(d => ({ x: d.category, y: d.barValue }))}
+              xScale={xScale}
+              yScale={yScale}
+              alignment={alignment}
+              barWidthRatio={barWidthRatio}
+              color="#3b82f6"
               opacity={0.8}
+              animate={true}
+              animationDuration={500}
             />
-          )
-        })}
-      </g>
+            
+            {/* 線圖 */}
+            <Line 
+              data={testData.map(d => ({ x: d.category, y: d.lineValue }))}
+              xScale={xScale}
+              yScale={yScale}
+              pointAlignment={alignment}
+              color="#ef4444"
+              strokeWidth={3}
+              showPoints={true}
+              pointRadius={5}
+              animate={true}
+              animationDuration={700}
+            />
+            
+            {/* 散點圖 */}
+            <Scatter 
+              data={testData.map(d => ({ x: d.category, y: d.scatterValue }))}
+              xScale={xScale}
+              yScale={yScale}
+              pointAlignment={alignment}
+              color="#10b981"
+              radius={8}
+              opacity={0.9}
+              strokeColor="white"
+              strokeWidth={2}
+              animate={true}
+              animationDuration={900}
+            />
+            
+            {/* 對齊輔助線 */}
+            {showGuides && (
+              <AlignmentGuides 
+                xScale={xScale}
+                height={chartHeight}
+              />
+            )}
+          </g>
+        </svg>
+      </ChartCanvas>
     )
   }
 
   // 動態程式碼範例 - 根據控制面板設定同步更新
-  const codeExample = `
-// 對齊測試演示 - 使用 Primitives 直接構建
+  const codeExample = `// 響應式對齊測試演示 - 使用 ResponsiveChartContainer + Primitives
 import React, { useMemo } from 'react'
+import { ResponsiveChartContainer } from '@/registry/components/primitives/canvas/responsive-chart-container'
 import { ChartCanvas } from '@/registry/components/primitives/canvas'
 import { Bar, Line, Scatter } from '@/registry/components/primitives/shapes'
 import * as d3 from 'd3'
 
-const testData = [
-  { category: 'A', barValue: 100, lineValue: 80, scatterValue: 90 },
-  { category: 'B', barValue: 150, lineValue: 120, scatterValue: 135 },
-  // ... more data
-]
-
-function AlignmentTestChart() {
-  // 創建 scales
-  const { xScale, yScale } = useMemo(() => {
-    const xScale = d3.scaleBand()
-      .domain(testData.map(d => d.category))
-      .range([0, 640])  // 800 - margins
-      .padding(0.1)
-    
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(testData, d => Math.max(d.barValue, d.lineValue, d.scatterValue))])
-      .range([320, 0])  // 400 - margins  
-      .nice()
-    
-    return { xScale, yScale }
-  }, [])
-
+function ResponsiveAlignmentChart() {
   return (
-    <ChartCanvas width={800} height={400} margin={{ top: 20, right: 40, bottom: 60, left: 60 }}>
-      <svg width={800} height={400}>
-        <g transform="translate(60, 20)">
-          {/* 手動軸線渲染 */}
-          {/* X軸 */}
-          <g transform="translate(0, 320)">
-            {xScale.domain().map(tick => {
-              const x = xScale(tick) + xScale.bandwidth() / 2
-              return (
-                <g key={tick}>
-                  <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
-                  <text x={x} y={20} textAnchor="middle" fontSize={12}>{tick}</text>
-                </g>
-              )
-            })}
-            <line x1={0} x2={640} y1={0} y2={0} stroke="#666" />
-          </g>
-          
-          {/* Y軸 ${showGrid ? '+ 網格線' : ''} */}
-          <g>
-            {yScale.ticks(5).map(tick => {
-              const y = yScale(tick)
-              return (
-                <g key={tick}>
-                  <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
-                  <text x={-10} y={y + 4} textAnchor="end" fontSize={12}>{tick}</text>
-                  ${showGrid ? `<line x1={0} x2={640} y1={y} y2={y} stroke="#e5e7eb" strokeDasharray="2,2" />` : ''}
-                </g>
-              )
-            })}
-            <line x1={0} x2={0} y1={0} y2={320} stroke="#666" />
-          </g>
+    <ResponsiveChartContainer>
+      {({ width, height }) => {
+        // 創建響應式 scales 和渲染邏輯
+        const margin = { top: 20, right: 20, bottom: 40, left: 40 }  // 使用系統預設
+        const chartWidth = width - margin.left - margin.right
+        const chartHeight = height - margin.top - margin.bottom
 
-          {/* 條形圖 - 當前對齊策略: ${alignment} */}
-          <Bar 
-            data={testData.map(d => ({ x: d.category, y: d.barValue }))}
-            xScale={xScale}
-            yScale={yScale}
-            alignment="${alignment}"
-            barWidthRatio={${barWidthRatio}}
-            color="#3b82f6"
-            opacity={0.8}
-            animate={true}
-            animationDuration={500}
-          />
-          
-          {/* 線圖 - 點對齊策略: ${alignment} */}
-          <Line 
-            data={testData.map(d => ({ x: d.category, y: d.lineValue }))}
-            xScale={xScale}
-            yScale={yScale}
-            pointAlignment="${alignment}"
-            color="#ef4444"
-            strokeWidth={3}
-            showPoints={true}
-            pointRadius={5}
-            animate={true}
-            animationDuration={700}
-          />
-          
-          {/* 散點圖 - 點對齊策略: ${alignment} */}
-          <Scatter 
-            data={testData.map(d => ({ x: d.category, y: d.scatterValue }))}
-            xScale={xScale}
-            yScale={yScale}
-            pointAlignment="${alignment}"
-            color="#10b981"
-            radius={8}
-            opacity={0.9}
-            strokeColor="white"
-            strokeWidth={2}
-            animate={true}
-            animationDuration={900}
-          />
-          
-          ${showGuides ? `{/* 對齊輔助線 - 紅色虛線顯示對齊位置 */}
-          <AlignmentGuides 
-            xScale={xScale}
-            height={320}
-          />` : ''}
-        </g>
-      </svg>
-    </ChartCanvas>
+        // 條形圖 - 當前對齊策略: ${alignment}
+        <Bar alignment="${alignment}" barWidthRatio={${barWidthRatio}} />
+        
+        // 線圖和散點圖 - 點對齊策略: ${alignment}
+        <Line pointAlignment="${alignment}" />
+        <Scatter pointAlignment="${alignment}" />
+        
+        ${showGuides ? '// 顯示對齊輔助線' : '// 隱藏對齊輔助線'}
+        ${showGrid ? '// 顯示網格線' : '// 隱藏網格線'}
+      }}
+    </ResponsiveChartContainer>
   )
 }`
 
@@ -293,7 +320,7 @@ function AlignmentTestChart() {
           <div className="bg-white p-6 rounded-lg shadow-sm border">
             <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
               <span className="text-green-500">🧪</span>
-              對齊測試圖表
+              對齊測試圖表 (響應式)
               {showGuides && (
                 <span className="text-sm text-red-500 ml-2">
                   (紅色虛線 = 對齊參考線)
@@ -301,107 +328,14 @@ function AlignmentTestChart() {
               )}
             </h3>
             <ChartContainer>
-              <ChartCanvas 
-                width={800} 
-                height={400} 
-                margin={{ top: 20, right: 40, bottom: 60, left: 60 }}
+              <ResponsiveChartContainer 
+                minHeight={400}
+                maxHeight={600}
               >
-                <svg width={800} height={400}>
-                  <g transform={`translate(60, 20)`}>
-                    {/* X軸 */}
-                    <g transform={`translate(0, ${400 - 20 - 60})`}>
-                      {xScale.domain().map((tick: any) => {
-                        const x = xScale(tick)! + xScale.bandwidth()! / 2
-                        return (
-                          <g key={tick}>
-                            <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
-                            <text x={x} y={20} textAnchor="middle" fontSize={12} fill="#666">
-                              {tick}
-                            </text>
-                          </g>
-                        )
-                      })}
-                      <line x1={0} x2={800 - 60 - 40} y1={0} y2={0} stroke="#666" />
-                    </g>
-                    
-                    {/* Y軸 */}
-                    <g>
-                      {yScale.ticks(5).map((tick: any) => {
-                        const y = yScale(tick)
-                        return (
-                          <g key={tick}>
-                            <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
-                            <text x={-10} y={y + 4} textAnchor="end" fontSize={12} fill="#666">
-                              {tick}
-                            </text>
-                            {showGrid && (
-                              <line 
-                                x1={0} 
-                                x2={800 - 60 - 40} 
-                                y1={y} 
-                                y2={y} 
-                                stroke="#e5e7eb" 
-                                strokeDasharray="2,2" 
-                              />
-                            )}
-                          </g>
-                        )
-                      })}
-                      <line x1={0} x2={0} y1={0} y2={400 - 20 - 60} stroke="#666" />
-                    </g>
-                    
-                    {/* 條形圖 */}
-                    <Bar 
-                      data={testData.map(d => ({ x: d.category, y: d.barValue }))}
-                      xScale={xScale}
-                      yScale={yScale}
-                      alignment={alignment}
-                      barWidthRatio={barWidthRatio}
-                      color="#3b82f6"
-                      opacity={0.8}
-                      animate={true}
-                      animationDuration={500}
-                    />
-                    
-                    {/* 線圖 */}
-                    <Line 
-                      data={testData.map(d => ({ x: d.category, y: d.lineValue }))}
-                      xScale={xScale}
-                      yScale={yScale}
-                      pointAlignment={alignment}
-                      color="#ef4444"
-                      strokeWidth={3}
-                      showPoints={true}
-                      pointRadius={5}
-                      animate={true}
-                      animationDuration={700}
-                    />
-                    
-                    {/* 散點圖 */}
-                    <Scatter 
-                      data={testData.map(d => ({ x: d.category, y: d.scatterValue }))}
-                      xScale={xScale}
-                      yScale={yScale}
-                      pointAlignment={alignment}
-                      color="#10b981"
-                      radius={8}
-                      opacity={0.9}
-                      strokeColor="white"
-                      strokeWidth={2}
-                      animate={true}
-                      animationDuration={900}
-                    />
-                    
-                    {/* 對齊輔助線 */}
-                    {showGuides && (
-                      <AlignmentGuides 
-                        xScale={xScale}
-                        height={400 - 20 - 60}
-                      />
-                    )}
-                  </g>
-                </svg>
-              </ChartCanvas>
+                {({ width, height }) => (
+                  <ResponsiveAlignmentChart width={width} height={height} />
+                )}
+              </ResponsiveChartContainer>
             </ChartContainer>
           </div>
         </div>
@@ -486,6 +420,10 @@ function AlignmentTestChart() {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm">支援動態切換對齊策略</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm">響應式容器自動調整尺寸</span>
+              </div>
             </div>
           </div>
         </div>
@@ -497,6 +435,8 @@ function AlignmentTestChart() {
               技術實現細節
             </h3>
             <div className="space-y-2 text-sm text-gray-600">
+              <p>• <strong>響應式容器</strong>：ResponsiveChartContainer</p>
+              <p>• <strong>動態尺寸計算</strong>：chartWidth/chartHeight</p>
               <p>• <strong>統一工具函數</strong>：calculateAlignedPosition()</p>
               <p>• <strong>Band Scale 處理</strong>：自動檢測並計算偏移</p>
               <p>• <strong>條形特殊處理</strong>：calculateBarPosition()</p>
@@ -525,12 +465,12 @@ function AlignmentTestChart() {
             </ol>
           </div>
           <div>
-            <h4 className="font-semibold mb-2 text-gray-800">進階測試</h4>
+            <h4 className="font-semibold mb-2 text-gray-800">響應式測試</h4>
             <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-              <li>開啟對齊輔助線</li>
-              <li>驗證紅線與組件對齊</li>
-              <li>測試極端寬度值 (0.2-1.0)</li>
-              <li>確認動畫過程中對齊保持</li>
+              <li>調整瀏覽器窗口大小</li>
+              <li>驗證圖表自動調整尺寸</li>
+              <li>確認對齊在不同尺寸下保持</li>
+              <li>測試極窄和極寬容器</li>
             </ol>
           </div>
           <div>

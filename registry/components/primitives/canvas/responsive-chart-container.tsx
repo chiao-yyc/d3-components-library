@@ -14,7 +14,7 @@ export interface ResponsiveChartContainerProps {
 
 export const ResponsiveChartContainer: React.FC<ResponsiveChartContainerProps> = ({
   children,
-  aspect,
+  aspect = 4/3,  // 預設使用 4:3 比例，更適合大多數圖表
   minWidth = 200,
   maxWidth = Infinity,
   minHeight = 150,

@@ -42,8 +42,7 @@ export default function BarChartDemo() {
   const [showLabels, setShowLabels] = useState(false)
   const [labelPosition, setLabelPosition] = useState<'top' | 'center' | 'bottom'>('top')
   
-  // 邊距設定
-  const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 40 })
+  // 移除 margin 設定，使用系統預設以確保一致性
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
 
@@ -158,40 +157,7 @@ export default function BarChartDemo() {
               </ControlGroup>
             )}
 
-            {/* 邊距設定 */}
-            <ControlGroup title="邊距設定" icon="📐" cols={4}>
-              <RangeSlider
-                label="上"
-                value={margin.top}
-                min={0}
-                max={50}
-                onChange={(value) => setMargin(prev => ({ ...prev, top: value }))}
-              />
-              
-              <RangeSlider
-                label="右"
-                value={margin.right}
-                min={0}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, right: value }))}
-              />
-              
-              <RangeSlider
-                label="下"
-                value={margin.bottom}
-                min={20}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, bottom: value }))}
-              />
-              
-              <RangeSlider
-                label="左"
-                value={margin.left}
-                min={20}
-                max={100}
-                onChange={(value) => setMargin(prev => ({ ...prev, left: value }))}
-              />
-            </ControlGroup>
+            {/* 移除邊距設定控制項，統一使用系統預設 margin 以確保一致性 */}
 
             {/* 功能開關 */}
             <ControlGroup title="交互功能" icon="🎯" cols={2}>
@@ -281,7 +247,6 @@ export default function BarChartDemo() {
                 showTooltip={showTooltip}
                 showLabels={showLabels}
                 labelPosition={labelPosition}
-                margin={margin}
                 onDataClick={(data) => console.log('Clicked:', data)}
                 onHover={(data) => console.log('Hovered:', data)}
               />
@@ -333,12 +298,6 @@ ${responsive ? `// 響應式模式 - 自動適應容器大小
   showTooltip={${showTooltip}}
   showLabels={${showLabels}}
   labelPosition="${labelPosition}"
-  margin={{
-    top: ${margin.top},
-    right: ${margin.right},
-    bottom: ${margin.bottom},
-    left: ${margin.left}
-  }}
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
 />` : `// 固定尺寸模式
@@ -355,12 +314,6 @@ ${responsive ? `// 響應式模式 - 自動適應容器大小
   showTooltip={${showTooltip}}
   showLabels={${showLabels}}
   labelPosition="${labelPosition}"
-  margin={{
-    top: ${margin.top},
-    right: ${margin.right},
-    bottom: ${margin.bottom},
-    left: ${margin.left}
-  }}
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
 />`}`}

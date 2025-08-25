@@ -1,5 +1,12 @@
 import { ReactNode } from 'react'
 
+export interface Margin {
+  top: number
+  right: number
+  bottom: number
+  left: number
+}
+
 export interface BaseChartDataPoint {
   [key: string]: any
 }
@@ -14,7 +21,7 @@ export interface BaseChartProps {
   data: BaseChartDataPoint[]
   width?: number
   height?: number
-  margin?: { top: number; right: number; bottom: number; left: number }
+  margin?: Margin
   className?: string
   style?: React.CSSProperties
   animate?: boolean
@@ -27,7 +34,7 @@ export interface BaseChartProps {
 export interface ChartDimensions {
   width: number
   height: number
-  margin: { top: number; right: number; bottom: number; left: number }
+  margin: Margin
   chartWidth: number
   chartHeight: number
 }

@@ -441,8 +441,7 @@ export default function CandlestickDemo() {
             >
               <CandlestickChart
                 data={currentData}
-                width={chartWidth}
-                height={chartHeight}
+                responsive={true}
                 colorMode={colorMode}
                 showVolume={showVolume}
                 candleWidth={candleWidth}

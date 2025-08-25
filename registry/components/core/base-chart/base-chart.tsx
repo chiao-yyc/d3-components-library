@@ -32,25 +32,50 @@ import {
   AnimationConfig
 } from './interaction-animation-utils'
 
+// 預設配置常數
+const DEFAULT_CHART_CONFIG = {
+  responsive: true,        // 🎯 響應式優先
+  aspect: 4/3,            // 標準寬高比 (4:3 更適合大多數圖表)
+  minWidth: 300,          // 最小寬度
+  maxWidth: 1200,         // 最大寬度  
+  minHeight: 200,         // 最小高度
+  maxHeight: 800,         // 最大高度
+  fallbackWidth: 600,     // 後備寬度
+  fallbackHeight: 450,    // 後備高度 (維持 4:3 比例)
+  animate: true,          // 預設動畫
+  animationDuration: 800, // 動畫時長
+  showTooltip: true       // 預設工具提示
+}
+
 export interface BaseChartProps {
   data: any[]
+  
+  // 🎯 響應式優先設計
+  responsive?: boolean     // 預設 true
+  aspect?: number         // 預設 16/9
+  minWidth?: number       // 預設 300
+  maxWidth?: number       // 預設 1200  
+  minHeight?: number      // 預設 200
+  maxHeight?: number      // 預設 800
+  
+  // 🔄 固定尺寸支援（當設定時自動 responsive: false）
   width?: number
   height?: number
+  
+  // 🛡️ 後備保護（內部使用）
+  fallbackWidth?: number   // 預設 600
+  fallbackHeight?: number  // 預設 400
+  
+  // 其他基礎屬性
   margin?: { top: number; right: number; bottom: number; left: number }
   className?: string
   style?: React.CSSProperties
-  animate?: boolean
-  animationDuration?: number
-  showTooltip?: boolean
+  animate?: boolean        // 預設 true
+  animationDuration?: number // 預設 800
+  showTooltip?: boolean    // 預設 true
   onError?: (error: Error) => void
   
-  // Responsive props
-  responsive?: boolean
-  aspect?: number
-  minWidth?: number
-  maxWidth?: number
-  minHeight?: number
-  maxHeight?: number
+  // 調試用（開發階段）
   containerWidth?: number  // For debugging purposes
   
   // Group functionality props
@@ -162,15 +187,67 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     }
   }
 
-  // 共用方法
+  // 🎯 智能尺寸檢測方法（響應式優先）
   protected getChartDimensions() {
-    const { width = 800, height = 400, margin = { top: 20, right: 30, bottom: 40, left: 40 } } = this.props
-    return {
-      width,
+    const { 
+      width, 
       height,
+      responsive = DEFAULT_CHART_CONFIG.responsive,
+      aspect = DEFAULT_CHART_CONFIG.aspect,
+      minWidth = DEFAULT_CHART_CONFIG.minWidth,
+      maxWidth = DEFAULT_CHART_CONFIG.maxWidth,
+      minHeight = DEFAULT_CHART_CONFIG.minHeight,
+      maxHeight = DEFAULT_CHART_CONFIG.maxHeight,
+      fallbackWidth = DEFAULT_CHART_CONFIG.fallbackWidth,
+      fallbackHeight = DEFAULT_CHART_CONFIG.fallbackHeight,
+      margin = { top: 20, right: 30, bottom: 40, left: 40 }
+    } = this.props
+    
+    let finalWidth: number
+    let finalHeight: number
+    let mode: 'fixed' | 'responsive' | 'fallback'
+    
+    // 1. 🔄 固定尺寸模式：如果明確指定 width 和 height
+    if (width !== undefined && height !== undefined) {
+      finalWidth = width
+      finalHeight = height  
+      mode = 'fixed'
+    }
+    // 2. 🎯 響應式模式：預設行為或明確啟用
+    else if (responsive !== false) {
+      // 這裡應該從 ResponsiveChartContainer 獲取尺寸
+      // 目前使用後備值，之後會在 createChartComponent 中處理
+      finalWidth = fallbackWidth
+      finalHeight = finalWidth / aspect
+      
+      // 應用約束條件
+      finalWidth = Math.max(minWidth, Math.min(maxWidth, finalWidth))
+      finalHeight = Math.max(minHeight, Math.min(maxHeight, finalHeight))
+      
+      mode = 'responsive'
+    }
+    // 3. 🛡️ 後備模式：響應式被禁用且沒有指定尺寸
+    else {
+      finalWidth = fallbackWidth
+      finalHeight = fallbackHeight
+      mode = 'fallback'
+    }
+    
+    console.log('🔧 Chart dimensions calculated:', {
+      mode,
+      width: finalWidth,
+      height: finalHeight,
+      responsive,
+      props: { width, height, responsive }
+    })
+    
+    return {
+      width: finalWidth,
+      height: finalHeight,
       margin,
-      chartWidth: width - margin.left - margin.right,
-      chartHeight: height - margin.top - margin.bottom
+      chartWidth: finalWidth - margin.left - margin.right,
+      chartHeight: finalHeight - margin.top - margin.bottom,
+      mode // 調試用
     }
   }
 
@@ -590,8 +667,23 @@ export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
   const ForwardedComponent = React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
+    // 🎯 應用預設配置（響應式優先）
+    const propsWithDefaults = useMemo(() => ({
+      ...DEFAULT_CHART_CONFIG,
+      ...props,
+      // 🔄 智能響應式檢測：如果指定了 width 和 height，自動禁用響應式
+      responsive: (props.width !== undefined && props.height !== undefined) 
+        ? false 
+        : (props.responsive !== undefined ? props.responsive : DEFAULT_CHART_CONFIG.responsive)
+    }), [props])
+    
     console.log('🎯 createChartComponent: forwardRef render function called!')
-    console.log('🎯 createChartComponent: rendering with props:', { responsive: props.responsive, width: props.width, height: props.height })
+    console.log('🎯 createChartComponent: rendering with props:', { 
+      responsive: propsWithDefaults.responsive, 
+      width: propsWithDefaults.width, 
+      height: propsWithDefaults.height,
+      mode: propsWithDefaults.width && propsWithDefaults.height ? 'fixed' : 'responsive'
+    })
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
@@ -600,17 +692,21 @@ export function createChartComponent<TProps extends BaseChartProps>(
     
     // 監聽 props 變化
     useEffect(() => {
-      console.log('🎯 createChartComponent: props changed via useEffect:', { responsive: props.responsive, width: props.width, height: props.height })
-      console.log('🎯 createChartComponent: will enter responsive mode?', props.responsive)
-    }, [props.responsive, props.width, props.height])
+      console.log('🎯 createChartComponent: props changed via useEffect:', { 
+        responsive: propsWithDefaults.responsive, 
+        width: propsWithDefaults.width, 
+        height: propsWithDefaults.height 
+      })
+      console.log('🎯 createChartComponent: will enter responsive mode?', propsWithDefaults.responsive)
+    }, [propsWithDefaults.responsive, propsWithDefaults.width, propsWithDefaults.height])
     
     // 計算最終的 props (包含響應式尺寸)
     const finalProps = useMemo(() => {
-      if (props.responsive && responsiveDimensions) {
-        return { ...props, width: responsiveDimensions.width, height: responsiveDimensions.height }
+      if (propsWithDefaults.responsive && responsiveDimensions) {
+        return { ...propsWithDefaults, width: responsiveDimensions.width, height: responsiveDimensions.height }
       }
-      return props
-    }, [props, responsiveDimensions])
+      return propsWithDefaults
+    }, [propsWithDefaults, responsiveDimensions])
     
     const chartInstance = useMemo(() => {
       const instance = new ChartClass(finalProps);
@@ -697,20 +793,6 @@ export function createChartComponent<TProps extends BaseChartProps>(
   return ForwardedComponent
 }
 
-// 默認配置
-export const DEFAULT_CHART_CONFIG = {
-  width: 800,
-  height: 400,
-  margin: { top: 20, right: 30, bottom: 40, left: 40 },
-  animate: true,
-  animationDuration: 750,
-  showTooltip: true,
-  colors: [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
-    '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16',
-    '#f97316', '#6366f1', '#14b8a6', '#f43f5e'
-  ]
-}
 
 // 工具函數
 export const chartUtils = {

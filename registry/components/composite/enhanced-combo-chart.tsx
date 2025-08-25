@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import * as d3 from 'd3'
+import { ResponsiveChartContainer } from '../primitives/canvas/responsive-chart-container'
 import {
   ChartCanvas,
   LayerManager,
@@ -90,6 +91,7 @@ export interface EnhancedComboChartProps {
   // 維度和邊距
   width?: number
   height?: number
+  responsive?: boolean  // 新增：響應式支援
   margin?: { top: number; right: number; bottom: number; left: number }
   
   // 數據映射
@@ -132,8 +134,9 @@ export interface EnhancedComboChartProps {
 export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
   data,
   series,
-  width = 800,
-  height = 400,
+  width,
+  height,
+  responsive,
   margin = { top: 20, right: 60, bottom: 50, left: 60 },
   xKey,
   leftAxis = {},
@@ -147,6 +150,10 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
   onSeriesHover,
   className = ''
 }) => {
+  // 智能響應式檢測：如果明確指定了尺寸，則關閉響應式；否則預設開啟響應式
+  const isResponsive = responsive !== undefined ? responsive : (width === undefined && height === undefined)
+  const fallbackWidth = 800
+  const fallbackHeight = 600  // 維持 4:3 比例 (800 * 3/4 = 600)
   // 驗證數據和系列配置
   if (!data?.length || !series?.length) {
     console.warn('EnhancedComboChart: Missing data or series', { data: data?.length, series: series?.length })
@@ -160,11 +167,6 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
   }
 
   console.log('EnhancedComboChart: Rendering with data', { dataLength: data.length, seriesLength: series.length, xKey })
-
-  const contentArea = {
-    width: width - margin.left - margin.right,
-    height: height - margin.top - margin.bottom
-  }
 
   // 處理數據和比例尺域值
   const { xDomain, leftYDomain, rightYDomain, processedSeries } = useMemo(() => {
@@ -364,11 +366,17 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
   const finalLeftYDomain = leftAxis.domain || leftYDomain
   const finalRightYDomain = rightAxis.domain || rightYDomain
 
-  return (
-    <div className={`enhanced-combo-chart ${className}`}>
+  // 響應式圖表內容渲染器
+  const renderComboChart = (chartWidth: number, chartHeight: number) => {
+    const contentArea = {
+      width: chartWidth - margin.left - margin.right,
+      height: chartHeight - margin.top - margin.bottom
+    }
+
+    return (
       <ChartCanvas
-        width={width}
-        height={height}
+        width={chartWidth}
+        height={chartHeight}
         margin={margin}
         className="enhanced-combo-chart-canvas"
       >
@@ -392,6 +400,25 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = ({
           />
         </LayerManager>
       </ChartCanvas>
+    )
+  }
+
+  if (isResponsive) {
+    return (
+      <div className={`enhanced-combo-chart ${className}`}>
+        <ResponsiveChartContainer>
+          {({ width: containerWidth, height: containerHeight }) => 
+            renderComboChart(containerWidth, containerHeight)
+          }
+        </ResponsiveChartContainer>
+      </div>
+    )
+  }
+
+  // 固定尺寸模式
+  return (
+    <div className={`enhanced-combo-chart ${className}`}>
+      {renderComboChart(width || fallbackWidth, height || fallbackHeight)}
     </div>
   )
 }
