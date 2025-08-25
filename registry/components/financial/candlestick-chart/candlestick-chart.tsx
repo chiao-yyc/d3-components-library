@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../../utils/cn'
+import { ResponsiveChartContainer } from '../../primitives/canvas/responsive-chart-container'
 import { useOHLCProcessor } from '../../core/ohlc-processor'
 import { useColorScheme } from '../../core/color-scheme'
 import { useTooltip, getPositionFromEvent } from '../../ui/chart-tooltip'
@@ -23,8 +24,9 @@ const DEFAULT_COLORS = {
 export function CandlestickChart({
   data,
   mapping,
-  width = 800,
-  height = 500,
+  width,
+  height,
+  responsive,
   margin,
   upColor,
   downColor,
@@ -52,6 +54,10 @@ export function CandlestickChart({
   style,
   ...props
 }: CandlestickChartProps) {
+  // 智能響應式檢測：如果明確指定了尺寸，則關閉響應式；否則預設開啟響應式
+  const isResponsive = responsive !== undefined ? responsive : (width === undefined && height === undefined)
+  const fallbackWidth = 800
+  const fallbackHeight = 500
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [crosshair, setCrosshair] = useState<{ x: number; y: number } | null>(null)
@@ -473,7 +479,8 @@ export function CandlestickChart({
     )
   }
 
-  return (
+  // 響應式圖表內容渲染器
+  const renderCandlestickChart = (chartWidth: number, chartHeight: number) => (
     <div 
       ref={containerRef}
       className={cn('candlestick-chart-container relative', className)}
@@ -483,9 +490,9 @@ export function CandlestickChart({
       {/* 主要圖表 */}
       <svg
         ref={svgRef}
-        width={width}
-        height={height}
-        viewBox={`0 0 ${width} ${height}`}
+        width={chartWidth}
+        height={chartHeight}
+        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
         className="candlestick-chart-svg overflow-visible max-w-full h-auto"
         preserveAspectRatio="xMidYMid meet"
       />
@@ -523,4 +530,18 @@ export function CandlestickChart({
       )}
     </div>
   )
+
+  // 響應式模式
+  if (isResponsive) {
+    return (
+      <ResponsiveChartContainer>
+        {({ width: containerWidth, height: containerHeight }) => 
+          renderCandlestickChart(containerWidth, containerHeight)
+        }
+      </ResponsiveChartContainer>
+    )
+  }
+
+  // 固定尺寸模式
+  return renderCandlestickChart(width || fallbackWidth, height || fallbackHeight)
 }

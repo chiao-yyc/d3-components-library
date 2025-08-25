@@ -5,6 +5,12 @@ console.log('🔍 BarChart imported:', BarChart)
 import { LineChart } from '@registry/components/basic/line-chart'
 import { AreaChart } from '@registry/components/basic/area-chart'
 import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+import { PieChart } from '@registry/components/basic/pie-chart'
+import { RadarChart } from '@registry/components/statistical/radar-chart'
+import { GaugeChart } from '@registry/components/basic/gauge-chart'
+import { BoxPlot } from '@registry/components/statistical/box-plot'
+import { Heatmap } from '@registry/components/basic/heatmap'
+import { TreeMap } from '@registry/components/statistical/tree-map'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import { 
   DemoPageTemplate,
@@ -25,6 +31,12 @@ const CHART_COMPONENTS = {
   line: LineChart,
   area: AreaChart,
   scatter: ScatterPlot,
+  pie: PieChart,
+  radar: RadarChart,
+  gauge: GaugeChart,
+  boxplot: BoxPlot,
+  heatmap: Heatmap,
+  treemap: TreeMap,
 } as const
 
 type ChartType = keyof typeof CHART_COMPONENTS
@@ -44,7 +56,77 @@ export default function ResponsiveChartDemo() {
   // 容器寬度模擬
   const [containerWidth, setContainerWidth] = useState(75) // 百分比
   
-  const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
+  // 為不同圖表類型準備適合的數據
+  const getChartData = () => {
+    const baseDataset = datasetOptions.find(d => d.value === selectedDataset)!
+    
+    switch (selectedChart) {
+      case 'gauge':
+        return {
+          data: [{ value: 75, label: '完成度' }],
+          props: { value: 75, min: 0, max: 100, xKey: undefined, yKey: undefined }
+        }
+      case 'pie':
+        return {
+          data: [
+            { category: 'A類', value: 30 },
+            { category: 'B類', value: 25 },
+            { category: 'C類', value: 20 },
+            { category: 'D類', value: 15 },
+            { category: 'E類', value: 10 }
+          ],
+          props: { xKey: 'category', yKey: 'value' }
+        }
+      case 'radar':
+        return {
+          data: [
+            { axis: '速度', value: 80 },
+            { axis: '效率', value: 75 },
+            { axis: '品質', value: 90 },
+            { axis: '創新', value: 85 },
+            { axis: '穩定', value: 70 },
+            { axis: '成本', value: 65 }
+          ],
+          props: { xKey: 'axis', yKey: 'value' }
+        }
+      case 'boxplot':
+        return {
+          data: [
+            { group: 'A組', values: [10, 15, 20, 25, 30, 35, 40] },
+            { group: 'B組', values: [12, 18, 22, 28, 32, 38, 42] },
+            { group: 'C組', values: [8, 14, 19, 24, 29, 34, 39] }
+          ],
+          props: { xKey: 'group', yKey: 'values' }
+        }
+      case 'heatmap':
+        return {
+          data: [
+            { x: 0, y: 0, value: 10 }, { x: 1, y: 0, value: 20 }, { x: 2, y: 0, value: 30 },
+            { x: 0, y: 1, value: 15 }, { x: 1, y: 1, value: 25 }, { x: 2, y: 1, value: 35 },
+            { x: 0, y: 2, value: 20 }, { x: 1, y: 2, value: 30 }, { x: 2, y: 2, value: 40 }
+          ],
+          props: { xKey: 'x', yKey: 'y', valueKey: 'value' }
+        }
+      case 'treemap':
+        return {
+          data: [
+            { name: '產品A', value: 100 },
+            { name: '產品B', value: 80 },
+            { name: '產品C', value: 60 },
+            { name: '產品D', value: 40 },
+            { name: '產品E', value: 20 }
+          ],
+          props: { xKey: 'name', yKey: 'value' }
+        }
+      default:
+        return {
+          data: baseDataset.data,
+          props: { xKey: baseDataset.xKey, yKey: baseDataset.yKey }
+        }
+    }
+  }
+  
+  const currentDataset = getChartData()
   const ChartComponent = CHART_COMPONENTS[selectedChart]
   console.log('🔍 Selected ChartComponent:', ChartComponent, selectedChart)
 
@@ -64,12 +146,18 @@ export default function ResponsiveChartDemo() {
     { label: '最大寬度', value: `${maxWidth}px` }
   ]
 
-  const codeExample = `import { ${selectedChart.charAt(0).toUpperCase() + selectedChart.slice(1)}Chart } from '@registry/components/...'
+  const getCodeExample = () => {
+    const componentName = ChartComponent.name || `${selectedChart.charAt(0).toUpperCase() + selectedChart.slice(1)}Chart`
+    const props = Object.entries(currentDataset.props)
+      .filter(([_, value]) => value !== undefined)
+      .map(([key, value]) => `  ${key}="${value}"`)
+      .join('\n')
+    
+    return `import { ${componentName} } from '@registry/components/...'
 
-<${ChartComponent.name}
+<${componentName}
   data={data}
-  xKey="${currentDataset.xKey}"
-  yKey="${currentDataset.yKey}"
+${props}
   responsive={true}
   aspect={${aspect}}
   minWidth={${minWidth}}
@@ -77,6 +165,9 @@ export default function ResponsiveChartDemo() {
   minHeight={${minHeight}}
   colors={${JSON.stringify(colorSchemes[selectedColor as keyof typeof colorSchemes])}}
 />`
+  }
+  
+  const codeExample = getCodeExample()
 
   return (
     <DemoPageTemplate
@@ -252,12 +343,11 @@ export default function ResponsiveChartDemo() {
                 }
               }}
             >
-              {/* Direct test with BarChart */}
-              <BarChart
+              {/* Dynamic Chart Component */}
+              <ChartComponent
                 key={`${selectedChart}-${aspect}`}
                 data={currentDataset.data}
-                xKey={currentDataset.xKey}
-                yKey={currentDataset.yKey}
+                {...currentDataset.props}
                 width={undefined}  // 明確設置為 undefined 來觸發默認值
                 height={undefined}
                 responsive={true}

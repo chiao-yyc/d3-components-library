@@ -86,7 +86,6 @@ export default function LineChartDemo() {
   const [crosshairData, setCrosshairData] = useState<any>(null)
   
   // 邊距設定
-  const [margin, setMargin] = useState({ top: 20, right: 30, bottom: 40, left: 50 })
 
   // 交互回調函數
   const handleZoom = (domain: [any, any]) => {
@@ -231,40 +230,6 @@ export default function LineChartDemo() {
               />
             </ControlGroup>
 
-            {/* 邊距設定 */}
-            <ControlGroup title="邊距設定" icon="📐" cols={4}>
-              <RangeSlider
-                label="上"
-                value={margin.top}
-                min={0}
-                max={50}
-                onChange={(value) => setMargin(prev => ({ ...prev, top: value }))}
-              />
-              
-              <RangeSlider
-                label="右"
-                value={margin.right}
-                min={0}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, right: value }))}
-              />
-              
-              <RangeSlider
-                label="下"
-                value={margin.bottom}
-                min={20}
-                max={80}
-                onChange={(value) => setMargin(prev => ({ ...prev, bottom: value }))}
-              />
-              
-              <RangeSlider
-                label="左"
-                value={margin.left}
-                min={20}
-                max={100}
-                onChange={(value) => setMargin(prev => ({ ...prev, left: value }))}
-              />
-            </ControlGroup>
 
             {/* 顯示選項 */}
             <ControlGroup title="顯示選項" icon="👁️" cols={2}>
@@ -396,7 +361,6 @@ export default function LineChartDemo() {
                 seriesKey={currentConfig.seriesKey}
                 width={chartWidth}
                 height={chartHeight}
-                margin={margin}
                 curve={curve}
                 showDots={showDots}
                 showArea={showArea}
@@ -465,13 +429,7 @@ const data = [
   interactive={${interactive}}
   strokeWidth={${strokeWidth}}
   dotRadius={${dotRadius}}
-  areaOpacity={${areaOpacity}}
-  margin={{
-    top: ${margin.top},
-    right: ${margin.right},
-    bottom: ${margin.bottom},
-    left: ${margin.left}
-  }}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  onZoom={(domain) => console.log('縮放:', domain)}\n  onZoomReset={() => console.log('重置縮放')}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}${enableDropShadow ? `\n  enableDropShadow={${enableDropShadow}}` : ''}${enableGlowEffect ? `\n  enableGlowEffect={${enableGlowEffect}}\n  glowColor="#3b82f6"` : ''}
+  areaOpacity={${areaOpacity}}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  onZoom={(domain) => console.log('縮放:', domain)}\n  onZoomReset={() => console.log('重置縮放')}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}${enableDropShadow ? `\n  enableDropShadow={${enableDropShadow}}` : ''}${enableGlowEffect ? `\n  enableGlowEffect={${enableGlowEffect}}\n  glowColor="#3b82f6"` : ''}
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
 />`}
