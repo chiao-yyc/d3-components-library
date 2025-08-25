@@ -601,7 +601,8 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     console.log('🎨 renderContent called:', {
       originalProps: { width: this.props.width, height: this.props.height },
       overrideProps,
-      finalProps: { width, height },
+      currentProps: { width: currentProps.width, height: currentProps.height },
+      extractedProps: { width, height },
       responsive
     })
     
@@ -636,7 +637,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
           width={width}
           height={height}
           className={cn(`${this.getChartType()}-svg`, 'overflow-visible')}
-          style={responsive ? { maxWidth: '100%', height: 'auto' } : {}}
+          style={responsive ? { maxWidth: '100%' } : {}}
         />
         
         {/* 工具提示 */}
@@ -742,22 +743,34 @@ export function createChartComponent<TProps extends BaseChartProps>(
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])
 
     // 如果啟用響應式模式，使用 ResponsiveChartContainer
-    if (props.responsive) {
+    console.log('🔍 Checking responsive condition:', { 
+      propsResponsive: props.responsive, 
+      propsWithDefaultsResponsive: propsWithDefaults.responsive 
+    })
+    if (propsWithDefaults.responsive) {
       console.log('🎯 BaseChart: entering responsive mode with ResponsiveChartContainer')
+      console.log('🎯 ResponsiveChartContainer props:', { 
+        aspect: propsWithDefaults.aspect, 
+        minWidth: propsWithDefaults.minWidth, 
+        maxWidth: propsWithDefaults.maxWidth, 
+        minHeight: propsWithDefaults.minHeight, 
+        maxHeight: propsWithDefaults.maxHeight 
+      })
       
       return (
         <ResponsiveChartContainer
-          aspect={props.aspect}
-          minWidth={props.minWidth}
-          maxWidth={props.maxWidth}
-          minHeight={props.minHeight}
-          maxHeight={props.maxHeight}
-          className={props.className}
-          style={props.style}
+          aspect={propsWithDefaults.aspect}
+          minWidth={propsWithDefaults.minWidth}
+          maxWidth={propsWithDefaults.maxWidth}
+          minHeight={propsWithDefaults.minHeight}
+          maxHeight={propsWithDefaults.maxHeight}
+          className={propsWithDefaults.className}
+          style={propsWithDefaults.style}
         >
           {(dimensions: { width: number; height: number }) => {
             console.log('📊 BaseChart render function called with dimensions:', dimensions)
             console.log('📊 Current props:', { width: props.width, height: props.height, responsive: props.responsive })
+            console.log('🔍 Creating currentProps with dimensions:', { ...props, width: dimensions.width, height: dimensions.height })
             
             // 更新響應式尺寸狀態
             if (!responsiveDimensions || 

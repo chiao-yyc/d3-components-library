@@ -120,8 +120,6 @@ export default function CandlestickDemo() {
   const [colorMode, setColorMode] = useState<'tw' | 'us' | 'custom'>('tw')
   
   // 圖表設定
-  const [chartWidth, setChartWidth] = useState(800)
-  const [chartHeight, setChartHeight] = useState(500)
   const [candleWidth, setCandleWidth] = useState(8)
   
   // 顯示選項
@@ -131,7 +129,6 @@ export default function CandlestickDemo() {
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
   
-  const containerRef = useRef<HTMLDivElement>(null)
 
   // 當前資料和配置
   const { currentData, config, analysis } = useMemo(() => {
@@ -216,33 +213,6 @@ export default function CandlestickDemo() {
     }
   }, [selectedDataset])
 
-  // 響應式尺寸偵測
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const width = Math.max(400, rect.width - 48)
-        setChartWidth(width)
-      }
-    }
-
-    updateDimensions()
-    const handleResize = () => updateDimensions()
-    window.addEventListener('resize', handleResize)
-    
-    let resizeObserver: ResizeObserver | null = null
-    if (containerRef.current && 'ResizeObserver' in window) {
-      resizeObserver = new ResizeObserver(updateDimensions)
-      resizeObserver.observe(containerRef.current)
-    }
-
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-    }
-  }, [])
 
   // 狀態顯示數據
   const statusItems = [
@@ -341,27 +311,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 圖表配置 */}
-            <ControlGroup title="圖表配置" icon="📊" cols={3}>
-              <RangeSlider
-                label="圖表寬度"
-                value={chartWidth}
-                min={400}
-                max={1200}
-                step={50}
-                onChange={setChartWidth}
-                suffix="px"
-              />
-              
-              <RangeSlider
-                label="圖表高度"
-                value={chartHeight}
-                min={300}
-                max={800}
-                step={25}
-                onChange={setChartHeight}
-                suffix="px"
-              />
-              
+            <ControlGroup title="圖表配置" icon="📊" cols={1}>
               <RangeSlider
                 label="蠟燭寬度"
                 value={candleWidth}
@@ -422,6 +372,7 @@ export default function CandlestickDemo() {
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
+          className="min-h-[420px]"
           actions={
             <div className="flex items-center gap-2">
               <CurrencyDollarIcon className="w-5 h-5 text-green-500" />
@@ -429,27 +380,22 @@ export default function CandlestickDemo() {
             </div>
           }
         >
-          <div 
-            ref={containerRef}
-            className="flex justify-center overflow-hidden"
-          >
+          <div className="w-full overflow-hidden">
             <motion.div
-              key={`${selectedDataset}-${colorMode}-${chartWidth}`}
+              key={`${selectedDataset}-${colorMode}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
             >
               <CandlestickChart
                 data={currentData}
-                responsive={true}
                 colorMode={colorMode}
                 showVolume={showVolume}
-                candleWidth={candleWidth}
                 showGrid={showGrid}
                 showTooltip={showTooltip}
                 animate={animate}
                 interactive={interactive}
-                onCandleClick={(data) => {
+                onDataClick={(data) => {
                   if (interactive) {
                     console.log('K線點擊:', data)
                   }
@@ -562,16 +508,13 @@ const data = [
 
 <CandlestickChart
   data={data}
-  width={${chartWidth}}
-  height={${chartHeight}}
   colorMode="${colorMode}"
   showVolume={${showVolume}}
-  candleWidth={${candleWidth}}
   showGrid={${showGrid}}
   showTooltip={${showTooltip}}
   animate={${animate}}
   interactive={${interactive}}
-  onCandleClick={(data) => console.log('K線點擊:', data)}
+  onDataClick={(data) => console.log('K線點擊:', data)}
 />`}
         />
       </ContentSection>

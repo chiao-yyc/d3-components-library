@@ -1,22 +1,34 @@
-import { ProcessedOHLCData, OHLCMapping } from '../core/ohlc-processor'
+import { BaseChartProps } from '../../core/base-chart/types'
 
-export interface CandlestickChartProps {
-  /** 原始資料 */
-  data: any[]
-  
+// 暫時簡化 OHLC 數據類型定義
+export interface ProcessedOHLCData {
+  date: Date
+  open: number
+  high: number
+  low: number
+  close: number
+  volume?: number
+  change: number
+  changePercent: number
+  direction: 'up' | 'down' | 'doji'
+  index: number
+}
+
+export interface OHLCMapping {
+  date?: string | ((d: any) => any)
+  open?: string | ((d: any) => any)
+  high?: string | ((d: any) => any)
+  low?: string | ((d: any) => any)
+  close?: string | ((d: any) => any)
+  volume?: string | ((d: any) => any)
+}
+
+export interface CandlestickChartProps extends BaseChartProps {
   /** 欄位映射配置 */
   mapping?: OHLCMapping
   
-  /** 圖表尺寸 */
-  width?: number
-  height?: number
-  responsive?: boolean  // 新增：響應式支援
-  margin?: {
-    top: number
-    right: number
-    bottom: number
-    left: number
-  }
+  /** 響應式支援 */
+  responsive?: boolean
 
   /** 樣式配置 */
   /** 上漲蠟燭顏色 */
@@ -52,11 +64,6 @@ export interface CandlestickChartProps {
   animate?: boolean
   animationDuration?: number
   
-  /** 互動功能 */
-  interactive?: boolean
-  showTooltip?: boolean
-  tooltipFormat?: (data: ProcessedOHLCData) => React.ReactNode
-  
   /** 事件處理 */
   onDataClick?: (data: ProcessedOHLCData) => void
   onDataHover?: (data: ProcessedOHLCData | null) => void
@@ -67,10 +74,6 @@ export interface CandlestickChartProps {
   onCandleClick?: (data: ProcessedOHLCData) => void
   /** @deprecated 請使用 onDataHover 替代 */
   onCandleHover?: (data: ProcessedOHLCData | null) => void
-  
-  /** 樣式類名 */
-  className?: string
-  style?: React.CSSProperties
 }
 
 export interface CandlestickItem {
