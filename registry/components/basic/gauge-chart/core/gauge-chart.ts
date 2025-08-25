@@ -14,12 +14,6 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
   private colorScale!: ColorScale;
 
   constructor(props: GaugeChartProps) {
-    console.log('🎯 D3GaugeChart constructor called with props:', {
-      responsive: props.responsive,
-      width: props.width,
-      height: props.height,
-      value: props.value
-    });
     super(props);
   }
 
@@ -32,9 +26,9 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
       // 使用共用的 DataProcessor 如果有數據
       if (data && data.length > 0) {
         const processor = new DataProcessor({
-          mapping: mapping || {
-            x: valueKey || valueAccessor,
-            y: labelKey || labelAccessor
+          mapping: {
+            x: mapping?.value || valueKey || valueAccessor || 'value',
+            y: mapping?.label || labelKey || labelAccessor || 'label'
           },
           autoDetect: true
         });
@@ -79,8 +73,8 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
     const calculatedOuterRadius = outerRadius || Math.max(50, availableRadius);
     const calculatedInnerRadius = innerRadius || calculatedOuterRadius * 0.7;
 
-    const startAngleRad = (startAngle - 90) * Math.PI / 180;
-    const endAngleRad = (endAngle - 90) * Math.PI / 180;
+    const startAngleRad = (startAngle) * Math.PI / 180;
+    const endAngleRad = (endAngle) * Math.PI / 180;
 
     const angleScale = d3.scaleLinear().domain([min, max]).range([startAngleRad, endAngleRad]);
 
@@ -96,7 +90,6 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
         });
         colorScale = this.colorScale;
       } catch (error) {
-        console.warn('Failed to create color scale, using fallback:', error);
         // 使用原來的 D3 實現作為備案
         colorScale = d3.scaleLinear<string>()
           .domain(d3.range(colors.length).map(i => min + (max - min) * i / (colors.length - 1)))
@@ -109,17 +102,42 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
   }
 
   private calculateTickData(): TickData[] {
-    const { min = 0, max = 100, tickCount = 5, tickFormat, showTicks = true } = this.props;
+    const { min = 0, max = 100, tickCount = 5, tickFormat, showTicks = true, showMinMax = true } = this.props;
     const { angleScale } = this.scales;
     if (!showTicks) return [];
     
     return d3.range(tickCount).map(i => {
       const tickValue = min + (max - min) * i / (tickCount - 1);
-      return { value: tickValue, angle: angleScale(tickValue), label: tickFormat ? tickFormat(tickValue) : tickValue.toString() };
+      const visualAngle = angleScale(tickValue) - Math.PI / 2; // 減去 90 度來轉換到視覺座標系
+      return { value: tickValue, angle: visualAngle, label: tickFormat ? tickFormat(tickValue) : tickValue.toString() };
+    }).filter(tick => {
+      // 如果顯示 MinMax 標籤，則從 tick 中排除最小值和最大值，避免重複
+      if (showMinMax) {
+        return tick.value !== min && tick.value !== max;
+      }
+      return true;
     });
   }
 
-  public renderContent(): void {
+  protected renderChart(): void {
+    this.renderGauge();
+  }
+
+  protected getChartType(): string {
+    return 'gauge';
+  }
+
+  private renderGauge(): void {
+    // 檢查 SVG 是否可用
+    if (!this.svgRef?.current) {
+      return;
+    }
+
+    // 檢查 scales 是否已初始化
+    if (!this.scales || typeof this.scales !== 'object') {
+      return;
+    }
+
     const { 
       backgroundColor = '#e5e7eb', 
       foregroundColor = '#3b82f6', 
@@ -148,7 +166,7 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
     const centerX = chartWidth / 2;
     const centerY = Math.max(calculatedOuterRadius + 20, chartHeight - calculatedOuterRadius - 20);
 
-    const svg = this.getSVG();
+    const svg = d3.select(this.svgRef.current);
     svg.selectAll('*').remove(); // 清除之前的內容
     
     const g = svg.append('g')
@@ -186,8 +204,8 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
           if (initialArc) {
             valuePath.attr('d', initialArc)
               .transition()
-              .duration(animationDuration)
-              .ease(d3.easeElasticOut)
+              .duration(animationDuration * 1.5)
+              .ease(d3.easeCubicOut)
               .attrTween('d', () => {
                 const interpolate = d3.interpolate(startAngleRad, valueAngle);
                 return (t: number) => this.arcGenerator!({ startAngle: startAngleRad, endAngle: interpolate(t) }) || '';
@@ -198,27 +216,32 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
     }
 
     // 指針
-    const needleAngle = angleScale(this.processedData.value);
     const needleLength = calculatedOuterRadius + 10;
-    const needleX = Math.cos(needleAngle) * needleLength;
-    const needleY = Math.sin(needleAngle) * needleLength;
-
-    const needle = g.append('line')
+    const targetAngleDegrees = angleScale(this.processedData.value) * 180 / Math.PI; // 轉換為度數，與弧線使用相同角度
+    
+    // 創建指針組，方便旋轉
+    const needleGroup = g.append('g')
+      .attr('class', 'needle-group');
+    
+    // 創建一個垂直向上的指針（0度位置）
+    const needle = needleGroup.append('line')
       .attr('x1', 0).attr('y1', 0)
-      .attr('x2', needleX).attr('y2', needleY)
+      .attr('x2', 0).attr('y2', -needleLength) // 向上指向
       .attr('stroke', needleColor)
       .attr('stroke-width', needleWidth)
       .attr('stroke-linecap', 'round');
 
     if (animate) {
-      needle
-        .attr('x2', Math.cos(startAngleRad) * needleLength)
-        .attr('y2', Math.sin(startAngleRad) * needleLength)
+      // 指針應該從最小值位置開始動畫，與弧線使用相同的角度系統
+      const minValueAngleDegrees = angleScale(min) * 180 / Math.PI;
+      needleGroup
+        .attr('transform', `rotate(${minValueAngleDegrees})`)
         .transition()
-        .duration(animationDuration)
-        .ease(d3.easeElasticOut)
-        .attr('x2', needleX)
-        .attr('y2', needleY);
+        .duration(animationDuration * 1.2)
+        .ease(d3.easeCubicOut)
+        .attr('transform', `rotate(${targetAngleDegrees})`);
+    } else {
+      needleGroup.attr('transform', `rotate(${targetAngleDegrees})`);
     }
 
     // 中心圓
@@ -257,9 +280,26 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
 
     // 最小值和最大值標籤
     if (showMinMax) {
-      const minAngle = startAngleRad;
-      const maxAngle = endAngleRad;
+      const minAngle = startAngleRad - Math.PI / 2; // 轉換到視覺座標系
+      const maxAngle = endAngleRad - Math.PI / 2;   // 轉換到視覺座標系
       const labelRadius = calculatedOuterRadius + 35;
+      
+      // 為 min 和 max 添加 tick 短線標記
+      g.append('line')
+        .attr('x1', Math.cos(minAngle) * (calculatedOuterRadius + 5))
+        .attr('y1', Math.sin(minAngle) * (calculatedOuterRadius + 5))
+        .attr('x2', Math.cos(minAngle) * (calculatedOuterRadius + 15))
+        .attr('y2', Math.sin(minAngle) * (calculatedOuterRadius + 15))
+        .attr('stroke', '#6b7280')
+        .attr('stroke-width', 1);
+        
+      g.append('line')
+        .attr('x1', Math.cos(maxAngle) * (calculatedOuterRadius + 5))
+        .attr('y1', Math.sin(maxAngle) * (calculatedOuterRadius + 5))
+        .attr('x2', Math.cos(maxAngle) * (calculatedOuterRadius + 15))
+        .attr('y2', Math.sin(maxAngle) * (calculatedOuterRadius + 15))
+        .attr('stroke', '#6b7280')
+        .attr('stroke-width', 1);
       
       g.append('text')
         .attr('x', Math.cos(minAngle) * labelRadius)
@@ -290,29 +330,80 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
     const { interactive = true, showTooltip = true, tooltipFormat } = this.props;
     
     if (interactive && showTooltip) {
-      // 為主要的 arc 添加 tooltip
-      g.selectAll('path')
-        .filter((d, i, nodes) => nodes.length > 1 ? i === nodes.length - 1 : true) // 選擇最後一個path（數值arc）
+      // 為主要的 arc 和指針添加 tooltip
+      const interactiveElements = g.selectAll('path, .needle-group')
+        .filter((d, i, nodes) => {
+          const element = nodes[i] as SVGElement;
+          // 選擇數值arc（最後一個path）和指針組
+          return element.classList?.contains('needle-group') || 
+                 (element.tagName === 'path' && i === nodes.length - 1);
+        });
+        
+      interactiveElements
         .style('cursor', 'pointer')
         .on('mouseenter', (event) => {
-          let content = `Value: ${this.processedData.value}`;
-          if (this.processedData.label) {
-            content += `<br>Label: ${this.processedData.label}`;
-          }
-          
-          if (tooltipFormat) {
-            content = tooltipFormat(this.processedData.value, this.processedData.label);
-          }
-          
-          this.showTooltip(event, content);
+          // 創建或顯示 tooltip
+          this.createTooltip(event);
+        })
+        .on('mousemove', (event) => {
+          // 更新 tooltip 位置
+          this.updateTooltipPosition(event);
         })
         .on('mouseleave', () => {
-          this.hideTooltip();
+          // 隱藏 tooltip
+          this.hideTooltipElement();
         });
     }
   }
-
-  public getChartType(): string {
-    return 'gauge';
+  
+  private createTooltip(event: MouseEvent): void {
+    const { tooltipFormat } = this.props;
+    
+    // 創建 tooltip 內容
+    let content = `Value: ${this.processedData.value}`;
+    if (this.processedData.label) {
+      content += `<br>Label: ${this.processedData.label}`;
+    }
+    
+    if (tooltipFormat) {
+      const formattedContent = tooltipFormat(this.processedData.value, this.processedData.label);
+      content = typeof formattedContent === 'string' ? formattedContent : content;
+    }
+    
+    // 創建或更新 tooltip 元素
+    let tooltip = d3.select('body').select('.gauge-tooltip');
+    if (tooltip.empty()) {
+      tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'gauge-tooltip')
+        .style('position', 'absolute')
+        .style('background', 'rgba(0, 0, 0, 0.8)')
+        .style('color', 'white')
+        .style('padding', '8px 12px')
+        .style('border-radius', '4px')
+        .style('font-size', '12px')
+        .style('pointer-events', 'none')
+        .style('z-index', '1000')
+        .style('opacity', '0');
+    }
+    
+    tooltip
+      .html(content)
+      .style('opacity', '1');
+      
+    this.updateTooltipPosition(event);
+  }
+  
+  private updateTooltipPosition(event: MouseEvent): void {
+    const tooltip = d3.select('.gauge-tooltip');
+    if (!tooltip.empty()) {
+      tooltip
+        .style('left', (event.pageX + 10) + 'px')
+        .style('top', (event.pageY - 10) + 'px');
+    }
+  }
+  
+  private hideTooltipElement(): void {
+    d3.select('.gauge-tooltip').style('opacity', '0');
   }
 }

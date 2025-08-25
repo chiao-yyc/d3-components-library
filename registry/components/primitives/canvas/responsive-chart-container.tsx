@@ -23,9 +23,6 @@ export const ResponsiveChartContainer: React.FC<ResponsiveChartContainerProps> =
   className = '',
   style = {}
 }) => {
-  console.log('🎯 ResponsiveChartContainer: component initialized with props:', {
-    aspect, minWidth, maxWidth, minHeight, maxHeight, debounceMs
-  })
   const containerRef = useRef<HTMLDivElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const resizeTimeoutRef = useRef<NodeJS.Timeout>()
@@ -63,13 +60,6 @@ export const ResponsiveChartContainer: React.FC<ResponsiveChartContainerProps> =
 
     const prevDimensions = prevDimensionsRef.current
     if (prevDimensions.width !== width || prevDimensions.height !== height) {
-      console.log('🔄 ResponsiveChartContainer updating dimensions:', {
-        container: containerRef.current?.getBoundingClientRect(),
-        computed: { availableWidth, availableHeight },
-        final: { width, height },
-        aspect,
-        constraints: { minWidth, maxWidth, minHeight, maxHeight }
-      })
       prevDimensionsRef.current = { width, height }
       setDimensions({ width, height })
     }
