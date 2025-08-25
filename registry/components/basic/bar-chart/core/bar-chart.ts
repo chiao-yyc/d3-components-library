@@ -11,6 +11,12 @@ export class D3BarChart extends BaseChart<BarChartProps> {
   private colorScale!: ColorScale; // Add colorScale property
 
   constructor(props: BarChartProps) {
+    console.log('🎯 D3BarChart constructor called with props:', {
+      responsive: props.responsive,
+      width: props.width,
+      height: props.height,
+      containerWidth: (props as any).containerWidth
+    })
     super(props); // Call super with container and config
 
     // No need for defaultConfig here, BaseChart handles it

@@ -30,6 +30,10 @@ export default function BarChartDemo() {
   const [chartWidth, setChartWidth] = useState(700)
   const [chartHeight, setChartHeight] = useState(400)
   
+  // 響應式控制
+  const [responsive, setResponsive] = useState(false)
+  const [aspect, setAspect] = useState(16/9)
+  
   // 圖表選項
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
   const [animate, setAnimate] = useState(true)
@@ -47,7 +51,8 @@ export default function BarChartDemo() {
   const statusItems = [
     { label: '數據集', value: currentDataset.label },
     { label: '數據點數', value: currentDataset.data.length },
-    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '圖表模式', value: responsive ? '響應式' : '固定尺寸', color: responsive ? '#10b981' : '#6b7280' },
+    { label: '圖表尺寸', value: responsive ? `比例 ${aspect.toFixed(2)}:1` : `${chartWidth} × ${chartHeight}` },
     { label: '方向', value: orientation === 'vertical' ? '垂直' : '水平' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
@@ -106,28 +111,52 @@ export default function BarChartDemo() {
               />
             </ControlGroup>
 
-            {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={2}>
-              <RangeSlider
-                label="寬度"
-                value={chartWidth}
-                min={400}
-                max={1000}
-                step={50}
-                onChange={setChartWidth}
-                suffix="px"
+            {/* 響應式設定 */}
+            <ControlGroup title="響應式配置" icon="📱" cols={2}>
+              <ToggleControl
+                label="響應式模式"
+                checked={responsive}
+                onChange={setResponsive}
+                description="自動適應容器寬度變化"
               />
               
-              <RangeSlider
-                label="高度"
-                value={chartHeight}
-                min={300}
-                max={600}
-                step={25}
-                onChange={setChartHeight}
-                suffix="px"
-              />
+              {responsive && (
+                <RangeSlider
+                  label="寬高比"
+                  value={aspect}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  onChange={setAspect}
+                  suffix=":1"
+                />
+              )}
             </ControlGroup>
+
+            {/* 固定尺寸設定 */}
+            {!responsive && (
+              <ControlGroup title="固定尺寸" icon="📏" cols={2}>
+                <RangeSlider
+                  label="寬度"
+                  value={chartWidth}
+                  min={400}
+                  max={1000}
+                  step={50}
+                  onChange={setChartWidth}
+                  suffix="px"
+                />
+                
+                <RangeSlider
+                  label="高度"
+                  value={chartHeight}
+                  min={300}
+                  max={600}
+                  step={25}
+                  onChange={setChartHeight}
+                  suffix="px"
+                />
+              </ControlGroup>
+            )}
 
             {/* 邊距設定 */}
             <ControlGroup title="邊距設定" icon="📐" cols={4}>
@@ -226,19 +255,25 @@ export default function BarChartDemo() {
             </div>
           }
         >
-          <div className="flex justify-center">
+          <div className={responsive ? 'w-full' : 'flex justify-center'}>
             <motion.div
-              key={`${chartWidth}-${chartHeight}-${orientation}`}
+              key={`${responsive ? 'responsive' : 'fixed'}-${chartWidth}-${chartHeight}-${orientation}-${aspect}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
+              className={responsive ? 'w-full' : ''}
             >
               <BarChart
                 data={currentDataset.data}
                 xKey={currentDataset.xKey}
                 yKey={currentDataset.yKey}
-                width={chartWidth}
-                height={chartHeight}
+                width={responsive ? undefined : chartWidth}
+                height={responsive ? undefined : chartHeight}
+                responsive={responsive}
+                aspect={responsive ? aspect : undefined}
+                minWidth={300}
+                maxWidth={1200}
+                minHeight={200}
                 orientation={orientation}
                 colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
                 animate={animate}
@@ -281,6 +316,32 @@ const data = [
   // ... more data
 ]
 
+${responsive ? `// 響應式模式 - 自動適應容器大小
+<BarChart
+  data={data}
+  xKey="${currentDataset.xKey}"
+  yKey="${currentDataset.yKey}"
+  responsive={true}
+  aspect={${aspect}}
+  minWidth={300}
+  maxWidth={1200}
+  minHeight={200}
+  orientation="${orientation}"
+  colors={${JSON.stringify(colorSchemes[selectedColor as keyof typeof colorSchemes], null, 2)}}
+  animate={${animate}}
+  interactive={${interactive}}
+  showTooltip={${showTooltip}}
+  showLabels={${showLabels}}
+  labelPosition="${labelPosition}"
+  margin={{
+    top: ${margin.top},
+    right: ${margin.right},
+    bottom: ${margin.bottom},
+    left: ${margin.left}
+  }}
+  onDataClick={(data) => console.log('Clicked:', data)}
+  onHover={(data) => console.log('Hovered:', data)}
+/>` : `// 固定尺寸模式
 <BarChart
   data={data}
   xKey="${currentDataset.xKey}"
@@ -302,7 +363,7 @@ const data = [
   }}
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
-/>`}
+/>`}`}
         />
       </ContentSection>
 
@@ -334,6 +395,10 @@ const data = [
                   <div className="w-2 h-2 bg-orange-500 rounded-full" />
                   靈活的標籤位置配置
                 </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  響應式設計支援
+                </li>
               </ul>
             </div>
             
@@ -354,7 +419,7 @@ const data = [
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-pink-500 rounded-full" />
-                  響應式設計支援
+                  自動容器尺寸適應
                 </li>
               </ul>
             </div>
