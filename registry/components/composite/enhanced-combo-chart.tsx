@@ -954,6 +954,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
             <Line
               key={`line-${seriesConfig.name}-${index}`}
               {...commonProps}
+              opacity={seriesConfig.lineOpacity || 1}
               strokeWidth={seriesConfig.strokeWidth || 2}
               showPoints={seriesConfig.showPoints ?? true}
               pointRadius={seriesConfig.pointRadius || 3}

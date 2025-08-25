@@ -80,13 +80,12 @@ export const Line: React.FC<LineProps> = ({
             .attr('d', lineGenerator)
 
           if (animate) {
-            const totalLength = (path.node() as SVGPathElement)?.getTotalLength() || 0
+            // 🔧 修復方案：使用 opacity 動畫替代 stroke-dasharray 動畫
             path
-              .attr('stroke-dasharray', `${totalLength} ${totalLength}`)
-              .attr('stroke-dashoffset', totalLength)
+              .attr('opacity', 0)
               .transition()
-              .duration(animationDuration)
-              .attr('stroke-dashoffset', 0)
+              .duration(animationDuration / 2)
+              .attr('opacity', opacity)
           }
 
           return path

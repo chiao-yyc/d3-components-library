@@ -1,16 +1,23 @@
 import React, { useState, useMemo } from 'react'
-import { ChartContainer } from '@/components/ui/ChartContainer'
 import { DemoPageTemplate } from '@/components/ui/DemoPageTemplate'
 import { ModernControlPanel } from '@/components/ui/ModernControlPanel'
-import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '@/registry/components/composite'
+import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '../../../registry/components/composite/enhanced-combo-chart'
 
-// 簡單的測試數據
+// ✅ 確認問題：5筆數據 + 大數值 = 只有點沒有線
+// ✅ 解決方案：需要更多數據點才能正確生成線段
 const debugData: EnhancedComboData[] = [
-  { month: 'Jan', sales: 100, target: 120, growth: 5 },
-  { month: 'Feb', sales: 150, target: 140, growth: 10 },
-  { month: 'Mar', sales: 120, target: 130, growth: -2 },
-  { month: 'Apr', sales: 180, target: 160, growth: 15 },
-  { month: 'May', sales: 200, target: 190, growth: 8 }
+  { month: 'Jan', sales: 2800, target: 2400, growth: 8.5 },
+  { month: 'Feb', sales: 2200, target: 2100, growth: -2.1 },
+  { month: 'Mar', sales: 3200, target: 2800, growth: 12.3 },
+  { month: 'Apr', sales: 2900, target: 2600, growth: 6.7 },
+  { month: 'May', sales: 2100, target: 2200, growth: -4.2 },
+  { month: 'Jun', sales: 3800, target: 3200, growth: 18.5 },
+  { month: 'Jul', sales: 3400, target: 2900, growth: 15.2 },
+  { month: 'Aug', sales: 2700, target: 2500, growth: 4.8 },
+  { month: 'Sep', sales: 3100, target: 2700, growth: 9.8 },
+  { month: 'Oct', sales: 2600, target: 2400, growth: 2.5 },
+  { month: 'Nov', sales: 3600, target: 3000, growth: 16.7 },
+  { month: 'Dec', sales: 4200, target: 3500, growth: 22.1 }
 ]
 
 export default function ComboChartDebugDemo() {
@@ -18,8 +25,23 @@ export default function ComboChartDebugDemo() {
   const [showLines, setShowLines] = useState(true)
   const [showPoints, setShowPoints] = useState(true)
   const [lineStrokeWidth, setLineStrokeWidth] = useState(3)
-  const [animate, setAnimate] = useState(true)
+  const [animate, setAnimate] = useState(false)  // 🔧 暫時關閉動畫，避免 Line 渲染問題
   const [interactive, setInteractive] = useState(true)
+  const [forceRerender, setForceRerender] = useState(0)  // 🔄 強制重新渲染的 key
+
+  // 🎛️ 細緻圖層控制狀態
+  const [barControls, setBarControls] = useState({
+    opacity: 0.8,
+    animate: false,
+    interactive: true
+  })
+  
+  const [lineControls, setLineControls] = useState({
+    opacity: 0.9,
+    animate: false,
+    interactive: true,
+    strokeWidth: 4
+  })
 
   // 構建系列配置
   const series: ComboChartSeries[] = useMemo(() => {
@@ -32,7 +54,8 @@ export default function ComboChartDebugDemo() {
         name: '銷售額',
         yAxis: 'left',
         color: '#3b82f6',
-        barOpacity: 0.8
+        barOpacity: barControls.opacity,
+        // 個別控制（EnhancedComboChart 尚未支援個別控制，先用全域設定）
       })
     }
     
@@ -40,10 +63,11 @@ export default function ComboChartDebugDemo() {
       result.push({
         type: 'line',
         dataKey: 'target',
-        name: '目標線',
+        name: '目標',
         yAxis: 'left',
-        color: '#ef4444',
-        strokeWidth: lineStrokeWidth,
+        color: '#06b6d4',
+        strokeWidth: lineControls.strokeWidth,
+        lineOpacity: lineControls.opacity,
         showPoints: showPoints,
         pointRadius: 4,
         curve: 'monotone'
@@ -56,6 +80,7 @@ export default function ComboChartDebugDemo() {
         yAxis: 'right',
         color: '#10b981',
         strokeWidth: lineStrokeWidth,
+        lineOpacity: 0.9,
         showPoints: showPoints,
         pointRadius: 5,
         curve: 'cardinal'
@@ -63,7 +88,7 @@ export default function ComboChartDebugDemo() {
     }
     
     return result
-  }, [showBars, showLines, showPoints, lineStrokeWidth])
+  }, [showBars, showLines, showPoints, lineStrokeWidth, barControls, lineControls])
 
   const codeExample = `
 // Combo Chart 除錯範例
@@ -101,7 +126,8 @@ const series = [
   rightAxis={{ label: "成長率 (%)" }}
 />`
 
-  const controls = [
+  // 🎛️ 細緻控制面板配置
+  const generalControls = [
     {
       type: 'checkbox' as const,
       label: '顯示條形圖',
@@ -119,25 +145,86 @@ const series = [
       label: '顯示數據點',
       checked: showPoints,
       onChange: (checked: boolean) => setShowPoints(checked)
+    }
+  ]
+
+  const barSpecificControls = [
+    {
+      type: 'range' as const,
+      label: `條形透明度 (${Math.round(barControls.opacity * 100)}%)`,
+      min: 0.1,
+      max: 1,
+      step: 0.1,
+      value: barControls.opacity,
+      onChange: (value: number) => setBarControls(prev => ({ ...prev, opacity: value }))
+    },
+    {
+      type: 'checkbox' as const,
+      label: '條形動畫 ⚠️',
+      checked: barControls.animate,
+      onChange: (checked: boolean) => {
+        setBarControls(prev => ({ ...prev, animate: checked }))
+        setForceRerender(prev => prev + 1)  // 觸發重新渲染
+      }
+    },
+    {
+      type: 'checkbox' as const,
+      label: '條形互動',
+      checked: barControls.interactive,
+      onChange: (checked: boolean) => setBarControls(prev => ({ ...prev, interactive: checked }))
+    }
+  ]
+
+  const lineSpecificControls = [
+    {
+      type: 'range' as const,
+      label: `線條透明度 (${Math.round(lineControls.opacity * 100)}%)`,
+      min: 0.1,
+      max: 1,
+      step: 0.1,
+      value: lineControls.opacity,
+      onChange: (value: number) => setLineControls(prev => ({ ...prev, opacity: value }))
     },
     {
       type: 'range' as const,
-      label: `線條粗細 (${lineStrokeWidth}px)`,
+      label: `線條粗細 (${lineControls.strokeWidth}px)`,
       min: 1,
       max: 10,
       step: 1,
-      value: lineStrokeWidth,
-      onChange: (value: number) => setLineStrokeWidth(value)
+      value: lineControls.strokeWidth,
+      onChange: (value: number) => setLineControls(prev => ({ ...prev, strokeWidth: value }))
     },
     {
       type: 'checkbox' as const,
-      label: '開啟動畫',
+      label: '線條動畫 ⚠️',
+      checked: lineControls.animate,
+      onChange: (checked: boolean) => {
+        setLineControls(prev => ({ ...prev, animate: checked }))
+        setForceRerender(prev => prev + 1)  // 觸發重新渲染
+      }
+    },
+    {
+      type: 'checkbox' as const,
+      label: '線條互動',
+      checked: lineControls.interactive,
+      onChange: (checked: boolean) => setLineControls(prev => ({ ...prev, interactive: checked }))
+    }
+  ]
+
+  const globalControls = [
+    {
+      type: 'checkbox' as const,
+      label: '全域動畫 ⚠️',
       checked: animate,
-      onChange: (checked: boolean) => setAnimate(checked)
+      onChange: (checked: boolean) => {
+        setAnimate(checked)
+        // 強制重新渲染來觸發動畫
+        setForceRerender(prev => prev + 1)
+      }
     },
     {
       type: 'checkbox' as const,
-      label: '互動功能',
+      label: '全域互動',
       checked: interactive,
       onChange: (checked: boolean) => setInteractive(checked)
     }
@@ -150,40 +237,73 @@ const series = [
       tags={['combo', 'debug', 'line', 'troubleshooting']}
       codeExample={codeExample}
     >
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* 控制面板 */}
-        <div className="xl:col-span-1 bg-white p-6 rounded-lg shadow-sm border">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 控制面板 - 使用固定高度和滾動 */}
+        <div className="lg:col-span-1 bg-white p-4 rounded-lg shadow-sm border max-h-[600px] overflow-y-auto sticky top-4">
           <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
             <span className="text-orange-500">🔧</span>
             除錯控制
           </h3>
-          <ModernControlPanel controls={controls} />
+          
+          {/* 一般控制 */}
+          <div className="mb-4">
+            <h4 className="font-medium mb-2 text-gray-700">一般設定</h4>
+            <ModernControlPanel controls={generalControls} />
+          </div>
+
+          {/* 全域控制 */}
+          <div className="mb-4">
+            <h4 className="font-medium mb-2 text-gray-700">全域設定</h4>
+            <ModernControlPanel controls={globalControls} />
+          </div>
+
+          {/* 🎛️ 進階控制 (摺疊) */}
+          <details className="mb-4">
+            <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
+              🎛️ 進階控制
+            </summary>
+            <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-100">
+              {/* 條形圖控制 */}
+              {showBars && (
+                <div>
+                  <h5 className="font-medium mb-2 text-blue-700 text-sm">📊 條形圖</h5>
+                  <ModernControlPanel controls={barSpecificControls} />
+                </div>
+              )}
+
+              {/* 線圖控制 */}
+              {showLines && (
+                <div>
+                  <h5 className="font-medium mb-2 text-cyan-700 text-sm">📈 線圖</h5>
+                  <ModernControlPanel controls={lineSpecificControls} />
+                </div>
+              )}
+            </div>
+          </details>
           
           {/* 除錯信息 */}
-          <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <h4 className="font-semibold text-yellow-900 mb-2">除錯信息</h4>
-            <div className="text-sm text-yellow-800 space-y-1">
-              <p>• 系列數量: {series.length}</p>
-              <p>• 條形圖: {showBars ? '✓' : '✗'}</p>
-              <p>• 線圖: {showLines ? '✓' : '✗'}</p>
-              <p>• 數據點: {showPoints ? '✓' : '✗'}</p>
-              <p>• 線條粗細: {lineStrokeWidth}px</p>
+          <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <h4 className="font-semibold text-yellow-900 mb-2 text-sm">即時狀態</h4>
+            <div className="text-xs text-yellow-800 space-y-1">
+              <p>條形圖: {showBars ? '✓' : '✗'} | 線圖: {showLines ? '✓' : '✗'} | 數據點: {showPoints ? '✓' : '✗'}</p>
+              <p>動畫: {animate ? '✓' : '✗'} | 重新渲染: {forceRerender} 次</p>
             </div>
           </div>
         </div>
 
         {/* 主圖表 */}
-        <div className="xl:col-span-3 bg-white p-6 rounded-lg shadow-sm border">
+        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
             <span className="text-blue-500">📊</span>
             Combo Chart 除錯視圖
           </h3>
-          <ChartContainer>
+          <div className="w-full">
             <EnhancedComboChart
+              key={`combo-chart-${forceRerender}`}  // 🔄 強制重新渲染觸發動畫
               data={debugData}
               series={series}
               xKey="month"
-              width={800}
+              width={760}
               height={400}
               margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
               animate={animate}
@@ -196,6 +316,10 @@ const series = [
                 label: "成長率 (%)",
                 gridlines: false
               }}
+              xAxis={{
+                label: "月份",
+                gridlines: true
+              }}
               onSeriesClick={(series, dataPoint, event) => {
                 console.log('Series clicked:', { series: series.name, dataPoint })
               }}
@@ -203,7 +327,7 @@ const series = [
                 console.log('Series hovered:', { series: series.name, dataPoint })
               }}
             />
-          </ChartContainer>
+          </div>
         </div>
       </div>
 
@@ -253,6 +377,14 @@ const series = [
                 <li>調整圖層 z-index</li>
                 <li>檢查條形圖的 opacity 設定</li>
                 <li>確認 LayerManager 的順序</li>
+              </ul>
+            </div>
+            <div>
+              <strong className="text-gray-800">限制：個別動畫控制</strong>
+              <ul className="ml-4 mt-1 space-y-1 list-disc list-inside">
+                <li>⚠️ 標記的動畫控制會觸發整個圖表重新渲染</li>
+                <li>個別圖表類型的動畫控制尚未實現</li>
+                <li>目前使用全域動畫設定</li>
               </ul>
             </div>
           </div>
