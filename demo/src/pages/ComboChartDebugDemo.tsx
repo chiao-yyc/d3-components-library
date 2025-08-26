@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { DemoPageTemplate } from '@/components/ui/DemoPageTemplate'
 import { ModernControlPanel } from '@/components/ui/ModernControlPanel'
 import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '../../../registry/components/composite/enhanced-combo-chart'
+import { CodeExample } from '../components/ui'
 
 // ✅ 確認問題：5筆數據 + 大數值 = 只有點沒有線
 // ✅ 解決方案：需要更多數據點才能正確生成線段
@@ -419,6 +420,105 @@ const series = [
               <li>• 測試不同配置組合</li>
             </ul>
           </div>
+        </div>
+
+        {/* 程式碼範例 */}
+        <div className="mt-6 max-w-4xl mx-auto">
+          <CodeExample
+            title="組合圖表調試工具使用範例"
+            description="展示如何使用調試模式來測試和優化組合圖表的繪制效果"
+            code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+// 開啟調試模式
+const debugMode = process.env.NODE_ENV === 'development'
+
+const data = [
+  { month: 'Jan', sales: 2800, target: 2400, growth: 8.5 },
+  { month: 'Feb', sales: 2200, target: 2100, growth: -2.1 },
+  { month: 'Mar', sales: 3200, target: 2800, growth: 12.3 },
+  { month: 'Apr', sales: 2900, target: 2600, growth: 6.7 },
+  { month: 'May', sales: 2100, target: 2200, growth: -4.2 },
+  { month: 'Jun', sales: 3800, target: 3200, growth: 18.5 },
+  // ...更多數據
+]
+
+const series: ComboChartSeries[] = [
+  {
+    type: 'bar',
+    dataKey: 'sales',
+    name: '銷售額',
+    yAxis: 'left',
+    color: '#3b82f6',
+    debug: debugMode  // 開啟系列調試
+  },
+  {
+    type: 'line',
+    dataKey: 'target',
+    name: '目標線',
+    yAxis: 'left',
+    color: '#10b981',
+    strokeWidth: 2,
+    strokeDasharray: '5,5',
+    debug: debugMode
+  },
+  {
+    type: 'line',
+    dataKey: 'growth',
+    name: '成長率',
+    yAxis: 'right',
+    color: '#ef4444',
+    strokeWidth: 3,
+    debug: debugMode
+  }
+]
+
+<EnhancedComboChart
+  data={data}
+  series={series}
+  xKey="month"
+  width={800}
+  height={500}
+  // 全局調試設定
+  debug={debugMode}
+  debugOptions={{
+    showBounds: true,        // 顯示邊界
+    showScales: true,        // 顯示比例尺訊息
+    showDataPoints: true,    // 顯示數據點
+    logEvents: true,         // 記錄事件
+    highlightLayers: true    // 突顯顯示圖層
+  }}
+  leftAxis={{ 
+    label: '銷售額 (萬元)', 
+    gridlines: true 
+  }}
+  rightAxis={{ 
+    label: '成長率 (%)', 
+    gridlines: false 
+  }}
+  animate={true}
+  interactive={true}
+  // 調試事件回調
+  onSeriesClick={(series, dataPoint, event) => {
+    if (debugMode) {
+      console.log('點擊事件:', series.name, dataPoint)
+    }
+  }}
+  onSeriesHover={(series, dataPoint, event) => {
+    if (debugMode) {
+      console.log('悬停事件:', series.name, dataPoint)
+    }
+  }}
+/>
+
+/* 調試控制台輸出範例:
+   • 系列渲染狀態訊息
+   • 比例尺域值範圍
+   • 事件冦笱詳細訊息
+   • 性能計測數據
+   • SVG 元素結構分析
+*/`}
+            language="typescript"
+          />
         </div>
       </div>
     </DemoPageTemplate>

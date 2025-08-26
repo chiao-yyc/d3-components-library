@@ -27,6 +27,7 @@ export {
 // 數據展示組件
 export { DataTable } from './DataTable'
 export { CodeExample, CodeExamples } from './CodeExample'
+export { ResponsiveChart, useResponsiveChart } from './ResponsiveChart'
 
 // 類型導出
 export type { 
@@ -58,6 +59,10 @@ export type {
   CodeExampleProps,
   CodeExamplesProps
 } from './CodeExample'
+
+export type {
+  ResponsiveChartProps
+} from './ResponsiveChart'
 
 // === 基礎圖表組件 ===
 export { BarChart, type BarChartProps } from './bar-chart'

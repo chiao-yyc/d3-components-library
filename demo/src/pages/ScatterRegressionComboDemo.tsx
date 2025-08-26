@@ -1,6 +1,24 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import {
+  DemoPageTemplate,
+  ModernControlPanel,
+  ChartContainer,
+  DataTable,
+  CodeExample
+} from '../components/ui'
+import {
+  ChartBarSquareIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  CogIcon,
+  EyeIcon,
+  SparklesIcon,
+  CalculatorIcon,
+  AcademicCapIcon
+} from '@heroicons/react/24/outline'
 
 const ScatterRegressionComboDemo: React.FC = () => {
   // 場景 1: 銷售業績分析 - 廣告投入 vs 銷售額，氣泡大小代表客戶數量
@@ -245,209 +263,448 @@ const ScatterRegressionComboDemo: React.FC = () => {
   const currentSeries = getCurrentSeries()
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Scatter + Regression Line 組合圖表
-        </h1>
-        <p className="text-gray-600 mb-6">
-          展示散點圖與回歸線的組合，支援氣泡圖、分組著色和多種回歸分析。適用於相關性分析和趨勢預測。
-        </p>
-
-        {/* 場景選擇 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { key: 'sales', label: '📈 銷售業績', desc: '廣告投入vs銷售額分析' },
-            { key: 'product', label: '📊 產品性能', desc: '價格vs性能相關性' },
-            { key: 'stock', label: '💹 股票分析', desc: '風險vs收益平衡' },
-          ].map((scenario) => (
-            <button
-              key={scenario.key}
-              onClick={() => {
-                setActiveScenario(scenario.key as any)
-                setActiveSeriesIds(new Set())
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeScenario === scenario.key
-                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-medium">{scenario.label}</div>
-              <div className="text-xs text-gray-500">{scenario.desc}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* 回歸分析配置 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">回歸分析配置</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="showRegression"
-                checked={showRegression}
-                onChange={(e) => setShowRegression(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="showRegression" className="text-sm text-gray-700">顯示回歸線</label>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">回歸類型</label>
-              <select
-                value={regressionType}
-                onChange={(e) => setRegressionType(e.target.value as any)}
-                disabled={!showRegression}
-                className="w-full px-3 py-1 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="linear">線性回歸</option>
-                <option value="polynomial">多項式回歸</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="showEquation"
-                checked={showEquation}
-                onChange={(e) => setShowEquation(e.target.checked)}
-                disabled={!showRegression}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="showEquation" className="text-sm text-gray-700">顯示方程式</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="showRSquared"
-                checked={showRSquared}
-                onChange={(e) => setShowRSquared(e.target.checked)}
-                disabled={!showRegression}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="showRSquared" className="text-sm text-gray-700">顯示 R² 值</label>
-            </div>
-          </div>
-        </div>
-
-        {/* 系列控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">系列控制</h3>
-            <button
-              onClick={resetSeries}
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-            >
-              顯示全部
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(activeScenario === 'sales' ? salesSeries : 
-              activeScenario === 'product' ? productSeries : stockSeries).map((series) => (
-              <button
-                key={series.dataKey}
-                onClick={() => toggleSeries(series.dataKey)}
-                className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
-                  activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
-                    ? 'bg-white border-2 text-gray-700'
-                    : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
-                }`}
-                style={{
-                  borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
-                    ? series.color 
-                    : undefined
-                }}
-              >
-                <div 
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: series.color }}
-                />
-                {series.name}
-                <span className="text-xs opacity-60">
-                  ({series.type === 'scatter' ? '散點' : '線'})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">{config.title}</h2>
+    <DemoPageTemplate
+      title="Scatter + Regression 組合圖表 🔬"
+      description="展示散點圖與回歸線的完美組合，支援氣泡圖、分組著色和多種回歸分析。適用於相關性分析、趨勢預測和科學研究數據可視化。"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div className="mb-4">
-          <EnhancedComboChart
-            data={getCurrentData()}
-            series={currentSeries}
-            xKey={getCurrentXKey()}
-            width={900}
-            height={500}
-            margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-            leftAxis={{
-              label: config.leftAxis.label,
-              gridlines: true,
-            }}
-            rightAxis={{
-              label: config.rightAxis.label,
-              gridlines: false,
-            }}
-            xAxis={{
-              label: config.xAxis.label,
-            }}
-            animate={true}
-            className="scatter-regression-combo"
-          />
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel title="分析控制" icon={<CogIcon className="h-5 w-5" />}>
+            <div className="space-y-6">
+
+              {/* 場景選擇 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <SparklesIcon className="h-4 w-4 text-blue-500" />
+                  <h3 className="text-sm font-semibold text-gray-700">選擇分析場景</h3>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { 
+                      key: 'sales', 
+                      label: '銷售業績', 
+                      icon: <ChartBarIcon className="h-4 w-4" />,
+                      desc: '廣告投入vs銷售額分析',
+                      color: 'blue'
+                    },
+                    { 
+                      key: 'product', 
+                      label: '產品性能', 
+                      icon: <ChartBarSquareIcon className="h-4 w-4" />,
+                      desc: '價格vs性能相關性',
+                      color: 'green' 
+                    },
+                    { 
+                      key: 'stock', 
+                      label: '股票分析', 
+                      icon: <CurrencyDollarIcon className="h-4 w-4" />,
+                      desc: '風險vs收益平衡',
+                      color: 'purple'
+                    },
+                  ].map((scenario) => (
+                    <motion.button
+                      key={scenario.key}
+                      onClick={() => {
+                        setActiveScenario(scenario.key as any)
+                        setActiveSeriesIds(new Set())
+                      }}
+                      whileHover={{ scale: 1.02, x: 2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`w-full p-3 rounded-xl border-2 transition-all duration-200 text-left ${
+                        activeScenario === scenario.key
+                          ? `bg-${scenario.color}-100 border-${scenario.color}-300 text-${scenario.color}-700`
+                          : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        {scenario.icon}
+                        <span className="font-medium text-sm">{scenario.label}</span>
+                      </div>
+                      <div className="text-xs opacity-70">{scenario.desc}</div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 回歸分析配置 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <CalculatorIcon className="h-4 w-4 text-green-500" />
+                  <h3 className="text-sm font-semibold text-gray-700">回歸分析配置</h3>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="showRegression"
+                      checked={showRegression}
+                      onChange={(e) => setShowRegression(e.target.checked)}
+                      className="rounded border-gray-300 text-green-500 focus:ring-green-200"
+                    />
+                    <label htmlFor="showRegression" className="text-sm text-gray-700 font-medium">顯示回歸線</label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">回歸類型</label>
+                    <select
+                      value={regressionType}
+                      onChange={(e) => setRegressionType(e.target.value as any)}
+                      disabled={!showRegression}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-green-200 focus:border-green-300"
+                    >
+                      <option value="linear">線性回歸</option>
+                      <option value="polynomial">多項式回歸</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="showEquation"
+                        checked={showEquation}
+                        onChange={(e) => setShowEquation(e.target.checked)}
+                        disabled={!showRegression}
+                        className="rounded border-gray-300 text-green-500 focus:ring-green-200"
+                      />
+                      <label htmlFor="showEquation" className="text-sm text-gray-700">顯示方程式</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="showRSquared"
+                        checked={showRSquared}
+                        onChange={(e) => setShowRSquared(e.target.checked)}
+                        disabled={!showRegression}
+                        className="rounded border-gray-300 text-green-500 focus:ring-green-200"
+                      />
+                      <label htmlFor="showRSquared" className="text-sm text-gray-700">顯示 R² 值</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 系列控制 */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <EyeIcon className="h-4 w-4 text-purple-500" />
+                    <h3 className="text-sm font-semibold text-gray-700">系列控制</h3>
+                  </div>
+                  <button
+                    onClick={resetSeries}
+                    className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-600"
+                  >
+                    顯示全部
+                  </button>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-2">
+                  {(activeScenario === 'sales' ? salesSeries : 
+                    activeScenario === 'product' ? productSeries : stockSeries).map((series) => (
+                    <motion.button
+                      key={series.dataKey}
+                      onClick={() => toggleSeries(series.dataKey)}
+                      whileHover={{ x: 2 }}
+                      className={`w-full p-2 rounded-lg text-xs transition-all duration-200 text-left ${
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                          ? 'bg-white border-2 shadow-sm'
+                          : 'bg-gray-100 border border-gray-300 opacity-60'
+                      }`}
+                      style={{
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                          ? series.color 
+                          : undefined
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-sm" 
+                          style={{ backgroundColor: series.color }}
+                        />
+                        <span className="font-medium flex-1">{series.name}</span>
+                        <span className="text-xs opacity-60">
+                          ({series.type === 'scatter' ? '散點' : '線'})
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ModernControlPanel>
         </div>
 
-        {/* 數據統計 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="font-medium text-blue-800">散點圖系列</div>
-            <div className="text-blue-600">
-              {currentSeries.filter(s => s.type === 'scatter').length} 個散點圖系列
-            </div>
-          </div>
-          <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">趨勢線系列</div>
-            <div className="text-green-600">
-              {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
-            </div>
-          </div>
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="font-medium text-purple-800">資料點數量</div>
-            <div className="text-purple-600">
-              {getCurrentData().length} 個數據點
-            </div>
-          </div>
-        </div>
-      </div>
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
 
-      {/* 技術說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">技術特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">🎯 散點圖功能</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 支援氣泡圖：點的大小映射到數據維度</li>
-              <li>• 分組著色：根據類別自動分配顏色</li>
-              <li>• 交互事件：點擊和懸停事件處理</li>
-              <li>• 自適應縮放：自動調整點的大小範圍</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">📈 回歸分析</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 線性回歸：最小二乘法計算趨勢線</li>
-              <li>• 多項式回歸：支援二次曲線擬合</li>
-              <li>• R² 決定係數：評估回歸模型擬合度</li>
-              <li>• 方程式顯示：實時顯示回歸方程</li>
-            </ul>
-          </div>
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeScenario}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ChartContainer 
+              title={config.title}
+              subtitle={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點`}
+              responsive={true}
+              aspectRatio={16 / 9}
+            >
+              {({ width, height }) => (
+                <EnhancedComboChart
+                  data={getCurrentData()}
+                  series={currentSeries}
+                  xKey={getCurrentXKey()}
+                  width={width}
+                  height={height}
+                  margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                  leftAxis={{
+                    label: config.leftAxis.label,
+                    gridlines: true,
+                  }}
+                  rightAxis={{
+                    label: config.rightAxis.label,
+                    gridlines: false,
+                  }}
+                  xAxis={{
+                    label: config.xAxis.label,
+                  }}
+                  animate={true}
+                  className="scatter-regression-combo"
+                />
+              )}
+            </ChartContainer>
+          </motion.div>
+
+          {/* 數據統計卡片 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                  <ChartBarSquareIcon className="h-4 w-4 text-white" />
+                </div>
+                <div className="font-semibold text-blue-800">散點圖系列</div>
+              </div>
+              <div className="text-blue-700 text-lg font-bold">
+                {currentSeries.filter(s => s.type === 'scatter').length} 個散點圖系列
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">~</span>
+                </div>
+                <div className="font-semibold text-green-800">趨勢線系列</div>
+              </div>
+              <div className="text-green-700 text-lg font-bold">
+                {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              whileHover={{ y: -2, scale: 1.02 }}
+              className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">#</span>
+                </div>
+                <div className="font-semibold text-purple-800">資料點</div>
+              </div>
+              <div className="text-purple-700 text-lg font-bold">
+                {getCurrentData().length} 個數據點
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* 技術特色說明 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 backdrop-blur-sm border border-white/20"
+          >
+            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">🔬 技術特色</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <motion.div 
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-white/50 shadow-sm"
+              >
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <ChartBarSquareIcon className="h-5 w-5 text-blue-500" />
+                  散點圖功能
+                </h4>
+                <ul className="text-gray-600 space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    支援氣泡圖：點的大小映射到數據維度
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    分組著色：根據類別自動分配顏色
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    交互事件：點擊和懸停事件處理
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></span>
+                    自適應縮放：自動調整點的大小範圍
+                  </li>
+                </ul>
+              </motion.div>
+              
+              <motion.div 
+                whileHover={{ y: -2, scale: 1.02 }}
+                className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-white/50 shadow-sm"
+              >
+                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <CalculatorIcon className="h-5 w-5 text-green-500" />
+                  回歸分析
+                </h4>
+                <ul className="text-gray-600 space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></span>
+                    線性回歸：最小二乘法計算趨勢線
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></span>
+                    多項式回歸：支援二次曲線擬合
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></span>
+                    R² 決定係數：評估回歸模型擬合度
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></span>
+                    方程式顯示：實時顯示回歸方程
+                  </li>
+                </ul>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* 資料表格 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <DataTable
+              title={`${config.title} - 資料預覽`}
+              description="當前場景的示範資料，展示前8筆記錄"
+              data={getCurrentData().slice(0, 8)}
+              columns={Object.keys(getCurrentData()[0] || {}).map(key => ({
+                key,
+                title: key,
+                sortable: true
+              }))}
+            />
+          </motion.div>
+
+          {/* 程式碼範例 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+          >
+            <CodeExample
+              title="散點 + 回歸線組合圖表使用範例"
+              description="展示如何使用 scatter 系列結合回歸分析，支援氣泡大小與回歸線顯示"
+              code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+const data = [
+  { 
+    month: 'Jan', 
+    adSpend: 5000, 
+    revenue: 45000, 
+    customerCount: 120, 
+    satisfaction: 4.2 
+  },
+  { 
+    month: 'Feb', 
+    adSpend: 7200, 
+    revenue: 62000, 
+    customerCount: 145, 
+    satisfaction: 4.3 
+  },
+  // ...更多數據
+]
+
+const series: ComboChartSeries[] = [
+  {
+    type: 'scatter',
+    dataKey: 'revenue',
+    name: '廣告投入vs銷售額',
+    yAxis: 'left',
+    color: '#3b82f6',
+    scatterRadius: 6,
+    scatterOpacity: 0.7,
+    // 使用客戶數量作為氣泡大小
+    sizeKey: 'customerCount',
+    sizeRange: [4, 16],
+    // 回歸線設定
+    showRegression: true,
+    regressionType: 'linear',
+    regressionColor: '#ef4444',
+    regressionWidth: 2,
+    showRSquared: true
+  },
+  {
+    type: 'line',
+    dataKey: 'satisfaction',
+    name: '客戶滿意度',
+    yAxis: 'right',
+    color: '#10b981',
+    strokeWidth: 2,
+    showPoints: true,
+    pointRadius: 3,
+    curve: 'monotone'
+  }
+]
+
+<EnhancedComboChart
+  data={data}
+  series={series}
+  xKey="month"
+  width={800}
+  height={500}
+  leftAxis={{
+    label: '銷售額 (元)',
+    gridlines: true
+  }}
+  rightAxis={{
+    label: '滿意度 (分)',
+    gridlines: false
+  }}
+  xAxis={{
+    label: '時間周期'
+  }}
+  animate={true}
+  interactive={true}
+  margin={{ top: 20, right: 80, bottom: 60, left: 100 }}
+  onSeriesClick={(series, dataPoint) => {
+    console.log('點擊了', series.name, dataPoint)
+  }}
+/>`}
+              language="typescript"
+            />
+          </motion.div>
         </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 

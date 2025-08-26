@@ -938,12 +938,28 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
           return null
         }
 
-        // 轉換數據格式
-        const seriesData = data.map(d => ({
-          x: d[xKey],
-          y: Number(d[seriesConfig.dataKey]) || 0,
-          originalData: d
-        }))
+        // 轉換數據格式，為 area 類型保留 baseline 相關數據
+        const seriesData = data.map(d => {
+          const baseData = {
+            x: d[xKey],
+            y: Number(d[seriesConfig.dataKey]) || 0,
+            originalData: d
+          }
+          
+          // 如果是 area 類型且使用函數 baseline，需要添加 baseline 字段到數據中
+          if (seriesConfig.type === 'area' && typeof seriesConfig.baseline === 'function') {
+            try {
+              const baselineValue = seriesConfig.baseline(d)
+              if (baselineValue != null && !isNaN(baselineValue)) {
+                baseData.y0 = baselineValue
+              }
+            } catch (error) {
+              console.warn(`Error calculating baseline for data point:`, d, error)
+            }
+          }
+          
+          return baseData
+        })
 
         console.log(`🎨 Rendering ${seriesConfig.type} series: ${seriesConfig.name}`, {
           dataPoints: seriesData.length,
@@ -968,7 +984,7 @@ const DirectChartRenderer: React.FC<DirectChartRendererProps> = ({
               key={`area-${seriesConfig.name}-${index}`}
               {...commonProps}
               opacity={seriesConfig.areaOpacity || 0.6}
-              baseline={seriesConfig.baseline || 0}
+              baseline={typeof seriesConfig.baseline === 'function' ? 0 : (seriesConfig.baseline || 0)}
               alignment="start"
               curve={getCurveFunction(seriesConfig.curve || 'monotone')}
               gradient={seriesConfig.gradient}

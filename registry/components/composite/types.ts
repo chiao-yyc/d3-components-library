@@ -50,7 +50,7 @@ export interface ComboChartSeries {
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step'
   // Area 專用配置
   areaOpacity?: number
-  baseline?: number
+  baseline?: number | ((d: any) => number)
   gradient?: {
     id: string
     stops: { offset: string; color: string; opacity?: number }[]

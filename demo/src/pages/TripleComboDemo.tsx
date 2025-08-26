@@ -1,6 +1,22 @@
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  SelectControl,
+  ToggleControl,
+  RangeSlider,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline'
 
 const TripleComboDemo: React.FC = () => {
   // 場景 1: 電商業務分析 - 銷售額(柱) + 成長區間(面) + 目標線(線)
@@ -290,232 +306,346 @@ const TripleComboDemo: React.FC = () => {
   const config = getCurrentConfig()
   const currentSeries = getCurrentSeries()
 
+  const scenarioOptions = [
+    { value: 'ecommerce', label: '🛒 電商分析', desc: '銷售、成長與目標' },
+    { value: 'budget', label: '💰 預算管理', desc: '支出、預算與效率' },
+    { value: 'social', label: '📱 社群媒體', desc: '互動、觸及與參與' },
+  ]
+
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '當前場景', value: scenarioOptions.find(s => s.value === activeScenario)?.label || '' },
+    { label: '資料點數', value: getCurrentData().length },
+    { label: '區域系列', value: currentSeries.filter(s => s.type === 'area').length },
+    { label: '柱狀系列', value: currentSeries.filter(s => s.type === 'bar').length },
+    { label: '線條系列', value: currentSeries.filter(s => s.type === 'line').length },
+    { label: '柱狀透明度', value: `${Math.round(barOpacity * 100)}%` }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: getCurrentXKey(), title: '主鍵', sortable: true },
+    { 
+      key: activeScenario === 'ecommerce' ? 'sales' : activeScenario === 'budget' ? 'actual_cost' : 'interactions', 
+      title: '主要數值', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    },
+    { 
+      key: activeScenario === 'ecommerce' ? 'target' : activeScenario === 'budget' ? 'forecast' : 'engagement_rate', 
+      title: '目標/趨勢', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    }
+  ]
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Bar + Area + Line 三重組合圖表
-        </h1>
-        <p className="text-gray-600 mb-6">
-          展示柱狀圖、區域圖與線圖的三重組合，適用於多維度業務分析、預算管理和績效追蹤。
-        </p>
-
-        {/* 場景選擇 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { key: 'ecommerce', label: '🛒 電商分析', desc: '銷售、成長與目標' },
-            { key: 'budget', label: '💰 預算管理', desc: '支出、預算與效率' },
-            { key: 'social', label: '📱 社群媒體', desc: '互動、觸及與參與' },
-          ].map((scenario) => (
-            <button
-              key={scenario.key}
-              onClick={() => {
-                setActiveScenario(scenario.key as any)
-                setActiveSeriesIds(new Set())
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeScenario === scenario.key
-                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-medium">{scenario.label}</div>
-              <div className="text-xs text-gray-500">{scenario.desc}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* 三重組合配置 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">三重組合配置</h3>
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="showAreaChart"
-                checked={showAreaChart}
-                onChange={(e) => setShowAreaChart(e.target.checked)}
-                className="rounded border-gray-300"
-              />
-              <label htmlFor="showAreaChart" className="text-sm text-gray-700">顯示區域圖</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm text-gray-700">柱狀圖透明度：</label>
-              <input
-                type="range"
-                min="0.3"
-                max="1"
-                step="0.1"
-                value={barOpacity}
-                onChange={(e) => setBarOpacity(Number(e.target.value))}
-                className="w-20"
-              />
-              <span className="text-xs text-gray-500">{barOpacity}</span>
-            </div>
-            <div className="text-xs text-gray-500">
-              三重組合：區域圖提供範圍參考，柱狀圖顯示實際數值，線圖展示趨勢變化
-            </div>
-          </div>
-        </div>
-
-        {/* 系列控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">系列控制</h3>
-            <button
-              onClick={resetSeries}
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-            >
-              顯示全部
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(activeScenario === 'ecommerce' ? ecommerceSeries : 
-              activeScenario === 'budget' ? budgetSeries : socialSeries).map((series) => (
-              <button
-                key={series.dataKey}
-                onClick={() => toggleSeries(series.dataKey)}
-                className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
-                  activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
-                    ? 'bg-white border-2 text-gray-700'
-                    : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
-                }`}
-                style={{
-                  borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
-                    ? series.color 
-                    : undefined
-                }}
-              >
-                <div 
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: series.color }}
-                />
-                {series.name}
-                <span className="text-xs opacity-60">
-                  ({series.type === 'area' ? '區域' : series.type === 'bar' ? '柱狀' : '線條'})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">{config.title}</h2>
+    <DemoPageTemplate
+      title="Bar + Area + Line 三重組合圖表"
+      description="展示柱狀圖、區域圖與線圖的三重組合，適用於多維度業務分析、預算管理和績效追蹤"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div className="mb-4">
-          <EnhancedComboChart
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="控制面板" 
+            icon={<CogIcon className="w-5 h-5" />}
+          >
+          <div className="space-y-8">
+            {/* 場景選擇 */}
+            <ControlGroup title="場景選擇" icon="🎯" cols={1}>
+              <SelectControl
+                label="分析場景"
+                value={activeScenario}
+                onChange={(value) => {
+                  setActiveScenario(value as any)
+                  setActiveSeriesIds(new Set())
+                }}
+                options={scenarioOptions.map(s => ({ value: s.value, label: s.label }))}
+                description={scenarioOptions.find(s => s.value === activeScenario)?.desc}
+              />
+            </ControlGroup>
+
+            {/* 三重組合配置 */}
+            <ControlGroup title="三重組合配置" icon="📊" cols={2}>
+              <ToggleControl
+                label="顯示區域圖"
+                checked={showAreaChart}
+                onChange={setShowAreaChart}
+                description="顯示背景範圍參考區域"
+              />
+              
+              <RangeSlider
+                label="柱狀圖透明度"
+                value={barOpacity}
+                min={0.3}
+                max={1}
+                step={0.1}
+                onChange={setBarOpacity}
+                suffix="%"
+                description="調整柱狀圖透明度以優化視覺層次"
+              />
+            </ControlGroup>
+
+            {/* 系列控制 */}
+            <ControlGroup title="系列控制" icon="🎨" cols={1}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">可見系列</span>
+                  <button
+                    onClick={resetSeries}
+                    className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+                  >
+                    顯示全部
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(activeScenario === 'ecommerce' ? ecommerceSeries : 
+                    activeScenario === 'budget' ? budgetSeries : socialSeries).map((series) => (
+                    <button
+                      key={series.dataKey}
+                      onClick={() => toggleSeries(series.dataKey)}
+                      className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                          ? 'bg-white border-2 text-gray-700'
+                          : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
+                      }`}
+                      style={{
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                          ? series.color 
+                          : undefined
+                      }}
+                    >
+                      <div 
+                        className="w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: series.color }}
+                      />
+                      {series.name}
+                      <span className="text-xs opacity-60">
+                        ({series.type === 'area' ? '區域' : series.type === 'bar' ? '柱狀' : '線條'})
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </ControlGroup>
+          </div>
+          </ModernControlPanel>
+        </div>
+
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeScenario}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+        <ChartContainer
+          title={config.title}
+          subtitle={`${currentSeries.filter(s => s.type === 'area').length}區域 + ${currentSeries.filter(s => s.type === 'bar').length}柱狀 + ${currentSeries.filter(s => s.type === 'line').length}線條 三重組合`}
+          responsive={true}
+          aspectRatio={16 / 9}
+          actions={
+            <div className="flex items-center gap-2">
+              <PresentationChartBarIcon className="w-5 h-5 text-purple-500" />
+              <span className="text-sm text-gray-600">三重組合圖表</span>
+            </div>
+          }
+        >
+          {({ width, height }) => (
+            <motion.div
+              key={`${activeScenario}-${barOpacity}-${showAreaChart}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <EnhancedComboChart
+                data={getCurrentData()}
+                series={currentSeries}
+                xKey={getCurrentXKey()}
+                width={width}
+                height={height}
+                margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                leftAxis={{
+                  label: config.leftAxis.label,
+                  gridlines: true,
+                }}
+                rightAxis={{
+                  label: config.rightAxis.label,
+                  gridlines: false,
+                }}
+                xAxis={{
+                  label: config.xAxis.label,
+                }}
+                animate={true}
+                className="triple-combo-chart"
+              />
+            </motion.div>
+          )}
+        </ChartContainer>
+          </motion.div>
+
+          {/* 狀態顯示 */}
+          <StatusDisplay items={statusItems} />
+
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
             data={getCurrentData()}
-            series={currentSeries}
-            xKey={getCurrentXKey()}
-            width={900}
-            height={500}
-            margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-            leftAxis={{
-              label: config.leftAxis.label,
-              gridlines: true,
-            }}
-            rightAxis={{
-              label: config.rightAxis.label,
-              gridlines: false,
-            }}
-            xAxis={{
-              label: config.xAxis.label,
-            }}
-            animate={true}
-            className="triple-combo-chart"
+            columns={tableColumns}
+            maxRows={8}
+            showIndex
           />
-        </div>
 
-        {/* 數據統計 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="font-medium text-blue-800">區域圖系列</div>
-            <div className="text-blue-600">
-              {currentSeries.filter(s => s.type === 'area').length} 個區域圖
+          {/* 代碼範例 */}
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+const data = [
+  { 
+    month: 'Q1', 
+    sales: 120000, 
+    growth_min: 110000, 
+    growth_max: 140000, 
+    target: 135000, 
+    conversion: 3.2 
+  },
+  // ...更多數據
+]
+
+const series: ComboChartSeries[] = [
+  // Area 系列 - 背景區間
+  {
+    type: 'area',
+    dataKey: 'growth_max',
+    name: '成長預期區間',
+    yAxis: 'left',
+    color: '#10b981',
+    areaOpacity: 0.15,
+    baseline: (d: any) => d.growth_min
+  },
+  // Bar 系列 - 主要數據
+  {
+    type: 'bar',
+    dataKey: 'sales',
+    name: '實際銷售額',
+    yAxis: 'left',
+    color: '#3b82f6',
+    barOpacity: 0.7,
+    barWidth: 0.6
+  },
+  // Line 系列 - 目標/趨勢
+  {
+    type: 'line',
+    dataKey: 'target',
+    name: '目標線',
+    yAxis: 'left',
+    color: '#ef4444',
+    strokeWidth: 3,
+    showPoints: true
+  }
+]
+
+<EnhancedComboChart
+  data={data}
+  series={series}
+  xKey="month"
+  width={${getCurrentData().length * 80}}
+  height={500}
+  leftAxis={{ label: "${config.leftAxis.label}", gridlines: true }}
+  rightAxis={{ label: "${config.rightAxis.label}", gridlines: false }}
+  animate={true}
+  interactive={true}
+/>`}
+          />
+
+          {/* 功能說明 */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">三重組合圖表功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">視覺層次</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  背景區域參考
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  主要數據柱狀圖
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  趨勢線分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  雙軸數據支援
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">互動功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  圖層獨立控制
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  透明度調整
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  系列篩選
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  場景快速切換
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  電商業務分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  專案預算管理
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-lime-500 rounded-full" />
+                  社群媒體監控
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                  多維度分析
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">柱狀圖系列</div>
-            <div className="text-green-600">
-              {currentSeries.filter(s => s.type === 'bar').length} 個柱狀圖
-            </div>
-          </div>
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="font-medium text-purple-800">線圖系列</div>
-            <div className="text-purple-600">
-              {currentSeries.filter(s => s.type === 'line').length} 條線圖
-            </div>
-          </div>
-          <div className="bg-orange-50 p-3 rounded">
-            <div className="font-medium text-orange-800">總數據點</div>
-            <div className="text-orange-600">
-              {getCurrentData().length} 個數據點
-            </div>
-          </div>
+        </div>
+        
         </div>
       </div>
-
-      {/* 技術說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">三重組合特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">📊 視覺層次</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 區域圖：背景範圍參考，低透明度</li>
-              <li>• 柱狀圖：主要數據呈現，中等透明度</li>
-              <li>• 線圖：趨勢分析，高對比度顯示</li>
-              <li>• 雙軸支援：不同單位數據同時展示</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">⚡ 互動功能</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 圖層控制：獨立開關三種圖表類型</li>
-              <li>• 透明度調整：優化視覺重疊效果</li>
-              <li>• 系列篩選：靈活控制顯示內容</li>
-              <li>• 場景切換：快速對比不同業務案例</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* 應用場景說明 */}
-        <div className="mt-6">
-          <h4 className="font-medium text-gray-800 mb-3">🎯 業務應用場景</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-blue-600 mb-1">🛒 電商營運</div>
-              <div className="text-gray-600">銷售分析、目標追蹤、成長預測、轉換優化</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-purple-600 mb-1">💰 專案管理</div>
-              <div className="text-gray-600">預算控制、成本分析、效率監控、風險評估</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-cyan-600 mb-1">📱 社群經營</div>
-              <div className="text-gray-600">互動分析、觸及監控、參與度優化、粉絲成長</div>
-            </div>
-          </div>
-        </div>
-
-        {/* 技術架構說明 */}
-        <div className="mt-6">
-          <h4 className="font-medium text-gray-800 mb-3">🔧 技術實現</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-white p-4 rounded border">
-            <div>
-              <div className="font-medium text-gray-700 mb-1">圖層渲染順序</div>
-              <div className="text-gray-600">Area (背景) → Bar (中層) → Line (前景)</div>
-            </div>
-            <div>
-              <div className="font-medium text-gray-700 mb-1">雙軸協調</div>
-              <div className="text-gray-600">自動域值計算、獨立刻度、標籤對齊</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 

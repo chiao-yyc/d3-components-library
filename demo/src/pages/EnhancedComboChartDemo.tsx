@@ -1,7 +1,21 @@
 import React, { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 
 // 導入真正的增強版 ComboChart
 import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '../../../registry/components/composite'
+import { 
+  DemoPageTemplate,
+  ModernControlPanel,
+  ControlGroup,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline'
 
 // 生成示例數據
 const generateSalesData = () => {
@@ -132,222 +146,203 @@ export const EnhancedComboChartDemo: React.FC = () => {
     selectedSeries.length === 0 || selectedSeries.includes(s.name)
   )
 
+  // 場景選項
+  const scenarioOptions = [
+    { value: 'sales', label: '💰 銷售分析' },
+    { value: 'performance', label: '📊 績效分析' }
+  ]
+
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '當前場景', value: scenarioOptions.find(s => s.value === activeScenario)?.label || '' },
+    { label: '資料點數', value: currentData.length },
+    { label: '系列數量', value: visibleSeries.length },
+    { label: 'Bar 系列', value: visibleSeries.filter(s => s.type === 'bar').length },
+    { label: 'Line 系列', value: visibleSeries.filter(s => s.type === 'line').length },
+    { label: '左軸系列', value: visibleSeries.filter(s => s.yAxis === 'left').length },
+    { label: '右軸系列', value: visibleSeries.filter(s => s.yAxis === 'right').length }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: currentXKey, title: '主鍵', sortable: true },
+    { 
+      key: activeScenario === 'sales' ? 'revenue' : 'budget', 
+      title: '主要數值', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    },
+    { 
+      key: activeScenario === 'sales' ? 'profit' : 'actual', 
+      title: '次要數值', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    },
+    { 
+      key: activeScenario === 'sales' ? 'growthRate' : 'efficiency', 
+      title: '百分比指標', 
+      sortable: true,
+      formatter: (value) => `${Number(value).toFixed(1)}%`,
+      align: 'right'
+    }
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-          📊 Enhanced ComboChart 增強版組合圖表演示
-        </h1>
-        <p className="text-gray-600 mb-6">
-          展示增強版 ComboChart 的進階功能：靈活數據映射、多軸配置、互動控制
-        </p>
-
-        {/* 場景選擇 */}
-        <div className="flex space-x-4 mb-6">
-          <button
-            onClick={() => setActiveScenario('sales')}
-            className={`px-4 py-2 rounded-md transition-colors ${
-              activeScenario === 'sales'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+    <DemoPageTemplate
+      title="Enhanced ComboChart 增強版組合圖表演示"
+      description="展示增強版 ComboChart 的進階功能：靈活數據映射、多軸配置、互動控制"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="配置中心" 
+            icon={<CogIcon className="w-5 h-5" />}
           >
-            💰 銷售分析
-          </button>
-          <button
-            onClick={() => setActiveScenario('performance')}
-            className={`px-4 py-2 rounded-md transition-colors ${
-              activeScenario === 'performance'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            📊 績效分析
-          </button>
-        </div>
+            <div className="space-y-8">
+              {/* 場景選擇 */}
+              <ControlGroup title="場景選擇" icon="🎯" cols={1}>
+                <SelectControl
+                  label="分析場景"
+                  value={activeScenario}
+                  onChange={(value) => {
+                    setActiveScenario(value as any)
+                    setSelectedSeries([])
+                  }}
+                  options={scenarioOptions}
+                />
+              </ControlGroup>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 圖表區域 */}
-          <div className="lg:col-span-3">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="text-lg font-semibold mb-4 text-gray-700">Production Chart</h4>
-              <EnhancedComboChart
-                data={currentData}
-                series={visibleSeries}
-                xKey={currentXKey}
-                leftAxis={{
-                  label: activeScenario === 'sales' ? '金額 (萬元)' : '預算 vs 實際 (萬元)',
-                  gridlines: true
-                }}
-                rightAxis={{
-                  label: activeScenario === 'sales' ? '成長率 (%)' : '績效指標 (%)',
-                  gridlines: false
-                }}
-                xAxis={{
-                  label: activeScenario === 'sales' ? '月份' : '季度',
-                  gridlines: true
-                }}
-                animate={animate}
-                interactive={interactive}
-                onSeriesClick={handleSeriesClick}
-                onSeriesHover={handleSeriesHover}
-                width={600}
-                height={400}
-              />
-            </div>
-            
-
-            {/* 數據表格 */}
-            <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                數據一覽表
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-3 py-2 text-left font-medium text-gray-500">
-                        {activeScenario === 'sales' ? '月份' : '季度'}
-                      </th>
-                      {currentSeries.map(series => (
-                        <th key={series.dataKey} className="px-3 py-2 text-left font-medium text-gray-500">
-                          {series.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {currentData.map((item, index) => (
-                      <tr key={index}>
-                        <td className="px-3 py-2 font-medium text-gray-900">
-                          {item[currentXKey]}
-                        </td>
-                        {currentSeries.map(series => (
-                          <td key={series.dataKey} className="px-3 py-2 text-gray-500">
-                            {typeof item[series.dataKey] === 'number' 
-                              ? item[series.dataKey].toLocaleString()
-                              : item[series.dataKey]
-                            }
-                            {series.dataKey.includes('Rate') || series.dataKey.includes('efficiency') || series.dataKey.includes('satisfaction') ? '%' : ''}
-                          </td>
-                        ))}
-                      </tr>
+              {/* 系列控制 */}
+              <ControlGroup title="系列選擇" icon="📊" cols={1}>
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-600 mb-3">選擇要顯示的圖表系列：</div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {currentSeries.map(series => (
+                      <button
+                        key={series.name}
+                        onClick={() => toggleSeries(series.name)}
+                        className={`p-3 rounded-lg border-2 transition-colors text-left flex items-center gap-3 ${
+                          selectedSeries.length === 0 || selectedSeries.includes(series.name)
+                            ? 'bg-white border-2 text-gray-700'
+                            : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
+                        }`}
+                        style={{
+                          borderColor: selectedSeries.length === 0 || selectedSeries.includes(series.name) 
+                            ? series.color 
+                            : undefined
+                        }}
+                      >
+                        <div 
+                          className="w-3 h-3 rounded-sm"
+                          style={{ backgroundColor: series.color }}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium">{series.name}</div>
+                          <div className="text-xs opacity-60">({series.type === 'bar' ? '柱狀圖' : '線圖'})</div>
+                        </div>
+                      </button>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* 控制面板 */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">控制面板</h3>
-            
-            {/* 系列選擇 */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                顯示系列
-              </label>
-              {currentSeries.map(series => (
-                <div key={series.name} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={`series-${series.name}`}
-                    checked={selectedSeries.length === 0 || selectedSeries.includes(series.name)}
-                    onChange={() => toggleSeries(series.name)}
-                    className="rounded"
-                  />
-                  <div 
-                    className="w-3 h-3 rounded"
-                    style={{ backgroundColor: series.color }}
-                  />
-                  <label htmlFor={`series-${series.name}`} className="text-sm text-gray-700">
-                    {series.name} ({series.type})
-                  </label>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </ControlGroup>
 
-            {/* 全域設定 */}
-            <div className="space-y-3 pt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="animate"
+              {/* 全域設定 */}
+              <ControlGroup title="全域設定" icon="⚙️" cols={1}>
+                <ToggleControl
+                  label="動畫效果"
                   checked={animate}
-                  onChange={(e) => setAnimate(e.target.checked)}
-                  className="rounded"
+                  onChange={setAnimate}
+                  description="圖表轉場和更新動畫"
                 />
-                <label htmlFor="animate" className="text-sm text-gray-700">
-                  動畫效果
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="interactive"
+                
+                <ToggleControl
+                  label="互動功能"
                   checked={interactive}
-                  onChange={(e) => setInteractive(e.target.checked)}
-                  className="rounded"
+                  onChange={setInteractive}
+                  description="啟用點擊和懸停事件"
                 />
-                <label htmlFor="interactive" className="text-sm text-gray-700">
-                  互動功能
-                </label>
-              </div>
+              </ControlGroup>
             </div>
-
-            {/* 統計資訊 */}
-            <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">圖表統計</h4>
-              <div className="text-xs text-gray-600 space-y-1">
-                <div>資料點數: {currentData.length}</div>
-                <div>系列數量: {visibleSeries.length}</div>
-                <div>Bar 系列: {visibleSeries.filter(s => s.type === 'bar').length}</div>
-                <div>Line 系列: {visibleSeries.filter(s => s.type === 'line').length}</div>
-                <div>左軸系列: {visibleSeries.filter(s => s.yAxis === 'left').length}</div>
-                <div>右軸系列: {visibleSeries.filter(s => s.yAxis === 'right').length}</div>
-              </div>
-            </div>
-          </div>
+          </ModernControlPanel>
         </div>
 
-        {/* 功能說明 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              增強功能特點
-            </h3>
-            <ul className="text-blue-800 space-y-1 text-sm">
-              <li>• <strong>靈活數據接口</strong>: 統一數據源，系列配置分離</li>
-              <li>• <strong>精細軸線控制</strong>: 獨立的左右軸配置和格式化</li>
-              <li>• <strong>智能比例尺</strong>: 自動檢測數據類型和範圍</li>
-              <li>• <strong>豐富互動</strong>: 點擊、懸停事件處理</li>
-              <li>• <strong>視覺自訂</strong>: 每個系列獨立的樣式配置</li>
-            </ul>
-          </div>
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeScenario}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ChartContainer
+              title={activeScenario === 'sales' ? '銷售業績分析' : '績效監控分析'}
+              subtitle={`${visibleSeries.length} 個系列 | ${currentData.length} 個資料點`}
+              responsive={true}
+              aspectRatio={16 / 9}
+              actions={
+                <div className="flex items-center gap-2">
+                  <PresentationChartBarIcon className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm text-gray-600">增強版組合圖表</span>
+                </div>
+              }
+            >
+              {({ width, height }) => (
+                <motion.div
+                  key={`${activeScenario}-${animate}-${interactive}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <EnhancedComboChart
+                    data={currentData}
+                    series={visibleSeries}
+                    xKey={currentXKey}
+                    width={width}
+                    height={height}
+                    leftAxis={{
+                      label: activeScenario === 'sales' ? '金額 (萬元)' : '預算 vs 實際 (萬元)',
+                      gridlines: true
+                    }}
+                    rightAxis={{
+                      label: activeScenario === 'sales' ? '成長率 (%)' : '績效指標 (%)',
+                      gridlines: false
+                    }}
+                    xAxis={{
+                      label: activeScenario === 'sales' ? '月份' : '季度'
+                    }}
+                    animate={animate}
+                    interactive={interactive}
+                    onSeriesClick={handleSeriesClick}
+                    onSeriesHover={handleSeriesHover}
+                  />
+                </motion.div>
+              )}
+            </ChartContainer>
+          </motion.div>
 
-          <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-            <h3 className="text-lg font-semibold text-green-900 mb-2">
-              使用場景
-            </h3>
-            <ul className="text-green-800 space-y-1 text-sm">
-              <li>• <strong>業務分析</strong>: 收入、利潤與成長率對比</li>
-              <li>• <strong>績效監控</strong>: 預算執行與效率指標</li>
-              <li>• <strong>市場分析</strong>: 銷量與市佔率趨勢</li>
-              <li>• <strong>財務報表</strong>: 多維度財務數據視覺化</li>
-              <li>• <strong>運營儀表板</strong>: KPI 監控與趨勢分析</li>
-            </ul>
-          </div>
-        </div>
+          {/* 狀態顯示 */}
+          <StatusDisplay items={statusItems} />
 
-        {/* 程式碼範例 */}
-        <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            使用範例
-          </h3>
-          <pre className="text-sm text-gray-700 overflow-x-auto">
-{`import { EnhancedComboChart } from '@/components/composite'
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
+            data={currentData}
+            columns={tableColumns}
+            maxRows={8}
+            showIndex
+          />
+
+          {/* 代碼範例 */}
+          <CodeExample
+            title="EnhancedComboChart 進階使用範例"
+            description="展示如何使用增強版組合圖表的多種配置選項和互動功能"
+            code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
 
 const data = [
   { month: 'Jan', revenue: 500000, profit: 80000, growthRate: 12.5 },
@@ -355,26 +350,66 @@ const data = [
   // ...更多數據
 ]
 
-const series = [
-  { type: 'bar', dataKey: 'revenue', name: '營收', yAxis: 'left', color: '#3b82f6' },
-  { type: 'bar', dataKey: 'profit', name: '利潤', yAxis: 'left', color: '#10b981' },
-  { type: 'line', dataKey: 'growthRate', name: '成長率', yAxis: 'right', color: '#ef4444' }
+const series: ComboChartSeries[] = [
+  { 
+    type: 'bar', 
+    dataKey: 'revenue', 
+    name: '營收', 
+    yAxis: 'left', 
+    color: '#3b82f6',
+    barOpacity: 0.8
+  },
+  { 
+    type: 'bar', 
+    dataKey: 'profit', 
+    name: '利潤', 
+    yAxis: 'left', 
+    color: '#10b981',
+    barOpacity: 0.8
+  },
+  { 
+    type: 'line', 
+    dataKey: 'growthRate', 
+    name: '成長率', 
+    yAxis: 'right', 
+    color: '#ef4444',
+    strokeWidth: 3,
+    showPoints: true,
+    curve: 'monotone'
+  }
 ]
 
 <EnhancedComboChart
   data={data}
   series={series}
   xKey="month"
-  leftAxis={{ label: '金額 (萬元)', gridlines: true }}
-  rightAxis={{ label: '成長率 (%)', gridlines: false }}
+  width={800}
+  height={500}
+  leftAxis={{ 
+    label: '金額 (萬元)', 
+    gridlines: true 
+  }}
+  rightAxis={{ 
+    label: '成長率 (%)', 
+    gridlines: false 
+  }}
+  xAxis={{ 
+    label: '月份' 
+  }}
   animate={true}
   interactive={true}
-  onSeriesClick={(series, dataPoint) => console.log('Clicked:', series.name)}
+  onSeriesClick={(series, dataPoint, event) => {
+    console.log('Clicked:', series.name, dataPoint)
+  }}
+  onSeriesHover={(series, dataPoint, event) => {
+    console.log('Hovered:', series.name, dataPoint)
+  }}
 />`}
-          </pre>
+            language="typescript"
+          />
         </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 
