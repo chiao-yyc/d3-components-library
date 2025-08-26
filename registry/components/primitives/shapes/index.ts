@@ -5,7 +5,6 @@ export { StackedArea } from './stacked-area'
 export { Scatter } from './scatter'
 export { RegressionLine } from './regression-line'
 export { Waterfall } from './waterfall'
-export { Candlestick } from './candlestick'
 export type { 
   BarShapeData,
   BarProps,
@@ -24,7 +23,3 @@ export type {
   WaterfallProps
 } from './types'
 
-export type {
-  CandlestickShapeData,
-  CandlestickProps
-} from './candlestick'

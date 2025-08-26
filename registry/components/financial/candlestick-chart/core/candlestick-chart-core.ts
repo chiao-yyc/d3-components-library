@@ -17,6 +17,10 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
   private volumes: VolumeItem[] = [];
   private colors: any = {};
   private scales: any = {};
+  
+  // 🔧 新增：縮放級別和動態寬度管理
+  private currentScale: number = 1;
+  private currentMaxCandleWidth: number = 20;
 
   constructor(config: CandlestickChartProps) {
     super(config);
@@ -166,33 +170,11 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
       return;
     }
 
-    // 🔧 修復：基於原始數據密度計算穩定的蠟燭寬度
-    // 計算原始數據的平均時間間距
-    const sortedData = this.processedOHLCData.slice().sort((a, b) => a.date.getTime() - b.date.getTime());
-    let totalTimeDiff = 0;
-    for (let i = 1; i < sortedData.length; i++) {
-      totalTimeDiff += sortedData[i].date.getTime() - sortedData[i-1].date.getTime();
-    }
-    const avgTimeBetweenPoints = totalTimeDiff / Math.max(1, sortedData.length - 1);
+    // 🔧 使用智能寬度計算，防止重疊
+    const candleActualWidth = this.calculateSmartCandleWidth();
     
-    // 🔧 修復：使用穩定的寬度計算，避免在縮放時產生過大的寬度值
-    // 基於當前可見數據點的數量計算合理寬度
-    const currentDomain = xScale.domain();
-    const visibleData = this.processedOHLCData.filter(d => 
-      d.date >= currentDomain[0] && d.date <= currentDomain[1]
-    );
-    
-    const visibleDataCount = Math.max(1, visibleData.length);
-    const domainWidth = xScale.range()[1] - xScale.range()[0]; // 固定為chartWidth
-    const maxCandleWidth = Math.min(20, domainWidth / visibleDataCount * 0.8); // 限制最大寬度
-    const candleActualWidth = Math.max(0.5, Math.min(maxCandleWidth, domainWidth / visibleDataCount * candleWidth));
-    
-    console.log('🕯️ Stable candle width calculation:', {
-      visibleDataCount,
-      domainWidth,
-      maxCandleWidth: maxCandleWidth.toFixed(1),
-      candleActualWidth: candleActualWidth.toFixed(1)
-    });
+    // 更新當前最大寬度（用於邊距計算）
+    this.currentMaxCandleWidth = candleActualWidth;
 
     this.candlesticks = this.processedOHLCData.map((d, i) => {
       const x = xScale(d.date) - candleActualWidth / 2;
@@ -232,16 +214,8 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
       return;
     }
 
-    // 🔧 修復：使用與candlestick相同的穩定寬度計算邏輯
-    const currentDomain = xScale.domain();
-    const visibleData = this.processedOHLCData.filter(d => 
-      d.date >= currentDomain[0] && d.date <= currentDomain[1]
-    );
-    
-    const visibleDataCount = Math.max(1, visibleData.length);
-    const domainWidth = xScale.range()[1] - xScale.range()[0]; // 固定為chartWidth
-    const maxVolumeWidth = Math.min(15, domainWidth / visibleDataCount * 0.6); // 限制最大寬度
-    const volumeBarWidth = Math.max(0.5, Math.min(maxVolumeWidth, domainWidth / visibleDataCount * 0.6));
+    // 🔧 使用智能寬度計算，與蠟燭同步且防止重疊
+    const volumeBarWidth = this.calculateSmartVolumeWidth();
 
     this.volumes = this.processedOHLCData.map((d, i) => {
       if (!d.volume) return null;
@@ -331,6 +305,12 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
 
     const g = this.createSVGContainer();
 
+    // 🔧 創建剪切群組，確保所有圖表內容不溢出overlay
+    const strictClipId = (g.node() as any).__strictClipId;
+    const chartContentGroup = g.append('g')
+      .attr('class', 'chart-content-clipped')
+      .attr('clip-path', `url(#${strictClipId})`);
+
     // 繪製格線
     if (showGrid) {
       // 水平格線
@@ -365,8 +345,8 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
         .attr('opacity', 0.5);
     }
 
-    // 繪製蠟燭圖
-    const candleGroups = g.selectAll('.candlestick')
+    // 繪製蠟燭圖（在剪切群組內）
+    const candleGroups = chartContentGroup.selectAll('.candlestick')
       .data(this.candlesticks)
       .enter()
       .append('g')
@@ -399,9 +379,9 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
       .attr('stroke', d => d.color)
       .attr('stroke-width', 1);
 
-    // 成交量圖表
+    // 成交量圖表（也在剪切群組內）
     if (showVolume && volumeScale && this.volumes.length) {
-      const volumeG = g.append('g')
+      const volumeG = chartContentGroup.append('g')
         .attr('class', 'volume-chart')
         .attr('transform', `translate(0, ${priceChartHeight + 10})`);
         
@@ -607,7 +587,7 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
       scales 
     } = crosshairElements;
     
-    const { xScale, yScale, volumeScale, priceChartHeight, chartWidth, chartHeight } = scales;
+    const { yScale, volumeScale, priceChartHeight, chartWidth, chartHeight } = scales;
     
     overlay
       .on('mousemove', (event) => {
@@ -616,7 +596,8 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
         
         if (closestData) {
           const dataPoint = closestData.data;
-          const dataX = xScale(dataPoint.date);
+          // 🔧 使用當前的比例尺（會在縮放時更新）
+          const dataX = this.scales.xScale(dataPoint.date);
           const dataY = yScale(dataPoint.close);
 
           crosshairGroup.style('display', 'block');
@@ -713,8 +694,8 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
 
   // 基於 D3.js 最佳實務的全新縮放實現
   private setupZoomPan(g: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    const { chartWidth, chartHeight, xScale, yScale, volumeScale } = this.scales;
-    const { zoomConfig = {}, enableZoom = false, enablePan = false, showVolume = true } = this.props;
+    const { chartWidth, chartHeight, xScale, yScale, volumeScale, priceChartHeight } = this.scales;
+    const { zoomConfig = {}, enableZoom = false, enablePan = false, showVolume = true, showGrid = true } = this.props;
     
     console.log('🚀 setupZoomPan called with D3.js best practices pattern');
     
@@ -760,9 +741,23 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
         // 更新比例尺
         this.scales.xScale = newXScale;
         
-        // 🎯 只計算和更新蠟燭位置（最重要）
+        // 🔧 確保縮放級別已更新，然後重新計算蠟燭
+        this.currentScale = transform.k;
         this.calculateCandlesticks();
         this.updateChartElementsPositions(g);
+        
+        // 🔧 立即更新格線（與蠟燭圖同步）
+        if (showGrid) {
+          console.log('📐 Updating gridlines...');
+          this.updateGridlines(g, newXScale, this.scales.yScale, chartWidth, priceChartHeight);
+        }
+        
+        // 🔧 立即更新成交量位置（與蠟燭圖同步）
+        if (showVolume) {
+          console.log('📊 Updating volume bars...');
+          this.calculateVolumes();
+          this.updateVolumePositions(g);
+        }
         
         // console.log('⚡ Immediate update completed'); // 優化：減少日誌
       };
@@ -773,7 +768,7 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
         if (showVolume) {
           this.calculateVolumes();
           // 更新成交量柱狀圖位置
-          const volumeGroups = g.selectAll('.volume-bar');
+          const volumeGroups = g.select('.chart-content-clipped').selectAll('.volume-bar');
           if (this.volumes?.length > 0) {
             volumeGroups.each((_d: any, i, nodes) => {
               const group = d3.select(nodes[i]);
@@ -832,21 +827,32 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
       .on('zoom', (event) => {
         const transform = event.transform;
         
-        // 🔧 簡化邊界約束 - 使用快速幾何計算而非複雜的數據範圍計算
+        // 🔧 動態邊界約束 - 考慮蠟燭寬度的精確邊界
         const scale = transform.k;
         const originalX = transform.x;
         
-        // 簡單快速的邊界約束：直接限制平移範圍
-        const maxTranslateX = 0; // 右邊界：不能向右平移超過原點
-        const minTranslateX = chartWidth * (1 - scale); // 左邊界：考慮縮放後的內容寬度
+        // 保存縮放級別
+        this.currentScale = scale;
         
-        // 快速約束檢查
+        // 獲取動態邊界（考慮當前蠟燭寬度）
+        const bounds = this.getEffectiveChartBounds();
+        
+        // 動態邊界約束：基於實際有效繪圖區域
+        const maxTranslateX = bounds.left; // 右邊界：預留右側蠟燭空間
+        const minTranslateX = bounds.width * (1 - scale) - bounds.left; // 左邊界：考慮縮放和左側蠟燭空間
+        
+        // 約束檢查
         let constrainedX = Math.max(minTranslateX, Math.min(maxTranslateX, originalX));
         
-        // 只有在真正需要約束時才修改和記錄
+        // 只有在真正需要約束時才修改
         if (Math.abs(constrainedX - originalX) > 0.1) {
           transform.x = constrainedX;
-          // console.log('🚫 Fast boundary constrained:', { original: originalX, constrained: constrainedX }); // 減少日誌輸出
+          console.log('🚫 Dynamic boundary constrained:', { 
+            original: originalX, 
+            constrained: constrainedX, 
+            candleWidth: this.currentMaxCandleWidth,
+            bounds 
+          });
         }
         
         // 使用修改後的變換更新圖表
@@ -882,12 +888,13 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
         
         console.log('🔄 Double-click reset triggered');
         
-        // 重置比例尺
+        // 重置比例尺和縮放級別
         this.scales.xScale = originalXScale.copy();
         this.scales.yScale = originalYScale.copy();
         if (originalVolumeScale) {
           this.scales.volumeScale = originalVolumeScale.copy();
         }
+        this.currentScale = 1; // 重置縮放級別
         
         // 重新計算並更新
         this.calculateCandlesticks();
@@ -920,7 +927,8 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
 
   // 專門為縮放優化的快速位置更新方法
   private updateChartElementsPositions(g: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    const candleGroups = g.selectAll('.candlestick');
+    // 🔧 從剪切群組中選擇元素
+    const candleGroups = g.select('.chart-content-clipped').selectAll('.candlestick');
     
     if (!this.candlesticks || this.candlesticks.length === 0) {
       return;
@@ -950,7 +958,7 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
     
     // 更新成交量柱狀圖
     if (this.props.showVolume && this.volumes?.length > 0) {
-      const volumeBars = g.selectAll('.volume-bar');
+      const volumeBars = g.select('.chart-content-clipped').selectAll('.volume-bar');
       volumeBars.each((_d: any, i, nodes) => {
         const bar = d3.select(nodes[i]);
         const volumeData = this.volumes?.[i];
@@ -1007,7 +1015,7 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
     
     // 更新成交量柱狀圖
     if (this.props.showVolume && volumeScale && this.volumes?.length > 0) {
-      const volumeBars = g.selectAll('.volume-bar');
+      const volumeBars = g.select('.chart-content-clipped').selectAll('.volume-bar');
       
       volumeBars.each((_d: any, i, nodes) => {
         const bar = d3.select(nodes[i]);
@@ -1084,17 +1092,183 @@ export class D3CandlestickChart extends BaseChart<CandlestickChartProps> {
     // 清除現有內容
     svg.selectAll('*').remove()
     
+    // 🔧 添加嚴格的clipPath，防止溢出overlay
+    const clipId = `strict-chart-bounds-${Date.now()}`;
+    svg.append('defs')
+      .append('clipPath')
+      .attr('id', clipId)
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', chartWidth)
+      .attr('height', chartHeight);
+    
     // 創建主要群組
     const mainGroup = svg
       .append('g')
       .attr('class', `${this.getChartType()}-chart`)
       .attr('transform', `translate(${margin.left},${margin.top})`);
+    
+    // 存儲clipId供後續使用
+    (mainGroup.node() as any).__strictClipId = clipId;
       
     return mainGroup;
   }
 
   protected getChartType(): string {
     return 'candlestick';
+  }
+
+  // 🔧 新增：智能寬度計算，防止蠟燭重疊
+  private calculateSmartCandleWidth(): number {
+    const { candleWidth = 0.8 } = this.props;
+    const { xScale, chartWidth } = this.scales;
+    
+    if (!this.processedOHLCData.length) return 1;
+    
+    // 獲取可見時間範圍
+    const currentDomain = xScale.domain();
+    const visibleTimeSpan = currentDomain[1].getTime() - currentDomain[0].getTime();
+    
+    // 計算原始數據時間範圍
+    const dataTimeRange = d3.extent(this.processedOHLCData, d => d.date) as [Date, Date];
+    const totalTimeSpan = dataTimeRange[1].getTime() - dataTimeRange[0].getTime();
+    
+    // 縮放比例（可見時間 vs 總時間）
+    const zoomRatio = totalTimeSpan / visibleTimeSpan;
+    
+    // 基於數據密度計算基礎間距
+    const baseSpacing = chartWidth / this.processedOHLCData.length;
+    const currentSpacing = baseSpacing * zoomRatio;
+    
+    // 寬度約束：不超過間距的85%，避免重疊
+    const maxAllowedWidth = currentSpacing * 0.85;
+    const baseWidth = baseSpacing * candleWidth;
+    const scaledWidth = baseWidth * this.currentScale;
+    
+    // 最終寬度：在縮放寬度和最大允許寬度之間取較小值
+    const finalWidth = Math.min(scaledWidth, maxAllowedWidth);
+    
+    return Math.min(50, Math.max(0.5, finalWidth));
+  }
+
+  // 🔧 新增：智能成交量寬度計算，與蠟燭寬度同步
+  private calculateSmartVolumeWidth(): number {
+    const { xScale, chartWidth } = this.scales;
+    
+    if (!this.processedOHLCData.length) return 1;
+    
+    // 獲取可見時間範圍
+    const currentDomain = xScale.domain();
+    const visibleTimeSpan = currentDomain[1].getTime() - currentDomain[0].getTime();
+    
+    // 計算原始數據時間範圍
+    const dataTimeRange = d3.extent(this.processedOHLCData, d => d.date) as [Date, Date];
+    const totalTimeSpan = dataTimeRange[1].getTime() - dataTimeRange[0].getTime();
+    
+    // 縮放比例（可見時間 vs 總時間）
+    const zoomRatio = totalTimeSpan / visibleTimeSpan;
+    
+    // 基於數據密度計算基礎間距（成交量比蠟燭窄）
+    const baseSpacing = chartWidth / this.processedOHLCData.length;
+    const currentSpacing = baseSpacing * zoomRatio;
+    
+    // 成交量寬度：比蠟燭窄，約為間距的50%
+    const maxAllowedWidth = currentSpacing * 0.5;
+    const baseWidth = baseSpacing * 0.6; // 60%的基礎間距
+    const scaledWidth = baseWidth * this.currentScale;
+    
+    // 最終寬度
+    const finalWidth = Math.min(scaledWidth, maxAllowedWidth);
+    
+    return Math.min(30, Math.max(0.5, finalWidth));
+  }
+
+  // 🔧 新增：動態邊界計算方法
+  private getEffectiveChartBounds(): { left: number, right: number, width: number } {
+    const { chartWidth } = this.scales;
+    
+    // 根據當前蠟燭寬度動態計算邊距，最少預留10px
+    const candlePadding = Math.max(this.currentMaxCandleWidth / 2, 10);
+    
+    return {
+      left: candlePadding,
+      right: chartWidth - candlePadding,
+      width: chartWidth - candlePadding * 2
+    };
+  }
+
+  /**
+   * 快速更新成交量位置 - 在縮放時立即調用
+   */
+  private updateVolumePositions(g: d3.Selection<SVGGElement, unknown, null, undefined>): void {
+    const volumeGroups = g.select('.chart-content-clipped').selectAll('.volume-bar');
+    if (this.volumes?.length > 0) {
+      volumeGroups.each((_d: any, i, nodes) => {
+        const group = d3.select(nodes[i]);
+        const volumeData = this.volumes?.[i];
+        if (volumeData && volumeData.geometry) {
+          group
+            .attr('x', volumeData.geometry.x)
+            .attr('width', volumeData.geometry.width);
+        }
+      });
+    }
+  }
+
+  /**
+   * 動態更新格線 - 在縮放/平移時調用
+   */
+  private updateGridlines(
+    g: d3.Selection<SVGGElement, unknown, null, undefined>,
+    newXScale: any,
+    yScale: any,
+    chartWidth: number,
+    priceChartHeight: number
+  ): void {
+    // 更新水平格線（Y軸方向）
+    const horizontalGrid = g.select('.grid-horizontal');
+    if (!horizontalGrid.empty()) {
+      const yTicks = yScale.ticks();
+      const horizontalLines = horizontalGrid.selectAll('line').data(yTicks);
+      
+      horizontalLines.exit().remove();
+      
+      horizontalLines
+        .enter()
+        .append('line')
+        .attr('stroke', '#e5e7eb')
+        .attr('stroke-width', 0.5)
+        .attr('opacity', 0.5)
+        .merge(horizontalLines as any)
+        .attr('x1', 0)
+        .attr('x2', chartWidth)
+        .attr('y1', d => yScale(d))
+        .attr('y2', d => yScale(d));
+    }
+    
+    // 更新垂直格線（X軸方向）- 使用新的比例尺
+    const verticalGrid = g.select('.grid-vertical');
+    if (!verticalGrid.empty()) {
+      const timeTickCount = Math.min(10, Math.floor(chartWidth / 80));
+      const xTicks = newXScale.ticks(timeTickCount);
+      const verticalLines = verticalGrid.selectAll('line').data(xTicks);
+      
+      verticalLines.exit().remove();
+      
+      verticalLines
+        .enter()
+        .append('line')
+        .attr('stroke', '#e5e7eb')
+        .attr('stroke-width', 0.5)
+        .attr('opacity', 0.5)
+        .merge(verticalLines as any)
+        .attr('x1', d => newXScale(d))
+        .attr('x2', d => newXScale(d))
+        .attr('y1', 0)
+        .attr('y2', priceChartHeight);
+    }
+    
   }
 
   // 統一的 X 軸管理方法，確保初始創建和縮放更新都使用相同的數據對齊邏輯
