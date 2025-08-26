@@ -1,2 +1,2 @@
 export * from './types';
-export * from './candlestick-chart-core';
+export { D3CandlestickChart } from './candlestick-chart-core';

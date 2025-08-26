@@ -31,6 +31,7 @@ export interface EnhancedComboChartV2Props {
   rightAxis?: AxisConfig
   xAxis?: AxisConfig
   
+  
   // 視覺配置
   colors?: string[]
   animate?: boolean
@@ -128,6 +129,7 @@ export const EnhancedComboChartV2: React.FC<EnhancedComboChartV2Props> = ({
             leftAxis={leftAxis}
             rightAxis={rightAxis}
             xAxis={xAxis}
+            verticalLayout={verticalLayout}
             animate={animate}
             animationDuration={animationDuration}
             interactive={interactive}

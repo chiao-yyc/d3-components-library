@@ -55,10 +55,37 @@ export interface CandlestickChartProps extends BaseChartProps {
   showGrid?: boolean
   /** 是否顯示十字線游標 */
   showCrosshair?: boolean
+  /** 十字線配置 */
+  crosshairConfig?: {
+    color?: string
+    opacity?: number
+    strokeWidth?: number
+    strokeDasharray?: string
+  }
   /** 是否啟用縮放 */
   enableZoom?: boolean
   /** 是否啟用平移 */
   enablePan?: boolean
+  /** 縮放配置 */
+  zoomConfig?: {
+    scaleExtent?: [number, number]
+    constrainToData?: boolean
+    resetOnDoubleClick?: boolean
+    enableX?: boolean
+    enableY?: boolean
+  }
+  /** 工具提示配置 */
+  tooltipConfig?: {
+    formatter?: {
+      date?: (date: string | Date) => string
+      price?: (price: number) => string
+      volume?: (volume: number) => string
+      percent?: (percent: number) => string
+    }
+    colorMode?: 'taiwan' | 'us'
+    offset?: { x: number; y: number }
+    boundary?: { padding: number }
+  }
   
   /** 動畫效果 */
   animate?: boolean
