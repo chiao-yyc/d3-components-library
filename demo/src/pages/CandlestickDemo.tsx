@@ -398,7 +398,8 @@ export default function CandlestickDemo() {
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
-          className="min-h-[420px]"
+          responsive={true}
+          aspectRatio={16 / 9}
           actions={
             <div className="flex items-center gap-2">
               <CurrencyDollarIcon className="w-5 h-5 text-green-500" />
@@ -406,7 +407,7 @@ export default function CandlestickDemo() {
             </div>
           }
         >
-          <div className="w-full overflow-hidden">
+          {({ width, height }) => (
             <motion.div
               key={`${selectedDataset}-${colorMode}`}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -448,12 +449,12 @@ export default function CandlestickDemo() {
                   }
                 }}
                 responsive
-                width={800}
-                height={420}
+                width={width}
+                height={height}
                 candleWidth={candleWidth / 10}
               />
             </motion.div>
-          </div>
+          )}
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>

@@ -1,6 +1,21 @@
 import React, { useState, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline'
 
 interface DataPoint {
   [key: string]: any
@@ -145,263 +160,403 @@ const DynamicComboDemo: React.FC = () => {
     }
   }, [currentSeries])
 
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          動態組合圖表系統
-        </h1>
-        <p className="text-gray-600 mb-6">
-          靈活的圖表組合系統，支援動態加載系列、即時配置調整和多種預設組合模式。
-        </p>
+  const categoryOptions = [
+    { value: 'all', label: '全部', desc: '所有可用系列' },
+    { value: 'primary', label: '主要指標', desc: '核心業務數據' },
+    { value: 'secondary', label: '次要指標', desc: '趨勢和比率' },
+    { value: 'analysis', label: '分析型', desc: '散點和深度分析' },
+  ]
 
-        {/* 圖表配置控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">圖表設定</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="animate"
-                  checked={chartSettings.animate}
-                  onChange={(e) => setChartSettings(prev => ({ ...prev, animate: e.target.checked }))}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="animate" className="text-sm text-gray-700">動畫效果</label>
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '總系列數', value: stats.totalSeries },
+    { label: '左軸系列', value: stats.leftAxisSeries },
+    { label: '右軸系列', value: stats.rightAxisSeries },
+    { label: '圖表類型', value: Object.keys(stats.typeCount).length },
+    { label: '當前類別', value: categoryOptions.find(c => c.value === selectedCategory)?.label || '' },
+    { label: '動畫狀態', value: chartSettings.animate ? '開啟' : '關閉' }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: 'month', title: '月份', sortable: true },
+    { 
+      key: 'sales', 
+      title: '銷售額', 
+      sortable: true,
+      formatter: (value) => `$${value.toLocaleString()}`,
+      align: 'right'
+    },
+    { 
+      key: 'revenue', 
+      title: '營收', 
+      sortable: true,
+      formatter: (value) => `$${value.toLocaleString()}`,
+      align: 'right'
+    },
+    { 
+      key: 'profit', 
+      title: '利潤', 
+      sortable: true,
+      formatter: (value) => `$${value.toLocaleString()}`,
+      align: 'right'
+    },
+    { 
+      key: 'margin', 
+      title: '利潤率', 
+      sortable: true,
+      formatter: (value) => `${value.toFixed(1)}%`,
+      align: 'right'
+    }
+  ]
+
+  return (
+    <DemoPageTemplate
+      title="動態組合圖表系統"
+      description="靈活的圖表組合系統，支援動態加載系列、即時配置調整和多種預設組合模式"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="動態配置中心" 
+            icon={<AdjustmentsHorizontalIcon className="w-5 h-5" />}
+          >
+          <div className="space-y-8">
+            {/* 快速配置 */}
+            <ControlGroup title="快速配置" icon="⚡" cols={1}>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {presetConfigurations.map((preset, index) => (
+                    <button
+                      key={index}
+                      onClick={() => applyPreset(preset)}
+                      className="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      <div className="font-medium text-blue-700 text-sm">{preset.name}</div>
+                      <div className="text-xs text-blue-600">{preset.description}</div>
+                    </button>
+                  ))}
+                  <button
+                    onClick={clearAllSeries}
+                    className="px-3 py-2 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                  >
+                    <div className="font-medium text-red-700 text-sm">清除全部</div>
+                    <div className="text-xs text-red-600">移除所有系列</div>
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="showGridlines"
-                  checked={chartSettings.showGridlines}
-                  onChange={(e) => setChartSettings(prev => ({ ...prev, showGridlines: e.target.checked }))}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="showGridlines" className="text-sm text-gray-700">顯示網格線</label>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-700">左軸標籤：</label>
+            </ControlGroup>
+
+            {/* 圖表設定 */}
+            <ControlGroup title="圖表設定" icon="📊" cols={2}>
+              <ToggleControl
+                label="動畫效果"
+                checked={chartSettings.animate}
+                onChange={(checked) => setChartSettings(prev => ({ ...prev, animate: checked }))}
+                description="圖表轉場和更新動畫"
+              />
+              
+              <ToggleControl
+                label="顯示網格線"
+                checked={chartSettings.showGridlines}
+                onChange={(checked) => setChartSettings(prev => ({ ...prev, showGridlines: checked }))}
+                description="顯示背景網格線輔助線"
+              />
+            </ControlGroup>
+
+            {/* 軸線設定 */}
+            <ControlGroup title="軸線設定" icon="🎯" cols={2}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">左軸標籤</label>
                 <input
                   type="text"
                   value={chartSettings.leftAxisLabel}
                   onChange={(e) => setChartSettings(prev => ({ ...prev, leftAxisLabel: e.target.value }))}
-                  className="text-sm border border-gray-300 rounded px-2 py-1 w-32"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="輸入左軸標籤"
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-700">右軸標籤：</label>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">右軸標籤</label>
                 <input
                   type="text"
                   value={chartSettings.rightAxisLabel}
                   onChange={(e) => setChartSettings(prev => ({ ...prev, rightAxisLabel: e.target.value }))}
-                  className="text-sm border border-gray-300 rounded px-2 py-1 w-32"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="輸入右軸標籤"
                 />
               </div>
+            </ControlGroup>
+
+            {/* 系列類別篩選 */}
+            <ControlGroup title="系列類別篩選" icon="🎨" cols={1}>
+              <SelectControl
+                label="系列類別"
+                value={selectedCategory}
+                onChange={(value) => setSelectedCategory(value as any)}
+                options={categoryOptions}
+                description="依據業務需求篩選系列類型"
+              />
+            </ControlGroup>
+
+            {/* 可用系列選擇 */}
+            <ControlGroup title="可用圖表系列" icon="📋" cols={1}>
+              <div className="space-y-3">
+                <div className="text-sm text-gray-600">
+                  點擊下方系列來動態添加或移除至圖表中
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => toggleSeries(template.id)}
+                      className={`p-3 rounded-lg border transition-all ${
+                        activeSeries.has(template.id)
+                          ? 'bg-white border-2 shadow-sm'
+                          : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
+                      }`}
+                      style={{
+                        borderColor: activeSeries.has(template.id) ? template.color : undefined
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <div 
+                          className="w-4 h-4 rounded"
+                          style={{ backgroundColor: template.color }}
+                        />
+                        <span className="font-medium text-sm">{template.name}</span>
+                        <span className="text-xs px-1 py-0.5 bg-gray-200 rounded">
+                          {template.type}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-600 text-left">{template.description}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {template.yAxis === 'left' ? '左軸' : '右軸'}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </ControlGroup>
+          </div>
+          </ModernControlPanel>
+        </div>
+
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeSeries.size}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+        <ChartContainer
+          title="動態組合圖表"
+          subtitle={currentSeries.length > 0 ? `${stats.totalSeries} 個系列，${stats.leftAxisSeries} 左軸 + ${stats.rightAxisSeries} 右軸` : '尚未選擇系列'}
+          responsive={true}
+          aspectRatio={16 / 9}
+          actions={
+            <div className="flex items-center gap-2">
+              <AdjustmentsHorizontalIcon className="w-5 h-5 text-green-500" />
+              <span className="text-sm text-gray-600">動態配置</span>
             </div>
-          </div>
-        </div>
-
-        {/* 預設配置 */}
-        <div className="bg-blue-50 p-4 rounded-lg mb-6">
-          <h3 className="text-sm font-medium text-blue-800 mb-3">快速配置</h3>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {presetConfigurations.map((preset, index) => (
-              <button
-                key={index}
-                onClick={() => applyPreset(preset)}
-                className="px-3 py-2 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-              >
-                <div className="font-medium text-blue-700 text-sm">{preset.name}</div>
-                <div className="text-xs text-blue-600">{preset.description}</div>
-              </button>
-            ))}
-            <button
-              onClick={clearAllSeries}
-              className="px-3 py-2 bg-red-100 border border-red-200 rounded-lg hover:bg-red-200 transition-colors"
-            >
-              <div className="font-medium text-red-700 text-sm">清除全部</div>
-              <div className="text-xs text-red-600">移除所有系列</div>
-            </button>
-          </div>
-        </div>
-
-        {/* 系列類別篩選 */}
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">系列類別</h3>
-          <div className="flex gap-2">
-            {[
-              { key: 'all', label: '全部', desc: '所有可用系列' },
-              { key: 'primary', label: '主要指標', desc: '核心業務數據' },
-              { key: 'secondary', label: '次要指標', desc: '趨勢和比率' },
-              { key: 'analysis', label: '分析型', desc: '散點和深度分析' },
-            ].map((category) => (
-              <button
-                key={category.key}
-                onClick={() => setSelectedCategory(category.key as any)}
-                className={`px-3 py-2 rounded border transition-colors ${
-                  selectedCategory === category.key
-                    ? 'bg-blue-100 border-blue-300 text-blue-700'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <div className="font-medium text-sm">{category.label}</div>
-                <div className="text-xs opacity-75">{category.desc}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* 可用系列選擇 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">可用圖表系列</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filteredTemplates.map((template) => (
-              <button
-                key={template.id}
-                onClick={() => toggleSeries(template.id)}
-                className={`p-3 rounded-lg border transition-all ${
-                  activeSeries.has(template.id)
-                    ? 'bg-white border-2 shadow-sm'
-                    : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
-                }`}
-                style={{
-                  borderColor: activeSeries.has(template.id) ? template.color : undefined
-                }}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <div 
-                    className="w-4 h-4 rounded"
-                    style={{ backgroundColor: template.color }}
+          }
+        >
+          {({ width, height }) => (
+            <>
+              {currentSeries.length > 0 ? (
+                <motion.div
+                  key={`${activeSeries.size}-${chartSettings.animate}-${chartSettings.showGridlines}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <EnhancedComboChart
+                    data={sampleData}
+                    series={currentSeries}
+                    xKey="month"
+                    width={width}
+                    height={height}
+                    margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                    leftAxis={{
+                      label: chartSettings.leftAxisLabel,
+                      gridlines: chartSettings.showGridlines,
+                    }}
+                    rightAxis={{
+                      label: chartSettings.rightAxisLabel,
+                      gridlines: false,
+                    }}
+                    xAxis={{
+                      label: '月份',
+                    }}
+                    animate={chartSettings.animate}
+                    className="dynamic-combo-chart"
                   />
-                  <span className="font-medium text-sm">{template.name}</span>
-                  <span className="text-xs px-1 py-0.5 bg-gray-200 rounded">
-                    {template.type}
-                  </span>
+                </motion.div>
+              ) : (
+                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                  <div className="text-center text-gray-500">
+                    <AdjustmentsHorizontalIcon className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <div className="text-lg font-medium mb-2">尚未選擇任何圖表系列</div>
+                    <div className="text-sm">請從上方選擇要顯示的圖表系列，或使用快速配置</div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-600 text-left">{template.description}</div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {template.yAxis === 'left' ? '左軸' : '右軸'}
-                </div>
-              </button>
-            ))}
+              )}
+            </>
+          )}
+        </ChartContainer>
+          </motion.div>
+
+          {/* 狀態顯示 */}
+          {currentSeries.length > 0 && <StatusDisplay items={statusItems} />}
+
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
+            data={sampleData}
+            columns={tableColumns}
+            maxRows={8}
+            showIndex
+          />
+
+          {/* 代碼範例 */}
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import React, { useState } from 'react'
+import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+const DynamicComboDemo: React.FC = () => {
+  const [selectedChartTypes, setSelectedChartTypes] = useState<Set<string>>(new Set(['bar', 'line']))
+  
+  const data = [
+    { month: 'Jan', sales: 120, growth: 15.2, profit: 25 },
+    // ...更多數據
+  ]
+
+  // 動態系列配置
+  const availableSeries = {
+    bar: {
+      type: 'bar' as const,
+      dataKey: 'sales',
+      name: '銷售額',
+      yAxis: 'left' as const,
+      color: '#3b82f6'
+    },
+    line: {
+      type: 'line' as const,
+      dataKey: 'growth',
+      name: '成長率',
+      yAxis: 'right' as const,
+      color: '#ef4444',
+      strokeWidth: 3
+    }
+  }
+
+  const series: ComboChartSeries[] = Array.from(selectedChartTypes)
+    .map(type => availableSeries[type as keyof typeof availableSeries])
+    .filter(Boolean)
+
+  return (
+    <EnhancedComboChart
+      data={data}
+      series={series}
+      xKey="month"
+      width={800}
+      height={500}
+      leftAxis={{ label: "銷售額/利潤", gridlines: true }}
+      rightAxis={{ label: "成長率 (%)", gridlines: false }}
+      animate={true}
+      interactive={true}
+    />
+  )
+}`}
+          />
+
+          {/* 功能說明 */}
+        <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-6 border border-green-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-teal-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">動態組合圖表系統功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">動態加載</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  即時系列添加/移除
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  預設配置快速切換
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  系列類別篩選
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  即時狀態統計
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">性能優化</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  React.memo 和 useMemo
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  useCallback 優化
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  智能更新機制
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  漸進式載入
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  企業儀表板
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-lime-500 rounded-full" />
+                  數據探索分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  客製化報表
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                  動態數據視覺化
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-
-        {/* 當前配置統計 */}
-        <div className="bg-white p-4 rounded-lg border mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">當前配置統計</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.totalSeries}</div>
-              <div className="text-gray-600">總系列數</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.leftAxisSeries}</div>
-              <div className="text-gray-600">左軸系列</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.rightAxisSeries}</div>
-              <div className="text-gray-600">右軸系列</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">{Object.keys(stats.typeCount).length}</div>
-              <div className="text-gray-600">圖表類型</div>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {Object.entries(stats.typeCount).map(([type, count]) => (
-              <span key={type} className="px-2 py-1 bg-gray-100 rounded text-xs">
-                {type}: {count}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 動態圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">動態組合圖表</h2>
         
-        {currentSeries.length > 0 ? (
-          <div className="mb-4">
-            <EnhancedComboChart
-              data={sampleData}
-              series={currentSeries}
-              xKey="month"
-              width={900}
-              height={500}
-              margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-              leftAxis={{
-                label: chartSettings.leftAxisLabel,
-                gridlines: chartSettings.showGridlines,
-              }}
-              rightAxis={{
-                label: chartSettings.rightAxisLabel,
-                gridlines: false,
-              }}
-              xAxis={{
-                label: '月份',
-              }}
-              animate={chartSettings.animate}
-              className="dynamic-combo-chart"
-            />
-          </div>
-        ) : (
-          <div className="mb-4 h-[500px] flex items-center justify-center bg-gray-50 rounded-lg">
-            <div className="text-center text-gray-500">
-              <div className="text-lg font-medium mb-2">尚未選擇任何圖表系列</div>
-              <div className="text-sm">請從上方選擇要顯示的圖表系列，或使用快速配置</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* 功能說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">動態系統特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">🚀 動態加載</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 即時系列添加/移除：無需重新載入頁面</li>
-              <li>• 預設配置快速切換：一鍵應用常用組合</li>
-              <li>• 系列類別篩選：依據業務需求分類選擇</li>
-              <li>• 配置狀態即時統計：清晰掌握當前設定</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">⚡ 性能優化</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• React.memo 和 useMemo：減少不必要的重新渲染</li>
-              <li>• useCallback 優化：避免函數重複創建</li>
-              <li>• 智能更新機制：只更新變化的圖表元素</li>
-              <li>• 漸進式載入：大數據集分批處理</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <h4 className="font-medium text-gray-800 mb-3">📊 應用場景</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-blue-600 mb-1">🏢 企業儀表板</div>
-              <div className="text-gray-600">多部門數據整合、KPI 監控、實時業務分析</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-green-600 mb-1">📈 數據探索</div>
-              <div className="text-gray-600">彈性數據視覺化、假設驗證、趨勢發現</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-purple-600 mb-1">🎯 客製化報表</div>
-              <div className="text-gray-600">用戶自定義圖表、個人化分析、動態報告</div>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 

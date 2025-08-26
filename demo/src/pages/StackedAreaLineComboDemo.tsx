@@ -1,6 +1,25 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import {
+  DemoPageTemplate,
+  ModernControlPanel,
+  ChartContainer,
+  DataTable,
+  CodeExample
+} from '../components/ui'
+import {
+  ChartBarSquareIcon,
+  ComputerDesktopIcon,
+  BanknotesIcon,
+  CogIcon,
+  EyeIcon,
+  SparklesIcon,
+  SignalIcon,
+  GlobeAltIcon,
+  BoltIcon
+} from '@heroicons/react/24/outline'
 
 const StackedAreaLineComboDemo: React.FC = () => {
   // 場景 1: 網站流量分析 - 多個流量來源堆疊與轉換率趨勢
@@ -49,16 +68,15 @@ const StackedAreaLineComboDemo: React.FC = () => {
     { month: 'Q2 2022', coal: 26, gas: 28, nuclear: 18, hydro: 15, solar: 10, wind: 3, carbonEmission: 380, renewableRatio: 28 },
     { month: 'Q3 2022', coal: 25, gas: 28.5, nuclear: 17.5, hydro: 15.5, solar: 10.5, wind: 3, carbonEmission: 375, renewableRatio: 29 },
     { month: 'Q4 2022', coal: 24, gas: 29, nuclear: 17, hydro: 16, solar: 11, wind: 3, carbonEmission: 365, renewableRatio: 30 },
-    { month: 'Q1 2023', coal: 23, gas: 29, nuclear: 17, hydro: 16, solar: 12, wind: 3, carbonEmission: 355, renewableRatio: 31 },
-    { month: 'Q2 2023', coal: 22, gas: 29.5, nuclear: 16.5, hydro: 16.5, solar: 12.5, wind: 3, carbonEmission: 350, renewableRatio: 32 },
-    { month: 'Q3 2023', coal: 21, gas: 30, nuclear: 16, hydro: 17, solar: 13, wind: 3, carbonEmission: 345, renewableRatio: 33 },
-    { month: 'Q4 2023', coal: 20, gas: 30, nuclear: 16, hydro: 17, solar: 14, wind: 3, carbonEmission: 330, renewableRatio: 34 },
   ]
 
   const [activeScenario, setActiveScenario] = useState<'traffic' | 'revenue' | 'energy'>('traffic')
   const [activeSeriesIds, setActiveSeriesIds] = useState<Set<string>>(new Set())
   const [stackOffset, setStackOffset] = useState<'none' | 'expand' | 'silhouette' | 'wiggle'>('none')
   const [stackOrder, setStackOrder] = useState<'none' | 'ascending' | 'descending' | 'insideOut'>('none')
+  const [animate, setAnimate] = useState(true)
+  const [interactive, setInteractive] = useState(true)
+  const [showTooltips, setShowTooltips] = useState(true)
 
   // 網站流量場景配置
   const trafficSeries: ComboChartSeries[] = [
@@ -126,21 +144,24 @@ const StackedAreaLineComboDemo: React.FC = () => {
     switch (activeScenario) {
       case 'traffic':
         return {
-          title: '網站流量分析 - Stacked Area + Line',
+          title: '網站流量分析',
+          subtitle: '多渠道流量堆疊與轉換率趨勢分析',
           leftAxis: { label: '訪問量' },
           rightAxis: { label: '轉換率 (%) / 停留時間 (分鐘)' },
           xAxis: { label: '月份' }
         }
       case 'revenue':
         return {
-          title: '收入構成分析 - Stacked Area + Line',
+          title: '收入構成分析',
+          subtitle: '產品線收入堆疊與增長率分析',
           leftAxis: { label: '收入 (萬元)' },
           rightAxis: { label: '增長率 (%) / 利潤率 (%)' },
           xAxis: { label: '月份' }
         }
       case 'energy':
         return {
-          title: '能源消耗分析 - Stacked Area + Line',
+          title: '能源消耗分析',
+          subtitle: '能源來源堆疊與環保指標趨勢',
           leftAxis: { label: '能源占比 (%)' },
           rightAxis: { label: '碳排放 (萬噸) / 再生能源比例 (%)' },
           xAxis: { label: '季度' }
@@ -148,6 +169,7 @@ const StackedAreaLineComboDemo: React.FC = () => {
       default:
         return {
           title: '網站流量分析',
+          subtitle: '多渠道流量堆疊分析',
           leftAxis: { label: '訪問量' },
           rightAxis: { label: '轉換率' },
           xAxis: { label: '月份' }
@@ -171,193 +193,410 @@ const StackedAreaLineComboDemo: React.FC = () => {
 
   const config = getCurrentConfig()
   const currentSeries = getCurrentSeries()
+  const currentData = getCurrentData()
+
+  const scenarios = [
+    {
+      id: 'traffic' as const,
+      title: '流量分析',
+      icon: GlobeAltIcon,
+      description: '多渠道網站流量堆疊分析',
+      color: 'from-blue-500 to-blue-600'
+    },
+    {
+      id: 'revenue' as const,
+      title: '收入構成',
+      icon: BanknotesIcon,
+      description: '產品線收入結構分析',
+      color: 'from-green-500 to-green-600'
+    },
+    {
+      id: 'energy' as const,
+      title: '能源結構',
+      icon: BoltIcon,
+      description: '能源來源與環保趨勢',
+      color: 'from-yellow-500 to-yellow-600'
+    }
+  ]
+
+  const statisticsData = [
+    {
+      label: '資料點數',
+      value: currentData.length,
+      icon: SignalIcon,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100'
+    },
+    {
+      label: '堆疊系列',
+      value: currentSeries.filter(s => s.type === 'stackedArea').length,
+      icon: ChartBarSquareIcon,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100'
+    },
+    {
+      label: '趨勢線',
+      value: currentSeries.filter(s => s.type === 'line').length,
+      icon: SparklesIcon,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100'
+    },
+    {
+      label: '總系列',
+      value: currentSeries.length,
+      icon: EyeIcon,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100'
+    }
+  ]
+
+  const features = [
+    {
+      title: '智能堆疊算法',
+      description: '使用D3.js堆疊生成器實現精確的多層堆疊，支援多種偏移和排序模式',
+      icon: SparklesIcon
+    },
+    {
+      title: '多維度組合',
+      description: '結合堆疊區域圖與趨勢線，同時展示構成關係和變化趨勢',
+      icon: EyeIcon
+    },
+    {
+      title: '動態系列控制',
+      description: '支援即時切換系列顯示，靈活調整堆疊配置和排序方式',
+      icon: CogIcon
+    },
+    {
+      title: '雙軸指標對比',
+      description: '左右雙軸支援不同量級指標同時展示，提供全面的數據洞察',
+      icon: ComputerDesktopIcon
+    }
+  ]
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
+    <DemoPageTemplate>
+      {/* Header Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12"
+      >
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
           Stacked Area + Line 組合圖表
         </h1>
-        <p className="text-gray-600 mb-6">
-          展示多系列數據的堆疊區域圖與趨勢線的組合，支援多種堆疊模式和排序方式。適用於分析構成關係與趨勢變化的複合數據。
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          展示多系列數據的堆疊區域圖與趨勢線組合，支援多種堆疊模式和排序方式，適用於構成關係分析
         </p>
+      </motion.div>
 
-        {/* 場景選擇 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { key: 'traffic', label: '🌐 網站流量', desc: '多渠道流量堆疊分析' },
-            { key: 'revenue', label: '💰 收入構成', desc: '產品線收入分析' },
-            { key: 'energy', label: '⚡ 能源結構', desc: '能源來源與環保趨勢' },
-          ].map((scenario) => (
-            <button
-              key={scenario.key}
-              onClick={() => {
-                setActiveScenario(scenario.key as any)
-                setActiveSeriesIds(new Set())
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeScenario === scenario.key
-                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-medium">{scenario.label}</div>
-              <div className="text-xs text-gray-500">{scenario.desc}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* 堆疊配置控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">堆疊配置</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">堆疊模式</label>
-              <select
-                value={stackOffset}
-                onChange={(e) => setStackOffset(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="none">標準堆疊</option>
-                <option value="expand">百分比堆疊</option>
-                <option value="silhouette">對稱堆疊</option>
-                <option value="wiggle">流圖模式</option>
-              </select>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Left Panel - 1/4 width */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Scenario Selection */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="bg-white rounded-xl shadow-lg border border-gray-200 p-6"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <ChartBarSquareIcon className="h-5 w-5 mr-2 text-blue-600" />
+              場景選擇
+            </h3>
+            <div className="space-y-3">
+              {scenarios.map((scenario) => {
+                const Icon = scenario.icon
+                return (
+                  <motion.button
+                    key={scenario.id}
+                    onClick={() => {
+                      setActiveScenario(scenario.id)
+                      setActiveSeriesIds(new Set())
+                    }}
+                    className={`w-full p-4 rounded-lg text-left transition-all duration-200 ${
+                      activeScenario === scenario.id
+                        ? `bg-gradient-to-r ${scenario.color} text-white shadow-lg`
+                        : 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center mb-2">
+                      <Icon className={`h-5 w-5 mr-2 ${
+                        activeScenario === scenario.id ? 'text-white' : 'text-gray-600'
+                      }`} />
+                      <span className="font-medium">{scenario.title}</span>
+                    </div>
+                    <p className={`text-sm ${
+                      activeScenario === scenario.id ? 'text-white/90' : 'text-gray-600'
+                    }`}>
+                      {scenario.description}
+                    </p>
+                  </motion.button>
+                )
+              })}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">排序方式</label>
-              <select
-                value={stackOrder}
-                onChange={(e) => setStackOrder(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-              >
-                <option value="none">原始順序</option>
-                <option value="ascending">升序排序</option>
-                <option value="descending">降序排序</option>
-                <option value="insideOut">內外排序</option>
-              </select>
+          </motion.div>
+
+          {/* Stack Configuration */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white rounded-xl shadow-lg border border-gray-200 p-6"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">堆疊配置</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">堆疊模式</label>
+                <select
+                  value={stackOffset}
+                  onChange={(e) => setStackOffset(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="none">標準堆疊</option>
+                  <option value="expand">百分比堆疊</option>
+                  <option value="silhouette">對稱堆疊</option>
+                  <option value="wiggle">流圖模式</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">排序方式</label>
+                <select
+                  value={stackOrder}
+                  onChange={(e) => setStackOrder(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="none">原始順序</option>
+                  <option value="ascending">升序排序</option>
+                  <option value="descending">降序排序</option>
+                  <option value="insideOut">內外排序</option>
+                </select>
+              </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* 系列控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">系列控制</h3>
-            <button
-              onClick={resetSeries}
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-            >
-              顯示全部
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(activeScenario === 'traffic' ? trafficSeries : 
-              activeScenario === 'revenue' ? revenueSeries : energySeries).map((series) => (
-              <button
-                key={series.dataKey}
-                onClick={() => toggleSeries(series.dataKey)}
-                className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
-                  activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
-                    ? 'bg-white border-2 text-gray-700'
-                    : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
-                }`}
-                style={{
-                  borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
-                    ? series.color 
-                    : undefined
-                }}
-              >
-                <div 
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: series.color }}
-                />
-                {series.name}
-                <span className="text-xs opacity-60">
-                  ({series.type === 'stackedArea' ? '堆疊' : '線'})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+          {/* Statistics Cards */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-xl shadow-lg border border-gray-200 p-6"
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">圖表統計</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {statisticsData.map((stat, index) => {
+                const Icon = stat.icon
+                return (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 + index * 0.05 }}
+                    className={`${stat.bgColor} rounded-lg p-3 text-center`}
+                  >
+                    <Icon className={`h-5 w-5 ${stat.color} mx-auto mb-1`} />
+                    <div className={`text-lg font-bold ${stat.color}`}>{stat.value}</div>
+                    <div className="text-xs text-gray-600">{stat.label}</div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </motion.div>
 
-      {/* 圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">{config.title}</h2>
-        
-        <div className="mb-4">
-          <EnhancedComboChart
-            data={getCurrentData()}
-            series={currentSeries}
-            xKey={getCurrentXKey()}
-            width={900}
-            height={500}
-            margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-            leftAxis={{
-              label: config.leftAxis.label,
-              gridlines: true,
-            }}
-            rightAxis={{
-              label: config.rightAxis.label,
-              gridlines: false,
-            }}
-            xAxis={{
-              label: config.xAxis.label,
-            }}
-            animate={true}
-            className="stacked-area-line-combo"
+          {/* Modern Control Panel */}
+          <ModernControlPanel
+            animate={animate}
+            onAnimateChange={setAnimate}
+            interactive={interactive}
+            onInteractiveChange={setInteractive}
+            showTooltips={showTooltips}
+            onShowTooltipsChange={setShowTooltips}
           />
         </div>
 
-        {/* 數據統計 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="font-medium text-blue-800">堆疊區域系列</div>
-            <div className="text-blue-600">
-              {currentSeries.filter(s => s.type === 'stackedArea').length} 個堆疊層級
-            </div>
-          </div>
-          <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">趨勢線系列</div>
-            <div className="text-green-600">
-              {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
-            </div>
-          </div>
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="font-medium text-purple-800">資料點數量</div>
-            <div className="text-purple-600">
-              {getCurrentData().length} 個時間點
-            </div>
-          </div>
+        {/* Right Panel - 3/4 width */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Chart Container */}
+          <ChartContainer
+            title={config.title}
+            subtitle={config.subtitle}
+            responsive={true}
+            aspectRatio={16 / 9}
+          >
+            {({ width, height }) => (
+              <EnhancedComboChart
+                data={currentData}
+                series={currentSeries}
+                xKey={getCurrentXKey()}
+                width={width}
+                height={height}
+                margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                leftAxis={{
+                  label: config.leftAxis.label,
+                  gridlines: true,
+                }}
+                rightAxis={{
+                  label: config.rightAxis.label,
+                  gridlines: false,
+                }}
+                xAxis={{
+                  label: config.xAxis.label,
+                }}
+                animate={animate}
+                interactive={interactive}
+              />
+            )}
+          </ChartContainer>
+
+          {/* Data Table */}
+          <DataTable
+            title="數據一覽表"
+            data={currentData.slice(0, 8)}
+            columns={[
+              {
+                key: 'month',
+                label: activeScenario === 'energy' ? '季度' : '月份',
+                render: (value: any) => <span className="font-medium text-gray-900">{value}</span>
+              },
+              ...currentSeries.slice(0, 6).map(series => ({
+                key: series.dataKey,
+                label: series.name,
+                render: (value: any) => (
+                  <span className="text-gray-600">
+                    {typeof value === 'number' ? value.toLocaleString() : value}
+                    {series.name.includes('率') || series.name.includes('比例') ? '%' : ''}
+                  </span>
+                )
+              }))
+            ]}
+          />
         </div>
       </div>
 
-      {/* 技術說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">技術特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">🎯 堆疊區域算法</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 使用 D3.js stack() 生成器進行精確堆疊</li>
-              <li>• 支援多種堆疊偏移模式（標準、百分比、對稱、流圖）</li>
-              <li>• 智能排序算法優化視覺層次</li>
-              <li>• 自動處理缺失值和負值情況</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">📊 組合圖表系統</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 智能圖層排序：stackedArea → area → bar → line</li>
-              <li>• 雙軸支援不同單位的指標對比</li>
-              <li>• 動態系列控制與實時更新</li>
-              <li>• 響應式設計與交互事件支援</li>
-            </ul>
-          </div>
+      {/* Technical Features Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mt-8"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">技術特色</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {features.map((feature, index) => {
+            const Icon = feature.icon
+            return (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 + index * 0.1 }}
+                className="flex items-start space-x-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg"
+              >
+                <div className="flex-shrink-0">
+                  <Icon className="h-8 w-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
-      </div>
-    </div>
+      </motion.div>
+
+      {/* Code Example */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mt-8"
+      >
+        <CodeExample
+          title="堆疊區域 + 線條組合圖表使用範例"
+          description="展示如何使用 stackedArea 系列創建堆疊區域圖表並結合線條趨勢分析"
+          code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+const data = [
+  { 
+    month: 'Jan', 
+    organic: 12000, 
+    social: 8000, 
+    paid: 5000, 
+    direct: 15000, 
+    conversionRate: 2.3, 
+    avgSessionTime: 3.2 
+  },
+  { 
+    month: 'Feb', 
+    organic: 15000, 
+    social: 9200, 
+    paid: 5800, 
+    direct: 16200, 
+    conversionRate: 2.6, 
+    avgSessionTime: 3.4 
+  },
+  // ...更多數據
+]
+
+const series: ComboChartSeries[] = [
+  // 堆疊區域系列
+  {
+    type: 'stackedArea',
+    dataKey: 'organic',
+    name: '自然流量',
+    yAxis: 'left',
+    color: '#10b981',
+    stackGroupKey: 'traffic',
+    areaOpacity: 0.8,
+    curve: 'monotone'
+  },
+  {
+    type: 'stackedArea',
+    dataKey: 'social',
+    name: '社交媒體',
+    yAxis: 'left',
+    color: '#3b82f6',
+    stackGroupKey: 'traffic',
+    areaOpacity: 0.8,
+    curve: 'monotone'
+  },
+  // 線條系列
+  {
+    type: 'line',
+    dataKey: 'conversionRate',
+    name: '轉換率',
+    yAxis: 'right',
+    color: '#ef4444',
+    strokeWidth: 3,
+    curve: 'monotone'
+  }
+]
+
+<EnhancedComboChart
+  data={data}
+  series={series}
+  xKey="month"
+  width={800}
+  height={500}
+  leftAxis={{
+    label: '流量數 (人次)',
+    gridlines: true
+  }}
+  rightAxis={{
+    label: '轉換率 (%) / 停留時間 (分)',
+    gridlines: false
+  }}
+  xAxis={{
+    label: '月份'
+  }}
+  animate={true}
+  margin={{ top: 20, right: 100, bottom: 60, left: 80 }}
+/>`}
+          language="typescript"
+        />
+      </motion.div>
+    </DemoPageTemplate>
   )
 }
 

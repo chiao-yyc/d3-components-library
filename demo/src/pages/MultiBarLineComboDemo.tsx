@@ -290,15 +290,17 @@ const MultiBarLineComboDemo: React.FC = () => {
           >
             <ChartContainer 
               title={config.title}
-              description={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點`}
+              subtitle={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點`}
+              responsive={true}
+              aspectRatio={16 / 9}
             >
-              <div className="h-[600px] w-full bg-gradient-to-br from-gray-50 to-white rounded-lg p-6">
+              {({ width, height }) => (
                 <EnhancedComboChart
                   data={getCurrentData()}
                   series={currentSeries}
                   xKey={getCurrentXKey()}
-                  width={800}
-                  height={500}
+                  width={width}
+                  height={height}
                   margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
                   leftAxis={{
                     label: config.leftAxis.label,
@@ -314,7 +316,7 @@ const MultiBarLineComboDemo: React.FC = () => {
                   animate={true}
                   className="multi-bar-line-combo"
                 />
-              </div>
+              )}
             </ChartContainer>
           </motion.div>
 

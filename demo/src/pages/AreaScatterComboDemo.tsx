@@ -1,6 +1,21 @@
 import React, { useState } from 'react'
+import { motion } from 'framer-motion'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { 
+  DemoPageTemplate,
+  ContentSection,
+  ModernControlPanel,
+  ControlGroup,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, ChartBarSquareIcon, MapIcon } from '@heroicons/react/24/outline'
 
 const AreaScatterComboDemo: React.FC = () => {
   // 場景 1: 氣溫預測與實際觀測 - 預測區間 + 實際測量點
@@ -248,233 +263,351 @@ const AreaScatterComboDemo: React.FC = () => {
   const config = getCurrentConfig()
   const currentSeries = getCurrentSeries()
 
+  const scenarioOptions = [
+    { value: 'temperature', label: '🌡️ 氣溫預測', desc: '預測區間與實際觀測' },
+    { value: 'stock', label: '📈 股票分析', desc: '價格區間與成交熱點' },
+    { value: 'population', label: '🏙️ 人口密度', desc: '密度分佈與城市中心' },
+  ]
+
+  const areaModeOptions = [
+    { value: 'interval', label: '區間帶狀' },
+    { value: 'traditional', label: '傳統區域' }
+  ]
+
+  const sizeOptions = [
+    { value: 'fixed', label: '固定大小' },
+    { value: 'dynamic', label: '動態大小' }
+  ]
+
+  // 狀態顯示數據
+  const statusItems = [
+    { label: '當前場景', value: scenarioOptions.find(s => s.value === activeScenario)?.label || '' },
+    { label: '資料點數', value: getCurrentData().length },
+    { label: '區域系列', value: currentSeries.filter(s => s.type === 'area').length },
+    { label: '散點系列', value: currentSeries.filter(s => s.type === 'scatter').length },
+    { label: '區域模式', value: areaModeOptions.find(a => a.value === areaMode)?.label || '' }
+  ]
+
+  // 數據表格列定義
+  const tableColumns: DataTableColumn[] = [
+    { key: getCurrentXKey(), title: '主鍵', sortable: true },
+    { 
+      key: activeScenario === 'temperature' ? 'forecast' : activeScenario === 'stock' ? 'price_area' : 'density_area', 
+      title: '區域值', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    },
+    { 
+      key: activeScenario === 'temperature' ? 'actual' : activeScenario === 'stock' ? 'volume_points' : 'city_centers', 
+      title: '散點值', 
+      sortable: true,
+      formatter: (value) => typeof value === 'number' ? value.toLocaleString() : value,
+      align: 'right'
+    }
+  ]
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Area + Scatter 組合圖表
-        </h1>
-        <p className="text-gray-600 mb-6">
-          展示區域圖與散點圖的組合，適用於趨勢區間分析、信心區間顯示和關鍵數據點標記。
-        </p>
-
-        {/* 場景選擇 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { key: 'temperature', label: '🌡️ 氣溫預測', desc: '預測區間與實際觀測' },
-            { key: 'stock', label: '📈 股票分析', desc: '價格區間與成交熱點' },
-            { key: 'population', label: '🏙️ 人口密度', desc: '密度分佈與城市中心' },
-          ].map((scenario) => (
-            <button
-              key={scenario.key}
-              onClick={() => {
-                setActiveScenario(scenario.key as any)
-                setActiveSeriesIds(new Set())
-              }}
-              className={`px-4 py-2 rounded-lg border transition-colors ${
-                activeScenario === scenario.key
-                  ? 'bg-blue-100 border-blue-300 text-blue-700'
-                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="font-medium">{scenario.label}</div>
-              <div className="text-xs text-gray-500">{scenario.desc}</div>
-            </button>
-          ))}
-        </div>
-
-        {/* 圖表配置 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">圖表配置</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="showConfidenceArea"
-                  checked={showConfidenceArea}
-                  onChange={(e) => setShowConfidenceArea(e.target.checked)}
-                  className="rounded border-gray-300"
-                />
-                <label htmlFor="showConfidenceArea" className="text-sm text-gray-700">顯示區域圖</label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-700">區域模式：</label>
-                <select
-                  value={areaMode}
-                  onChange={(e) => setAreaMode(e.target.value as 'interval' | 'traditional')}
-                  className="text-sm border border-gray-300 rounded px-2 py-1"
-                  disabled={!showConfidenceArea}
-                >
-                  <option value="interval">區間帶狀</option>
-                  <option value="traditional">傳統區域</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-2">
-                <label className="text-sm text-gray-700">散點大小：</label>
-                <select
-                  value={scatterSizeMode}
-                  onChange={(e) => setScatterSizeMode(e.target.value as 'fixed' | 'dynamic')}
-                  className="text-sm border border-gray-300 rounded px-2 py-1"
-                >
-                  <option value="fixed">固定大小</option>
-                  <option value="dynamic">動態大小</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 text-xs text-gray-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div>
-                <strong>區間帶狀：</strong>顯示數值範圍（如信心區間、價格範圍）
-              </div>
-              <div>
-                <strong>傳統區域：</strong>從 Y=0 開始，展示絕對數值大小
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 系列控制 */}
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">系列控制</h3>
-            <button
-              onClick={resetSeries}
-              className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-            >
-              顯示全部
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(activeScenario === 'temperature' ? temperatureSeries : 
-              activeScenario === 'stock' ? stockSeries : populationSeries).map((series) => (
-              <button
-                key={series.dataKey}
-                onClick={() => toggleSeries(series.dataKey)}
-                className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
-                  activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
-                    ? 'bg-white border-2 text-gray-700'
-                    : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
-                }`}
-                style={{
-                  borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
-                    ? series.color 
-                    : undefined
-                }}
-              >
-                <div 
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: series.color }}
-                />
-                {series.name}
-                <span className="text-xs opacity-60">
-                  ({series.type === 'area' ? '區域' : '散點'})
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 圖表 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-xl font-semibold mb-4">{config.title}</h2>
+    <DemoPageTemplate
+      title="Area + Scatter 組合圖表"
+      description="展示區域圖與散點圖的組合，適用於趨勢區間分析、信心區間顯示和關鍵數據點標記"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
-        <div className="mb-4">
-          <EnhancedComboChart
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="控制面板" 
+            icon={<CogIcon className="w-5 h-5" />}
+          >
+          <div className="space-y-8">
+            {/* 場景選擇 */}
+            <ControlGroup title="場景選擇" icon="🎯" cols={1}>
+              <SelectControl
+                label="數據場景"
+                value={activeScenario}
+                onChange={(value) => {
+                  setActiveScenario(value as any)
+                  setActiveSeriesIds(new Set())
+                }}
+                options={scenarioOptions.map(s => ({ value: s.value, label: s.label }))}
+                description={scenarioOptions.find(s => s.value === activeScenario)?.desc}
+              />
+            </ControlGroup>
+
+            {/* 圖表配置 */}
+            <ControlGroup title="圖表配置" icon="📊" cols={2}>
+              <ToggleControl
+                label="顯示區域圖"
+                checked={showConfidenceArea}
+                onChange={setShowConfidenceArea}
+                description="顯示背景區域圖層"
+              />
+              
+              <SelectControl
+                label="區域模式"
+                value={areaMode}
+                onChange={(value) => setAreaMode(value as 'interval' | 'traditional')}
+                options={areaModeOptions}
+                disabled={!showConfidenceArea}
+              />
+              
+              <SelectControl
+                label="散點大小"
+                value={scatterSizeMode}
+                onChange={(value) => setScatterSizeMode(value as 'fixed' | 'dynamic')}
+                options={sizeOptions}
+              />
+            </ControlGroup>
+
+            {/* 系列控制 */}
+            <ControlGroup title="系列控制" icon="🎨" cols={1}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">可見系列</span>
+                  <button
+                    onClick={resetSeries}
+                    className="px-3 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+                  >
+                    顯示全部
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(activeScenario === 'temperature' ? temperatureSeries : 
+                    activeScenario === 'stock' ? stockSeries : populationSeries).map((series) => (
+                    <button
+                      key={series.dataKey}
+                      onClick={() => toggleSeries(series.dataKey)}
+                      className={`px-3 py-1 rounded text-xs transition-colors flex items-center gap-2 ${
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                          ? 'bg-white border-2 text-gray-700'
+                          : 'bg-gray-200 border-2 border-gray-300 text-gray-500'
+                      }`}
+                      style={{
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                          ? series.color 
+                          : undefined
+                      }}
+                    >
+                      <div 
+                        className="w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: series.color }}
+                      />
+                      {series.name}
+                      <span className="text-xs opacity-60">
+                        ({series.type === 'area' ? '區域' : '散點'})
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </ControlGroup>
+          </div>
+          </ModernControlPanel>
+        </div>
+
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* 圖表展示 */}
+          <motion.div
+            key={activeScenario}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+        <ChartContainer
+          title={config.title}
+          subtitle={`${currentSeries.filter(s => s.type === 'area').length} 個區域系列 + ${currentSeries.filter(s => s.type === 'scatter').length} 個散點系列`}
+          responsive={true}
+          aspectRatio={16 / 9}
+          actions={
+            <div className="flex items-center gap-2">
+              <MapIcon className="w-5 h-5 text-blue-500" />
+              <span className="text-sm text-gray-600">區域散點組合</span>
+            </div>
+          }
+        >
+          {({ width, height }) => (
+            <motion.div
+              key={`${activeScenario}-${areaMode}-${scatterSizeMode}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <EnhancedComboChart
+                data={getCurrentData()}
+                series={currentSeries}
+                xKey={getCurrentXKey()}
+                width={width}
+                height={height}
+                margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
+                leftAxis={{
+                  label: config.leftAxis.label,
+                  gridlines: true,
+                }}
+                rightAxis={{
+                  label: config.rightAxis.label,
+                  gridlines: false,
+                }}
+                xAxis={{
+                  label: config.xAxis.label,
+                }}
+                animate={true}
+                className="area-scatter-combo"
+              />
+            </motion.div>
+          )}
+        </ChartContainer>
+          </motion.div>
+
+          {/* 狀態顯示 */}
+          <StatusDisplay items={statusItems} />
+
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
             data={getCurrentData()}
-            series={currentSeries}
-            xKey={getCurrentXKey()}
-            width={900}
-            height={500}
-            margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-            leftAxis={{
-              label: config.leftAxis.label,
-              gridlines: true,
-            }}
-            rightAxis={{
-              label: config.rightAxis.label,
-              gridlines: false,
-            }}
-            xAxis={{
-              label: config.xAxis.label,
-            }}
-            animate={true}
-            className="area-scatter-combo"
+            columns={tableColumns}
+            maxRows={8}
+            showIndex
           />
-        </div>
 
-        {/* 數據統計 */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-blue-50 p-3 rounded">
-            <div className="font-medium text-blue-800">區域圖系列</div>
-            <div className="text-blue-600">
-              {currentSeries.filter(s => s.type === 'area').length} 個區域圖系列
+          {/* 代碼範例 */}
+        <CodeExample
+          title="使用範例"
+          language="tsx"
+          code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+
+const data = [
+  { 
+    time: '00:00', 
+    cpuMin: 20, 
+    cpuMax: 45, 
+    memoryUsage: 60, 
+    alerts: 2, 
+    performance: 85 
+  },
+  // ...更多數據
+]
+
+const series: ComboChartSeries[] = [
+  // 背景區域系列
+  {
+    type: 'area',
+    dataKey: 'cpuMax',
+    name: 'CPU使用率範圍',
+    yAxis: 'left',
+    color: '#3b82f6',
+    areaOpacity: 0.3,
+    baseline: (d: any) => d.cpuMin,
+    curve: 'monotone'
+  },
+  // 散點系列
+  {
+    type: 'scatter',
+    dataKey: 'performance',
+    name: '效能指標',
+    yAxis: 'right',
+    color: '#ef4444',
+    scatterRadius: 6,
+    sizeKey: 'alerts',
+    sizeRange: [4, 12]
+  }
+]
+
+<EnhancedComboChart
+  data={data}
+  series={series}
+  xKey="time"
+  width={${getCurrentData().length * 50}}
+  height={400}
+  leftAxis={{ label: "使用率 (%)", gridlines: true }}
+  rightAxis={{ label: "效能指標 (%)", gridlines: false }}
+  animate={true}
+  interactive={true}
+/>`}
+          />
+
+          {/* 功能說明 */}
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">Area + Scatter 組合圖表功能特點</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">區域圖功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  區間帶狀模式
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                  傳統區域模式
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                  動態基線計算
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                  漸層填充效果
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">散點圖功能</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full" />
+                  多維度數據映射
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                  動態尺寸調整
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                  邊框樣式控制
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  交互式數據探索
+                </li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-semibold text-gray-800">應用場景</h4>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                  氣象預測分析
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                  金融價格區間
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-lime-500 rounded-full" />
+                  人口密度分佈
+                </li>
+                <li className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                  系統監控分析
+                </li>
+              </ul>
             </div>
           </div>
-          <div className="bg-green-50 p-3 rounded">
-            <div className="font-medium text-green-800">散點圖系列</div>
-            <div className="text-green-600">
-              {currentSeries.filter(s => s.type === 'scatter').length} 個散點圖系列
-            </div>
-          </div>
-          <div className="bg-purple-50 p-3 rounded">
-            <div className="font-medium text-purple-800">資料點數量</div>
-            <div className="text-purple-600">
-              {getCurrentData().length} 個數據點
-            </div>
-          </div>
+        </div>
+        
         </div>
       </div>
-
-      {/* 技術說明 */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">技術特色</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">🎯 區域圖雙模式</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• <strong>區間帶狀模式：</strong>顯示範圍區間（上限-下限）</li>
-              <li>• <strong>傳統區域模式：</strong>從 Y=0 開始的絕對面積</li>
-              <li>• 動態基線計算：支援函數式基線配置</li>
-              <li>• 漸層填充效果：美觀的視覺層次</li>
-              <li>• 透明度控制：適合多圖層組合顯示</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-800 mb-2">⚡ 散點圖功能</h4>
-            <ul className="text-gray-600 space-y-1">
-              <li>• 多維度數據映射：大小、顏色、位置</li>
-              <li>• 動態尺寸調整：根據數據值自動縮放</li>
-              <li>• 邊框樣式控制：增強視覺區分度</li>
-              <li>• 交互式數據探索：點擊獲取詳細信息</li>
-            </ul>
-          </div>
-        </div>
-
-        {/* 應用場景說明 */}
-        <div className="mt-6">
-          <h4 className="font-medium text-gray-800 mb-3">📊 應用場景</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-blue-600 mb-1">🌡️ 科學監測</div>
-              <div className="text-gray-600">氣象預測、環境監測、實驗數據分析</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-purple-600 mb-1">📈 金融分析</div>
-              <div className="text-gray-600">股價區間、波動範圍、關鍵交易點</div>
-            </div>
-            <div className="bg-white p-3 rounded border">
-              <div className="font-medium text-cyan-600 mb-1">🏙️ 空間分析</div>
-              <div className="text-gray-600">人口分佈、密度分析、地理統計</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </DemoPageTemplate>
   )
 }
 

@@ -6,15 +6,23 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { designTokens, commonStyles } from '../../design/design-tokens'
+import { ResponsiveChart } from './ResponsiveChart'
 
 export interface ChartContainerProps {
   title?: string
-  children: React.ReactNode
+  children: React.ReactNode | ((dimensions: { width: number; height: number }) => React.ReactNode)
   loading?: boolean
   error?: string
   className?: string
   actions?: React.ReactNode
   subtitle?: string
+  // 響應式選項
+  responsive?: boolean
+  aspectRatio?: number
+  minWidth?: number
+  minHeight?: number
+  maxWidth?: number
+  maxHeight?: number
 }
 
 export const ChartContainer: React.FC<ChartContainerProps> = ({
@@ -24,13 +32,19 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   error,
   className = '',
   actions,
-  subtitle
+  subtitle,
+  responsive = true,
+  aspectRatio = 4 / 3,
+  minWidth = 300,
+  minHeight = 200,
+  maxWidth = 1200,
+  maxHeight = 800
 }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: designTokens.animation.easing.easeOut }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className={`${commonStyles.chartContainer} ${className}`}
     >
       {(title || actions) && (
@@ -64,7 +78,21 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            {children}
+            {responsive && typeof children === 'function' ? (
+              <ResponsiveChart
+                aspectRatio={aspectRatio}
+                minWidth={minWidth}
+                minHeight={minHeight}
+                maxWidth={maxWidth}
+                maxHeight={maxHeight}
+              >
+                {children}
+              </ResponsiveChart>
+            ) : (
+              typeof children === 'function' ? 
+                children({ width: 800, height: 500 }) : 
+                children
+            )}
           </motion.div>
         )}
       </div>

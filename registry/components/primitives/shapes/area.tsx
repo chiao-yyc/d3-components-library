@@ -55,13 +55,24 @@ export const Area: React.FC<AreaProps> = ({
       .y1(d => yScale(d.y))
       .y0(d => {
         if (typeof baseline === 'function') {
-          return yScale(baseline(d))
+          const baselineValue = baseline(d)
+          return baselineValue != null ? yScale(baselineValue) : yScale(0)
         }
         return d.y0 !== undefined ? yScale(d.y0) : yScale(baseline)
       })
       .curve(curve)
 
-    const validData = data.filter(d => d.x != null && d.y != null)
+    const validData = data.filter(d => {
+      if (d.x == null || d.y == null) return false
+      
+      // 如果使用動態 baseline，也需要驗證 baseline 值
+      if (typeof baseline === 'function') {
+        const baselineValue = baseline(d)
+        return baselineValue != null && !isNaN(baselineValue) && !isNaN(d.y)
+      }
+      
+      return !isNaN(d.y)
+    })
 
     if (gradient) {
       let defs = selection.select('defs')
