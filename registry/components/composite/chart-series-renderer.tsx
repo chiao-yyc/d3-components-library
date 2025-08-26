@@ -51,7 +51,7 @@ export const ChartSeriesRenderer: React.FC<ChartSeriesRendererProps> = ({
   animationDuration, 
   interactive, 
   onSeriesClick, 
-  onSeriesHover
+  onSeriesHover,
 }) => {
   console.log('🎯 ChartSeriesRenderer rendering with scales:', {
     xScale: !!xScale,
@@ -201,7 +201,7 @@ function renderBarGroup(
   animationDuration: number,
   interactive: boolean,
   onSeriesClick?: (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => void,
-  onSeriesHover?: (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => void
+  onSeriesHover?: (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => void,
 ) {
   return groupSeries.map((item, groupIndex) => {
     const { series: seriesConfig, originalIndex } = item
@@ -225,7 +225,8 @@ function renderBarGroup(
       groupOffset
     }))
 
-    return (
+    
+    const barElement = (
       <MultiBar
         key={`bar-${seriesConfig.name}-${originalIndex}`}
         data={seriesData}
@@ -244,6 +245,8 @@ function renderBarGroup(
           (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
       />
     )
+
+    return barElement
   })
 }
 
@@ -325,6 +328,7 @@ function renderNonBarSeries(
 
     case 'waterfall':
       return renderWaterfallSeries(seriesConfig, index, data, xKey, xScale, yScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
+
 
     default:
       return null
@@ -495,3 +499,4 @@ function renderWaterfallSeries(
     />
   )
 }
+

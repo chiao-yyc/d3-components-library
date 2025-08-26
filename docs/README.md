@@ -84,6 +84,8 @@ npx d3-components init
 ## Inspire by / Ref
 
 - [FunnelGraph.js](https://github.com/greghub/funnel-graph-js)
+- [Constrain zoom and pan in d3](https://stackoverflow.com/questions/45370566/constrain-zoom-and-pan-in-d3) - D3.js 縮放和平移邊界約束最佳實踐
+- [Creating an interactive chart with D3](https://blog.scottlogic.com/2014/09/19/interactive.html) - 金融圖表交互功能實現指南
 
 ---
 

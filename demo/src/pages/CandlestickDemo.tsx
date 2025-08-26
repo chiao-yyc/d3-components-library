@@ -129,6 +129,11 @@ export default function CandlestickDemo() {
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
   
+  // 新的交互功能選項
+  const [showCrosshair, setShowCrosshair] = useState(true)
+  const [enableZoom, setEnableZoom] = useState(true)
+  const [enablePan, setEnablePan] = useState(true)
+  
 
   // 當前資料和配置
   const { currentData, config, analysis } = useMemo(() => {
@@ -347,6 +352,13 @@ export default function CandlestickDemo() {
               />
               
               <ToggleControl
+                label="十字線游標"
+                checked={showCrosshair}
+                onChange={setShowCrosshair}
+                description="顯示跟隨滑鼠的十字線游標"
+              />
+              
+              <ToggleControl
                 label="動畫效果"
                 checked={animate}
                 onChange={setAnimate}
@@ -355,12 +367,26 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+            <ControlGroup title="交互功能" icon="🎯" cols={2}>
               <ToggleControl
                 label="互動功能"
                 checked={interactive}
                 onChange={setInteractive}
                 description="啟用點擊和懸停交互功能"
+              />
+              
+              <ToggleControl
+                label="縮放功能"
+                checked={enableZoom}
+                onChange={setEnableZoom}
+                description="使用滾輪縮放圖表"
+              />
+              
+              <ToggleControl
+                label="平移功能"
+                checked={enablePan}
+                onChange={setEnablePan}
+                description="拖拽平移圖表視圖"
               />
             </ControlGroup>
           </div>
@@ -395,11 +421,36 @@ export default function CandlestickDemo() {
                 showTooltip={showTooltip}
                 animate={animate}
                 interactive={interactive}
+                showCrosshair={showCrosshair}
+                enableZoom={enableZoom}
+                enablePan={enablePan}
+                crosshairConfig={{
+                  color: '#666666',
+                  opacity: 0.7,
+                  strokeWidth: 1,
+                  strokeDasharray: '3,3'
+                }}
+                zoomConfig={{
+                  scaleExtent: [0.5, 10],
+                  constrainToData: true,
+                  resetOnDoubleClick: true,
+                  enableX: true,
+                  enableY: false
+                }}
                 onDataClick={(data) => {
                   if (interactive) {
                     console.log('K線點擊:', data)
                   }
                 }}
+                onDataHover={(data) => {
+                  if (interactive && showTooltip) {
+                    console.log('K線懸停:', data)
+                  }
+                }}
+                responsive
+                width={800}
+                height={420}
+                candleWidth={candleWidth / 10}
               />
             </motion.div>
           </div>

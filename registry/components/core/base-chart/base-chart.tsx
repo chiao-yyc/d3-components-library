@@ -772,19 +772,23 @@ export function createChartComponent<TProps extends BaseChartProps>(
             console.log('📊 Current props:', { width: props.width, height: props.height, responsive: props.responsive })
             console.log('🔍 Creating currentProps with dimensions:', { ...props, width: dimensions.width, height: dimensions.height })
             
-            // 更新響應式尺寸狀態
+            // 更新響應式尺寸狀態 - 延遲到下一個事件循環避免在 render 中更新 state
             if (!responsiveDimensions || 
                 responsiveDimensions.width !== dimensions.width || 
                 responsiveDimensions.height !== dimensions.height) {
-              console.log('📊 Updating responsiveDimensions state:', dimensions)
-              setResponsiveDimensions(dimensions)
+              console.log('📊 Scheduling responsiveDimensions state update:', dimensions)
               
-              // 當尺寸改變時，同步更新圖表實例
-              if (chartInstance.svgRef?.current && dimensions.width > 0 && dimensions.height > 0) {
-                const updatedProps = { ...props, width: dimensions.width, height: dimensions.height }
-                console.log('📊 Updating chartInstance with props:', updatedProps)
-                setTimeout(() => chartInstance.update(updatedProps), 0)
-              }
+              // 使用 setTimeout 延遲狀態更新到下一個事件循環
+              setTimeout(() => {
+                setResponsiveDimensions(dimensions)
+                
+                // 當尺寸改變時，同步更新圖表實例
+                if (chartInstance.svgRef?.current && dimensions.width > 0 && dimensions.height > 0) {
+                  const updatedProps = { ...props, width: dimensions.width, height: dimensions.height }
+                  console.log('📊 Updating chartInstance with props:', updatedProps)
+                  chartInstance.update(updatedProps)
+                }
+              }, 0)
             }
             
             // 使用最新的尺寸渲染

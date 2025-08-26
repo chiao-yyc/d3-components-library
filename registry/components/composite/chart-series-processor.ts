@@ -91,6 +91,7 @@ export class ChartSeriesProcessor {
     
     // 智能檢測 X 軸類型
     const firstValue = xValues[0]
+    
     if (firstValue instanceof Date || (typeof firstValue === 'string' && !isNaN(Date.parse(firstValue)))) {
       xDomain = d3.extent(xValues.map(v => v instanceof Date ? v : new Date(v))) as [Date, Date]
     } else if (typeof firstValue === 'number') {
@@ -127,10 +128,11 @@ export class ChartSeriesProcessor {
   ): [number, number] {
     if (series.length === 0) return [0, 1]
 
-    // 檢查是否有堆疊區域系列和瀑布圖系列
     const stackedAreaSeries = series.filter(s => s.type === 'stackedArea')
     const waterfallSeries = series.filter(s => s.type === 'waterfall')
-    const nonStackedSeries = series.filter(s => s.type !== 'stackedArea' && s.type !== 'waterfall')
+    const nonStackedSeries = series.filter(s => 
+      s.type !== 'stackedArea' && s.type !== 'waterfall'
+    )
 
     let values: number[] = []
 

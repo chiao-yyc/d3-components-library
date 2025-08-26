@@ -40,7 +40,6 @@ export const ChartAxisRenderer: React.FC<ChartAxisRendererProps> = ({
     leftYScale: !!leftYScale,
     rightYScale: !!rightYScale
   })
-
   return (
     <>
       {/* X 軸 */}
