@@ -70,12 +70,13 @@ function App() {
           <Route path="/combo-chart" element={<ComboChartDemo />} />
           <Route path="/enhanced-combo-chart" element={<EnhancedComboChartDemo />} />
           <Route path="/area-line-combo" element={<AreaLineComboDemo />} />
+          <Route path="/scatter-regression-combo" element={<ScatterRegressionComboDemo />} />
+          <Route path="/triple-combo" element={<TripleComboDemo />} />
+          {/* 隱藏路由：保留功能但不在主導航中顯示 */}
           <Route path="/multi-bar-line-combo" element={<MultiBarLineComboDemo />} />
           <Route path="/stacked-area-line-combo" element={<StackedAreaLineComboDemo />} />
-          <Route path="/scatter-regression-combo" element={<ScatterRegressionComboDemo />} />
           <Route path="/waterfall-line-combo" element={<WaterfallLineComboDemo />} />
           <Route path="/area-scatter-combo" element={<AreaScatterComboDemo />} />
-          <Route path="/triple-combo" element={<TripleComboDemo />} />
           <Route path="/dynamic-combo" element={<DynamicComboDemo />} />
           <Route path="/data-processor-test" element={<DataProcessorTestDemo />} />
           <Route path="/composable-primitives" element={<ComposablePrimitivesDemo />} />

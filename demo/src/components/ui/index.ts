@@ -89,7 +89,7 @@ export const CHART_CATEGORIES = {
   basic: ['BarChart', 'LineChart', 'AreaChart', 'PieChart'],
   statistical: ['ScatterPlot', 'BoxPlot', 'ViolinPlot', 'RadarChart'],
   special: ['HeatMap', 'FunnelChart', 'GaugeChart'],
-  utility: ['DataMapper']
+  utility: []
 } as const
 
 // === 組件元數據 ===

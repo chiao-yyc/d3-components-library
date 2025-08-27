@@ -21,6 +21,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
+import RelatedComponents from '../components/RelatedComponents'
 import { CogIcon, ChartBarIcon, PaintBrushIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 export default function BarChartDemo() {
@@ -378,6 +379,11 @@ ${responsive ? `// 響應式模式 - 自動適應容器大小
             </div>
           </div>
         </div>
+      </ContentSection>
+
+      {/* 相關組件推薦 */}
+      <ContentSection delay={0.3}>
+        <RelatedComponents currentPath="/bar-chart" />
       </ContentSection>
     </DemoPageTemplate>
   )
