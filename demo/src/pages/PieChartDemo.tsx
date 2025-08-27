@@ -8,7 +8,6 @@ import { motion } from 'framer-motion'
 import { PieChart } from '../components/ui'
 import { 
   DemoPageTemplate,
-  ContentSection,
   ModernControlPanel,
   ControlGroup,
   RangeSlider,
@@ -52,8 +51,6 @@ const expenseData = [
 export default function PieChartDemo() {
   // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('sales')
-  const [chartWidth, setChartWidth] = useState(600)
-  const [chartHeight, setChartHeight] = useState(400)
   
   // 半徑設定
   const [innerRadius, setInnerRadius] = useState(0)
@@ -110,8 +107,7 @@ export default function PieChartDemo() {
   const statusItems = [
     { label: '數據集', value: selectedDataset === 'sales' ? '產品銷售額' : selectedDataset === 'market' ? '市場佔有率' : '支出分析' },
     { label: '數據項目', value: currentData.length },
-    { label: '圖表類型', value: innerRadius > 0 ? '甜甜圈圖' : '圓餅圖' },
-    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '圖表類型', value: innerRadius > 0 ? '甜甜圓圖' : '圓餅圖' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
 
@@ -146,9 +142,10 @@ export default function PieChartDemo() {
       title="PieChart Demo"
       description="現代化圓餅圖組件展示 - 支援甜甜圈模式、豐富的動畫效果和互動功能"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
@@ -180,28 +177,6 @@ export default function PieChartDemo() {
               />
             </ControlGroup>
 
-            {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={2}>
-              <RangeSlider
-                label="圖表寬度"
-                value={chartWidth}
-                min={400}
-                max={800}
-                step={50}
-                onChange={setChartWidth}
-                suffix="px"
-              />
-              
-              <RangeSlider
-                label="圖表高度"
-                value={chartHeight}
-                min={300}
-                max={600}
-                step={25}
-                onChange={setChartHeight}
-                suffix="px"
-              />
-            </ControlGroup>
 
             {/* 半徑配置 */}
             <ControlGroup title="半徑配置" icon="⚪" cols={4}>
@@ -340,23 +315,27 @@ export default function PieChartDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
-        <ChartContainer
-          title="圖表預覽"
-          subtitle="即時預覽配置效果"
-          actions={
-            <div className="flex items-center gap-2">
-              <ChartPieIcon className="w-5 h-5 text-purple-500" />
-              <span className="text-sm text-gray-600">{innerRadius > 0 ? '甜甜圈圖' : '圓餅圖'}</span>
-            </div>
-          }
-        >
-          <div className="flex justify-center">
-            <motion.div
-              key={`${chartWidth}-${chartHeight}-${selectedDataset}-${innerRadius}`}
+        {/* 主要內容區域 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
+          <ChartContainer
+            title="圖表預覽"
+            subtitle="即時預覽配置效果"
+            responsive={true}
+            aspectRatio={16 / 9}
+            actions={
+              <div className="flex items-center gap-2">
+                <ChartPieIcon className="w-5 h-5 text-purple-500" />
+                <span className="text-sm text-gray-600">{innerRadius > 0 ? '甜甜圈圖' : '圓餅圖'}</span>
+              </div>
+            }
+          >
+            {({ width, height }) => (
+              <div className="flex justify-center">
+                <motion.div
+                  key={`${selectedDataset}-${innerRadius}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
@@ -364,10 +343,10 @@ export default function PieChartDemo() {
               <PieChart
                 data={currentData}
                 mapping={mapping}
-                width={chartWidth}
-                height={chartHeight}
+                width={width}
+                height={height}
                 innerRadius={innerRadius}
-                outerRadius={outerRadius}
+                outerRadius={Math.min(width, height) * 0.35}
                 cornerRadius={cornerRadius}
                 padAngle={padAngle}
                 colorScheme={colorScheme}
@@ -387,23 +366,22 @@ export default function PieChartDemo() {
                 onSliceHover={(data) => {
                   console.log('Pie slice hovered:', data)
                 }}
-              />
-            </motion.div>
-          </div>
+                />
+              </motion.div>
+              </div>
+            )}
+          </ChartContainer>
           
           <StatusDisplay items={statusItems} />
-        </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
-        <DataTable
-          title="數據詳情"
-          data={currentData}
-          columns={getTableColumns()}
-          maxRows={8}
-          showIndex
-        />
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
+            data={currentData}
+            columns={getTableColumns()}
+            maxRows={8}
+            showIndex
+          />
         
         {/* 數據統計摘要 */}
         <div className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
@@ -426,12 +404,10 @@ export default function PieChartDemo() {
               <div className="text-teal-700">最大值</div>
             </div>
           </div>
-        </div>
-      </ContentSection>
+          </div>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
-        <CodeExample
+          {/* 代碼範例 */}
+          <CodeExample
           title="使用範例"
           language="tsx"
           code={`import { PieChart } from '../components/ui'
@@ -443,37 +419,39 @@ const data = [
   // ... more data
 ]
 
-<PieChart
-  data={data}
-  mapping={{
-    label: '${mapping.label}',
-    value: '${mapping.value}'${mapping.color ? `,\n    color: '${mapping.color}'` : ''}
-  }}
-  width={${chartWidth}}
-  height={${chartHeight}}
-  innerRadius={${innerRadius}}
-  outerRadius={${outerRadius}}
-  cornerRadius={${cornerRadius}}
-  padAngle={${padAngle}}
-  colorScheme="${colorScheme}"
-  showLabels={${showLabels}}
-  showLegend={${showLegend}}
-  legendPosition="${legendPosition}"
-  showPercentages={${showPercentages}}
-  labelThreshold={${labelThreshold}}
-  animate={${animate}}
-  animationType="${animationType}"
-  interactive={${interactive}}
-  showCenterText={${showCenterText}}
-  hoverEffect="${hoverEffect}"
-  onSliceClick={(data) => console.log('Clicked:', data)}
-  onSliceHover={(data) => console.log('Hovered:', data)}
-/>`}
-        />
-      </ContentSection>
+<ChartContainer responsive={true} aspectRatio={16/9}>
+  {({ width, height }) => (
+    <PieChart
+      data={data}
+      mapping={{
+        label: '${mapping.label}',
+        value: '${mapping.value}'${mapping.color ? `,\n        color: '${mapping.color}'` : ''}
+      }}
+      width={width}
+      height={height}
+      innerRadius={${innerRadius}}
+      outerRadius={Math.min(width, height) * 0.35}
+      cornerRadius={${cornerRadius}}
+      padAngle={${padAngle}}
+      colorScheme="${colorScheme}"
+      showLabels={${showLabels}}
+      showLegend={${showLegend}}
+      legendPosition="${legendPosition}"
+      showPercentages={${showPercentages}}
+      labelThreshold={${labelThreshold}}
+      animate={${animate}}
+      animationType="${animationType}"
+      interactive={${interactive}}
+      showCenterText={${showCenterText}}
+      hoverEffect="${hoverEffect}"
+      onSliceClick={(data) => console.log('Clicked:', data)}
+      onSliceHover={(data) => console.log('Hovered:', data)}
+    />
+  )}
+</ChartContainer>`}
+          />
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
@@ -526,7 +504,8 @@ const data = [
             </div>
           </div>
         </div>
-      </ContentSection>
+      </div>
+      </div>
     </DemoPageTemplate>
   )
 }

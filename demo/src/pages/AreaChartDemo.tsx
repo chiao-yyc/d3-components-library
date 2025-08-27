@@ -8,7 +8,6 @@ import { motion } from 'framer-motion'
 import { AreaChart } from '@registry/components/basic/area-chart'
 import { 
   DemoPageTemplate,
-  ContentSection,
   ModernControlPanel,
   ControlGroup,
   RangeSlider,
@@ -158,12 +157,14 @@ export default function AreaChartDemo() {
       title="AreaChart Demo"
       description="現代化區域圖組件展示 - 支援堆疊模式、多系列資料和動畫效果"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
-          title="控制面板" 
-          icon={<CogIcon className="w-5 h-5" />}
-        >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* 控制面板 - 1/4 width */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="控制面板" 
+            icon={<CogIcon className="w-5 h-5" />}
+          >
           <div className="space-y-8">
             {/* 基本設定 */}
             <ControlGroup title="基本設定" icon="⚙️" cols={3}>
@@ -316,114 +317,117 @@ export default function AreaChartDemo() {
               />
             </ControlGroup>
           </div>
-        </ModernControlPanel>
-      </ContentSection>
+          </ModernControlPanel>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
-        <ChartContainer
-          title="圖表預覽"
-          subtitle="即時預覽配置效果"
-          actions={
-            <div className="flex items-center gap-2">
-              <SwatchIcon className="w-5 h-5 text-green-500" />
-              <span className="text-sm text-gray-600">區域圖</span>
-            </div>
-          }
-        >
-          <div className="flex justify-center">
-            <motion.div
-              key={`${selectedDataset}-${stackMode}-${curve}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <AreaChart
-                data={currentData}
-                mapping={mapping}
-                width={800}
-                height={400}
-                stackMode={stackMode}
-                curve={curve}
-                fillOpacity={fillOpacity}
-                strokeWidth={strokeWidth}
-                colorScheme={colorScheme}
-                gradient={gradient}
-                showGrid={showGrid}
-                showDots={showDots}
-                showLegend={showLegend}
-                legendPosition={legendPosition}
-                animate={animate}
-                interactive={interactive}
-                onDataClick={(data, series) => {
-                  console.log('Area data clicked:', data, series)
-                }}
-                onDataHover={(data, series) => {
-                  console.log('Area data hovered:', data, series)
-                }}
-                // 新增的交互功能
-                enableBrushZoom={enableBrushZoom}
-                onZoom={(domain) => {
-                  setZoomDomain(domain)
-                  console.log('AreaChart 縮放:', domain)
-                }}
-                onZoomReset={() => {
-                  setZoomDomain(null)
-                  console.log('AreaChart 縮放重置')
-                }}
-                enableCrosshair={enableCrosshair}
-                crosshairConfig={{
-                  showCircle: true,
-                  showLines: true,
-                  showText: true,
-                  formatText: (data) => `日期: ${data.x}\n數值: ${data.y.toFixed(2)}`
-                }}
-              />
-            </motion.div>
-          </div>
+        {/* 主要內容區域 - 3/4 width */}
+        <div className="lg:col-span-3 space-y-8">
           
+          {/* 圖表展示 */}
+          <ChartContainer
+            title="圖表預覽"
+            subtitle="即時預覽配置效果"
+            responsive={true}
+            aspectRatio={16 / 9}
+            actions={
+              <div className="flex items-center gap-2">
+                <SwatchIcon className="w-5 h-5 text-green-500" />
+                <span className="text-sm text-gray-600">區域圖</span>
+              </div>
+            }
+          >
+            {({ width, height }) => (
+              <>
+                <motion.div
+                  key={`${selectedDataset}-${stackMode}-${curve}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <AreaChart
+                    data={currentData}
+                    mapping={mapping}
+                    width={width}
+                    height={height}
+                    stackMode={stackMode}
+                    curve={curve}
+                    fillOpacity={fillOpacity}
+                    strokeWidth={strokeWidth}
+                    colorScheme={colorScheme}
+                    gradient={gradient}
+                    showGrid={showGrid}
+                    showDots={showDots}
+                    showLegend={showLegend}
+                    legendPosition={legendPosition}
+                    animate={animate}
+                    interactive={interactive}
+                    onDataClick={(data, series) => {
+                      console.log('Area data clicked:', data, series)
+                    }}
+                    onDataHover={(data, series) => {
+                      console.log('Area data hovered:', data, series)
+                    }}
+                    // 新增的交互功能
+                    enableBrushZoom={enableBrushZoom}
+                    onZoom={(domain) => {
+                      setZoomDomain(domain)
+                      console.log('AreaChart 縮放:', domain)
+                    }}
+                    onZoomReset={() => {
+                      setZoomDomain(null)
+                      console.log('AreaChart 縮放重置')
+                    }}
+                    enableCrosshair={enableCrosshair}
+                    crosshairConfig={{
+                      showCircle: true,
+                      showLines: true,
+                      showText: true,
+                      formatText: (data) => `日期: ${data.x}\n數值: ${data.y.toFixed(2)}`
+                    }}
+                  />
+                </motion.div>
+                
+                {/* 交互狀態顯示 */}
+                {zoomDomain && (
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      <span className="font-medium text-blue-800">縮放狀態</span>
+                    </div>
+                    <div className="text-blue-700">
+                      <strong>縮放範圍:</strong> {
+                        zoomDomain[0] instanceof Date 
+                          ? zoomDomain[0].toLocaleDateString() 
+                          : zoomDomain[0]?.toString()
+                      } 到 {
+                        zoomDomain[1] instanceof Date 
+                          ? zoomDomain[1].toLocaleDateString() 
+                          : zoomDomain[1]?.toString()
+                      }
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </ChartContainer>
+
+          {/* 狀態顯示 */}
           <StatusDisplay items={statusItems} />
-          
-          {/* 交互狀態顯示 */}
-          {zoomDomain && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <span className="font-medium text-blue-800">縮放狀態</span>
-              </div>
-              <div className="text-blue-700">
-                <strong>縮放範圍:</strong> {
-                  zoomDomain[0] instanceof Date 
-                    ? zoomDomain[0].toLocaleDateString() 
-                    : zoomDomain[0]?.toString()
-                } 到 {
-                  zoomDomain[1] instanceof Date 
-                    ? zoomDomain[1].toLocaleDateString() 
-                    : zoomDomain[1]?.toString()
-                }
-              </div>
-            </div>
-          )}
-        </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
-        <DataTable
-          title="當前資料"
-          data={currentData.slice(0, 15)}
-          columns={tableColumns}
-          maxRows={10}
-          showIndex
-        />
-      </ContentSection>
+          {/* 數據詳情 */}
+          <DataTable
+            title="當前資料"
+            data={currentData.slice(0, 15)}
+            columns={tableColumns}
+            maxRows={10}
+            showIndex
+          />
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
-        <CodeExample
-          title="使用範例"
-          language="tsx"
-          code={`import { AreaChart } from '@registry/components/basic/area-chart'
+          {/* 代碼範例 */}
+          <CodeExample
+            title="使用範例"
+            language="tsx"
+            code={`import { AreaChart } from '@registry/components/basic/area-chart'
 
 const data = [
   { date: '2023-01', revenue: 120000, category: '營收' },
@@ -455,64 +459,63 @@ const data = [
   onDataClick={(data, series) => console.log('Clicked:', data, series)}
   onZoom={(domain) => console.log('Zoom:', domain)}
 />`}
-        />
-      </ContentSection>
+          />
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full" />
-            <h3 className="text-xl font-semibold text-gray-800">AreaChart 功能特點</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800">核心功能</h4>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  多種堆疊模式（無堆疊、累積、百分比）
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  豐富的曲線插值選項
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                  漸變填充和透明度控制
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                  靈活的圖例配置
-                </li>
-              </ul>
+          {/* 功能說明 */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full" />
+              <h3 className="text-xl font-semibold text-gray-800">AreaChart 功能特點</h3>
             </div>
             
-            <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800">交互特性</h4>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  筆刷縮放功能
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                  十字游標數據追踪
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                  多系列數據支援
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
-                  平滑動畫過渡
-                </li>
-              </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-800">核心功能</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                    多種堆疊模式（無堆疊、累積、百分比）
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    豐富的曲線插值選項
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                    漸變填充和透明度控制
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                    靈活的圖例配置
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-800">交互特性</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    筆刷縮放功能
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                    十字游標數據追踪
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                    多系列數據支援
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                    平滑動畫過渡
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      </ContentSection>
+      </div>
     </DemoPageTemplate>
   )
 }

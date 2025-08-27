@@ -1,9 +1,16 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { BoxPlot } from '@registry/components/statistical/box-plot/box-plot'
-import DemoPageTemplate from '../components/ui/DemoPageTemplate'
-import ModernControlPanel, { ControlGroup, RangeSlider, SelectControl, ToggleControl } from '../components/ui/ModernControlPanel'
-import DataTable from '../components/ui/DataTable'
+import { 
+  DemoPageTemplate,
+  ModernControlPanel,
+  ControlGroup,
+  RangeSlider,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  DataTable
+} from '../components/ui'
 import { designTokens } from '../design/design-tokens'
 import { 
   ChartBarIcon,
@@ -52,8 +59,6 @@ const experimentData = [
 export default function BoxPlotDemo() {
   // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('scores')
-  const [chartWidth, setChartWidth] = useState(600)
-  const [chartHeight, setChartHeight] = useState(500)
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
   
   // 箱體配置
@@ -340,24 +345,6 @@ export default function BoxPlotDemo() {
               />
             </ControlGroup>
 
-            <ControlGroup title="尺寸配置" icon={<AdjustmentsHorizontalIcon className="w-4 h-4" />} cols={1}>
-              <RangeSlider
-                label="圖表寬度"
-                value={chartWidth}
-                onChange={setChartWidth}
-                min={400}
-                max={1000}
-                step={50}
-              />
-              <RangeSlider
-                label="圖表高度"
-                value={chartHeight}
-                onChange={setChartHeight}
-                min={300}
-                max={800}
-                step={50}
-              />
-            </ControlGroup>
 
             <ControlGroup title="箱體配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
@@ -584,36 +571,24 @@ export default function BoxPlotDemo() {
         <div className="xl:col-span-3 space-y-6">
 
           {/* 箱形圖展示 */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className={`${designTokens.colors.cardBg} backdrop-blur-md rounded-2xl border ${designTokens.colors.border} overflow-hidden`}
+          <ChartContainer
+            title={config.title}
+            subtitle={config.description}
+            responsive={true}
+            aspectRatio={16 / 9}
           >
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className={`${designTokens.typography.heading3} text-gray-800`}>
-                    {config.title}
-                  </h3>
-                  <p className={`${designTokens.typography.body} text-gray-600 mt-1`}>
-                    {config.description}
-                  </p>
-                </div>
-                <div className="text-right text-sm text-gray-500">
-                  {chartWidth} × {chartHeight}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="flex justify-center">
+            {({ width, height }) => (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
                 <BoxPlot
                   data={currentData}
                   labelKey={dataKeys.labelKey}
                   valuesKey={dataKeys.valuesKey}
-                  width={chartWidth}
-                  height={chartHeight}
+                  width={width}
+                  height={height}
                   orientation={orientation}
                   boxWidth={boxWidth}
                   whiskerWidth={whiskerWidth}
@@ -641,9 +616,9 @@ export default function BoxPlotDemo() {
                     console.log('Box hovered:', data)
                   }}
                 />
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            )}
+          </ChartContainer>
 
           {/* 統計數據表格 */}
           <DataTable
@@ -675,12 +650,14 @@ const data = [
   { ${dataKeys.labelKey}: '物理', ${dataKeys.valuesKey}: [88, 91, 85, 89, 92, 87, 90, 86] }
 ]
 
-<BoxPlot
-  data={data}
-  labelKey="${dataKeys.labelKey}"
-  valuesKey="${dataKeys.valuesKey}"
-  width={${chartWidth}}
-  height={${chartHeight}}
+<ChartContainer responsive={true} aspectRatio={16/9}>
+  {({ width, height }) => (
+    <BoxPlot
+      data={data}
+      labelKey="${dataKeys.labelKey}"
+      valuesKey="${dataKeys.valuesKey}"
+      width={width}
+      height={height}
   orientation="${orientation}"
   boxWidth={${boxWidth}}
   whiskerWidth={${whiskerWidth}}
@@ -699,9 +676,11 @@ const data = [
   jitterWidth={${jitterWidth}}
   pointRadius={${pointRadius}}
   pointOpacity={${pointOpacity}}` : ''}
-  onBoxClick={(data) => console.log('Clicked:', data)}
-  onBoxHover={(data) => console.log('Hovered:', data)}
-/>`}</code>
+      onBoxClick={(data) => console.log('Clicked:', data)}
+      onBoxHover={(data) => console.log('Hovered:', data)}
+    />
+  )}
+</ChartContainer>`}</code>
               </pre>
             </div>
           </motion.div>
