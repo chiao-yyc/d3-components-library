@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { ReactNode, useState } from 'react'
+import Breadcrumb from './Breadcrumb'
 
 interface LayoutProps {
   children: ReactNode
@@ -14,72 +15,96 @@ interface NavigationItem {
 interface NavigationGroup {
   title: string
   items: NavigationItem[]
+  tier?: 1 | 2 | 3
+  description?: string
 }
 
 function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['core', 'combo']))
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['🚀 快速開始', '📊 基礎圖表']))
 
   const navigationGroups: NavigationGroup[] = [
+    // 第一層：快速開始
     {
-      title: '核心功能',
+      title: '🚀 快速開始',
+      tier: 1,
+      description: '新手入門必看',
       items: [
-        { path: '/', name: '首頁', icon: '🏠' },
-        { path: '/simple-components', name: '簡化組件', icon: '🚀' },
-        { path: '/composable-primitives', name: '完全組合式', icon: '🧩' },
-        { path: '/gallery', name: '組件庫', icon: '🎨' },
-        { path: '/data-mapper', name: '資料映射', icon: '📊' },
-        { path: '/modular-test', name: '模組測試', icon: '🔧' }
+        { path: '/', name: '專案概覽', icon: '🏠' },
+        { path: '/gallery', name: '組件庫總覽', icon: '🎨' },
       ]
     },
+    
+    // 第二層：開發指南  
     {
-      title: '基礎圖表',
+      title: '📊 基礎圖表',
+      tier: 2,
+      description: '常用圖表組件',
       items: [
         { path: '/bar-chart', name: '長條圖', icon: '📊' },
         { path: '/line-chart', name: '折線圖', icon: '📈' },
         { path: '/scatter-plot', name: '散點圖', icon: '🔵' },
         { path: '/pie-chart', name: '圓餅圖', icon: '🥧' },
-        { path: '/area-chart', name: '區域圖', icon: '🌊' },
-        { path: '/heatmap', name: '熱力圖', icon: '🔥' },
-        { path: '/correlogram', name: '相關性圖', icon: '🔗' }
+        { path: '/area-chart', name: '區域圖', icon: '🌊' }
       ]
     },
     {
-      title: '進階圖表',
+      title: '📈 進階圖表',
+      tier: 2,
+      description: '專業數據視覺化',
       items: [
-        { path: '/gauge-chart', name: '儀表盤', icon: '⏱️' },
-        { path: '/funnel-chart', name: '漏斗圖', icon: '🎯' },
+        { path: '/heatmap', name: '熱力圖', icon: '🔥' },
         { path: '/box-plot', name: '箱形圖', icon: '📦' },
         { path: '/violin-plot', name: '小提琴圖', icon: '🎻' },
         { path: '/radar-chart', name: '雷達圖', icon: '🎯' },
-        { path: '/tree-map', name: '樹狀圖', icon: '🌳' },
+        { path: '/funnel-chart', name: '漏斗圖', icon: '🎯' },
+        { path: '/gauge-chart', name: '儀表盤', icon: '⏱️' },
         { path: '/candlestick', name: 'K線圖', icon: '📊' }
       ]
     },
     {
-      title: '組合圖表',
+      title: '🔧 組合式架構',
+      tier: 2,
+      description: '靈活的組件組合',
       items: [
-        { path: '/combo-chart', name: '基礎組合', icon: '🔧' },
-        { path: '/enhanced-combo-chart', name: '增強組合', icon: '⚡' },
-        { path: '/area-line-combo', name: '面積線條', icon: '🌊' },
-        { path: '/multi-bar-line-combo', name: '多條線條', icon: '📊' },
-        { path: '/stacked-area-line-combo', name: '堆疊區域', icon: '📈' },
-        { path: '/scatter-regression-combo', name: '散點回歸', icon: '🔵' },
-        { path: '/waterfall-line-combo', name: '瀑布線條', icon: '💧' },
-        { path: '/area-scatter-combo', name: '區域散點', icon: '🎯' },
-        { path: '/triple-combo', name: '三重組合', icon: '🚀' },
-        { path: '/dynamic-combo', name: '動態組合', icon: '⚡' }
+        { path: '/simple-components', name: '簡化組件模式', icon: '🚀' },
+        { path: '/composable-primitives', name: '完全組合模式', icon: '🧩' },
+        { path: '/combo-chart', name: '組合圖表展示', icon: '⚡' },
+        { path: '/enhanced-combo-chart', name: '增強組合圖表', icon: '🔧' },
+        { path: '/area-line-combo', name: '面積線條組合', icon: '🌊' }
       ]
     },
     {
-      title: '開發工具',
+      title: '📱 響應式系統',
+      tier: 2,
+      description: '適配各種螢幕',
       items: [
-        { path: '/data-processor-test', name: 'DataProcessor 測試', icon: '🔬' },
-        { path: '/alignment-test', name: '對齊問題測試', icon: '🎯' },
+        { path: '/responsive-chart', name: '響應式圖表', icon: '📱' },
+        { path: '/responsive-test', name: '容器測試', icon: '🧪' },
+        { path: '/alignment-test', name: '對齊策略', icon: '🎯' }
+      ]
+    },
+
+    // 第三層：開發者工具
+    {
+      title: '🧪 測試與除錯',
+      tier: 3,
+      description: '開發者專用工具',
+      items: [
+        { path: '/modular-test', name: '組件測試', icon: '🧩' },
+        { path: '/data-processor-test', name: '數據處理測試', icon: '🔬' },
         { path: '/combo-debug', name: 'Combo 圖表除錯', icon: '🔧' },
-        { path: '/layer-debug', name: '圖層順序調試', icon: '📚' },
-        { path: '/responsive-chart', name: '響應式圖表系統', icon: '📱' },
-        { path: '/responsive-test', name: '響應式容器測試', icon: '🧪' }
+        { path: '/layer-debug', name: '圖層調試', icon: '📚' }
+      ]
+    },
+    {
+      title: '🛠️ 進階工具',
+      tier: 3,
+      description: '提升開發效率',
+      items: [
+        { path: '/data-mapper', name: '資料映射器', icon: '🗂️' },
+        { path: '/correlogram', name: '相關性分析', icon: '🔗' },
+        { path: '/tree-map', name: '樹狀結構', icon: '🌳' }
       ]
     }
   ]
@@ -123,61 +148,102 @@ function Layout({ children }: LayoutProps) {
 
         {/* 導航選單 */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          <div className="space-y-2">
-            {navigationGroups.map((group) => (
-              <div key={group.title} className="mb-4">
-                <button
-                  onClick={() => toggleGroup(group.title)}
-                  className={`w-full flex items-center justify-between p-2 text-left rounded-md transition-colors ${
-                    isSidebarOpen ? 'hover:bg-gray-100' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <span className={`font-medium text-gray-700 ${
-                    isSidebarOpen ? 'text-sm' : 'text-xs'
-                  }`}>
-                    {isSidebarOpen ? group.title : group.title.charAt(0)}
-                  </span>
+          <div className="space-y-3">
+            {/* 三層式分組渲染 */}
+            {[1, 2, 3].map(tier => {
+              const tierGroups = navigationGroups.filter(group => group.tier === tier)
+              if (tierGroups.length === 0) return null
+              
+              return (
+                <div key={tier} className="space-y-2">
+                  {/* 層級標題 */}
                   {isSidebarOpen && (
-                    <svg 
-                      className={`w-4 h-4 transform transition-transform ${
-                        expandedGroups.has(group.title) ? 'rotate-90' : ''
-                      }`}
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    <div className={`text-xs font-bold uppercase tracking-wider px-2 py-1 ${
+                      tier === 1 ? 'text-green-600 bg-green-50 rounded-md' :
+                      tier === 2 ? 'text-blue-600 bg-blue-50 rounded-md' :
+                      'text-purple-600 bg-purple-50 rounded-md'
+                    }`}>
+                      {tier === 1 ? '第一層：快速開始' :
+                       tier === 2 ? '第二層：開發指南' :
+                       '第三層：開發者工具'}
+                    </div>
                   )}
-                </button>
-                
-                {(expandedGroups.has(group.title) || !isSidebarOpen) && (
-                  <div className={`mt-2 space-y-1 ${
-                    isSidebarOpen ? 'ml-2' : 'ml-0'
-                  }`}>
-                    {group.items.map((item) => (
-                      <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                          `flex items-center p-2 rounded-md text-sm transition-colors ${
-                            isActive
-                              ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500'
-                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`
-                        }
-                        title={!isSidebarOpen ? item.name : undefined}
+                  
+                  {/* 群組項目 */}
+                  {tierGroups.map((group) => (
+                    <div key={group.title} className="mb-3">
+                      <button
+                        onClick={() => toggleGroup(group.title)}
+                        className={`w-full flex items-center justify-between p-2 text-left rounded-md transition-colors ${
+                          isSidebarOpen ? 'hover:bg-gray-100' : 'hover:bg-gray-100'
+                        } ${
+                          tier === 1 ? 'bg-green-50/50' :
+                          tier === 2 ? 'bg-blue-50/50' :
+                          'bg-purple-50/50'
+                        }`}
                       >
-                        <span className="mr-3">{item.icon}</span>
+                        <div className="flex-1">
+                          <span className={`font-medium ${
+                            tier === 1 ? 'text-green-800' :
+                            tier === 2 ? 'text-blue-800' :
+                            'text-purple-800'
+                          } ${isSidebarOpen ? 'text-sm' : 'text-xs'}`}>
+                            {isSidebarOpen ? group.title : group.title.split(' ')[0]}
+                          </span>
+                          {isSidebarOpen && group.description && (
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {group.description}
+                            </div>
+                          )}
+                        </div>
                         {isSidebarOpen && (
-                          <span className="flex-1 truncate">{item.name}</span>
+                          <svg 
+                            className={`w-4 h-4 transform transition-transform ${
+                              expandedGroups.has(group.title) ? 'rotate-90' : ''
+                            }`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
                         )}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                      </button>
+                      
+                      {(expandedGroups.has(group.title) || !isSidebarOpen) && (
+                        <div className={`mt-2 space-y-1 ${
+                          isSidebarOpen ? 'ml-3 pl-3 border-l-2 border-gray-100' : 'ml-0'
+                        }`}>
+                          {group.items.map((item) => (
+                            <NavLink
+                              key={item.path}
+                              to={item.path}
+                              className={({ isActive }) =>
+                                `flex items-center p-2 rounded-md text-sm transition-colors ${
+                                  isActive
+                                    ? `${
+                                        tier === 1 ? 'bg-green-100 text-green-800 border-r-2 border-green-500' :
+                                        tier === 2 ? 'bg-blue-100 text-blue-800 border-r-2 border-blue-500' :
+                                        'bg-purple-100 text-purple-800 border-r-2 border-purple-500'
+                                      }`
+                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                }`
+                              }
+                              title={!isSidebarOpen ? item.name : undefined}
+                            >
+                              <span className="mr-3">{item.icon}</span>
+                              {isSidebarOpen && (
+                                <span className="flex-1 truncate">{item.name}</span>
+                              )}
+                            </NavLink>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
           </div>
         </nav>
 
@@ -218,6 +284,7 @@ function Layout({ children }: LayoutProps) {
 
         {/* 主要內容 */}
         <main className="flex-1 p-6 overflow-y-auto">
+          <Breadcrumb />
           {children}
         </main>
       </div>

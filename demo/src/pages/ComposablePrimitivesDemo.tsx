@@ -36,26 +36,31 @@ export default function ComposablePrimitivesDemo() {
 
   const colors = colorThemes[theme]
 
-  // 創建 scales
-  const { xScale, yScale } = useMemo(() => {
+  // 創建 scales - 使用動態寬高
+  const createScales = (width: number, height: number) => {
+    const margin = { top: 20, right: 80, bottom: 60, left: 80 }
+    const innerWidth = width - margin.left - margin.right
+    const innerHeight = height - margin.top - margin.bottom
+    
     const xScale = d3.scaleBand()
       .domain(sampleData.map(d => d.x))
-      .range([0, 800 - 80 - 80])  // width - left margin - right margin
+      .range([0, innerWidth])
       .padding(0.1)
     
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(sampleData, d => Math.max(d.y, d.trend, d.points)) || 5000])
-      .range([400 - 20 - 60, 0])  // height - top margin - bottom margin
+      .range([innerHeight, 0])
       .nice()
     
-    return { xScale, yScale }
-  }, [])
+    return { xScale, yScale, margin, innerWidth, innerHeight }
+  }
 
   // 動態程式碼範例 - 反映當前選擇的組件和設定
   const codeExample = `
-// 完全組合式圖表構建 - 使用 Primitives 直接組合
-import React, { useMemo } from 'react'
+// 完全組合式圖表構建 - 響應式 Primitives 組合
+import React from 'react'
 import { ChartCanvas } from '@/registry/components/primitives/canvas'
+import { ChartContainer } from '@/components/ui/ChartContainer'
 import { ${[showBars && 'Bar', showLine && 'Line', showScatter && 'Scatter'].filter(Boolean).join(', ')} } from '@/registry/components/primitives/shapes'
 import * as d3 from 'd3'
 
@@ -66,27 +71,36 @@ const sampleData = [
 ]
 
 function ComposableChart() {
-  // 創建 scales
-  const { xScale, yScale } = useMemo(() => {
+  // 創建響應式 scales
+  const createScales = (width, height) => {
+    const margin = { top: 20, right: 80, bottom: 60, left: 80 }
+    const innerWidth = width - margin.left - margin.right
+    const innerHeight = height - margin.top - margin.bottom
+    
     const xScale = d3.scaleBand()
       .domain(sampleData.map(d => d.x))
-      .range([0, 640])  // 800 - margins
+      .range([0, innerWidth])
       .padding(0.1)
     
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(sampleData, d => Math.max(d.y, d.trend, d.points))])
-      .range([320, 0])  // 400 - margins
+      .range([innerHeight, 0])
       .nice()
     
-    return { xScale, yScale }
-  }, [])
+    return { xScale, yScale, margin, innerWidth, innerHeight }
+  }
 
   return (
-    <ChartCanvas width={800} height={400} margin={{ top: 20, right: 80, bottom: 60, left: 80 }}>
-      <svg width={800} height={400}>
-        <g transform="translate(80, 20)">
+    <ChartContainer responsive={true} aspectRatio={16/9}>
+      {({ width, height }) => {
+        const { xScale, yScale, margin, innerWidth, innerHeight } = createScales(width, height)
+        
+        return (
+          <ChartCanvas width={width} height={height} margin={margin}>
+            <svg width={width} height={height}>
+              <g transform={\`translate(\${margin.left}, \${margin.top})\`}>
           {/* 手動軸線渲染 */}
-          <g transform="translate(0, 320)">
+          <g transform={\`translate(0, \${innerHeight})\`}>
             {xScale.domain().map(tick => (
               <g key={tick}>
                 <line x1={xScale(tick) + xScale.bandwidth() / 2} 
@@ -96,7 +110,7 @@ function ComposableChart() {
                       y={20} textAnchor="middle" fontSize={12}>{tick}</text>
               </g>
             ))}
-            <line x1={0} x2={640} y1={0} y2={0} stroke="#666" />
+            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="#666" />
           </g>
           
           <g>
@@ -104,11 +118,11 @@ function ComposableChart() {
               <g key={tick}>
                 <line x1={-5} x2={0} y1={yScale(tick)} y2={yScale(tick)} stroke="#666" />
                 <text x={-10} y={yScale(tick) + 4} textAnchor="end" fontSize={12}>{tick}</text>
-                <line x1={0} x2={640} y1={yScale(tick)} y2={yScale(tick)} 
+                <line x1={0} x2={innerWidth} y1={yScale(tick)} y2={yScale(tick)} 
                       stroke="#e5e7eb" strokeDasharray="2,2" />
               </g>
             ))}
-            <line x1={0} x2={0} y1={0} y2={320} stroke="#666" />
+            <line x1={0} x2={0} y1={0} y2={innerHeight} stroke="#666" />
           </g>
 
           {/* 當前啟用的組件 - 主題: ${theme} 對齊: ${alignment} */}
@@ -151,9 +165,12 @@ function ComposableChart() {
             animate={${animate}}
             animationDuration={1000}
           />` : ''}
-        </g>
-      </svg>
-    </ChartCanvas>
+              </g>
+            </svg>
+          </ChartCanvas>
+        )
+      }}
+    </ChartContainer>
   )
 }`
 
@@ -239,100 +256,109 @@ function ComposableChart() {
               <span className="text-green-500">🧩</span>
               可組合圖表
             </h3>
-            <ChartContainer>
-              <ChartCanvas 
-                width={800} 
-                height={400} 
-                margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-              >
-                <svg width={800} height={400}>
-                  <g transform="translate(80, 20)">
-                    {/* 軸線 */}
-                    <g transform={`translate(0, ${400 - 20 - 60})`}>
-                      {xScale.domain().map((tick: any) => {
-                        const x = xScale(tick)! + xScale.bandwidth()! / 2
-                        return (
-                          <g key={tick}>
-                            <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
-                            <text x={x} y={20} textAnchor="middle" fontSize={12} fill="#666">
-                              {tick}
-                            </text>
-                          </g>
-                        )
-                      })}
-                      <line x1={0} x2={800 - 80 - 80} y1={0} y2={0} stroke="#666" />
-                    </g>
-                    
-                    <g>
-                      {yScale.ticks(5).map((tick: any) => {
-                        const y = yScale(tick)
-                        return (
-                          <g key={tick}>
-                            <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
-                            <text x={-10} y={y + 4} textAnchor="end" fontSize={12} fill="#666">
-                              {tick}
-                            </text>
-                            <line 
-                              x1={0} 
-                              x2={800 - 80 - 80} 
-                              y1={y} 
-                              y2={y} 
-                              stroke="#e5e7eb" 
-                              strokeDasharray="2,2" 
-                            />
-                          </g>
-                        )
-                      })}
-                      <line x1={0} x2={0} y1={0} y2={400 - 20 - 60} stroke="#666" />
-                    </g>
+            <ChartContainer
+              responsive={true}
+              aspectRatio={16/9}
+            >
+              {({ width, height }) => {
+                const { xScale, yScale, margin, innerWidth, innerHeight } = createScales(width, height)
+                
+                return (
+                  <ChartCanvas 
+                    width={width} 
+                    height={height} 
+                    margin={margin}
+                  >
+                    <svg width={width} height={height}>
+                      <g transform={`translate(${margin.left}, ${margin.top})`}>
+                        {/* 軸線 */}
+                        <g transform={`translate(0, ${innerHeight})`}>
+                          {xScale.domain().map((tick: any) => {
+                            const x = xScale(tick)! + xScale.bandwidth()! / 2
+                            return (
+                              <g key={tick}>
+                                <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
+                                <text x={x} y={20} textAnchor="middle" fontSize={12} fill="#666">
+                                  {tick}
+                                </text>
+                              </g>
+                            )
+                          })}
+                          <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="#666" />
+                        </g>
+                        
+                        <g>
+                          {yScale.ticks(5).map((tick: any) => {
+                            const y = yScale(tick)
+                            return (
+                              <g key={tick}>
+                                <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
+                                <text x={-10} y={y + 4} textAnchor="end" fontSize={12} fill="#666">
+                                  {tick}
+                                </text>
+                                <line 
+                                  x1={0} 
+                                  x2={innerWidth} 
+                                  y1={y} 
+                                  y2={y} 
+                                  stroke="#e5e7eb" 
+                                  strokeDasharray="2,2" 
+                                />
+                              </g>
+                            )
+                          })}
+                          <line x1={0} x2={0} y1={0} y2={innerHeight} stroke="#666" />
+                        </g>
 
-                    {/* 條形圖 - 銷售額 */}
-                    {showBars && (
-                      <Bar 
-                        data={sampleData.map(d => ({ x: d.x, y: d.y }))}
-                        xScale={xScale}
-                        yScale={yScale}
-                        alignment={alignment}
-                        barWidthRatio={barWidthRatio}
-                        color={colors.bar}
-                        animate={animate}
-                        animationDuration={600}
-                      />
-                    )}
-                    
-                    {/* 線圖 - 趨勢 */}
-                    {showLine && (
-                      <Line 
-                        data={sampleData.map(d => ({ x: d.x, y: d.trend }))}
-                        xScale={xScale}
-                        yScale={yScale}
-                        pointAlignment={alignment}
-                        color={colors.line}
-                        strokeWidth={3}
-                        showPoints={true}
-                        pointRadius={4}
-                        animate={animate}
-                        animationDuration={800}
-                      />
-                    )}
-                    
-                    {/* 散點圖 - 資料點 */}
-                    {showScatter && (
-                      <Scatter 
-                        data={sampleData.map(d => ({ x: d.x, y: d.points }))}
-                        xScale={xScale}
-                        yScale={yScale}
-                        pointAlignment={alignment}
-                        color={colors.scatter}
-                        radius={6}
-                        opacity={0.8}
-                        animate={animate}
-                        animationDuration={1000}
-                      />
-                    )}
-                  </g>
-                </svg>
-              </ChartCanvas>
+                        {/* 條形圖 - 銷售額 */}
+                        {showBars && (
+                          <Bar 
+                            data={sampleData.map(d => ({ x: d.x, y: d.y }))}
+                            xScale={xScale}
+                            yScale={yScale}
+                            alignment={alignment}
+                            barWidthRatio={barWidthRatio}
+                            color={colors.bar}
+                            animate={animate}
+                            animationDuration={600}
+                          />
+                        )}
+                        
+                        {/* 線圖 - 趨勢 */}
+                        {showLine && (
+                          <Line 
+                            data={sampleData.map(d => ({ x: d.x, y: d.trend }))}
+                            xScale={xScale}
+                            yScale={yScale}
+                            pointAlignment={alignment}
+                            color={colors.line}
+                            strokeWidth={3}
+                            showPoints={true}
+                            pointRadius={4}
+                            animate={animate}
+                            animationDuration={800}
+                          />
+                        )}
+                        
+                        {/* 散點圖 - 資料點 */}
+                        {showScatter && (
+                          <Scatter 
+                            data={sampleData.map(d => ({ x: d.x, y: d.points }))}
+                            xScale={xScale}
+                            yScale={yScale}
+                            pointAlignment={alignment}
+                            color={colors.scatter}
+                            radius={6}
+                            opacity={0.8}
+                            animate={animate}
+                            animationDuration={1000}
+                          />
+                        )}
+                      </g>
+                    </svg>
+                  </ChartCanvas>
+                )
+              }}
             </ChartContainer>
           </div>
         </div>

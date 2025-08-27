@@ -408,55 +408,57 @@ export default function CandlestickDemo() {
           }
         >
           {({ width, height }) => (
-            <motion.div
-              key={`${selectedDataset}-${colorMode}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CandlestickChart
-                data={currentData}
-                colorMode={colorMode}
-                showVolume={showVolume}
-                showGrid={showGrid}
-                showTooltip={showTooltip}
-                animate={animate}
-                interactive={interactive}
-                showCrosshair={showCrosshair}
-                enableZoom={enableZoom}
-                enablePan={enablePan}
-                crosshairConfig={{
-                  color: '#666666',
-                  opacity: 0.7,
-                  strokeWidth: 1,
-                  strokeDasharray: '3,3'
-                }}
-                zoomConfig={{
-                  scaleExtent: [0.5, 10],
-                  constrainToData: true,
-                  resetOnDoubleClick: true,
-                  enableX: true,
-                  enableY: false
-                }}
-                onDataClick={(data) => {
-                  if (interactive) {
-                    console.log('K線點擊:', data)
-                  }
-                }}
-                onDataHover={(data) => {
-                  if (interactive && showTooltip) {
-                    console.log('K線懸停:', data)
-                  }
-                }}
-                responsive
-                width={width}
-                height={height}
-                candleWidth={candleWidth / 10}
-              />
-            </motion.div>
+            <div>
+              <motion.div
+                key={`${selectedDataset}-${colorMode}`}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CandlestickChart
+                  data={currentData}
+                  colorMode={colorMode}
+                  showVolume={showVolume}
+                  showGrid={showGrid}
+                  showTooltip={showTooltip}
+                  animate={animate}
+                  interactive={interactive}
+                  showCrosshair={showCrosshair}
+                  enableZoom={enableZoom}
+                  enablePan={enablePan}
+                  crosshairConfig={{
+                    color: '#666666',
+                    opacity: 0.7,
+                    strokeWidth: 1,
+                    strokeDasharray: '3,3'
+                  }}
+                  zoomConfig={{
+                    scaleExtent: [0.5, 10],
+                    constrainToData: true,
+                    resetOnDoubleClick: true,
+                    enableX: true,
+                    enableY: false
+                  }}
+                  onDataClick={(data) => {
+                    if (interactive) {
+                      console.log('K線點擊:', data)
+                    }
+                  }}
+                  onDataHover={(data) => {
+                    if (interactive && showTooltip) {
+                      console.log('K線懸停:', data)
+                    }
+                  }}
+                  responsive
+                  width={width}
+                  height={height}
+                  candleWidth={candleWidth / 10}
+                />
+              </motion.div>
+              
+              <StatusDisplay items={statusItems} />
+            </div>
           )}
-          
-          <StatusDisplay items={statusItems} />
         </ChartContainer>
       </ContentSection>
 

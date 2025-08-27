@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
 import { 
   DemoPageTemplate,
+  ContentSection,
   ModernControlPanel,
   ControlGroup,
   RangeSlider,
@@ -10,7 +11,6 @@ import {
   ToggleControl,
   ChartContainer,
   StatusDisplay,
-  DataTable,
   CodeExample
 } from '../components/ui'
 import { CogIcon, ChartPieIcon } from '@heroicons/react/24/outline'
@@ -138,8 +138,6 @@ const biodiversityData = [
 export default function ViolinPlotDemo() {
   // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('drug')
-  const [chartWidth, setChartWidth] = useState(700)
-  const [chartHeight, setChartHeight] = useState(600)
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
   
   // 小提琴配置
@@ -169,7 +167,7 @@ export default function ViolinPlotDemo() {
   const [interactive, setInteractive] = useState(true)
 
   // 當前資料和配置
-  const { currentData, config, datasetInfo } = useMemo(() => {
+  const { currentData, config } = useMemo(() => {
     switch (selectedDataset) {
       case 'drug':
         return {
@@ -374,11 +372,6 @@ export default function ViolinPlotDemo() {
                   { value: 'epanechnikov', label: 'Epanechnikov (最優)' },
                   { value: 'triangular', label: '三角核 (快速)' }
                 ]}
-                description={{
-                  gaussian: '最常用，適合大多數數據分佈',
-                  epanechnikov: '理論上最優，邊界平滑',
-                  triangular: '簡單實用，計算快速'
-                }[kdeMethod]}
               />
               
               <RangeSlider
@@ -388,7 +381,6 @@ export default function ViolinPlotDemo() {
                 max={200}
                 step={10}
                 onChange={setResolution}
-                description="更高解析度 = 更平滑曲線，但計算較慢"
               />
             </ControlGroup>
 
@@ -411,7 +403,6 @@ export default function ViolinPlotDemo() {
                 max={2}
                 step={0.1}
                 onChange={setSmoothing}
-                description="值越大 = 曲線越平滑"
               />
               
               <RangeSlider
@@ -421,7 +412,6 @@ export default function ViolinPlotDemo() {
                 max={1}
                 step={0.1}
                 onChange={setViolinFillOpacity}
-                formatter={(value) => `${(value * 100).toFixed(0)}%`}
               />
             </ControlGroup>
 
@@ -519,8 +509,8 @@ export default function ViolinPlotDemo() {
                 data={currentData}
                 labelKey={dataKeys.labelKey}
                 valuesKey={dataKeys.valuesKey}
-                width={width}
-                height={height}
+                width={800}
+                height={500}
                 orientation={orientation}
                 violinWidth={violinWidth}
                 resolution={resolution}
@@ -607,7 +597,6 @@ export default function ViolinPlotDemo() {
               })}
             </div>
           )}
-          </div>
 
           {/* 代碼範例 */}
           <CodeExample
@@ -645,7 +634,7 @@ const data = [
 </ChartContainer>`}
           />
         </div>
-      </div>
+      </ContentSection>
     </DemoPageTemplate>
   )
 }
