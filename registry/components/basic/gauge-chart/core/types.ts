@@ -87,7 +87,12 @@ export interface GaugeChartConfig {
   showTooltip?: boolean;
   tooltipFormat?: (value: number, label?: string) => string;
 
-  // Events
-  onValueChange?: (value: number) => void;
+  // Events - 標準事件命名
+  onDataClick?: (value: number, label?: string) => void;
+  onDataHover?: (value: number | null, label?: string) => void;
   onError?: (error: Error) => void;
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
+  onValueChange?: (value: number) => void;
 }

@@ -21,8 +21,17 @@ export interface BarProps {
   className?: string
   animate?: boolean
   animationDuration?: number
+  
+  // 標準事件命名
+  onDataClick?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  onDataHover?: (d: BarShapeData | null, i: number, event: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onBarClick?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseEnter?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseLeave?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
 }
 
@@ -74,6 +83,13 @@ export interface AreaProps {
     id: string
     stops: { offset: string; color: string; opacity?: number }[]
   }
+  
+  // 標準事件命名
+  onDataClick?: (event: React.MouseEvent) => void
+  onDataHover?: (event: React.MouseEvent | null) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onAreaClick?: (event: React.MouseEvent) => void
 }
 
@@ -104,8 +120,17 @@ export interface StackedAreaProps {
   animationDuration?: number
   stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
   stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
+  
+  // 標準事件命名
+  onDataClick?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  onDataHover?: (series: StackedAreaSeries | null, event: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onAreaClick?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onAreaMouseEnter?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onAreaMouseLeave?: (series: StackedAreaSeries, event: React.MouseEvent) => void
 }
 
@@ -186,7 +211,16 @@ export interface WaterfallProps {
   connectorColor?: string
   connectorWidth?: number
   connectorDasharray?: string
+  
+  // 標準事件命名
+  onDataClick?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  onDataHover?: (dataPoint: WaterfallShapeData | null, cumulativeValue: number, event: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onBarClick?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseEnter?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseLeave?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
 }

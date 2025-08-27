@@ -25,8 +25,17 @@ export interface BarProps {
   animationDuration?: number
   alignment?: AlignmentStrategy
   barWidthRatio?: number
+  
+  // 標準事件命名
+  onDataClick?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  onDataHover?: (d: BarShapeData | null, i: number, event: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onBarClick?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseEnter?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseLeave?: (d: BarShapeData, i: number, event: React.MouseEvent) => void
 }
 
@@ -42,6 +51,8 @@ export const Bar: React.FC<BarProps> = ({
   animationDuration = 300,
   alignment = 'center',
   barWidthRatio = 0.8,
+  onDataClick,
+  onDataHover,
   onBarClick,
   onBarMouseEnter,
   onBarMouseLeave
@@ -194,23 +205,32 @@ export const Bar: React.FC<BarProps> = ({
         )
     }
 
-    if (onBarClick || onBarMouseEnter || onBarMouseLeave) {
+    if (onDataClick || onBarClick || onDataHover || onBarMouseEnter || onBarMouseLeave) {
       selection.selectAll('.bar-shape')
         .on('click', function(event, d) {
-          if (onBarClick) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          // 優先使用標準事件處理器
+          if (onDataClick) {
+            onDataClick(d, index, event)
+          } else if (onBarClick) {
             onBarClick(d, index, event)
           }
         })
         .on('mouseenter', function(event, d) {
-          if (onBarMouseEnter) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          // 優先使用標準事件處理器
+          if (onDataHover) {
+            onDataHover(d, index, event)
+          } else if (onBarMouseEnter) {
             onBarMouseEnter(d, index, event)
           }
         })
         .on('mouseleave', function(event, d) {
-          if (onBarMouseLeave) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          // 優先使用標準事件處理器
+          if (onDataHover) {
+            onDataHover(null, index, event)
+          } else if (onBarMouseLeave) {
             onBarMouseLeave(d, index, event)
           }
         })
@@ -228,6 +248,8 @@ export const Bar: React.FC<BarProps> = ({
     animationDuration,
     alignment,
     barWidthRatio,
+    onDataClick,
+    onDataHover,
     onBarClick,
     onBarMouseEnter,
     onBarMouseLeave
