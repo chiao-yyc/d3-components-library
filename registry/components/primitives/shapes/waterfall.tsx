@@ -51,6 +51,8 @@ export const Waterfall: React.FC<WaterfallProps> = ({
   connectorColor = '#6b7280',
   connectorWidth = 1,
   connectorDasharray = '3,3',
+  onDataClick,
+  onDataHover,
   onBarClick,
   onBarMouseEnter,
   onBarMouseLeave
@@ -204,14 +206,22 @@ export const Waterfall: React.FC<WaterfallProps> = ({
           }
 
           // 添加事件處理
-          if (onBarClick || onBarMouseEnter || onBarMouseLeave) {
+          if (onDataClick || onBarClick || onDataHover || onBarMouseEnter || onBarMouseLeave) {
             enterBars
               .style('cursor', 'pointer')
               .on('click', function(event, d) {
-                if (onBarClick) onBarClick(d.original, d.cumulativeValue, event)
+                if (onDataClick) {
+                  onDataClick(d.original, d.cumulativeValue, event)
+                } else if (onBarClick) {
+                  onBarClick(d.original, d.cumulativeValue, event)
+                }
               })
               .on('mouseenter', function(event, d) {
-                if (onBarMouseEnter) onBarMouseEnter(d.original, d.cumulativeValue, event)
+                if (onDataHover) {
+                  onDataHover(d.original, d.cumulativeValue, event)
+                } else if (onBarMouseEnter) {
+                  onBarMouseEnter(d.original, d.cumulativeValue, event)
+                }
                 // 鼠標懸停效果
                 d3.select(this)
                   .transition()
@@ -219,7 +229,11 @@ export const Waterfall: React.FC<WaterfallProps> = ({
                   .attr('opacity', Math.min(1, opacity + 0.2))
               })
               .on('mouseleave', function(event, d) {
-                if (onBarMouseLeave) onBarMouseLeave(d.original, d.cumulativeValue, event)
+                if (onDataHover) {
+                  onDataHover(null, d.cumulativeValue, event)
+                } else if (onBarMouseLeave) {
+                  onBarMouseLeave(d.original, d.cumulativeValue, event)
+                }
                 // 恢復原始透明度
                 d3.select(this)
                   .transition()
@@ -298,6 +312,8 @@ export const Waterfall: React.FC<WaterfallProps> = ({
     connectorColor,
     connectorWidth,
     connectorDasharray,
+    onDataClick,
+    onDataHover,
     onBarClick,
     onBarMouseEnter,
     onBarMouseLeave

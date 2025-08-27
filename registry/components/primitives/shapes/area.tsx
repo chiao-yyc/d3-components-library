@@ -25,6 +25,9 @@ export interface AreaProps {
     id: string
     stops: { offset: string; color: string; opacity?: number }[]
   }
+  onDataClick?: (event: React.MouseEvent) => void
+  
+  /** @deprecated 請使用 onDataClick 替代 */
   onAreaClick?: (event: React.MouseEvent) => void
 }
 
@@ -41,6 +44,7 @@ export const Area: React.FC<AreaProps> = ({
   baseline = 0,
   alignment = 'center',
   gradient,
+  onDataClick,
   onAreaClick
 }) => {
   const areaRef = useRef<SVGGElement>(null)
@@ -152,11 +156,15 @@ export const Area: React.FC<AreaProps> = ({
           )
       )
 
-    if (onAreaClick) {
+    if (onDataClick || onAreaClick) {
       selection.selectAll('.area-path')
         .style('cursor', 'pointer')
         .on('click', function(event) {
-          onAreaClick(event)
+          if (onDataClick) {
+            onDataClick(event)
+          } else if (onAreaClick) {
+            onAreaClick(event)
+          }
         })
     }
 
@@ -173,6 +181,7 @@ export const Area: React.FC<AreaProps> = ({
     baseline,
     alignment,
     gradient,
+    onDataClick,
     onAreaClick
   ])
 

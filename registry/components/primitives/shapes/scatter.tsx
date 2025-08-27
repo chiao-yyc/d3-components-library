@@ -25,8 +25,14 @@ export interface ScatterProps {
   strokeWidth?: number
   strokeColor?: string
   pointAlignment?: AlignmentStrategy
+  onDataClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  onDataHover?: (dataPoint: ScatterShapeData | null, event: React.MouseEvent) => void
+  
+  /** @deprecated 請使用 onDataClick 替代 */
   onPointClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseEnter?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseLeave?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
 }
 
@@ -44,6 +50,8 @@ export const Scatter: React.FC<ScatterProps> = ({
   strokeWidth = 1,
   strokeColor = 'white',
   pointAlignment = 'center',
+  onDataClick,
+  onDataHover,
   onPointClick,
   onPointMouseEnter,
   onPointMouseLeave
@@ -96,14 +104,22 @@ export const Scatter: React.FC<ScatterProps> = ({
           }
 
           // 添加事件處理
-          if (onPointClick || onPointMouseEnter || onPointMouseLeave) {
+          if (onDataClick || onPointClick || onDataHover || onPointMouseEnter || onPointMouseLeave) {
             enterCircles
               .style('cursor', 'pointer')
               .on('click', function(event, d) {
-                if (onPointClick) onPointClick(d, event)
+                if (onDataClick) {
+                  onDataClick(d, event)
+                } else if (onPointClick) {
+                  onPointClick(d, event)
+                }
               })
               .on('mouseenter', function(event, d) {
-                if (onPointMouseEnter) onPointMouseEnter(d, event)
+                if (onDataHover) {
+                  onDataHover(d, event)
+                } else if (onPointMouseEnter) {
+                  onPointMouseEnter(d, event)
+                }
                 // 鼠標懸停效果
                 d3.select(this)
                   .transition()
@@ -115,7 +131,11 @@ export const Scatter: React.FC<ScatterProps> = ({
                   .attr('opacity', 1)
               })
               .on('mouseleave', function(event, d) {
-                if (onPointMouseLeave) onPointMouseLeave(d, event)
+                if (onDataHover) {
+                  onDataHover(null, event)
+                } else if (onPointMouseLeave) {
+                  onPointMouseLeave(d, event)
+                }
                 // 恢復原始大小
                 d3.select(this)
                   .transition()
@@ -197,6 +217,8 @@ export const Scatter: React.FC<ScatterProps> = ({
     strokeWidth,
     strokeColor,
     pointAlignment,
+    onDataClick,
+    onDataHover,
     onPointClick,
     onPointMouseEnter,
     onPointMouseLeave

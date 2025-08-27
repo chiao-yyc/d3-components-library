@@ -55,9 +55,18 @@ export interface LineProps {
   showPoints?: boolean
   pointRadius?: number
   pointColor?: string
+  // 標準事件命名
+  onDataClick?: (d: LineShapeData | null, i?: number, event?: React.MouseEvent) => void
+  onDataHover?: (d: LineShapeData | null, i?: number, event?: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onLineClick?: (event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataClick 替代 */
   onPointClick?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseEnter?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseLeave?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
 }
 
@@ -156,8 +165,16 @@ export interface ScatterProps {
   opacity?: number
   strokeWidth?: number
   strokeColor?: string
+  // 標準事件命名
+  onDataClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  onDataHover?: (dataPoint: ScatterShapeData | null, event: React.MouseEvent) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onPointClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseEnter?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseLeave?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
 }
 

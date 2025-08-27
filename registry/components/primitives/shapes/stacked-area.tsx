@@ -28,8 +28,14 @@ export interface StackedAreaProps {
   animationDuration?: number
   stackOrder?: 'ascending' | 'descending' | 'insideOut' | 'none' | 'reverse'
   stackOffset?: 'none' | 'expand' | 'diverging' | 'silhouette' | 'wiggle'
+  onDataClick?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  onDataHover?: (series: StackedAreaSeries | null, event: React.MouseEvent) => void
+  
+  /** @deprecated 請使用 onDataClick 替代 */
   onAreaClick?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onAreaMouseEnter?: (series: StackedAreaSeries, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onAreaMouseLeave?: (series: StackedAreaSeries, event: React.MouseEvent) => void
 }
 
@@ -44,6 +50,8 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
   animationDuration = 300,
   stackOrder = 'none',
   stackOffset = 'none',
+  onDataClick,
+  onDataHover,
   onAreaClick,
   onAreaMouseEnter,
   onAreaMouseLeave
@@ -156,17 +164,29 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
             }
 
             // 添加事件處理
-            if (onAreaClick || onAreaMouseEnter || onAreaMouseLeave) {
+            if (onDataClick || onAreaClick || onDataHover || onAreaMouseEnter || onAreaMouseLeave) {
               path
                 .style('cursor', 'pointer')
                 .on('click', function(event) {
-                  if (onAreaClick) onAreaClick(seriesItem, event)
+                  if (onDataClick) {
+                    onDataClick(seriesItem, event)
+                  } else if (onAreaClick) {
+                    onAreaClick(seriesItem, event)
+                  }
                 })
                 .on('mouseenter', function(event) {
-                  if (onAreaMouseEnter) onAreaMouseEnter(seriesItem, event)
+                  if (onDataHover) {
+                    onDataHover(seriesItem, event)
+                  } else if (onAreaMouseEnter) {
+                    onAreaMouseEnter(seriesItem, event)
+                  }
                 })
                 .on('mouseleave', function(event) {
-                  if (onAreaMouseLeave) onAreaMouseLeave(seriesItem, event)
+                  if (onDataHover) {
+                    onDataHover(null, event)
+                  } else if (onAreaMouseLeave) {
+                    onAreaMouseLeave(seriesItem, event)
+                  }
                 })
             }
 
@@ -216,6 +236,8 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
     animationDuration,
     stackOrder,
     stackOffset,
+    onDataClick,
+    onDataHover,
     onAreaClick,
     onAreaMouseEnter,
     onAreaMouseLeave

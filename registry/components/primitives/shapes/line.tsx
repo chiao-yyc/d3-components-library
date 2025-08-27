@@ -23,9 +23,16 @@ export interface LineProps {
   pointRadius?: number
   pointColor?: string
   pointAlignment?: AlignmentStrategy
+  onDataClick?: (d: LineShapeData | null, i?: number, event?: React.MouseEvent) => void
+  onDataHover?: (d: LineShapeData | null, i?: number, event?: React.MouseEvent) => void
+  
+  /** @deprecated 請使用 onDataClick 替代 */
   onLineClick?: (event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataClick 替代 */
   onPointClick?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseEnter?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onPointMouseLeave?: (d: LineShapeData, i: number, event: React.MouseEvent) => void
 }
 
@@ -44,6 +51,8 @@ export const Line: React.FC<LineProps> = ({
   pointRadius = 3,
   pointColor,
   pointAlignment = 'center',
+  onDataClick,
+  onDataHover,
   onLineClick,
   onPointClick,
   onPointMouseEnter,
@@ -120,11 +129,15 @@ export const Line: React.FC<LineProps> = ({
           )
       )
 
-    if (onLineClick) {
+    if (onDataClick || onLineClick) {
       selection.selectAll('.line-path')
         .style('cursor', 'pointer')
         .on('click', function(event) {
-          onLineClick(event)
+          if (onDataClick) {
+            onDataClick(null, undefined, event)
+          } else if (onLineClick) {
+            onLineClick(event)
+          }
         })
     }
 
@@ -185,24 +198,30 @@ export const Line: React.FC<LineProps> = ({
             )
         )
 
-      if (onPointClick || onPointMouseEnter || onPointMouseLeave) {
+      if (onDataClick || onPointClick || onDataHover || onPointMouseEnter || onPointMouseLeave) {
         selection.selectAll('.line-point')
           .style('cursor', 'pointer')
           .on('click', function(event, d) {
-            if (onPointClick) {
-              const index = validData.indexOf(d)
+            const index = validData.indexOf(d)
+            if (onDataClick) {
+              onDataClick(d, index, event)
+            } else if (onPointClick) {
               onPointClick(d, index, event)
             }
           })
           .on('mouseenter', function(event, d) {
-            if (onPointMouseEnter) {
-              const index = validData.indexOf(d)
+            const index = validData.indexOf(d)
+            if (onDataHover) {
+              onDataHover(d, index, event)
+            } else if (onPointMouseEnter) {
               onPointMouseEnter(d, index, event)
             }
           })
           .on('mouseleave', function(event, d) {
-            if (onPointMouseLeave) {
-              const index = validData.indexOf(d)
+            const index = validData.indexOf(d)
+            if (onDataHover) {
+              onDataHover(null, index, event)
+            } else if (onPointMouseLeave) {
               onPointMouseLeave(d, index, event)
             }
           })
@@ -224,6 +243,8 @@ export const Line: React.FC<LineProps> = ({
     pointRadius,
     pointColor,
     pointAlignment,
+    onDataClick,
+    onDataHover,
     onLineClick,
     onPointClick,
     onPointMouseEnter,
