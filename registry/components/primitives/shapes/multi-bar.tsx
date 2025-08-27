@@ -22,8 +22,14 @@ export interface MultiBarProps {
   barWidth?: number
   groupOffset?: number
   alignment?: AlignmentStrategy
+  onDataClick?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
+  onDataHover?: (d: MultiBarData | null, i: number, event: React.MouseEvent) => void
+  
+  /** @deprecated 請使用 onDataClick 替代 */
   onBarClick?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseEnter?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
+  /** @deprecated 請使用 onDataHover 替代 */
   onBarMouseLeave?: (d: MultiBarData, i: number, event: React.MouseEvent) => void
 }
 
@@ -40,6 +46,8 @@ export const MultiBar: React.FC<MultiBarProps> = ({
   barWidth,
   groupOffset = 0,
   alignment = 'center',
+  onDataClick,
+  onDataHover,
   onBarClick,
   onBarMouseEnter,
   onBarMouseLeave
@@ -196,24 +204,30 @@ export const MultiBar: React.FC<MultiBarProps> = ({
     }
 
     // 事件處理
-    if (onBarClick || onBarMouseEnter || onBarMouseLeave) {
+    if (onDataClick || onBarClick || onDataHover || onBarMouseEnter || onBarMouseLeave) {
       selection.selectAll('.multi-bar-shape')
         .style('cursor', 'pointer')
         .on('click', function(event, d) {
-          if (onBarClick) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          if (onDataClick) {
+            onDataClick(d, index, event)
+          } else if (onBarClick) {
             onBarClick(d, index, event)
           }
         })
         .on('mouseenter', function(event, d) {
-          if (onBarMouseEnter) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          if (onDataHover) {
+            onDataHover(d, index, event)
+          } else if (onBarMouseEnter) {
             onBarMouseEnter(d, index, event)
           }
         })
         .on('mouseleave', function(event, d) {
-          if (onBarMouseLeave) {
-            const index = data.indexOf(d)
+          const index = data.indexOf(d)
+          if (onDataHover) {
+            onDataHover(null, index, event)
+          } else if (onBarMouseLeave) {
             onBarMouseLeave(d, index, event)
           }
         })
@@ -231,6 +245,8 @@ export const MultiBar: React.FC<MultiBarProps> = ({
     animationDuration,
     barWidth,
     groupOffset,
+    onDataClick,
+    onDataHover,
     onBarClick,
     onBarMouseEnter,
     onBarMouseLeave
