@@ -1,0 +1,441 @@
+/**
+ * 文字處理工具模組
+ * 提供文字自動換行、智能定位、長度計算等功能
+ * 純 JavaScript/TypeScript 核心實現，框架無關
+ */
+
+import * as d3 from 'd3';
+
+export interface TextWrapOptions {
+  width: number;
+  lineHeight?: number;
+  maxLines?: number;
+  ellipsis?: boolean;
+  fontSize?: number;
+  fontFamily?: string;
+}
+
+export interface TextMeasurement {
+  width: number;
+  height: number;
+  lines: string[];
+}
+
+export interface TextPosition {
+  x: number;
+  y: number;
+  textAnchor: 'start' | 'middle' | 'end';
+  dominantBaseline: 'auto' | 'middle' | 'hanging' | 'central';
+}
+
+export interface AxisLabelConfig {
+  angle: number;
+  radius: number;
+  centerX: number;
+  centerY: number;
+  offset: number;
+  avoidOverlap?: boolean;
+}
+
+export class TextUtils {
+  /**
+   * 自動換行文字（基於 radar_02.js 的實現）
+   */
+  static wrapText(
+    textSelection: d3.Selection<SVGTextElement, unknown, null, undefined>,
+    options: TextWrapOptions
+  ): void {
+    const {
+      width,
+      lineHeight = 1.4,
+      maxLines = Infinity,
+      ellipsis = true,
+      fontSize = 12,
+      fontFamily = 'sans-serif'
+    } = options;
+
+    textSelection.each(function() {
+      const text = d3.select(this);
+      const words = text.text().split(/\s+/).reverse();
+      const originalText = text.text();
+      
+      let word: string | undefined;
+      let line: string[] = [];
+      let lineNumber = 0;
+      const x = text.attr('x');
+      const y = text.attr('y');
+      const dy = parseFloat(text.attr('dy') || '0');
+      
+      // 清空原文字並創建第一個 tspan
+      text.text(null);
+      let tspan = text.append('tspan')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('dy', `${dy}em`)
+        .style('font-size', `${fontSize}px`)
+        .style('font-family', fontFamily);
+
+      while ((word = words.pop()) && lineNumber < maxLines) {
+        line.push(word);
+        tspan.text(line.join(' '));
+        
+        const textLength = this.getComputedTextLength ? this.getComputedTextLength() : 0;
+        
+        if (textLength > width && line.length > 1) {
+          line.pop();
+          tspan.text(line.join(' '));
+          
+          // 檢查是否需要省略號
+          if (lineNumber === maxLines - 1 && ellipsis && words.length > 0) {
+            const ellipsisText = line.join(' ') + '...';
+            tspan.text(ellipsisText);
+            break;
+          }
+          
+          line = [word];
+          lineNumber++;
+          
+          if (lineNumber < maxLines) {
+            tspan = text.append('tspan')
+              .attr('x', x)
+              .attr('y', y)
+              .attr('dy', `${lineHeight}em`)
+              .style('font-size', `${fontSize}px`)
+              .style('font-family', fontFamily)
+              .text(word);
+          }
+        }
+      }
+      
+      // 如果沒有成功換行，恢復原文字
+      if (lineNumber === 0 && line.length === 0) {
+        text.text(originalText);
+      }
+    });
+  }
+
+  /**
+   * 計算文字尺寸
+   */
+  static measureText(
+    text: string,
+    fontSize: number = 12,
+    fontFamily: string = 'sans-serif'
+  ): TextMeasurement {
+    // 創建臨時測量元素
+    const measureElement = d3.select('body')
+      .append('svg')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('width', '0')
+      .style('height', '0')
+      .append('text')
+      .style('font-size', `${fontSize}px`)
+      .style('font-family', fontFamily)
+      .text(text);
+
+    const bbox = (measureElement.node() as SVGTextElement)?.getBBox();
+    const width = bbox?.width || 0;
+    const height = bbox?.height || 0;
+
+    // 清理臨時元素
+    d3.select('body').select('svg').remove();
+
+    return {
+      width,
+      height,
+      lines: [text]
+    };
+  }
+
+  /**
+   * 計算換行後的文字尺寸
+   */
+  static measureWrappedText(
+    text: string,
+    options: TextWrapOptions
+  ): TextMeasurement {
+    const { width, lineHeight = 1.4, fontSize = 12, fontFamily = 'sans-serif' } = options;
+    const words = text.split(/\s+/);
+    const lines: string[] = [];
+    let currentLine: string[] = [];
+    
+    // 創建臨時測量元素
+    const measureElement = d3.select('body')
+      .append('svg')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('width', '0')
+      .style('height', '0')
+      .append('text')
+      .style('font-size', `${fontSize}px`)
+      .style('font-family', fontFamily);
+
+    words.forEach(word => {
+      const testLine = [...currentLine, word].join(' ');
+      measureElement.text(testLine);
+      
+      const textWidth = (measureElement.node() as SVGTextElement)?.getComputedTextLength() || 0;
+      
+      if (textWidth > width && currentLine.length > 0) {
+        lines.push(currentLine.join(' '));
+        currentLine = [word];
+      } else {
+        currentLine.push(word);
+      }
+    });
+    
+    if (currentLine.length > 0) {
+      lines.push(currentLine.join(' '));
+    }
+
+    // 清理臨時元素
+    d3.select('body').select('svg').remove();
+
+    const singleLineHeight = fontSize * 1.2; // 基於字體大小的估算
+    const totalHeight = lines.length * singleLineHeight * lineHeight;
+
+    return {
+      width,
+      height: totalHeight,
+      lines
+    };
+  }
+
+  /**
+   * 智能定位軸標籤
+   */
+  static positionAxisLabels(
+    labels: AxisLabelConfig[],
+    avoidOverlap: boolean = true
+  ): TextPosition[] {
+    const positions: TextPosition[] = labels.map(config => {
+      const { angle, radius, centerX, centerY, offset } = config;
+      
+      // 計算基本位置
+      const radians = (angle * Math.PI) / 180;
+      const x = centerX + (radius + offset) * Math.cos(radians);
+      const y = centerY + (radius + offset) * Math.sin(radians);
+      
+      // 根據角度決定文字對齊方式
+      let textAnchor: 'start' | 'middle' | 'end' = 'middle';
+      let dominantBaseline: 'auto' | 'middle' | 'hanging' | 'central' = 'middle';
+      
+      // 角度標準化到 0-360
+      const normalizedAngle = ((angle % 360) + 360) % 360;
+      
+      if (normalizedAngle > 15 && normalizedAngle < 165) {
+        dominantBaseline = 'hanging';
+      } else if (normalizedAngle > 195 && normalizedAngle < 345) {
+        dominantBaseline = 'auto';
+      }
+      
+      if (normalizedAngle > 105 && normalizedAngle < 255) {
+        textAnchor = 'end';
+      } else if (normalizedAngle > 285 || normalizedAngle < 75) {
+        textAnchor = 'start';
+      }
+
+      return { x, y, textAnchor, dominantBaseline };
+    });
+
+    // 如果需要避免重疊，進行調整
+    if (avoidOverlap) {
+      return this.adjustOverlappingLabels(positions);
+    }
+
+    return positions;
+  }
+
+  /**
+   * 調整重疊的標籤位置
+   */
+  private static adjustOverlappingLabels(positions: TextPosition[]): TextPosition[] {
+    // 簡化的重疊檢測和調整算法
+    const adjustedPositions = [...positions];
+    const minDistance = 20; // 最小間距
+
+    for (let i = 0; i < adjustedPositions.length; i++) {
+      for (let j = i + 1; j < adjustedPositions.length; j++) {
+        const pos1 = adjustedPositions[i];
+        const pos2 = adjustedPositions[j];
+        
+        const distance = Math.sqrt(
+          Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+        );
+        
+        if (distance < minDistance) {
+          // 簡單調整：垂直移動第二個標籤
+          adjustedPositions[j] = {
+            ...pos2,
+            y: pos2.y + minDistance
+          };
+        }
+      }
+    }
+
+    return adjustedPositions;
+  }
+
+  /**
+   * 截斷過長文字
+   */
+  static truncateText(
+    text: string,
+    maxWidth: number,
+    fontSize: number = 12,
+    fontFamily: string = 'sans-serif',
+    ellipsis: string = '...'
+  ): string {
+    const measurement = this.measureText(text, fontSize, fontFamily);
+    
+    if (measurement.width <= maxWidth) {
+      return text;
+    }
+
+    // 二分法查找最適長度
+    let left = 0;
+    let right = text.length;
+    let result = text;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      const truncated = text.substring(0, mid) + ellipsis;
+      const measurement = this.measureText(truncated, fontSize, fontFamily);
+
+      if (measurement.width <= maxWidth) {
+        result = truncated;
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * 格式化數值為文字
+   */
+  static formatNumber(
+    value: number,
+    format?: 'decimal' | 'percentage' | 'currency' | 'scientific' | ((value: number) => string),
+    precision: number = 2
+  ): string {
+    if (typeof format === 'function') {
+      return format(value);
+    }
+
+    switch (format) {
+      case 'percentage':
+        return `${(value * 100).toFixed(precision)}%`;
+      
+      case 'currency':
+        return new Intl.NumberFormat('zh-TW', {
+          style: 'currency',
+          currency: 'TWD',
+          minimumFractionDigits: precision
+        }).format(value);
+      
+      case 'scientific':
+        return value.toExponential(precision);
+      
+      case 'decimal':
+      default:
+        return value.toFixed(precision);
+    }
+  }
+
+  /**
+   * 智能文字顏色（基於背景顏色）
+   */
+  static getContrastTextColor(backgroundColor: string): string {
+    // 簡化的顏色對比度計算
+    const hex = backgroundColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    // 計算亮度
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    return brightness > 128 ? '#000000' : '#ffffff';
+  }
+
+  /**
+   * 生成文字路徑（弧形文字）
+   */
+  static generateTextPath(
+    text: string,
+    centerX: number,
+    centerY: number,
+    radius: number,
+    startAngle: number,
+    endAngle: number
+  ): string {
+    const circumference = 2 * Math.PI * radius;
+    const arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
+    
+    // 簡化的弧形路徑生成
+    const startRadians = (startAngle * Math.PI) / 180;
+    const endRadians = (endAngle * Math.PI) / 180;
+    
+    const startX = centerX + radius * Math.cos(startRadians);
+    const startY = centerY + radius * Math.sin(startRadians);
+    const endX = centerX + radius * Math.cos(endRadians);
+    const endY = centerY + radius * Math.sin(endRadians);
+    
+    const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+    
+    return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+  }
+
+  /**
+   * 批量應用文字樣式
+   */
+  static applyTextStyles(
+    textSelection: d3.Selection<SVGTextElement, unknown, null, undefined>,
+    styles: {
+      fontSize?: number;
+      fontFamily?: string;
+      fontWeight?: string | number;
+      fill?: string;
+      textAnchor?: 'start' | 'middle' | 'end';
+      dominantBaseline?: string;
+      opacity?: number;
+    }
+  ): void {
+    const {
+      fontSize = 12,
+      fontFamily = 'sans-serif',
+      fontWeight = 'normal',
+      fill = '#000000',
+      textAnchor = 'middle',
+      dominantBaseline = 'middle',
+      opacity = 1
+    } = styles;
+
+    textSelection
+      .style('font-size', `${fontSize}px`)
+      .style('font-family', fontFamily)
+      .style('font-weight', fontWeight)
+      .style('fill', fill)
+      .style('opacity', opacity)
+      .attr('text-anchor', textAnchor)
+      .attr('dominant-baseline', dominantBaseline);
+  }
+}
+
+// 導出常用的文字對齊常數
+export const TEXT_ANCHOR = {
+  START: 'start' as const,
+  MIDDLE: 'middle' as const,
+  END: 'end' as const
+} as const;
+
+export const DOMINANT_BASELINE = {
+  AUTO: 'auto' as const,
+  MIDDLE: 'middle' as const,
+  HANGING: 'hanging' as const,
+  CENTRAL: 'central' as const
+} as const;

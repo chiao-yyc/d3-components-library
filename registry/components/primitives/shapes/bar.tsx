@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { calculateBarPosition, AlignmentStrategy } from '../utils/positioning'
+import { calculateBarPosition, AlignmentStrategy } from '../utils'
 
 export interface BarShapeData {
   x: any

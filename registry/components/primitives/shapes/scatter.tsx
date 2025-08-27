@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { calculateAlignedPosition, AlignmentStrategy } from '../utils/positioning'
+import { calculateAlignedPosition, AlignmentStrategy } from '../utils'
 
 export interface ScatterShapeData {
   x: any
