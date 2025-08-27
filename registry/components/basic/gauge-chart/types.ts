@@ -75,10 +75,15 @@ export interface GaugeChartProps extends Omit<BaseChartProps, 'data'> {
   animationDuration?: number
   animationEasing?: string
   
-  // 互動
+  // 互動 - 標準事件命名
   interactive?: boolean
   showTooltip?: boolean
   tooltipFormat?: (value: number, label?: string) => ReactNode
+  onDataClick?: (value: number, label?: string) => void
+  onDataHover?: (value: number | null, label?: string) => void
+  
+  // 向下兼容的廢棄事件
+  /** @deprecated 請使用 onDataClick 替代 */
   onValueChange?: (value: number) => void
   
   // 樣式
