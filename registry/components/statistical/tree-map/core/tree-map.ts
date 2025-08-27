@@ -127,9 +127,10 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
       }
 
       // 計算 TreeMap 佈局
+      const { chartWidth, chartHeight } = this.getChartDimensions();
       const layoutOptions: TreeMapOptions = {
-        width: this.props.width || 800,
-        height: this.props.height || 600,
+        width: chartWidth,
+        height: chartHeight,
         padding: this.props.padding,
         paddingInner: this.props.paddingInner,
         paddingOuter: this.props.paddingOuter,

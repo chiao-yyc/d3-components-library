@@ -298,16 +298,16 @@ export default function RadarChartDemo() {
       title="RadarChart Demo"
       description="現代化雷達圖組件展示 - 適用於多維數據可視化、能力評估和績效比較"
     >
-
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={2}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -336,7 +336,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={3}>
+            <ControlGroup title="尺寸配置" icon="📏" cols={1}>
               <RangeSlider
                 label="圖表寬度"
                 value={chartWidth}
@@ -370,7 +370,7 @@ export default function RadarChartDemo() {
 
 
             {/* 網格設定 */}
-            <ControlGroup title="網格配置" icon="🕸️" cols={3}>
+            <ControlGroup title="網格配置" icon="🕸️" cols={1}>
               <RangeSlider
                 label="網格層級"
                 value={levels}
@@ -400,7 +400,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 樣式設定 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+            <ControlGroup title="樣式配置" icon="🎨" cols={1}>
               <RangeSlider
                 label="線條寬度"
                 value={strokeWidth}
@@ -456,7 +456,7 @@ export default function RadarChartDemo() {
 
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
               <ToggleControl
                 label="顯示網格"
                 checked={showGrid}
@@ -501,7 +501,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon="🎯" cols={1}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
@@ -518,10 +518,11 @@ export default function RadarChartDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title={config.title}
           subtitle={config.description}
@@ -584,10 +585,8 @@ export default function RadarChartDemo() {
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
+          {/* 數據詳情 */}
         <DataTable
           title="數據詳情"
           data={currentData.map(row => ({ ...row, _average: 0 }))}
@@ -595,10 +594,8 @@ export default function RadarChartDemo() {
           maxRows={8}
           showIndex
         />
-      </ContentSection>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
+          {/* 代碼範例 */}
         <CodeExample
           title="使用範例"
           language="tsx"
@@ -641,10 +638,8 @@ const axes = ${JSON.stringify(currentAxes)}
   onDotClick={(value, series) => console.log('Dot:', value, series)}
 />`}
         />
-      </ContentSection>
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full" />
@@ -705,7 +700,8 @@ const axes = ${JSON.stringify(currentAxes)}
             </div>
           </div>
         </div>
-      </ContentSection>
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }

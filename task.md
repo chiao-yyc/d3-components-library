@@ -14,7 +14,7 @@
 
 ### **Phase 1: Demo層完成現代化 (高優先級)** 🔥
 
-**剩餘18個頁面需要響應式升級**:
+**剩餘17個頁面需要響應式升級**:
 
 #### **基礎圖表頁面 (6個)**
 - `LineChartDemo.tsx` - 需要ModernControlPanel + 響應式ChartContainer 
@@ -32,10 +32,10 @@
 - `FunnelChartDemo.tsx` - 需要現代化架構
 - `RadarChartDemo.tsx` - 需要現代化架構
 
-#### **工具與測試頁面 (6個)** 
+#### **工具與測試頁面 (5個)** 
 - `DataMapperDemo.tsx` - 數據映射工具頁面
 - `CorrelogramDemo.tsx` - 相關性矩陣頁面
-- `TreeMapDemo.tsx` - 樹狀圖頁面
+- ~~`TreeMapDemo.tsx` - 樹狀圖頁面~~ ✅
 - `ResponsiveTestDemo.tsx` - 響應式測試頁面
 - `AlignmentTestDemo.tsx` - 對齊測試頁面  
 - `SimpleComponentsDemo.tsx` - 簡單組件頁面

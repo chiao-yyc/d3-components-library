@@ -315,15 +315,16 @@ export default function ViolinPlotDemo() {
       title="ViolinPlot Demo"
       description="小提琴圖組件展示 - 結合核密度估計和箱形圖的進階統計分析"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -362,7 +363,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* KDE 設定 */}
-            <ControlGroup title="核密度估計" icon="📊" cols={2}>
+            <ControlGroup title="核密度估計" icon="📊" cols={1}>
               <SelectControl
                 label="KDE 方法"
                 value={kdeMethod}
@@ -385,7 +386,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 小提琴設定 */}
-            <ControlGroup title="小提琴配置" icon="🎻" cols={3}>
+            <ControlGroup title="小提琴配置" icon="🎻" cols={1}>
               <RangeSlider
                 label="最大寬度"
                 value={violinWidth}
@@ -429,7 +430,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
               <ToggleControl
                 label="顯示箱形圖"
                 checked={showBoxPlot}
@@ -484,10 +485,11 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
@@ -544,7 +546,7 @@ export default function ViolinPlotDemo() {
             { label: 'KDE方法', value: kdeMethod },
             { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
           ]} />
-          </ChartContainer>
+        </ChartContainer>
           
           {/* 統計分析 */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
@@ -597,6 +599,7 @@ export default function ViolinPlotDemo() {
               })}
             </div>
           )}
+        </div>
 
           {/* 代碼範例 */}
           <CodeExample
@@ -634,7 +637,7 @@ const data = [
 </ChartContainer>`}
           />
         </div>
-      </ContentSection>
+      </div>
     </DemoPageTemplate>
   )
 }

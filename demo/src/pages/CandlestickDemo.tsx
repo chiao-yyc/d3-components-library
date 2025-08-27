@@ -281,15 +281,16 @@ export default function CandlestickDemo() {
       title="CandlestickChart Demo"
       description="專業級K線圖組件展示 - 支援OHLC數據、成交量顯示和技術分析功能"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -329,7 +330,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
               <ToggleControl
                 label="顯示成交量"
                 checked={showVolume}
@@ -367,7 +368,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon="🎯" cols={1}>
               <ToggleControl
                 label="互動功能"
                 checked={interactive}
@@ -391,10 +392,11 @@ export default function CandlestickDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
@@ -460,10 +462,8 @@ export default function CandlestickDemo() {
             </div>
           )}
         </ChartContainer>
-      </ContentSection>
 
-      {/* 統計分析 */}
-      <ContentSection delay={0.2}>
+          {/* 統計分析 */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border border-green-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-blue-600 rounded-full" />
@@ -534,10 +534,8 @@ export default function CandlestickDemo() {
             </motion.div>
           </div>
         </div>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.3}>
+          {/* 數據詳情 */}
         <DataTable
           title="數據詳情"
           data={currentData.slice(-10)}
@@ -545,10 +543,8 @@ export default function CandlestickDemo() {
           maxRows={10}
           showIndex
         />
-      </ContentSection>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.4}>
+          {/* 代碼範例 */}
         <CodeExample
           title="使用範例"
           language="tsx"
@@ -571,10 +567,8 @@ const data = [
   onDataClick={(data) => console.log('K線點擊:', data)}
 />`}
         />
-      </ContentSection>
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.5}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-amber-500 to-orange-600 rounded-full" />
@@ -649,7 +643,8 @@ const data = [
             </div>
           </div>
         </div>
-      </ContentSection>
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }
