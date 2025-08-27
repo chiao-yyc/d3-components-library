@@ -74,15 +74,16 @@ export default function BarChartDemo() {
       title="BarChart Demo"
       description="現代化長條圖組件展示 - 支援多種配置選項和互動功能"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -112,7 +113,7 @@ export default function BarChartDemo() {
             </ControlGroup>
 
             {/* 響應式設定 */}
-            <ControlGroup title="響應式配置" icon="📱" cols={2}>
+            <ControlGroup title="響應式配置" icon="📱" cols={1}>
               <ToggleControl
                 label="響應式模式"
                 checked={responsive}
@@ -135,7 +136,7 @@ export default function BarChartDemo() {
 
             {/* 固定尺寸設定 */}
             {!responsive && (
-              <ControlGroup title="固定尺寸" icon="📏" cols={2}>
+              <ControlGroup title="固定尺寸" icon="📏" cols={1}>
                 <RangeSlider
                   label="寬度"
                   value={chartWidth}
@@ -161,7 +162,7 @@ export default function BarChartDemo() {
             {/* 移除邊距設定控制項，統一使用系統預設 margin 以確保一致性 */}
 
             {/* 功能開關 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon="🎯" cols={1}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
@@ -208,10 +209,11 @@ export default function BarChartDemo() {
             )}
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title="圖表預覽"
           subtitle="即時預覽配置效果"
@@ -256,10 +258,8 @@ export default function BarChartDemo() {
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
+          {/* 數據詳情 */}
         <DataTable
           title="數據詳情"
           data={currentDataset.data}
@@ -267,10 +267,8 @@ export default function BarChartDemo() {
           maxRows={8}
           showIndex
         />
-      </ContentSection>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
+          {/* 代碼範例 */}
         <CodeExample
           title="使用範例"
           language="tsx"
@@ -319,10 +317,8 @@ ${responsive ? `// 響應式模式 - 自動適應容器大小
   onHover={(data) => console.log('Hovered:', data)}
 />`}`}
         />
-      </ContentSection>
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
@@ -379,12 +375,11 @@ ${responsive ? `// 響應式模式 - 自動適應容器大小
             </div>
           </div>
         </div>
-      </ContentSection>
 
-      {/* 相關組件推薦 */}
-      <ContentSection delay={0.3}>
-        <RelatedComponents currentPath="/bar-chart" />
-      </ContentSection>
+          {/* 相關組件推薦 */}
+          <RelatedComponents currentPath="/bar-chart" />
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }

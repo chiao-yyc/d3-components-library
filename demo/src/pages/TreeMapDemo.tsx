@@ -215,6 +215,11 @@ export default function TreeMapDemo() {
   // 圖表設定
   const [chartWidth, setChartWidth] = useState(800)
   const [chartHeight, setChartHeight] = useState(500)
+  
+  // 響應式控制
+  const [responsive, setResponsive] = useState(true)
+  const [aspect, setAspect] = useState(16/9)
+  
   const [padding, setPadding] = useState(2)
   const [strokeWidth, setStrokeWidth] = useState(1)
   
@@ -319,6 +324,8 @@ export default function TreeMapDemo() {
     { label: '數據集', value: config.title },
     { label: '葉節點數', value: analysis.leafNodes },
     { label: '最大深度', value: analysis.maxDepth },
+    { label: '圖表模式', value: responsive ? '響應式' : '固定尺寸', color: responsive ? '#10b981' : '#6b7280' },
+    { label: '圖表尺寸', value: responsive ? `比例 ${aspect.toFixed(2)}:1` : `${chartWidth} × ${chartHeight}` },
     { label: '瓦片算法', value: analysis.algorithm.label },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
@@ -378,15 +385,16 @@ export default function TreeMapDemo() {
       title="TreeMap Demo"
       description="階層樹狀圖組件展示 - 支援多種數據格式、瓦片算法和視覺化選項"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -412,28 +420,55 @@ export default function TreeMapDemo() {
               />
             </ControlGroup>
 
-            {/* 圖表配置 */}
-            <ControlGroup title="圖表配置" icon="📊" cols={3}>
-              <RangeSlider
-                label="圖表寬度"
-                value={chartWidth}
-                min={400}
-                max={1200}
-                step={50}
-                onChange={setChartWidth}
-                suffix="px"
+            {/* 響應式配置 */}
+            <ControlGroup title="響應式配置" icon="📱" cols={1}>
+              <ToggleControl
+                label="響應式模式"
+                checked={responsive}
+                onChange={setResponsive}
+                description="自動適應容器寬度變化"
               />
               
-              <RangeSlider
-                label="圖表高度"
-                value={chartHeight}
-                min={300}
-                max={800}
-                step={25}
-                onChange={setChartHeight}
-                suffix="px"
-              />
-              
+              {responsive && (
+                <RangeSlider
+                  label="寬高比"
+                  value={aspect}
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  onChange={setAspect}
+                  suffix=":1"
+                />
+              )}
+            </ControlGroup>
+
+            {/* 固定尺寸設定 */}
+            {!responsive && (
+              <ControlGroup title="固定尺寸" icon="📏" cols={1}>
+                <RangeSlider
+                  label="圖表寬度"
+                  value={chartWidth}
+                  min={400}
+                  max={1200}
+                  step={50}
+                  onChange={setChartWidth}
+                  suffix="px"
+                />
+                
+                <RangeSlider
+                  label="圖表高度"
+                  value={chartHeight}
+                  min={300}
+                  max={800}
+                  step={25}
+                  onChange={setChartHeight}
+                  suffix="px"
+                />
+              </ControlGroup>
+            )}
+
+            {/* 佈局配置 */}
+            <ControlGroup title="佈局配置" icon="📊" cols={1}>
               <RangeSlider
                 label="內邊距"
                 value={padding}
@@ -538,10 +573,11 @@ export default function TreeMapDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
@@ -552,18 +588,24 @@ export default function TreeMapDemo() {
             </div>
           }
         >
-          <div className="flex justify-center overflow-x-auto">
+          <div className={responsive ? 'w-full' : 'flex justify-center overflow-x-auto'}>
             <motion.div
-              key={`${selectedDataset}-${tileAlgorithm}-${colorStrategy}`}
+              key={`${responsive ? 'responsive' : 'fixed'}-${chartWidth}-${chartHeight}-${aspect}-${selectedDataset}-${tileAlgorithm}-${colorStrategy}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
+              className={responsive ? 'w-full' : ''}
             >
               <TreeMap
                 data={currentData}
                 dataFormat={config.format}
-                width={chartWidth}
-                height={chartHeight}
+                width={responsive ? undefined : chartWidth}
+                height={responsive ? undefined : chartHeight}
+                responsive={responsive}
+                aspect={responsive ? aspect : undefined}
+                minWidth={300}
+                maxWidth={1200}
+                minHeight={200}
                 colorStrategy={colorStrategy}
                 tile={tileAlgorithm}
                 showLabels={showLabels}
@@ -593,10 +635,8 @@ export default function TreeMapDemo() {
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
-      </ContentSection>
 
-      {/* 統計分析 */}
-      <ContentSection delay={0.2}>
+          {/* 統計分析 */}
         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-2xl p-6 border border-indigo-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full" />
@@ -665,10 +705,8 @@ export default function TreeMapDemo() {
             </motion.div>
           </div>
         </div>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.3}>
+          {/* 數據詳情 */}
         <DataTable
           title="節點數據詳情"
           data={tableData.slice(0, 12)}
@@ -676,10 +714,8 @@ export default function TreeMapDemo() {
           maxRows={12}
           showIndex
         />
-      </ContentSection>
 
-      {/* 比較展示 */}
-      <ContentSection delay={0.4}>
+          {/* 比較展示 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ChartContainer
             title="不同算法比較"
@@ -690,26 +726,30 @@ export default function TreeMapDemo() {
                 <h5 className="text-sm font-medium text-gray-700 mb-2">Squarify 算法</h5>
                 <TreeMap
                   data={[companyData]}
-                  width={180}
-                  height={120}
+                  width={200}
+                  height={140}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                   tile="squarify"
                   colorStrategy="depth"
                   showLabels={false}
                   showValues={false}
                   fontSize={8}
+                  padding={1}
                 />
               </div>
               <div>
                 <h5 className="text-sm font-medium text-gray-700 mb-2">Binary 算法</h5>
                 <TreeMap
                   data={[companyData]}
-                  width={180}
-                  height={120}
+                  width={200}
+                  height={140}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                   tile="binary"
                   colorStrategy="depth"
                   showLabels={false}
                   showValues={false}
                   fontSize={8}
+                  padding={1}
                 />
               </div>
             </div>
@@ -724,33 +764,35 @@ export default function TreeMapDemo() {
                 <h5 className="text-sm font-medium text-gray-700 mb-2">按層級深度</h5>
                 <TreeMap
                   data={[marketShareData]}
-                  width={180}
-                  height={120}
+                  width={200}
+                  height={140}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                   colorStrategy="depth"
                   showLabels={false}
                   showValues={true}
                   fontSize={8}
+                  padding={1}
                 />
               </div>
               <div>
                 <h5 className="text-sm font-medium text-gray-700 mb-2">按數值大小</h5>
                 <TreeMap
                   data={[marketShareData]}
-                  width={180}
-                  height={120}
+                  width={200}
+                  height={140}
+                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
                   colorStrategy="value"
                   showLabels={false}
                   showValues={true}
                   fontSize={8}
+                  padding={1}
                 />
               </div>
             </div>
           </ChartContainer>
         </div>
-      </ContentSection>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.5}>
+          {/* 代碼範例 */}
         <CodeExample
           title="使用範例"
           language="tsx"
@@ -770,6 +812,18 @@ const data = [{
   ]
 }]
 
+${responsive ? `// 響應式模式 - 自動適應容器大小
+<TreeMap
+  data={data}
+  dataFormat="${config.format}"
+  responsive={true}
+  aspect={${aspect}}
+  minWidth={300}
+  maxWidth={1200}
+  minHeight={200}
+  colorStrategy="${colorStrategy}"
+  tile="${tileAlgorithm}"
+  showLabels={${showLabels}}` : `// 固定尺寸模式
 <TreeMap
   data={data}
   dataFormat="${config.format}"
@@ -777,7 +831,7 @@ const data = [{
   height={${chartHeight}}
   colorStrategy="${colorStrategy}"
   tile="${tileAlgorithm}"
-  showLabels={${showLabels}}
+  showLabels={${showLabels}}`}
   showValues={${showValues}}
   labelAlignment="${labelAlignment}"
   fontSize={${fontSize}}
@@ -790,10 +844,8 @@ const data = [{
   onNodeClick={(node) => console.log('點擊節點:', node)}
 />`}
         />
-      </ContentSection>
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.6}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border border-purple-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-indigo-600 rounded-full" />
@@ -868,7 +920,8 @@ const data = [{
             </div>
           </div>
         </div>
-      </ContentSection>
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }

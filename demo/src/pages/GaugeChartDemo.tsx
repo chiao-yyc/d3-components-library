@@ -195,15 +195,16 @@ export default function GaugeChartDemo() {
       title="GaugeChart Demo"
       description="儀表盤組件展示 - 支援多區間、動畫效果和自訂樣式"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
           title="控制面板" 
           icon={<CogIcon className="w-5 h-5" />}
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -244,7 +245,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 儀表盤配置 */}
-            <ControlGroup title="儀表盤配置" icon="📊" cols={3}>
+            <ControlGroup title="儀表盤配置" icon="📊" cols={1}>
               <RangeSlider
                 label="起始角度"
                 value={startAngle}
@@ -276,7 +277,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 樣式設定 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+            <ControlGroup title="樣式配置" icon="🎨" cols={1}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   指針顏色
@@ -363,10 +364,11 @@ export default function GaugeChartDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 圖表展示 */}
         <ChartContainer
           title="圖表預覽"
           subtitle={config.description}
@@ -413,10 +415,8 @@ export default function GaugeChartDemo() {
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
+          {/* 數據詳情 */}
         <DataTable
           title="數據詳情"
           data={tableData}
@@ -424,10 +424,8 @@ export default function GaugeChartDemo() {
           maxRows={8}
           showIndex
         />
-      </ContentSection>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
+          {/* 代碼範例 */}
         <CodeExample
           title="使用範例"
           language="tsx"
@@ -461,10 +459,8 @@ const data = [{
   onValueChange={(value) => console.log('Value changed:', value)}
 />`}
         />
-      </ContentSection>
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
+          {/* 功能說明 */}
         <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-2 h-8 bg-gradient-to-b from-orange-500 to-amber-600 rounded-full" />
@@ -517,7 +513,8 @@ const data = [{
             </div>
           </div>
         </div>
-      </ContentSection>
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }
