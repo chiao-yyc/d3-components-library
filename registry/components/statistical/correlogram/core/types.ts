@@ -54,6 +54,11 @@ export interface CorrelogramProps extends BaseChartProps {
   threshold?: number;               // 顯示閾值 (絕對值)
   onCellClick?: (x: string, y: string, value: number, event: Event) => void;
   onCellHover?: (x: string, y: string, value: number, event: Event) => void;
+  
+  // 圖例配置
+  showLegend?: boolean;             // 顯示圖例
+  legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+  legendTitle?: string;             // 圖例標題
 }
 
 // 內部配置

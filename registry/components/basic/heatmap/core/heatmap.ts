@@ -256,41 +256,85 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
   private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string, format?: (d: number) => string): void {
     if (!this.colorScale) return;
 
-    const { chartWidth, chartHeight } = this.getChartDimensions();
+    const { chartWidth, chartHeight, width: containerWidth, height: containerHeight, margin } = this.getChartDimensions();
     const valueExtent = d3.extent(this.processedData, d => d.value) as [number, number];
     
-    // 圖例尺寸設定
-    const legendWidth = position === 'left' || position === 'right' ? 20 : Math.min(200, chartWidth * 0.6);
-    const legendHeight = position === 'top' || position === 'bottom' ? 20 : Math.min(150, chartHeight * 0.6);
+    // 計算實際可用空間 - 修正邏輯
+    // containerWidth/Height 是整個容器尺寸，chartWidth/Height 是圖表繪製區尺寸
+    const rightSpaceInContainer = margin.right;  // 右側 margin 就是可用空間
+    const bottomSpaceInContainer = margin.bottom;  // 底部 margin 就是可用空間
+    const leftSpaceInContainer = margin.left;
+    const topSpaceInContainer = margin.top;
     
-    // 根據位置計算圖例座標
+    // 圖例尺寸設定 - 響應式調整
+    const baseHorizontalWidth = Math.min(180, chartWidth * 0.5);
+    const baseVerticalHeight = Math.min(120, chartHeight * 0.5);
+    
+    let legendWidth = position === 'left' || position === 'right' ? 20 : baseHorizontalWidth;
+    let legendHeight = position === 'top' || position === 'bottom' ? 20 : baseVerticalHeight;
+    
+    // 智能位置調整：檢查 margin 空間是否足夠
+    let actualPosition = position;
+    const minRightSpace = legendWidth + 30; // Legend寬度 + 一些緩衝
+    const minBottomSpace = 60; // Legend高度 + 標籤空間
+    
+    if (position === 'right' && rightSpaceInContainer < minRightSpace) {
+      if (bottomSpaceInContainer >= minBottomSpace) {
+        actualPosition = 'bottom';
+        legendWidth = Math.min(baseHorizontalWidth, chartWidth * 0.8);
+        legendHeight = 20;
+        console.log('🎯 Heatmap Legend: 右側空間不足，自動切換到底部位置');
+      } else {
+        // 如果底部也不夠，強制使用右側但調整尺寸
+        legendWidth = Math.max(15, rightSpaceInContainer - 25);
+        console.log('🎯 Heatmap Legend: 空間有限，縮小右側Legend尺寸');
+      }
+    }
+    
+    // 根據實際位置計算圖例座標
     let legendX: number, legendY: number;
-    let isVertical = position === 'left' || position === 'right';
+    let isVertical = actualPosition === 'left' || actualPosition === 'right';
     
-    switch (position) {
+    switch (actualPosition) {
       case 'top':
         legendX = (chartWidth - legendWidth) / 2;
-        legendY = -60;
+        legendY = -50; // 放在圖表上方
         break;
       case 'bottom':
         legendX = (chartWidth - legendWidth) / 2;
-        legendY = chartHeight + 60;
+        legendY = chartHeight + 30; // 放在圖表下方，給軸線留空間
         break;
       case 'left':
-        legendX = -80;
+        legendX = -60; // 放在圖表左側
         legendY = (chartHeight - legendHeight) / 2;
         break;
       case 'right':
       default:
-        legendX = chartWidth + 20;
+        legendX = chartWidth + 15; // 放在圖表右側，給Y軸留空間
         legendY = (chartHeight - legendHeight) / 2;
         break;
     }
 
-    // 創建圖例群組
+    // 創建圖例群組並添加溢出保護
     const legendGroup = g.append('g')
       .attr('class', 'heatmap-legend')
-      .attr('transform', `translate(${legendX}, ${legendY})`);
+      .attr('transform', `translate(${legendX}, ${legendY})`)
+      .style('overflow', 'hidden'); // 防止溢出
+
+    // 調試信息
+    console.log('🎯 Heatmap Legend 佈局:', {
+      originalPosition: position,
+      actualPosition,
+      legendX,
+      legendY,
+      legendWidth,
+      legendHeight,
+      rightSpaceInContainer,
+      bottomSpaceInContainer,
+      containerWidth,
+      chartWidth,
+      margin
+    });
 
     // 創建顏色漸層
     const defs = g.select('svg').select('defs').empty() ? g.select('svg').append('defs') : g.select('svg').select('defs');

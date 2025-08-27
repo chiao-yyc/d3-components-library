@@ -8,7 +8,6 @@ import { motion } from 'framer-motion'
 import { LineChart } from '@registry/components/basic/line-chart'
 import { 
   DemoPageTemplate,
-  ContentSection,
   ModernControlPanel,
   ControlGroup,
   RangeSlider,
@@ -141,12 +140,14 @@ export default function LineChartDemo() {
       title="LineChart Demo"
       description="現代化折線圖組件展示 - 支持時間序列、多系列數據和豐富的交互功能"
     >
-      {/* 控制面板 */}
-      <ContentSection>
-        <ModernControlPanel 
-          title="控制面板" 
-          icon={<CogIcon className="w-5 h-5" />}
-        >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* 控制面板 - 1/4 width */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="控制面板" 
+            icon={<CogIcon className="w-5 h-5" />}
+          >
           <div className="space-y-8">
             {/* 基本設定 */}
             <ControlGroup title="基本設定" icon="⚙️" cols={3}>
@@ -304,109 +305,112 @@ export default function LineChartDemo() {
             </ControlGroup>
           </div>
         </ModernControlPanel>
-      </ContentSection>
+        </div>
 
-      {/* 圖表展示 */}
-      <ContentSection delay={0.1}>
-        <ChartContainer
-          title="圖表預覽"
-          subtitle="即時預覽配置效果"
-          actions={
-            <div className="flex items-center gap-2">
-              <ChartBarIcon className="w-5 h-5 text-blue-500" />
-              <span className="text-sm text-gray-600">折線圖</span>
-              {enableBrushZoom && <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">筆刷縮放</span>}
-              {enableCrosshair && <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">十字游標</span>}
-            </div>
-          }
-        >
-          {/* 交互狀態顯示 */}
-          {(zoomDomain || crosshairData) && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-              <h4 className="font-semibold text-blue-800 mb-2">交互狀態</h4>
-              <div className="space-y-2 text-sm">
-                {zoomDomain && (
-                  <div className="text-blue-700">
-                    <strong>縮放範圍:</strong> {
-                      zoomDomain[0] instanceof Date 
-                        ? zoomDomain[0].toLocaleDateString() 
-                        : zoomDomain[0]?.toString()
-                    } 到 {
-                      zoomDomain[1] instanceof Date 
-                        ? zoomDomain[1].toLocaleDateString() 
-                        : zoomDomain[1]?.toString()
-                    }
-                  </div>
-                )}
-                {crosshairData && (
-                  <div className="text-green-700">
-                    <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
-                  </div>
-                )}
+        {/* 主要內容區域 - 3/4 width */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* 圖表展示 */}
+          <ChartContainer
+            title="圖表預覽"
+            subtitle="即時預覽配置效果"
+            responsive={true}
+            aspectRatio={16 / 9}
+            actions={
+              <div className="flex items-center gap-2">
+                <ChartBarIcon className="w-5 h-5 text-blue-500" />
+                <span className="text-sm text-gray-600">折線圖</span>
+                {enableBrushZoom && <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">筆刷縮放</span>}
+                {enableCrosshair && <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">十字游標</span>}
               </div>
-            </div>
-          )}
-          
-          <div className="flex justify-center">
-            <motion.div
-              key={`${chartWidth}-${chartHeight}-${selectedDataset}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <LineChart
-                data={currentData}
-                xKey={currentConfig.xKey}
-                yKey={currentConfig.yKey}
-                seriesKey={currentConfig.seriesKey}
-                width={chartWidth}
-                height={chartHeight}
-                curve={curve}
-                showDots={showDots}
-                showArea={showArea}
-                showGrid={showGrid}
-                animate={animate}
-                interactive={interactive}
-                strokeWidth={strokeWidth}
-                dotRadius={dotRadius}
-                areaOpacity={areaOpacity}
-                colors={selectedDataset === 'multiSeries' ? ['#3b82f6', '#ef4444', '#10b981'] : ['#3b82f6']}
-                onDataClick={(data) => console.log('Clicked:', data)}
-                onHover={(data) => console.log('Hovered:', data)}
+            }
+          >
+            {({ width, height }) => (
+              <>
+                {/* 交互狀態顯示 */}
+                {(zoomDomain || crosshairData) && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                    <h4 className="font-semibold text-blue-800 mb-2">交互狀態</h4>
+                    <div className="space-y-2 text-sm">
+                      {zoomDomain && (
+                        <div className="text-blue-700">
+                          <strong>縮放範圍:</strong> {
+                            zoomDomain[0] instanceof Date 
+                              ? zoomDomain[0].toLocaleDateString() 
+                              : zoomDomain[0]?.toString()
+                          } 到 {
+                            zoomDomain[1] instanceof Date 
+                              ? zoomDomain[1].toLocaleDateString() 
+                              : zoomDomain[1]?.toString()
+                          }
+                        </div>
+                      )}
+                      {crosshairData && (
+                        <div className="text-green-700">
+                          <strong>游標數據:</strong> X: {crosshairData.x}, Y: {crosshairData.y}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
-                // 交互功能
-                enableBrushZoom={enableBrushZoom}
-                onZoom={handleZoom}
-                onZoomReset={handleZoomReset}
-                enableCrosshair={enableCrosshair}
-                enableDropShadow={enableDropShadow}
-                enableGlowEffect={enableGlowEffect}
-                glowColor="#3b82f6"
-              />
-            </motion.div>
-          </div>
-          
+                <motion.div
+                  key={`${width}-${height}-${selectedDataset}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <LineChart
+                    data={currentData}
+                    xKey={currentConfig.xKey}
+                    yKey={currentConfig.yKey}
+                    seriesKey={currentConfig.seriesKey}
+                    width={width}
+                    height={height}
+                    curve={curve}
+                    showDots={showDots}
+                    showArea={showArea}
+                    showGrid={showGrid}
+                    animate={animate}
+                    interactive={interactive}
+                    strokeWidth={strokeWidth}
+                    dotRadius={dotRadius}
+                    areaOpacity={areaOpacity}
+                    colors={selectedDataset === 'multiSeries' ? ['#3b82f6', '#ef4444', '#10b981'] : ['#3b82f6']}
+                    onDataClick={(data) => console.log('Clicked:', data)}
+                    onHover={(data) => console.log('Hovered:', data)}
+                    
+                    // 交互功能
+                    enableBrushZoom={enableBrushZoom}
+                    onZoom={handleZoom}
+                    onZoomReset={handleZoomReset}
+                    enableCrosshair={enableCrosshair}
+                    enableDropShadow={enableDropShadow}
+                    enableGlowEffect={enableGlowEffect}
+                    glowColor="#3b82f6"
+                  />
+                </motion.div>
+              </>
+            )}
+          </ChartContainer>
+
+          {/* 狀態顯示 */}
           <StatusDisplay items={statusItems} />
-        </ChartContainer>
-      </ContentSection>
 
-      {/* 數據詳情 */}
-      <ContentSection delay={0.2}>
-        <DataTable
-          title="數據詳情"
-          data={currentData}
-          columns={getTableColumns()}
-          maxRows={8}
-          showIndex
-        />
-      </ContentSection>
+          {/* 數據詳情 */}
+          <DataTable
+            title="數據詳情"
+            data={currentData}
+            columns={getTableColumns()}
+            maxRows={8}
+            showIndex
+          />
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
-        <CodeExample
-          title="使用範例"
-          language="tsx"
-          code={`import { LineChart } from '@registry/components/basic/line-chart'
+          {/* 代碼範例 */}
+          <CodeExample
+            title="使用範例"
+            language="tsx"
+            code={`import { LineChart } from '@registry/components/basic/line-chart'
 
 // ${selectedDataset === 'timeSeries' ? '時間序列' : '多系列'}數據
 const data = [
@@ -419,8 +423,8 @@ const data = [
   data={data}
   xKey="${currentConfig.xKey}"
   yKey="${currentConfig.yKey}"${currentConfig.seriesKey ? `\n  seriesKey="${currentConfig.seriesKey}"` : ''}
-  width={${chartWidth}}
-  height={${chartHeight}}
+  width={800}
+  height={500}
   curve="${curve}"
   showDots={${showDots}}
   showArea={${showArea}}
@@ -433,64 +437,63 @@ const data = [
   onDataClick={(data) => console.log('Clicked:', data)}
   onHover={(data) => console.log('Hovered:', data)}
 />`}
-        />
-      </ContentSection>
+          />
 
-      {/* 功能說明 */}
-      <ContentSection delay={0.4}>
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-cyan-600 rounded-full" />
-            <h3 className="text-xl font-semibold text-gray-800">LineChart 功能特點</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800">核心功能</h4>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  多種曲線類型：直線、平滑、階梯等
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-500 rounded-full" />
-                  時間序列和多系列數據支持
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                  面積填充和數據點顯示
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                  靈活的樣式和尺寸配置
-                </li>
-              </ul>
+          {/* 功能說明 */}
+          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-cyan-600 rounded-full" />
+              <h3 className="text-xl font-semibold text-gray-800">LineChart 功能特點</h3>
             </div>
             
-            <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800">交互特性</h4>
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                  筆刷縮放：拖拽選取區域縮放
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-pink-500 rounded-full" />
-                  十字游標：精確數據點定位
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                  視覺效果：陰影和光暈增強
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full" />
-                  響應式設計和平滑動畫
-                </li>
-              </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-800">核心功能</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                    多種曲線類型：直線、平滑、階梯等
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-cyan-500 rounded-full" />
+                    時間序列和多系列數據支持
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-teal-500 rounded-full" />
+                    面積填充和數據點顯示
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                    靈活的樣式和尺寸配置
+                  </li>
+                </ul>
+              </div>
+              
+              <div className="space-y-3">
+                <h4 className="font-semibold text-gray-800">交互特性</h4>
+                <ul className="space-y-2 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full" />
+                    筆刷縮放：拖拽選取區域縮放
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-pink-500 rounded-full" />
+                    十字游標：精確數據點定位
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                    視覺效果：陰影和光暈增強
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    響應式設計和平滑動畫
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      </ContentSection>
+      </div>
     </DemoPageTemplate>
   )
 }

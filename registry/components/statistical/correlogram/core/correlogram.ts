@@ -232,7 +232,10 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
       animate = true,
       animationDuration = 750,
       onCellClick,
-      onCellHover
+      onCellHover,
+      showLegend = true,
+      legendPosition = 'right',
+      legendTitle = '相關係數'
     } = this.props;
 
 
@@ -365,6 +368,156 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
           }
         });
     }
+
+    // 渲染圖例
+    if (showLegend) {
+      this.renderLegend(g, legendPosition, legendTitle);
+    }
+  }
+
+  private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string): void {
+    const { chartWidth, chartHeight, width: containerWidth, height: containerHeight, margin } = this.getChartDimensions();
+    
+    // 計算實際可用空間 - 使用 margin 空間
+    const rightSpaceInContainer = margin.right;
+    const bottomSpaceInContainer = margin.bottom;
+    
+    // 圖例尺寸設定
+    const baseHorizontalWidth = Math.min(160, chartWidth * 0.5);
+    const baseVerticalHeight = Math.min(100, chartHeight * 0.4);
+    
+    let legendWidth = position === 'left' || position === 'right' ? 20 : baseHorizontalWidth;
+    let legendHeight = position === 'top' || position === 'bottom' ? 20 : baseVerticalHeight;
+    
+    // 智能位置調整：檢查 margin 空間是否足夠
+    let actualPosition = position;
+    const minRightSpace = legendWidth + 30;
+    const minBottomSpace = 60;
+    
+    if (position === 'right' && rightSpaceInContainer < minRightSpace) {
+      if (bottomSpaceInContainer >= minBottomSpace) {
+        actualPosition = 'bottom';
+        legendWidth = Math.min(baseHorizontalWidth, chartWidth * 0.8);
+        legendHeight = 20;
+        console.log('🎯 Correlogram Legend: 右側空間不足，自動切換到底部位置');
+      } else {
+        legendWidth = Math.max(15, rightSpaceInContainer - 25);
+        console.log('🎯 Correlogram Legend: 空間有限，縮小右側Legend尺寸');
+      }
+    }
+    
+    // 根據實際位置計算圖例座標
+    let legendX: number, legendY: number;
+    let isVertical = actualPosition === 'left' || actualPosition === 'right';
+    
+    switch (actualPosition) {
+      case 'top':
+        legendX = (chartWidth - legendWidth) / 2;
+        legendY = -50;
+        break;
+      case 'bottom':
+        legendX = (chartWidth - legendWidth) / 2;
+        legendY = chartHeight + 30;
+        break;
+      case 'left':
+        legendX = -60;
+        legendY = (chartHeight - legendHeight) / 2;
+        break;
+      case 'right':
+      default:
+        legendX = chartWidth + 15;
+        legendY = (chartHeight - legendHeight) / 2;
+        break;
+    }
+
+    // 創建圖例群組
+    const legendGroup = g.append('g')
+      .attr('class', 'correlogram-legend')
+      .attr('transform', `translate(${legendX}, ${legendY})`)
+      .style('overflow', 'hidden');
+
+    // 調試信息
+    console.log('🎯 Correlogram Legend 佈局:', {
+      originalPosition: position,
+      actualPosition,
+      legendX,
+      legendY,
+      legendWidth,
+      legendHeight,
+      rightSpaceInContainer,
+      bottomSpaceInContainer,
+      margin
+    });
+
+    // 創建顏色漸層
+    const defs = g.select('svg').select('defs').empty() ? g.select('svg').append('defs') : g.select('svg').select('defs');
+    
+    const gradientId = `correlogram-gradient-${Math.random().toString(36).substr(2, 9)}`;
+    const gradient = defs.append('linearGradient')
+      .attr('id', gradientId)
+      .attr('gradientUnits', 'userSpaceOnUse');
+
+    if (isVertical) {
+      gradient.attr('x1', 0).attr('y1', legendHeight).attr('x2', 0).attr('y2', 0);
+    } else {
+      gradient.attr('x1', 0).attr('y1', 0).attr('x2', legendWidth).attr('y2', 0);
+    }
+
+    // 添加顏色停止點 - 從負相關（紅色）到正相關（藍色）
+    const colorStops = [
+      { offset: '0%', color: '#B22222' }, // 強負相關 - 紅色
+      { offset: '50%', color: '#fff' },   // 無相關 - 白色
+      { offset: '100%', color: '#000080' } // 強正相關 - 藍色
+    ];
+
+    colorStops.forEach(stop => {
+      gradient.append('stop')
+        .attr('offset', stop.offset)
+        .attr('stop-color', stop.color);
+    });
+
+    // 繪製漸層矩形
+    legendGroup.append('rect')
+      .attr('width', legendWidth)
+      .attr('height', legendHeight)
+      .style('fill', `url(#${gradientId})`)
+      .attr('stroke', '#ccc')
+      .attr('stroke-width', 1);
+
+    // 添加標題
+    if (title) {
+      legendGroup.append('text')
+        .attr('class', 'legend-title')
+        .attr('x', isVertical ? -10 : legendWidth / 2)
+        .attr('y', isVertical ? -10 : -10)
+        .attr('text-anchor', isVertical ? 'end' : 'middle')
+        .style('font-size', '12px')
+        .style('font-weight', 'bold')
+        .style('fill', '#333')
+        .text(title);
+    }
+
+    // 添加數值標籤
+    const correlationLabels = [
+      { value: -1, text: '-1.0' },
+      { value: 0, text: '0.0' },
+      { value: 1, text: '+1.0' }
+    ];
+
+    correlationLabels.forEach((label, i) => {
+      const ratio = i / (correlationLabels.length - 1);
+      const labelX = isVertical ? legendWidth + 5 : ratio * legendWidth;
+      const labelY = isVertical ? legendHeight - ratio * legendHeight + 4 : legendHeight + 15;
+
+      legendGroup.append('text')
+        .attr('class', 'legend-label')
+        .attr('x', labelX)
+        .attr('y', labelY)
+        .attr('text-anchor', isVertical ? 'start' : 'middle')
+        .style('font-size', '10px')
+        .style('fill', '#666')
+        .text(label.text);
+    });
   }
 
   protected getChartType(): string {

@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
 import { 
   DemoPageTemplate,
-  ContentSection,
   ModernControlPanel,
   ControlGroup,
   RangeSlider,
@@ -520,8 +519,8 @@ export default function ViolinPlotDemo() {
                 data={currentData}
                 labelKey={dataKeys.labelKey}
                 valuesKey={dataKeys.valuesKey}
-                width={orientation === 'vertical' ? 700 : 800}
-                height={orientation === 'vertical' ? 600 : 500}
+                width={width}
+                height={height}
                 orientation={orientation}
                 violinWidth={violinWidth}
                 resolution={resolution}
@@ -555,11 +554,9 @@ export default function ViolinPlotDemo() {
             { label: 'KDE方法', value: kdeMethod },
             { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
           ]} />
-        </ChartContainer>
-      </ContentSection>
-
-      {/* 統計分析 */}
-      <ContentSection delay={0.2}>
+          </ChartContainer>
+          
+          {/* 統計分析 */}
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-8 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full" />
@@ -610,12 +607,10 @@ export default function ViolinPlotDemo() {
               })}
             </div>
           )}
-        </div>
-      </ContentSection>
+          </div>
 
-      {/* 代碼範例 */}
-      <ContentSection delay={0.3}>
-        <CodeExample
+          {/* 代碼範例 */}
+          <CodeExample
           title="使用範例"
           language="tsx"
           code={`import { ViolinPlot } from '@registry/components/statistical/violin-plot'
@@ -625,12 +620,14 @@ const data = [
   { ${dataKeys.labelKey}: '實驗組', ${dataKeys.valuesKey}: [95, 98, 89, 92, 101, 88] }
 ]
 
-<ViolinPlot
-  data={data}
-  labelKey="${dataKeys.labelKey}"
+<ChartContainer responsive={true} aspectRatio={16/9}>
+  {({ width, height }) => (
+    <ViolinPlot
+      data={data}
+      labelKey="${dataKeys.labelKey}"
   valuesKey="${dataKeys.valuesKey}"
-  width={${orientation === 'vertical' ? 700 : 800}}
-  height={${orientation === 'vertical' ? 600 : 500}}
+  width={width}
+  height={height}
   orientation="${orientation}"
   violinWidth={${violinWidth}}
   resolution={${resolution}}
@@ -642,10 +639,13 @@ const data = [
   colorScheme="${colorScheme}"
   animate={${animate}}
   interactive={${interactive}}
-  onViolinClick={(data) => console.log('Clicked:', data)}
-/>`}
-        />
-      </ContentSection>
+      onViolinClick={(data) => console.log('Clicked:', data)}
+    />
+  )}
+</ChartContainer>`}
+          />
+        </div>
+      </div>
     </DemoPageTemplate>
   )
 }
