@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
-import { AlignmentStrategy } from '../utils/positioning'
+import { AlignmentStrategy } from '../utils'
 
 export interface MultiBarData {
   x: any

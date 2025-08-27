@@ -1,15 +1,9 @@
-// Core OHLC Processor
-export { OHLCProcessor, processOHLCData } from './ohlc-processor'
+// 優先導出核心模組（框架無關）
+export * from './core';
 
-// React Hook
-export { useOHLCProcessor } from './use-ohlc-processor'
+// React hooks 層（依賴 React）
+export * from './use-ohlc-processor';
 
-// Types
-export type {
-  OHLCData,
-  ProcessedOHLCData,
-  OHLCMapping,
-  OHLCProcessorConfig,
-  OHLCProcessorResult,
-  UseOHLCProcessorOptions
-} from './types'
+// 向下兼容：直接導出核心功能
+export * from './core/ohlc-processor';
+export * from './core/types';
