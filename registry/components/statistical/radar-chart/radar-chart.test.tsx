@@ -4,7 +4,7 @@ import { axe } from 'jest-axe';
 import { vi } from 'vitest';
 
 import { RadarChart } from './radar-chart';
-import type { RadarChartProps } from './core/types';
+import type { RadarChartProps } from './radar-chart';
 
 // Mock data for testing
 const mockData = [
@@ -40,7 +40,7 @@ const defaultProps: RadarChartProps = {
   width: 400,
   height: 400,
   data: mockData,
-  axes: mockAxes,
+  axisKeys: mockAxes,
   labelAccessor: (d) => d.player,
 };
 
@@ -69,7 +69,7 @@ describe('RadarChart', () => {
     });
 
     it('should handle empty axes gracefully', () => {
-      render(<RadarChart {...defaultProps} axes={[]} />);
+      render(<RadarChart {...defaultProps} axisKeys={[]} />);
       
       // With empty axes, chart should still render but with no data elements
       expect(screen.getByRole('img')).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe('RadarChart', () => {
       const { rerender } = render(<RadarChart {...defaultProps} />);
       
       const newAxes = ['speed', 'strength', 'agility'];
-      rerender(<RadarChart {...defaultProps} axes={newAxes} />);
+      rerender(<RadarChart {...defaultProps} axisKeys={newAxes} />);
       
       await waitFor(() => {
         expect(screen.getByRole('img')).toBeInTheDocument();

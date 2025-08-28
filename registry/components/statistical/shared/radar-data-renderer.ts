@@ -205,7 +205,21 @@ export class RadarDataRenderer {
     if (animate) {
       lines.each(function(d, i) {
         const line = d3.select(this);
-        const totalLength = (line.node() as SVGPathElement)?.getTotalLength() || 0;
+        const node = line.node() as SVGPathElement;
+        
+        // 安全地獲取路徑長度，在測試環境中提供 fallback
+        let totalLength = 0;
+        try {
+          if (node && typeof node.getTotalLength === 'function') {
+            totalLength = node.getTotalLength();
+          } else {
+            // 測試環境 fallback: 估算路徑長度
+            totalLength = 100; // 使用合理的默認值
+          }
+        } catch (error) {
+          // 如果 getTotalLength() 失敗，使用估算值
+          totalLength = 100;
+        }
         
         line
           .attr('stroke-dasharray', `${totalLength} ${totalLength}`)

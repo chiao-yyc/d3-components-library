@@ -585,8 +585,8 @@ export default function BoxPlotDemo() {
               >
                 <BoxPlot
                   data={currentData}
-                  labelKey={dataKeys.labelKey}
-                  valuesKey={dataKeys.valuesKey}
+                  labelAccessor={dataKeys.labelKey}
+                  valuesAccessor={dataKeys.valuesKey}
                   width={width}
                   height={height}
                   orientation={orientation}
@@ -609,10 +609,10 @@ export default function BoxPlotDemo() {
                   jitterWidth={jitterWidth}
                   pointRadius={pointRadius}
                   pointOpacity={pointOpacity}
-                  onBoxClick={(data) => {
+                  onDataClick={(data) => {
                     console.log('Box clicked:', data)
                   }}
-                  onBoxHover={(data) => {
+                  onDataHover={(data) => {
                     console.log('Box hovered:', data)
                   }}
                 />
@@ -654,8 +654,8 @@ const data = [
   {({ width, height }) => (
     <BoxPlot
       data={data}
-      labelKey="${dataKeys.labelKey}"
-      valuesKey="${dataKeys.valuesKey}"
+      labelAccessor="${dataKeys.labelKey}"
+      valuesAccessor="${dataKeys.valuesKey}"
       width={width}
       height={height}
   orientation="${orientation}"
@@ -676,8 +676,8 @@ const data = [
   jitterWidth={${jitterWidth}}
   pointRadius={${pointRadius}}
   pointOpacity={${pointOpacity}}` : ''}
-      onBoxClick={(data) => console.log('Clicked:', data)}
-      onBoxHover={(data) => console.log('Hovered:', data)}
+      onDataClick={(data) => console.log('Clicked:', data)}
+      onDataHover={(data) => console.log('Hovered:', data)}
     />
   )}
 </ChartContainer>`}</code>

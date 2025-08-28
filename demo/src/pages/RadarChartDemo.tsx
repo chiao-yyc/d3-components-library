@@ -542,8 +542,8 @@ export default function RadarChartDemo() {
             >
               <RadarChart
                 data={currentData}
-                axes={currentAxes}
-                labelKey={config.labelKey}
+                axisKeys={currentAxes}
+                labelAccessor={config.labelKey}
                 width={chartWidth}
                 height={chartHeight}
                 radius={radius}
@@ -565,10 +565,10 @@ export default function RadarChartDemo() {
                 colorScheme={colorScheme}
                 animate={animate}
                 interactive={interactive}
-                onSeriesClick={(data) => {
+                onDataClick={(data) => {
                   console.log('Series clicked:', data)
                 }}
-                onSeriesHover={(data) => {
+                onDataHover={(data) => {
                   console.log('Series hovered:', data)
                 }}
                 onDotClick={(value, series) => {

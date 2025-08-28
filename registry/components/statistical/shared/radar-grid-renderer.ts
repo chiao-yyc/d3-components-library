@@ -5,6 +5,10 @@
 
 import * as d3 from 'd3';
 import { PolarUtils, RadarAxisConfig } from './polar-utils';
+import { 
+  type StandardAxisStyles, 
+  DEFAULT_AXIS_STYLES 
+} from '../../core/axis-styles/axis-styles';
 
 export interface GridStyles {
   stroke?: string;
@@ -34,6 +38,8 @@ export interface GridOptions {
   axisLabelOffset?: number;
   valueFormat?: (value: number) => string;
   glowEffect?: boolean;
+  // 新增：支持統一樣式系統
+  standardAxisStyles?: Partial<StandardAxisStyles>;
 }
 
 export class RadarGridRenderer {
@@ -55,8 +61,18 @@ export class RadarGridRenderer {
       showAxes = true,
       showAxisLabels = true,
       levels = 5,
-      glowEffect = false
+      glowEffect = false,
+      standardAxisStyles
     } = options;
+
+    // 合併統一樣式與自定義樣式
+    const mergedStandardStyles = { ...DEFAULT_AXIS_STYLES, ...standardAxisStyles };
+    const unifiedLabelStyles: LabelStyles = {
+      fontSize: parseInt(mergedStandardStyles.fontSize),
+      fontFamily: mergedStandardStyles.fontFamily,
+      fill: mergedStandardStyles.fontColor,
+      ...options.labelStyles
+    };
 
     // 清理現有網格
     container.selectAll('.radar-grid').remove();
@@ -105,7 +121,7 @@ export class RadarGridRenderer {
         levels,
         maxValue,
         options.gridLabelOffset || 10,
-        options.labelStyles,
+        unifiedLabelStyles,
         options.valueFormat
       );
     }
@@ -115,7 +131,7 @@ export class RadarGridRenderer {
       this.renderAxisLabels(
         gridGroup,
         axes,
-        options.labelStyles
+        unifiedLabelStyles
       );
     }
   }

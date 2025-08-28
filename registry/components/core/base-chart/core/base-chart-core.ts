@@ -11,6 +11,15 @@ import type {
   ChartStateCallbacks,
   ChartDimensions
 } from '../../types';
+import { AxisCore } from '../../../primitives/axis/core/axis-core';
+import { 
+  applyStandardAxisStyles, 
+  addAxisLabel, 
+  renderGrid,
+  type StandardAxisStyles, 
+  type AxisLabelConfig,
+  type GridConfig
+} from '../../axis-styles/axis-styles';
 
 /**
  * 純 TypeScript 的圖表核心基類
@@ -158,6 +167,154 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
     return chartArea;
+  }
+
+  // === 統一軸線渲染方法 ===
+  
+  /**
+   * 使用統一樣式渲染標準軸線
+   */
+  protected renderStandardAxis(
+    scale: d3.AxisScale<any>,
+    orientation: 'top' | 'right' | 'bottom' | 'left',
+    options: {
+      label?: string;
+      className?: string;
+      styles?: Partial<StandardAxisStyles>;
+      tickCount?: number;
+      tickFormat?: (domainValue: any, index: number) => string;
+      tickValues?: any[];
+      showGrid?: boolean;
+      gridConfig?: GridConfig;
+    } = {}
+  ): void {
+    if (!this.svgElement) return;
+    
+    const { 
+      label, 
+      className, 
+      styles, 
+      tickCount, 
+      tickFormat, 
+      tickValues,
+      showGrid = false,
+      gridConfig = { show: showGrid }
+    } = options;
+    
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    // 使用 AxisCore 創建軸線
+    const axisCore = new AxisCore({
+      scale,
+      orientation,
+      tickCount,
+      tickFormat,
+      tickValues,
+      showTicks: true,
+      showTickLabels: true,
+      showDomain: true
+    });
+    
+    // 創建軸線群組並設置位置
+    const svgSelection = d3.select(this.svgElement);
+    let chartArea = svgSelection.select('.chart-area') as d3.Selection<SVGGElement, unknown, null, undefined>;
+    
+    // 如果沒有找到 .chart-area，嘗試找圖表特定的類名
+    if (chartArea.empty()) {
+      chartArea = svgSelection.select(`g.${this.getChartType()}-chart`) as d3.Selection<SVGGElement, unknown, null, undefined>;
+    }
+    
+    // 如果仍然沒有找到，創建一個臨時的群組
+    if (chartArea.empty()) {
+      const { margin } = this.getChartDimensions();
+      chartArea = svgSelection
+        .append('g')
+        .attr('class', 'chart-area')
+        .attr('transform', `translate(${margin.left},${margin.top})`) as d3.Selection<SVGGElement, unknown, null, undefined>;
+    }
+    
+    const axisGroup = chartArea
+      .append('g')
+      .attr('class', className || `${orientation}-axis`)
+      .attr('transform', this.getAxisTransform(orientation, chartWidth, chartHeight));
+    
+    // 渲染軸線
+    axisCore.render(axisGroup);
+    
+    // 應用統一樣式
+    applyStandardAxisStyles(axisGroup, styles);
+    
+    // 添加軸線標籤
+    if (label) {
+      addAxisLabel(axisGroup, { text: label }, orientation, chartWidth, chartHeight);
+    }
+    
+    // 渲染網格線
+    if (showGrid && gridConfig.show) {
+      const gridOrientation = (orientation === 'left' || orientation === 'right') ? 'horizontal' : 'vertical';
+      const gridSize = gridOrientation === 'horizontal' ? chartWidth : chartHeight;
+      renderGrid(chartArea, scale, gridOrientation, gridSize, gridConfig);
+    }
+  }
+  
+  /**
+   * 獲取軸線變換位置
+   */
+  private getAxisTransform(
+    orientation: 'top' | 'right' | 'bottom' | 'left',
+    chartWidth: number,
+    chartHeight: number
+  ): string {
+    switch (orientation) {
+      case 'top': 
+        return `translate(0, 0)`;
+      case 'right': 
+        return `translate(${chartWidth}, 0)`;
+      case 'bottom': 
+        return `translate(0, ${chartHeight})`;
+      case 'left': 
+        return `translate(0, 0)`;
+      default:
+        return '';
+    }
+  }
+  
+  /**
+   * 快捷方法：渲染 X 軸（底部）
+   */
+  protected renderXAxis(
+    scale: d3.AxisScale<any>,
+    options: {
+      label?: string;
+      styles?: Partial<StandardAxisStyles>;
+      tickCount?: number;
+      tickFormat?: (domainValue: any, index: number) => string;
+      showGrid?: boolean;
+    } = {}
+  ): void {
+    this.renderStandardAxis(scale, 'bottom', {
+      ...options,
+      className: 'x-axis'
+    });
+  }
+  
+  /**
+   * 快捷方法：渲染 Y 軸（左側）
+   */
+  protected renderYAxis(
+    scale: d3.AxisScale<any>,
+    options: {
+      label?: string;
+      styles?: Partial<StandardAxisStyles>;
+      tickCount?: number;
+      tickFormat?: (domainValue: any, index: number) => string;
+      showGrid?: boolean;
+    } = {}
+  ): void {
+    this.renderStandardAxis(scale, 'left', {
+      ...options,
+      className: 'y-axis'
+    });
   }
 
   // === 公開 API ===
