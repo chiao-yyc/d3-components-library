@@ -9,6 +9,7 @@ import { createChartClipPath, createStandardDropShadow, createStandardGlow } fro
 import { BrushZoomController, CrosshairController, createBrushZoom, createCrosshair } from '../../../core/base-chart/interaction-utils';
 
 export class D3AreaChart extends BaseChart<AreaChartProps> {
+  private processedData: ProcessedAreaDataPoint[] = [];
   private seriesData: AreaSeriesData[] = [];
   private stackedData: any[] = [];
   private colorScale: any;
@@ -66,7 +67,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
     }).filter(d => !isNaN(d.y));
 
     // 按 x 值排序
-    this.processedData.sort((a, b) => {
+    this.processedData.sort((a: ProcessedAreaDataPoint, b: ProcessedAreaDataPoint) => {
       if (a.x instanceof Date && b.x instanceof Date) {
         return a.x.getTime() - b.x.getTime();
       }
@@ -77,7 +78,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
     });
 
     // 分組處理
-    const groupedData = d3.group(this.processedData, d => d.category || 'default');
+    const groupedData = d3.group(this.processedData, (d: ProcessedAreaDataPoint) => d.category || 'default');
     this.seriesData = Array.from(groupedData, ([key, values]) => ({ key, values }));
 
     // 堆疊處理
@@ -88,14 +89,14 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
     } else {
         const stack = d3.stack()
             .keys(this.seriesData.map(s => s.key))
-            .value((d: any, key) => d[key] || 0)
+            .value((d: any, key: string) => d[key] || 0)
             .order(d3.stackOrderNone)
             .offset(stackMode === 'stack' ? d3.stackOffsetNone : d3.stackOffsetExpand);
 
-        const dataForStacking = Array.from(d3.group(this.processedData, d => d.x).values()).map(values => {
+        const dataForStacking = Array.from(d3.group(this.processedData, (d: ProcessedAreaDataPoint) => d.x).values()).map(values => {
             const obj: any = { x: values[0].x };
             this.seriesData.forEach(series => {
-                const point = values.find(v => v.category === series.key);
+                const point = values.find((v: ProcessedAreaDataPoint) => v.category === series.key);
                 obj[series.key] = point ? point.y : 0;
             });
             return obj;
@@ -109,7 +110,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
                 y: d.data[layer.key],
                 y0: d[0],
                 y1: d[1],
-                originalData: this.processedData.find(p => p.x === d.data.x && p.category === layer.key)?.originalData,
+                originalData: this.processedData.find((p: ProcessedAreaDataPoint) => p.x === d.data.x && p.category === layer.key)?.originalData,
                 index: j,
                 category: layer.key
             }))
@@ -123,7 +124,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
     const { stackMode, colors } = this.props;
     const { chartWidth, chartHeight } = this.getChartDimensions();
 
-    const allValues = this.stackedData.flatMap(series => series.values);
+    const allValues = this.stackedData.flatMap((series: any) => series.values);
     if (allValues.length === 0) {
       this.scales = { xScale: d3.scaleLinear(), yScale: d3.scaleLinear(), chartWidth, chartHeight };
       return;
@@ -487,7 +488,7 @@ export class D3AreaChart extends BaseChart<AreaChartProps> {
    */
   private resetZoom(scales: { xScale: any; yScale: any }, onZoomReset?: () => void): void {
     // 重置到原始域 - 需要重新計算原始數據範圍
-    const allValues = this.stackedData.flatMap(series => series.values);
+    const allValues = this.stackedData.flatMap((series: any) => series.values);
     let originalXDomain: [any, any];
     
     const firstX = allValues[0]?.x;

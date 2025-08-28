@@ -20,8 +20,8 @@ export function useTooltip(options: UseTooltipOptions = {}): TooltipHook {
     data: null
   })
   
-  const hideTimeoutRef = useRef<NodeJS.Timeout>()
-  const showTimeoutRef = useRef<NodeJS.Timeout>()
+  const hideTimeoutRef = useRef<number | undefined>()
+  const showTimeoutRef = useRef<number | undefined>()
   
   // 清理定時器
   const clearTimeouts = useCallback(() => {
