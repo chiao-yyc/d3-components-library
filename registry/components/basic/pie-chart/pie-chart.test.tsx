@@ -4,7 +4,7 @@ import { axe } from 'jest-axe';
 import { vi } from 'vitest';
 
 import { PieChart } from './pie-chart';
-import type { PieChartProps } from './types';
+import type { PieChartProps } from './pie-chart';
 
 // Mock data for testing
 const mockData = [
@@ -19,8 +19,8 @@ const defaultProps: PieChartProps = {
   width: 400,
   height: 300,
   data: mockData,
-  labelAccessor: (d) => d.category,
-  valueAccessor: (d) => d.value,
+  labelAccessor: 'category',
+  valueAccessor: 'value',
 };
 
 describe('PieChart', () => {
@@ -29,7 +29,8 @@ describe('PieChart', () => {
     it('should render with minimal props', () => {
       render(<PieChart {...defaultProps} />);
       
-      expect(screen.getByRole('img')).toBeInTheDocument();
+      const svg = screen.getByRole('img');
+      expect(svg).toBeInTheDocument();
     });
 
     it('should render SVG element with correct dimensions', () => {

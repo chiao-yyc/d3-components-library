@@ -1,21 +1,74 @@
-import React from 'react'
-import { createChartComponent } from '../../core/base-chart/base-chart'
-import { D3RadarChart } from './core/radar-chart'
-import { RadarChartProps } from './core/types'
+// 新架構：使用 BaseChartCore + React 包裝層
+import React from 'react';
+import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base-chart/react-chart-wrapper';
+import { RadarChartCore, RadarChartCoreConfig } from './core/radar-chart-core';
 
-export const RadarChart = createChartComponent<RadarChartProps>(D3RadarChart)
+// 向下兼容：支援舊版 props
+import { RadarChartProps as LegacyRadarChartProps } from './core/types';
 
-export default RadarChart
+// 新的 props 介面
+export interface RadarChartProps extends ReactChartWrapperProps, RadarChartCoreConfig {
+  // 新架構不需要額外的 React 專用 props
+}
+
+// 創建基於 BaseChartCore 的組件
+const RadarChartComponent = createReactChartWrapper(RadarChartCore);
+
+// 主要導出
+export const RadarChart = React.forwardRef<RadarChartCore, RadarChartProps>((props, ref) => {
+  return <RadarChartComponent ref={ref} {...props} />;
+});
+
+RadarChart.displayName = 'RadarChart';
+
+// 向下兼容導出
+export const RadarChartLegacy = React.forwardRef<RadarChartCore, LegacyRadarChartProps & RadarChartProps>((props, ref) => {
+  // 將舊版 props 轉換為新版本
+  const {
+    dataKey,
+    labelKey,
+    valueKeys,
+    axes,
+    ...modernProps
+  } = props as any;
+
+  const finalProps: RadarChartProps = {
+    ...modernProps,
+    // 映射舊版資料存取模式到新版
+    labelAccessor: modernProps.labelAccessor || labelKey || 'label',
+    axisKeys: modernProps.axisKeys || valueKeys || axes || [],
+  };
+
+  return <RadarChart ref={ref} {...finalProps} />;
+});
+
+RadarChartLegacy.displayName = 'RadarChartLegacy';
+
+export default RadarChart;
 
 // 為了向下兼容，也導出個別的組件
 export { D3RadarChart } from './core/radar-chart'
 export type { 
-  RadarChartProps, 
+  RadarChartProps as LegacyRadarChartProps, 
+  ProcessedRadarDataPoint as LegacyProcessedRadarDataPoint,
+  RadarValue as LegacyRadarValue,
+  RadarAxis as LegacyRadarAxis,
+  RadarSeries as LegacySeries
+} from './core/types'
+
+// 導出新架構類型
+export type {
+  RadarChartCoreConfig,
+  RadarChartData,
   ProcessedRadarDataPoint,
   RadarValue,
   RadarAxis,
-  RadarSeries
-} from './core/types'
+  RadarSeries,
+  GridConfig,
+  AxisConfig,
+  DotConfig,
+  AreaConfig
+} from './core/radar-chart-core'
 
 // 默認配置
 export const defaultRadarChartProps: Partial<RadarChartProps> = {

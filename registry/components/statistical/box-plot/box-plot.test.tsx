@@ -4,7 +4,7 @@ import { axe } from 'jest-axe';
 import { vi } from 'vitest';
 
 import { BoxPlot } from './box-plot';
-import type { BoxPlotProps } from './types';
+import type { BoxPlotProps } from './box-plot';
 
 // Mock data for testing
 const mockData = [
@@ -26,10 +26,8 @@ const defaultProps: BoxPlotProps = {
   width: 400,
   height: 300,
   data: mockData,
-  mapping: {
-    label: 'category',
-    values: 'values'
-  },
+  labelAccessor: 'category',
+  valuesAccessor: 'values',
 };
 
 const accessorProps: BoxPlotProps = {
