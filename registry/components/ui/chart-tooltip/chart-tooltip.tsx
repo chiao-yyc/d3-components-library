@@ -30,8 +30,8 @@ export function ChartTooltip({
   const tooltipRef = useRef<HTMLDivElement>(null)
   const [adjustedPosition, setAdjustedPosition] = useState(position || { x: 0, y: 0 })
   const [actualPlacement, setActualPlacement] = useState<string>('top')
-  const hideTimeoutRef = useRef<NodeJS.Timeout>()
-  const showTimeoutRef = useRef<NodeJS.Timeout>()
+  const hideTimeoutRef = useRef<number | undefined>()
+  const showTimeoutRef = useRef<number | undefined>()
 
   // 計算調整後的位置
   const calculatePosition = useCallback(() => {
@@ -173,7 +173,7 @@ export function ChartTooltip({
           <div className="font-medium text-sm">{data.series}</div>
         )}
         <div className="text-xs">
-          {Object.entries(data.data || data).map(([key, value]) => (
+          {Object.entries(data.data || data).map(([key, value]: [string, any]) => (
             <div key={key} className="flex justify-between gap-2">
               <span className="text-gray-300">{key}:</span>
               <span className="font-medium">{String(value)}</span>
