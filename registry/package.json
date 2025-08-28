@@ -14,7 +14,10 @@
     "health-check": "node scripts/health-check.js",
     "health-check:api": "node scripts/api-validator.js",
     "health-check:types": "npm run type-check",
-    "health-check:performance": "node scripts/performance-analyzer.js"
+    "health-check:performance": "node scripts/performance-analyzer.js",
+    "docs:generate": "node scripts/generate-docs.js",
+    "docs:api": "node scripts/generate-api-docs.js",
+    "docs:all": "npm run docs:generate && npm run docs:api"
   },
   "dependencies": {
     "react": "^18.2.0",
