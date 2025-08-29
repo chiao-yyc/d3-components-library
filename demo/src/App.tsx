@@ -41,6 +41,8 @@ const ComboChartDebugDemo = lazy(() => import('./pages/ComboChartDebugDemo'))
 const LayerOrderDebugDemo = lazy(() => import('./pages/LayerOrderDebugDemo'))
 const ResponsiveChartDemo = lazy(() => import('./pages/ResponsiveChartDemo'))
 const ResponsiveTestDemo = lazy(() => import('./pages/ResponsiveTestDemo'))
+const PerformanceTestDemo = lazy(() => import('./pages/PerformanceTestDemo'))
+const VirtualScrollingDemo = lazy(() => import('./pages/VirtualScrollingDemo'))
 
 function App() {
   return (
@@ -85,6 +87,8 @@ function App() {
           <Route path="/layer-debug" element={<LayerOrderDebugDemo />} />
           <Route path="/responsive-chart" element={<ResponsiveChartDemo />} />
           <Route path="/responsive-test" element={<ResponsiveTestDemo />} />
+          <Route path="/performance-test" element={<PerformanceTestDemo />} />
+          <Route path="/virtual-scrolling" element={<VirtualScrollingDemo />} />
         </Routes>
       </Suspense>
     </Layout>

@@ -37,6 +37,11 @@ export const DataTable: React.FC<DataTableProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [currentPage, setCurrentPage] = useState(0)
 
+  // Early return if no data or columns
+  if (!data || !columns) {
+    return null
+  }
+
   // 排序邏輯
   const sortedData = React.useMemo(() => {
     if (!sortColumn) return data

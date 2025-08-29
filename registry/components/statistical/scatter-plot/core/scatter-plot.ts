@@ -689,23 +689,69 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   public getChartType(): string {
     return 'scatter';
   }
+  
+  /**
+   * 🎯 ScatterPlot 專用的預設 tooltip 內容格式化
+   */
+  protected getDefaultTooltipContent(data: any): React.ReactNode {
+    if (!data) return null;
+    
+    const { x, y, size, color, originalData } = data;
+    
+    return React.createElement('div', { className: 'text-sm space-y-1' }, [
+      // X, Y 座標值
+      React.createElement('div', { key: 'coords', className: 'font-medium text-white' }, 
+        `座標: (${x?.toFixed?.(2) || x}, ${y?.toFixed?.(2) || y})`
+      ),
+      // 尺寸資訊
+      size !== undefined && React.createElement('div', { key: 'size', className: 'text-gray-300' }, 
+        `尺寸: ${size?.toFixed?.(1) || size}`
+      ),
+      // 顏色資訊
+      color !== undefined && React.createElement('div', { key: 'color', className: 'text-gray-300' }, 
+        `顏色: ${color}`
+      ),
+      // 其他原始數據
+      originalData && Object.keys(originalData).length > 0 && 
+        React.createElement('div', { key: 'divider', className: 'border-t border-gray-600 pt-1 mt-1' }),
+      originalData && Object.entries(originalData)
+        .filter(([key]) => !['x', 'y', 'size', 'color'].includes(key))
+        .slice(0, 3) // 限制顯示前3個額外屬性
+        .map(([key, value]) => 
+          React.createElement('div', { key, className: 'flex justify-between gap-2 text-xs' }, [
+            React.createElement('span', { key: 'label', className: 'text-gray-400' }, `${key}:`),
+            React.createElement('span', { key: 'value', className: 'text-gray-200' }, String(value))
+          ])
+        )
+    ].filter(Boolean));
+  }
 
   protected setupEventListeners(): void {
-    const { onDataClick, onHover, interactive } = this.props;
+    const { onDataClick, onHover, interactive = true } = this.props;
     
     if (!interactive) return;
 
     if (this.scatterGroup) {
       this.scatterGroup.selectAll('.dot')
-        .on('click', onDataClick ? (event, d: any) => {
-          onDataClick(d);
-        } : null)
-        .on('mouseover', onHover ? (event, d: any) => {
-          onHover(d);
-        } : null)
-        .on('mouseout', onHover ? () => {
-          onHover(null);
-        } : null);
+        // 🎯 使用統一的事件處理系統
+        .on('click', (event, d: any) => {
+          // 調用統一的點擊處理
+          this.handleDataClick(event, d);
+          // 向下兼容
+          onDataClick?.(d);
+        })
+        .on('mouseover', (event, d: any) => {
+          // 🎯 顯示統一的 tooltip
+          this.showTooltip(event, d);
+          // 向下兼容
+          onHover?.(d);
+        })
+        .on('mouseout', (event) => {
+          // 🎯 隱藏統一的 tooltip
+          this.hideTooltip();
+          // 向下兼容
+          onHover?.(null);
+        });
     }
   }
 

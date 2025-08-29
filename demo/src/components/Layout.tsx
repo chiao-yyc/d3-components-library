@@ -95,6 +95,8 @@ function Layout({ children }: LayoutProps) {
       items: [
         { path: '/modular-test', name: '組件測試', icon: '🧩' },
         { path: '/data-processor-test', name: '數據處理測試', icon: '🔬' },
+        { path: '/performance-test', name: '性能測試', icon: '⚡' },
+        { path: '/virtual-scrolling', name: '虛擬滾動', icon: '🚀' },
         { path: '/combo-debug', name: 'Combo 圖表除錯', icon: '🔧' },
         { path: '/layer-debug', name: '圖層調試', icon: '📚' }
       ]

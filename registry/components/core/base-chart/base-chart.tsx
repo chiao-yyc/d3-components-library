@@ -32,6 +32,23 @@ import {
   AnimationConfig
 } from './interaction-animation-utils'
 
+// 匯入 tooltip 相關類型和組件
+import type { TooltipFormatter, TooltipData } from '../../ui/chart-tooltip/types'
+import { ChartTooltip } from '../../ui/chart-tooltip/chart-tooltip'
+
+// Tooltip 配置介面
+export interface TooltipConfig {
+  enabled?: boolean                          // 基本開關
+  mode?: 'auto' | 'always' | 'disabled'     // 顯示策略
+  theme?: 'light' | 'dark' | 'auto'         // 主題
+  performanceThreshold?: number             // 大數據集禁用閾值
+  disableOnLargeDataset?: boolean          // 是否在大數據集時自動禁用
+  throttleMs?: number                      // 節流延遲 (ms)
+  format?: TooltipFormatter                // 自定義格式化函數
+  hideDelay?: number                       // 隱藏延遲
+  showDelay?: number                       // 顯示延遲
+}
+
 // 預設配置常數
 const DEFAULT_CHART_CONFIG = {
   responsive: true,        // 🎯 響應式優先
@@ -44,7 +61,14 @@ const DEFAULT_CHART_CONFIG = {
   fallbackHeight: 450,    // 後備高度 (維持 4:3 比例)
   animate: true,          // 預設動畫
   animationDuration: 800, // 動畫時長
-  showTooltip: true       // 預設工具提示
+  showTooltip: true,      // 預設工具提示
+  tooltip: {              // 預設 tooltip 配置
+    enabled: true,
+    mode: 'auto' as const,
+    theme: 'dark' as const,
+    performanceThreshold: 50000,
+    disableOnLargeDataset: true
+  }
 }
 
 export interface BaseChartProps {
@@ -72,7 +96,14 @@ export interface BaseChartProps {
   style?: React.CSSProperties
   animate?: boolean        // 預設 true
   animationDuration?: number // 預設 800
-  showTooltip?: boolean    // 預設 true
+  
+  // 🎯 統一 Tooltip 配置
+  showTooltip?: boolean    // 預設 true (向下兼容)
+  tooltip?: TooltipConfig  // 新的統一配置介面
+  tooltipFormatter?: TooltipFormatter // 便利的格式化函數 (向下兼容)
+  onDataHover?: (data: any, event?: Event) => void // 標準事件處理器
+  onDataClick?: (data: any, event?: Event) => void // 標準事件處理器
+  
   onError?: (error: Error) => void
   
   // 調試用（開發階段）
@@ -95,6 +126,7 @@ export interface BaseChartState {
     y: number
     content: ReactNode
     visible: boolean
+    data?: any  // 添加數據引用
   } | null
   isLoading: boolean
   error: Error | null
@@ -112,6 +144,10 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected groupFilterManager?: GroupFilterManager
   protected interactionComposer?: InteractionComposer
   protected transitionManager?: TransitionManager
+  
+  // 🎯 統一 Tooltip 管理
+  protected tooltipConfig: TooltipConfig
+  protected shouldShowTooltip: boolean = true
 
   constructor(props: TProps) {
     console.log('🎯 BaseChart constructor called with props:', {
@@ -127,6 +163,9 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       error: null
     }
     
+    // 🎯 初始化 tooltip 配置
+    this.initializeTooltipConfig()
+    
     // Initialize group functionality if enabled
     this.initializeGroupManagers()
   }
@@ -136,6 +175,38 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected abstract createScales(): any
   protected abstract renderChart(): void
   protected abstract getChartType(): string
+
+  // 🎯 初始化 tooltip 配置和狀態
+  protected initializeTooltipConfig(): void {
+    const { showTooltip = true, tooltip = {}, data } = this.props
+    
+    // 合併配置，優先使用新的 tooltip 配置，向下兼容 showTooltip
+    this.tooltipConfig = {
+      ...DEFAULT_CHART_CONFIG.tooltip,
+      ...tooltip,
+      enabled: tooltip.enabled !== undefined ? tooltip.enabled : showTooltip
+    }
+    
+    // 智慧決策：根據數據量決定是否顯示 tooltip
+    const dataSize = data?.length || 0
+    const shouldAutoDisable = this.tooltipConfig.disableOnLargeDataset && 
+                             dataSize > (this.tooltipConfig.performanceThreshold || 50000)
+    
+    if (shouldAutoDisable && this.tooltipConfig.mode === 'auto') {
+      this.shouldShowTooltip = false
+      console.log(`🎯 Tooltip 自動禁用: 數據量 ${dataSize} 超過閾值 ${this.tooltipConfig.performanceThreshold}`)
+    } else if (this.tooltipConfig.mode === 'disabled') {
+      this.shouldShowTooltip = false
+    } else {
+      this.shouldShowTooltip = this.tooltipConfig.enabled || false
+    }
+    
+    console.log('🎯 Tooltip 配置已初始化:', {
+      config: this.tooltipConfig,
+      shouldShow: this.shouldShowTooltip,
+      dataSize
+    })
+  }
 
   // Initialize group managers based on props
   protected initializeGroupManagers(): void {
@@ -173,6 +244,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   public update(newProps: TProps) {
     
     this.props = newProps; // Update internal props
+    this.initializeTooltipConfig(); // Re-initialize tooltip config
     this.initializeGroupManagers(); // Re-initialize group managers with new props
     
     if (this.svgRef?.current) { // Only proceed if SVG is ready
@@ -400,6 +472,99 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   protected setState(newState: Partial<BaseChartState>) {
     this.state = { ...this.state, ...newState }
     // 觸發 React 重新渲染的機制將由 createChartComponent 處理
+  }
+
+  // 🎯 統一 Tooltip 事件處理方法
+  
+  /**
+   * 顯示 tooltip
+   */
+  protected showTooltip(event: MouseEvent | Event, data: any): void {
+    if (!this.shouldShowTooltip) return
+    
+    const position = this.getTooltipPosition(event)
+    const content = this.formatTooltipContent(data)
+    
+    this.setState({
+      tooltip: {
+        x: position.x,
+        y: position.y,
+        content,
+        visible: true,
+        data
+      }
+    })
+    
+    // 調用用戶自定義處理器
+    this.props.onDataHover?.(data, event)
+  }
+  
+  /**
+   * 隱藏 tooltip
+   */
+  protected hideTooltip(): void {
+    this.setState({
+      tooltip: this.state.tooltip ? { ...this.state.tooltip, visible: false } : null
+    })
+    
+    // 調用用戶自定義處理器
+    this.props.onDataHover?.(null)
+  }
+  
+  /**
+   * 處理數據點擊事件
+   */
+  protected handleDataClick(event: MouseEvent | Event, data: any): void {
+    this.props.onDataClick?.(data, event)
+  }
+  
+  /**
+   * 從事件中獲取 tooltip 位置
+   */
+  private getTooltipPosition(event: Event): { x: number; y: number } {
+    if (event instanceof MouseEvent) {
+      return { x: event.clientX, y: event.clientY }
+    }
+    // 後備位置
+    return { x: 0, y: 0 }
+  }
+  
+  /**
+   * 格式化 tooltip 內容
+   */
+  private formatTooltipContent(data: any): ReactNode {
+    const { tooltipFormatter, tooltip } = this.props
+    
+    // 優先使用 props 中的格式化函數
+    if (tooltipFormatter) {
+      return tooltipFormatter({ data, series: this.getChartType() })
+    }
+    
+    // 使用 tooltip 配置中的格式化函數
+    if (tooltip?.format) {
+      return tooltip.format({ data, series: this.getChartType() })
+    }
+    
+    // 預設格式化
+    return this.getDefaultTooltipContent(data)
+  }
+  
+  /**
+   * 獲取預設 tooltip 內容
+   */
+  protected getDefaultTooltipContent(data: any): ReactNode {
+    if (!data) return null
+    
+    return (
+      <div className="text-sm">
+        {Object.entries(data).map(([key, value]) => (
+          <div key={key} className="flex justify-between gap-2">
+            <span className="text-gray-300">{key}:</span>
+            <span className="font-medium">{String(value)}</span>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   protected handleError(error: Error) {
@@ -640,20 +805,27 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
           style={responsive ? { maxWidth: '100%' } : {}}
         />
         
-        {/* 工具提示 */}
-        {tooltip && tooltip.visible && currentProps.showTooltip && (
-          <div
-            className="absolute z-50 pointer-events-none px-3 py-2 text-sm bg-gray-800 text-white rounded shadow-lg whitespace-nowrap"
-            style={{
-              left: tooltip.x + 10,
-              top: tooltip.y - 10,
-              maxWidth: '300px'
-            }}
-          >
-            {tooltip.content}
-          </div>
-        )}
+        {/* 🎯 統一 Tooltip 系統 */}
+        {tooltip && tooltip.visible && this.shouldShowTooltip && this.renderTooltip(tooltip)}
       </div>
+    )
+  }
+  
+  /**
+   * 🎯 渲染統一的 Tooltip 組件
+   */
+  private renderTooltip(tooltip: NonNullable<BaseChartState['tooltip']>): ReactNode {
+    return (
+      <ChartTooltip
+        visible={tooltip.visible}
+        position={{ x: tooltip.x, y: tooltip.y }}
+        content={tooltip.content}
+        theme={this.tooltipConfig.theme}
+        hideDelay={this.tooltipConfig.hideDelay}
+        showDelay={this.tooltipConfig.showDelay}
+        animate={this.props.animate}
+        animationDuration={200}
+      />
     )
   }
 
