@@ -60,7 +60,8 @@ function Layout({ children }: LayoutProps) {
         { path: '/funnel-chart', name: '漏斗圖', icon: '🎯' },
         { path: '/gauge-chart', name: '儀表盤', icon: '⏱️' },
         { path: '/candlestick', name: 'K線圖', icon: '📊' },
-        { path: '/tree-map', name: '樹狀圖', icon: '🌳' }
+        { path: '/tree-map', name: '樹狀圖', icon: '🌳' },
+        { path: '/correlogram', name: '相關性分析', icon: '🔗' }
       ]
     },
     {
@@ -103,8 +104,7 @@ function Layout({ children }: LayoutProps) {
       tier: 3,
       description: '提升開發效率',
       items: [
-        { path: '/data-mapper', name: '資料映射器', icon: '🗂️' },
-        { path: '/correlogram', name: '相關性分析', icon: '🔗' }
+        { path: '/data-mapper', name: '資料映射器', icon: '🗂️' }
       ]
     }
   ]

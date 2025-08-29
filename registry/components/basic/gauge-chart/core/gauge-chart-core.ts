@@ -99,15 +99,16 @@ export interface GaugeChartCoreConfig extends BaseChartCoreConfig {
 
 // 主要的 GaugeChart 核心類
 export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
-  private processedData: ProcessedGaugeDataPoint = { value: 0, originalData: {} as any };
+  private processedGaugeData: ProcessedGaugeDataPoint = { value: 0, originalData: {} as any };
   private scales: Record<string, any> = {};
   private arcGenerator: d3.Arc<any, d3.DefaultArcObject> | null = null;
   private colorScale: ColorScale | null = null;
   private gaugeGroup: D3Selection | null = null;
+  private chartGroup: D3Selection | null = null;
 
   constructor(
     config: GaugeChartCoreConfig,
-    callbacks?: ChartStateCallbacks<GaugeChartData>
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
   }
@@ -185,7 +186,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     return this.scales;
   }
 
-  protected processData(): ProcessedGaugeDataPoint[] {
+  protected processData(): ChartData<GaugeChartData>[] {
     const config = this.config as GaugeChartCoreConfig;
     const { data, value, min = 0, max = 100, valueAccessor, labelAccessor } = config;
     
@@ -217,13 +218,14 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     // 確保數值在範圍內
     processedValue = Math.max(min, Math.min(max, processedValue));
     
-    this.processedData = {
+    this.processedGaugeData = {
       value: processedValue,
       label: processedLabel,
       originalData: data?.[0] || { value: processedValue } as any
     };
 
-    return [this.processedData];
+    // 返回符合 BaseChartCore 期待的格式
+    return data || [{ value: processedValue, label: processedLabel } as any];
   }
 
   private calculateTickData(): TickData[] {
@@ -257,7 +259,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     const config = this.config as GaugeChartCoreConfig;
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
-    if (!this.processedData || typeof this.processedData.value !== 'number') {
+    if (!this.processedGaugeData || typeof this.processedGaugeData.value !== 'number') {
       this.chartGroup.selectAll('*').remove();
       return;
     }
@@ -317,7 +319,12 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     this.gaugeGroup.attr('transform', `translate(${centerX}, ${centerY})`);
 
     // 背景弧線
-    const backgroundArc = this.arcGenerator!({ startAngle: startAngleRad, endAngle: endAngleRad });
+    const backgroundArc = this.arcGenerator!({
+      startAngle: startAngleRad,
+      endAngle: endAngleRad,
+      innerRadius: calculatedInnerRadius,
+      outerRadius: calculatedOuterRadius
+    });
     if (backgroundArc) {
       this.gaugeGroup
         .append('path')
@@ -331,7 +338,12 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
       zones.forEach((zone, i) => {
         const zoneStartAngle = angleScale(Math.max(zone.min, min));
         const zoneEndAngle = angleScale(Math.min(zone.max, max));
-        const zoneArc = this.arcGenerator!({ startAngle: zoneStartAngle, endAngle: zoneEndAngle });
+        const zoneArc = this.arcGenerator!({
+          startAngle: zoneStartAngle,
+          endAngle: zoneEndAngle,
+          innerRadius: calculatedInnerRadius,
+          outerRadius: calculatedOuterRadius
+        });
         if (zoneArc) {
           this.gaugeGroup!
             .append('path')
@@ -341,13 +353,18 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
         }
       });
     } else {
-      const valueAngle = angleScale(this.processedData.value);
-      const valueArc = this.arcGenerator!({ startAngle: startAngleRad, endAngle: valueAngle });
+      const valueAngle = angleScale(this.processedGaugeData.value);
+      const valueArc = this.arcGenerator!({
+        startAngle: startAngleRad,
+        endAngle: valueAngle,
+        innerRadius: calculatedInnerRadius,
+        outerRadius: calculatedOuterRadius
+      });
       if (valueArc) {
         const valueColor = colorScale ?
           (typeof colorScale.getColor === 'function' ?
-            colorScale.getColor(this.processedData.value) :
-            colorScale(this.processedData.value)) :
+            colorScale.getColor(this.processedGaugeData.value) :
+            colorScale(this.processedGaugeData.value)) :
           foregroundColor;
 
         const valuePath = this.gaugeGroup!
@@ -357,7 +374,12 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
           .attr('stroke', 'none');
 
         if (animate) {
-          const initialArc = this.arcGenerator!({ startAngle: startAngleRad, endAngle: startAngleRad });
+          const initialArc = this.arcGenerator!({
+            startAngle: startAngleRad,
+            endAngle: startAngleRad,
+            innerRadius: calculatedInnerRadius,
+            outerRadius: calculatedOuterRadius
+          });
           if (initialArc) {
             valuePath
               .attr('d', initialArc)
@@ -366,7 +388,12 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
               .ease(d3.easeCubicOut)
               .attrTween('d', () => {
                 const interpolate = d3.interpolate(startAngleRad, valueAngle);
-                return (t: number) => this.arcGenerator!({ startAngle: startAngleRad, endAngle: interpolate(t) }) || '';
+                return (t: number) => this.arcGenerator!({
+                  startAngle: startAngleRad,
+                  endAngle: interpolate(t),
+                  innerRadius: calculatedInnerRadius,
+                  outerRadius: calculatedOuterRadius
+                }) || '';
               });
           }
         }
@@ -404,7 +431,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     const { angleScale, calculatedOuterRadius } = this.scales;
 
     const needleLength = calculatedOuterRadius + 10;
-    const targetAngleDegrees = angleScale(this.processedData.value) * 180 / Math.PI;
+    const targetAngleDegrees = angleScale(this.processedGaugeData.value) * 180 / Math.PI;
 
     // 創建指針組
     const needleGroup = this.gaugeGroup!
@@ -523,7 +550,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
 
   private setupInteractions(): void {
     const config = this.config as GaugeChartCoreConfig;
-    const { interactive = true, showTooltip = true, onGaugeClick, onGaugeHover } = config;
+    const { interactive = true, onGaugeClick, onGaugeHover } = config;
 
     if (!interactive) return;
 
@@ -534,33 +561,29 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
 
     interactiveElements
       .on('click', (event) => {
-        onGaugeClick?.(this.processedData, event);
+        onGaugeClick?.(this.processedGaugeData, event);
       })
       .on('mouseenter', (event) => {
-        onGaugeHover?.(this.processedData, event);
-        if (showTooltip) {
-          this.showTooltip(event);
-        }
+        onGaugeHover?.(this.processedGaugeData, event);
+        this.showGaugeTooltip(event);
       })
       .on('mouseleave', (event) => {
         onGaugeHover?.(null, event);
-        if (showTooltip) {
-          this.hideTooltip();
-        }
+        this.hideGaugeTooltip();
       });
   }
 
-  private showTooltip(event: Event): void {
+  private showGaugeTooltip(event: Event): void {
     const config = this.config as GaugeChartCoreConfig;
     const { tooltipFormat } = config;
 
-    let content = `Value: ${this.processedData.value}`;
-    if (this.processedData.label) {
-      content += `<br>Label: ${this.processedData.label}`;
+    let content = `Value: ${this.processedGaugeData.value}`;
+    if (this.processedGaugeData.label) {
+      content += `<br>Label: ${this.processedGaugeData.label}`;
     }
 
     if (tooltipFormat) {
-      const formattedContent = tooltipFormat(this.processedData.value, this.processedData.label);
+      const formattedContent = tooltipFormat(this.processedGaugeData.value, this.processedGaugeData.label);
       content = typeof formattedContent === 'string' ? formattedContent : content;
     }
 
@@ -588,7 +611,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
       .style('top', (mouseEvent.pageY - 10) + 'px');
   }
 
-  private hideTooltip(): void {
+  private hideGaugeTooltip(): void {
     d3.select('.gauge-tooltip').remove();
   }
 
@@ -600,7 +623,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
 
   // 公共方法：獲取當前數據
   public getCurrentData(): ProcessedGaugeDataPoint {
-    return this.processedData;
+    return this.processedGaugeData;
   }
 
   // 公共方法：設置新的值
@@ -609,7 +632,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     const { min = 0, max = 100 } = config;
     
     const clampedValue = Math.max(min, Math.min(max, newValue));
-    this.processedData.value = clampedValue;
+    this.processedGaugeData.value = clampedValue;
     
     if (animate) {
       this.renderChart();
