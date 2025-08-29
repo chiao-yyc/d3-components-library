@@ -152,7 +152,7 @@ export interface StatusDisplayProps {
 }
 
 export const StatusDisplay: React.FC<StatusDisplayProps> = ({ items, className = '' }) => {
-  if (items.length === 0) return null
+  if (!items || items.length === 0) return null
 
   return (
     <motion.div

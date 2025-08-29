@@ -10,7 +10,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
 // 控制項類型定義
 export interface ControlConfig {
-  type: 'select' | 'range' | 'checkbox'
+  type: 'select' | 'range' | 'checkbox' | 'button'
   label: string
 }
 
@@ -36,7 +36,16 @@ export interface CheckboxConfig extends ControlConfig {
   onChange: (checked: boolean) => void
 }
 
-export type Control = SelectConfig | RangeConfig | CheckboxConfig
+export interface ButtonConfig extends ControlConfig {
+  type: 'button'
+  onClick: () => void
+  loading?: boolean
+  disabled?: boolean
+  variant?: 'primary' | 'secondary' | 'danger'
+  tooltip?: string
+}
+
+export type Control = SelectConfig | RangeConfig | CheckboxConfig | ButtonConfig
 
 export interface ModernControlPanelProps {
   title?: string
@@ -81,6 +90,18 @@ const renderControl = (control: Control, index: number) => {
           label={control.label}
           checked={control.checked}
           onChange={control.onChange}
+        />
+      )
+    case 'button':
+      return (
+        <ButtonControl
+          key={index}
+          label={control.label}
+          onClick={control.onClick}
+          loading={control.loading}
+          disabled={control.disabled}
+          variant={control.variant}
+          tooltip={control.tooltip}
         />
       )
     default:
@@ -350,6 +371,64 @@ export const ToggleControl: React.FC<ToggleControlProps> = ({
           </p>
         )}
       </div>
+    </motion.div>
+  )
+}
+
+// 按鈕控制組件
+export interface ButtonControlProps {
+  label: string
+  onClick: () => void
+  loading?: boolean
+  disabled?: boolean
+  variant?: 'primary' | 'secondary' | 'danger'
+  tooltip?: string
+  className?: string
+}
+
+export const ButtonControl: React.FC<ButtonControlProps> = ({
+  label,
+  onClick,
+  loading = false,
+  disabled = false,
+  variant = 'primary',
+  tooltip,
+  className = ''
+}) => {
+  const variantStyles = {
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-700',
+    danger: 'bg-red-600 hover:bg-red-700 text-white'
+  }
+
+  return (
+    <motion.div className={`space-y-2 ${className}`}>
+      <motion.button
+        onClick={onClick}
+        disabled={disabled || loading}
+        whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
+        whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
+        title={tooltip}
+        className={`
+          w-full px-4 py-3 rounded-lg font-medium text-sm
+          transition-all duration-200 ease-out
+          disabled:opacity-50 disabled:cursor-not-allowed
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          ${variantStyles[variant]}
+          ${loading ? 'cursor-wait' : ''}
+        `}
+      >
+        <div className="flex items-center justify-center gap-2">
+          {loading && (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+            />
+          )}
+          <span>{label}</span>
+        </div>
+      </motion.button>
     </motion.div>
   )
 }
