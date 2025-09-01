@@ -28,14 +28,23 @@ export function ChartTooltip({
   ...props
 }: ChartTooltipProps) {
   const tooltipRef = useRef<HTMLDivElement>(null)
-  const [adjustedPosition, setAdjustedPosition] = useState(position || { x: 0, y: 0 })
+  const [adjustedPosition, setAdjustedPosition] = useState(() => {
+    if (!position) return { x: 0, y: 0 }
+    // 🎯 立即應用 offset 到初始位置
+    return {
+      x: position.x + offset.x,
+      y: position.y + offset.y
+    }
+  })
   const [actualPlacement, setActualPlacement] = useState<string>('top')
   const hideTimeoutRef = useRef<number | undefined>()
   const showTimeoutRef = useRef<number | undefined>()
 
   // 計算調整後的位置
   const calculatePosition = useCallback(() => {
-    if (!tooltipRef.current || !visible || !position) return
+    if (!tooltipRef.current || !visible || !position) {
+      return;
+    }
 
     const tooltip = tooltipRef.current
     const rect = tooltip.getBoundingClientRect()
@@ -49,8 +58,14 @@ export function ChartTooltip({
     let adjustedY = position.y + offset.y
     let actualPlacement = placement
 
+    // 🎯 如果 placement 是 'none'，使用原始位置但仍應用 offset
+    if (placement === 'none') {
+      setAdjustedPosition({ x: position.x + offset.x, y: position.y + offset.y })
+      setActualPlacement('none')
+      return  // 早期返回，跳過自動位置調整邏輯
+    }
     // 自動調整位置
-    if (placement === 'auto') {
+    else if (placement === 'auto') {
       const spaceTop = position.y - boundaryRect.top
       const spaceBottom = boundaryRect.bottom - position.y
       const spaceLeft = position.x - boundaryRect.left
@@ -109,13 +124,15 @@ export function ChartTooltip({
 
     setAdjustedPosition({ x: adjustedX, y: adjustedY })
     setActualPlacement(actualPlacement)
-  }, [position, offset, placement, container, boundary, visible])
+  }, [position, offset, placement, container, boundary])
 
   // 當位置改變時重新計算
   useEffect(() => {
     if (visible) {
       // 延遲計算以確保 DOM 已更新
-      const timer = setTimeout(calculatePosition, 0)
+      const timer = setTimeout(() => {
+        calculatePosition();
+      }, 0)
       return () => clearTimeout(timer)
     }
   }, [visible, position, calculatePosition])
@@ -227,6 +244,7 @@ export function ChartTooltip({
 
   if (!visible) return null
 
+
   return (
     <div
       ref={tooltipRef}
@@ -250,6 +268,7 @@ export function ChartTooltip({
         left: adjustedPosition.x,
         top: adjustedPosition.y,
         maxWidth,
+        zIndex: 9999,
         ...arrowStyle,
         ...style,
       }}
