@@ -58,11 +58,22 @@ export interface ScatterPlotCoreConfig extends BaseChartCoreConfig {
   xAxisLabel?: string;
   yAxisLabel?: string;
   
+  // 新增：統一軸線系統配置
+  xTickCount?: number;
+  yTickCount?: number;
+  xTickFormat?: (domainValue: any, index: number) => string;
+  yTickFormat?: (domainValue: any, index: number) => string;
+  
   // 特殊功能
   showTrendline?: boolean;
   enableBrushZoom?: boolean;
   enableCrosshair?: boolean;
   enableVoronoi?: boolean;
+  
+  // 智能邊距功能
+  autoMargin?: boolean;              // 自動邊距，默認 true
+  paddingRatio?: number;             // 邊距比例，默認 0.05 (5%)
+  minPadding?: number;               // 最小邊距像素，默認 5px
   
   // 事件處理
   onDataClick?: (data: ProcessedScatterDataPoint, event: Event) => void;
@@ -72,10 +83,15 @@ export interface ScatterPlotCoreConfig extends BaseChartCoreConfig {
 
 // 主要的 ScatterPlot 核心類
 export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
-  private processedData: ProcessedScatterDataPoint[] = [];
+  private scatterProcessedData: ProcessedScatterDataPoint[] = [];
   private colorScale: ColorScale | null = null;
   private sizeScale: d3.ScaleLinear<number, number> | null = null;
   private trendlineData: { x: number; y: number }[] | null = null;
+  
+  // 添加缺失的屬性
+  private chartGroup: D3Selection | null = null;
+  private chartWidth: number = 0;
+  private chartHeight: number = 0;
   private scatterGroup: D3Selection | null = null;
   
   // 交互控制器
@@ -85,38 +101,35 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
 
   constructor(
     config: ScatterPlotCoreConfig,
-    callbacks?: ChartStateCallbacks<ScatterPlotData>
+    callbacks = {}
   ) {
     super(config, callbacks);
   }
 
-  protected processData(): { 
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>;
-    yScale: d3.ScaleLinear<number, number>;
-    data: ProcessedScatterDataPoint[] 
-  } {
+  protected processData(): ChartData<ScatterPlotData>[] {
     const config = this.config as ScatterPlotCoreConfig;
-    const { data, xAccessor, yAccessor, sizeAccessor, colorAccessor } = config;
-
-    if (!data || data.length === 0) {
-      this.processedData = [];
-      return {
-        xScale: d3.scaleLinear().range([0, this.chartWidth]),
-        yScale: d3.scaleLinear().range([this.chartHeight, 0]),
-        data: []
-      };
+    
+    // 使用基類的數據驗證
+    if (!this.validateData()) {
+      this.scatterProcessedData = [];
+      return [];
     }
     
+    const { data, xAccessor, yAccessor, sizeAccessor, colorAccessor } = config;
+    
     // 處理數據點 - 使用與 FunnelChartCore 相同的模式
-    this.processedData = data.map((item, index) => {
+    this.scatterProcessedData = data.map((item, index) => {
       // 處理 X 值
       let x: number | Date;
       if (typeof xAccessor === 'function') {
-        x = xAccessor(item, index, data);
+        const xValue = xAccessor(item, index, data);
+        x = (typeof xValue === 'string') ? parseFloat(xValue) || 0 : xValue;
       } else if (typeof xAccessor === 'string' || typeof xAccessor === 'number') {
-        x = item[xAccessor] as number | Date;
+        const xValue = item[xAccessor];
+        x = (typeof xValue === 'string') ? parseFloat(xValue) || 0 : xValue as number | Date;
       } else {
-        x = item.x as number | Date;
+        const xValue = item.x;
+        x = (typeof xValue === 'string') ? parseFloat(xValue) || 0 : xValue as number | Date;
       }
 
       // 處理 Y 值
@@ -159,16 +172,40 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
       };
     });
 
-    // 創建比例尺
-    const xValues = this.processedData.map(d => d.x);
-    const yValues = this.processedData.map(d => d.y);
+    // 返回原始數據以符合 BaseChartCore 介面
+    return data;
+  }
+
+  protected createScales(): Record<string, any> {
+    const config = this.config as ScatterPlotCoreConfig;
+    const { sizeAccessor, colorAccessor } = config;
+
+    if (!this.scatterProcessedData || this.scatterProcessedData.length === 0) {
+      return {
+        xScale: d3.scaleLinear().range([0, this.chartWidth]),
+        yScale: d3.scaleLinear().range([this.chartHeight, 0])
+      };
+    }
+    
+    // 檢查圖表尺寸是否有效
+    if (this.chartWidth <= 0 || this.chartHeight <= 0) {
+      // 返回基本比例尺，等待正確的尺寸
+      return { 
+        xScale: d3.scaleLinear().range([0, 800]),
+        yScale: d3.scaleLinear().range([400, 0])
+      };
+    }
+
+    // 創建 X 和 Y 比例尺
+    const xValues = this.scatterProcessedData.map(d => d.x);
+    const yValues = this.scatterProcessedData.map(d => d.y);
     
     const xScale = this.createXScale(xValues);
     const yScale = this.createYScale(yValues);
     
     // 創建尺寸比例尺
     if (sizeAccessor) {
-      const sizeValues = this.processedData.map(d => d.size).filter(s => s !== undefined) as number[];
+      const sizeValues = this.scatterProcessedData.map(d => d.size).filter(s => s !== undefined) as number[];
       if (sizeValues.length > 0) {
         this.sizeScale = d3.scaleLinear()
           .domain(d3.extent(sizeValues) as [number, number])
@@ -178,41 +215,118 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
 
     // 創建顏色比例尺
     if (colorAccessor && config.colors) {
-      this.colorScale = createColorScale(config.colors, this.processedData.length);
+      this.colorScale = createColorScale(config.colors, this.scatterProcessedData.length);
     }
 
-    return { xScale, yScale, data: this.processedData };
+    return {
+      xScale,
+      yScale,
+      sizeScale: this.sizeScale,
+      colorScale: this.colorScale
+    };
   }
+
+  /**
+   * 計算當前配置下的最大點半徑
+   */
+  private calculateMaxPointRadius(): number {
+    const config = this.config as ScatterPlotCoreConfig;
+    const baseRadius = config.pointRadius || 4;
+    
+    // 如果有 sizeScale，使用最大值
+    if (this.sizeScale && config.maxPointSize) {
+      return config.maxPointSize;
+    }
+    
+    return baseRadius;
+  }
+
+  // 移除本地的 calculateSmartPadding 方法，使用 BaseChartCore 的通用方法
 
   private createXScale(values: (number | Date)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
+    
+    // 使用 BaseChartCore 的通用智能邊距方法
+    const maxRadius = this.calculateMaxPointRadius();
+    const [rangeStart, rangeEnd] = this.getSmartScaleRange(this.chartWidth, maxRadius, 'points', false);
     
     // 檢查是否為日期類型
     if (values[0] instanceof Date) {
       return d3.scaleTime()
         .domain(d3.extent(values) as [Date, Date])
-        .range([0, this.chartWidth]);
+        .range([rangeStart, rangeEnd]);
     }
     
     // 數值類型
     return d3.scaleLinear()
       .domain(d3.extent(values as number[]) as [number, number])
-      .range([0, this.chartWidth]);
+      .range([rangeStart, rangeEnd]);
   }
 
   private createYScale(values: number[]): d3.ScaleLinear<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
     
+    // 使用 BaseChartCore 的通用智能邊距方法
+    const maxRadius = this.calculateMaxPointRadius();
+    const [rangeStart, rangeEnd] = this.getSmartScaleRange(this.chartHeight, maxRadius, 'points', true);
+    
     return d3.scaleLinear()
       .domain(d3.extent(values) as [number, number])
-      .range([this.chartHeight, 0]);
+      .range([rangeStart, rangeEnd]);
   }
 
   protected renderChart(): void {
-    if (!this.chartGroup || this.processedData.length === 0) return;
+    // 先確保有數據
+    if (!this.scatterProcessedData || this.scatterProcessedData.length === 0) {
+      return;
+    }
+    
+    // 始終重新計算圖表尺寸（修復位置！）
+    const margin = this.config.margin || { top: 20, right: 20, bottom: 60, left: 60 };
+    const width = (this.config.width || 600);
+    const height = (this.config.height || 400);
+    this.chartWidth = width - margin.left - margin.right;
+    this.chartHeight = height - margin.top - margin.bottom;
+    
+    // 現在檢查圖表尺寸是否有效
+    if (this.chartWidth <= 0 || this.chartHeight <= 0) {
+      return;
+    }
+    
+    // 創建或更新 chartGroup
+    if (!this.chartGroup) {
+      const svg = d3.select(this.svgElement!);
+      
+      // 清除現有內容
+      svg.selectAll('*').remove();
+      
+      // 創建圖表區域
+      this.chartGroup = svg
+        .append('g')
+        .attr('class', 'scatter-plot-chart')
+        .attr('transform', `translate(${margin.left},${margin.top})`) as unknown as D3Selection;
+    } else if (this.chartGroup) {
+      // 如果 chartGroup 已存在，只清理其內容，不重新創建
+      this.chartGroup.selectAll('*').remove();
+    }
 
     const config = this.config as ScatterPlotCoreConfig;
-    const { xScale, yScale } = this.processData();
+    
+    // 注意：processData() 已經在基類的 initialize() 中被調用，
+    // 並且 this.scatterProcessedData 已經在那裡被設置了
+    // 這裡只需要確保數據存在
+    if (!this.scatterProcessedData || this.scatterProcessedData.length === 0) {
+      return;
+    }
+    
+    // 創建比例尺
+    const scales = this.createScales();
+    const { xScale, yScale } = scales;
+    
+    // 確保 chartGroup 存在
+    if (!this.chartGroup) {
+      return;
+    }
 
     // 清除之前的內容
     this.chartGroup.selectAll('*').remove();
@@ -220,17 +334,33 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     // 創建散點組
     this.scatterGroup = this.chartGroup
       .append('g')
-      .attr('class', 'scatter-points');
+      .attr('class', 'scatter-points') as unknown as D3Selection;
 
     // 渲染數據點
     this.renderDataPoints(xScale, yScale);
 
     // 渲染軸線
-    if (config.showXAxis !== false) this.renderXAxis(xScale);
-    if (config.showYAxis !== false) this.renderYAxis(yScale);
+    // 使用 BaseChartCore 的統一軸線系統
+    if (config.showXAxis !== false) {
+      this.renderXAxis(xScale, {
+        label: config.xAxisLabel,
+        tickCount: config.xTickCount,
+        tickFormat: config.xTickFormat,
+        showGrid: config.showGrid
+      });
+    }
+    
+    if (config.showYAxis !== false) {
+      this.renderYAxis(yScale, {
+        label: config.yAxisLabel,
+        tickCount: config.yTickCount,
+        tickFormat: config.yTickFormat,
+        showGrid: config.showGrid
+      });
+    }
 
-    // 渲染網格
-    if (config.showGrid) this.renderGrid(xScale, yScale);
+    // 網格現在由 BaseChartCore 的軸線系統統一處理
+    // 舊的 renderGrid() 調用已移除
 
     // 渲染趨勢線
     if (config.showTrendline) this.renderTrendline(xScale, yScale);
@@ -243,14 +373,16 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
-    if (!this.scatterGroup) return;
+    if (!this.scatterGroup) {
+      return;
+    }
 
     const config = this.config as ScatterPlotCoreConfig;
     const pointRadius = config.pointRadius || 4;
 
     const points = this.scatterGroup
       .selectAll<SVGCircleElement, ProcessedScatterDataPoint>('.scatter-point')
-      .data(this.processedData)
+      .data(this.scatterProcessedData)
       .join('circle')
       .attr('class', 'scatter-point')
       .attr('cx', d => xScale(d.x as any) || 0)
@@ -277,60 +409,34 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         config.onDataClick?.(d, event);
       })
       .on('mouseenter', (event, d) => {
+        // 🎯 處理 tooltip 顯示
+        this.handleMouseOver(event, d);
         config.onDataHover?.(d, event);
       })
       .on('mouseleave', (event) => {
+        // 🎯 處理 tooltip 隱藏
+        this.handleMouseOut();
         config.onDataHover?.(null, event);
       });
   }
 
-  private renderXAxis(scale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>): void {
-    if (!this.chartGroup) return;
-
-    const config = this.config as ScatterPlotCoreConfig;
-    const axis = d3.axisBottom(scale);
-
-    this.chartGroup
-      .append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0, ${this.chartHeight})`)
-      .call(axis);
-
-    // 添加軸標籤
-    if (config.xAxisLabel) {
-      this.chartGroup
-        .append('text')
-        .attr('class', 'x-axis-label')
-        .attr('x', this.chartWidth / 2)
-        .attr('y', this.chartHeight + 40)
-        .attr('text-anchor', 'middle')
-        .text(config.xAxisLabel);
-    }
-  }
-
-  private renderYAxis(scale: d3.ScaleLinear<number, number>): void {
-    if (!this.chartGroup) return;
-
-    const config = this.config as ScatterPlotCoreConfig;
-    const axis = d3.axisLeft(scale);
-
-    this.chartGroup
-      .append('g')
-      .attr('class', 'y-axis')
-      .call(axis);
-
-    // 添加軸標籤
-    if (config.yAxisLabel) {
-      this.chartGroup
-        .append('text')
-        .attr('class', 'y-axis-label')
-        .attr('transform', 'rotate(-90)')
-        .attr('x', -this.chartHeight / 2)
-        .attr('y', -40)
-        .attr('text-anchor', 'middle')
-        .text(config.yAxisLabel);
-    }
-  }
+  /* 
+   * 舊的軸線實現已移除，現在使用 BaseChartCore 的統一軸線系統
+   * 備份的舊實現保留在註解中以供參考：
+   * 
+   * protected renderXAxis(scale) {
+   *   const axis = d3.axisBottom(scale);
+   *   this.chartGroup.append('g').attr('class', 'x-axis')
+   *     .attr('transform', `translate(0, ${this.chartHeight})`).call(axis);
+   *   // 軸標籤實現...
+   * }
+   * 
+   * protected renderYAxis(scale) {
+   *   const axis = d3.axisLeft(scale);  
+   *   this.chartGroup.append('g').attr('class', 'y-axis').call(axis);
+   *   // 軸標籤實現...
+   * }
+   */
 
   private renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
@@ -362,11 +468,11 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
-    if (!this.chartGroup || this.processedData.length < 2) return;
+    if (!this.chartGroup || this.scatterProcessedData.length < 2) return;
 
     // 計算線性回歸
-    const xValues = this.processedData.map(d => Number(d.x));
-    const yValues = this.processedData.map(d => d.y);
+    const xValues = this.scatterProcessedData.map(d => Number(d.x));
+    const yValues = this.scatterProcessedData.map(d => d.y);
 
     const n = xValues.length;
     const sumX = d3.sum(xValues);
@@ -429,13 +535,11 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   ): void {
     // 簡化的筆刷縮放實現
     // 在實際應用中需要使用更完整的 BrushZoomController
-    console.log('Setting up brush zoom for ScatterPlot');
   }
 
   private setupCrosshair(): void {
     // 簡化的十字準線實現
     // 在實際應用中需要使用 CrosshairController
-    console.log('Setting up crosshair for ScatterPlot');
   }
 
   private setupVoronoi(
@@ -443,7 +547,38 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     yScale: d3.ScaleLinear<number, number>
   ): void {
     // 實現 Voronoi 圖以優化鼠標懸停檢測
-    console.log('Setting up Voronoi interaction for ScatterPlot');
+  }
+
+  // 🎯 Tooltip 事件處理方法
+  private handleMouseOver = (event: MouseEvent, data: ProcessedScatterDataPoint): void => {
+    if (!this.containerElement) return;
+    
+    // 獲取容器相對位置
+    const rect = this.containerElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // 格式化 tooltip 內容
+    const content = this.formatTooltipContent(data);
+    
+    // 通過 callback 通知 React 層顯示 tooltip
+    this.callbacks.onTooltipShow?.(x, y, content);
+  }
+
+  private handleMouseOut = (): void => {
+    // 通過 callback 通知 React 層隱藏 tooltip
+    this.callbacks.onTooltipHide?.();
+  }
+
+  private formatTooltipContent(data: ProcessedScatterDataPoint): string {
+    const items = [
+      `X: ${typeof data.x === 'number' ? data.x.toFixed(2) : String(data.x)}`,
+      `Y: ${data.y.toFixed(2)}`,
+      ...(data.size !== undefined ? [`Size: ${data.size.toFixed(1)}`] : []),
+      ...(data.color !== undefined ? [`Color: ${data.color}`] : [])
+    ];
+    
+    return `資料點 ${data.index + 1}\n${items.join('\n')}`;
   }
 
   // 公共方法：更新配置
@@ -454,7 +589,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
 
   // 公共方法：獲取當前數據
   public getCurrentData(): ProcessedScatterDataPoint[] {
-    return this.processedData;
+    return this.scatterProcessedData;
   }
 
   // 公共方法：高亮特定數據點
@@ -470,5 +605,10 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
       .attr('stroke-width', (d: ProcessedScatterDataPoint) => 
         indices.includes(d.index) ? 2 : 0
       );
+  }
+
+  // 實現 BaseChartCore 的抽象方法
+  public getChartType(): string {
+    return 'scatter-plot';
   }
 }

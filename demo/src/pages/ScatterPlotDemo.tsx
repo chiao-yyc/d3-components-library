@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+import { ScatterPlotV2 as ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot-v2'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -101,8 +101,6 @@ export default function ScatterPlotDemo() {
   const [irisData] = useState(generateIrisData())
   
   // 圖表配置
-  const [chartWidth, setChartWidth] = useState(800)
-  const [chartHeight, setChartHeight] = useState(400)
   const [radius, setRadius] = useState(6)
   const [opacity, setOpacity] = useState(0.7)
   
@@ -111,6 +109,11 @@ export default function ScatterPlotDemo() {
   const [animate, setAnimate] = useState(true)
   const [interactive, setInteractive] = useState(true)
   const [showTooltip, setShowTooltip] = useState(true)
+  
+  // 軸線配置（新增的統一軸線系統選項）
+  const [showGrid, setShowGrid] = useState(false)
+  const [xTickCount, setXTickCount] = useState(5)
+  const [yTickCount, setYTickCount] = useState(5)
   
   // 交互功能
   const [enableBrushZoom, setEnableBrushZoom] = useState(false)
@@ -144,22 +147,25 @@ export default function ScatterPlotDemo() {
   const getCurrentConfig = () => {
     switch (selectedDataset) {
       case 'iris': 
-        return { xKey: 'sepalLength', yKey: 'petalLength', groupBy: 'species' }
+        return { xAccessor: 'sepalLength', yAccessor: 'petalLength', colorAccessor: 'species' }
       case 'bubble':
-        return { xKey: 'gdp', yKey: 'happiness', sizeKey: 'population', colorKey: 'country' }
+        return { xAccessor: 'gdp', yAccessor: 'happiness', sizeAccessor: 'population', colorAccessor: 'country' }
       default:
-        return { xKey: 'x', yKey: 'y', colorKey: 'category' }
+        return { xAccessor: 'x', yAccessor: 'y', colorAccessor: 'category' }
     }
   }
 
   const currentData = getCurrentData()
   const currentConfig = getCurrentConfig()
   
+  // 調試：檢查數據
+  console.log('🧪 ScatterPlotDemo data:', currentData?.length, currentConfig);
+  
   // 狀態顯示數據
   const statusItems = [
     { label: '數據集', value: selectedDataset === 'correlation' ? '相關性數據' : selectedDataset === 'iris' ? '鳶尾花數據' : 'GDP-幸福指數' },
     { label: '數據點數', value: currentData.length },
-    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '圖表尺寸', value: '800 x 400', color: '#6b7280' },
     { label: '點大小', value: radius },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
@@ -168,16 +174,16 @@ export default function ScatterPlotDemo() {
   const getTableColumns = (): DataTableColumn[] => {
     const config = getCurrentConfig()
     const columns: DataTableColumn[] = [
-      { key: config.xKey, title: config.xKey, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value },
-      { key: config.yKey, title: config.yKey, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value, align: 'right' }
+      { key: config.xAccessor as string, title: config.xAccessor as string, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value },
+      { key: config.yAccessor as string, title: config.yAccessor as string, sortable: true, formatter: (value) => typeof value === 'number' ? value.toFixed(2) : value, align: 'right' }
     ]
     
-    if (config.groupBy) {
-      columns.push({ key: config.groupBy, title: config.groupBy, sortable: true })
+    if (config.colorAccessor) {
+      columns.push({ key: config.colorAccessor as string, title: config.colorAccessor as string, sortable: true })
     }
     
-    if (config.sizeKey) {
-      columns.push({ key: config.sizeKey, title: config.sizeKey, sortable: true, formatter: (value) => value.toLocaleString(), align: 'right' })
+    if (config.sizeAccessor) {
+      columns.push({ key: config.sizeAccessor as string, title: config.sizeAccessor as string, sortable: true, formatter: (value) => value.toLocaleString(), align: 'right' })
     }
     
     return columns
@@ -229,28 +235,6 @@ export default function ScatterPlotDemo() {
               />
             </ControlGroup>
 
-            {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={1}>
-              <RangeSlider
-                label="寬度"
-                value={chartWidth}
-                min={600}
-                max={1000}
-                step={50}
-                onChange={setChartWidth}
-                suffix="px"
-              />
-              
-              <RangeSlider
-                label="高度"
-                value={chartHeight}
-                min={300}
-                max={600}
-                step={25}
-                onChange={setChartHeight}
-                suffix="px"
-              />
-            </ControlGroup>
 
 
             {/* 基本功能 */}
@@ -281,6 +265,36 @@ export default function ScatterPlotDemo() {
                 checked={showTrendline}
                 onChange={setShowTrendline}
                 description="顯示數據趨勢線"
+              />
+              
+              <ToggleControl
+                label="顯示網格"
+                checked={showGrid}
+                onChange={setShowGrid}
+                description="顯示軸線網格線"
+              />
+            </ControlGroup>
+
+            {/* 軸線配置 */}
+            <ControlGroup title="軸線設定" icon="📊" cols={1}>
+              <RangeSlider
+                label="X軸刻度數量"
+                value={xTickCount}
+                min={3}
+                max={10}
+                step={1}
+                onChange={setXTickCount}
+                suffix="個"
+              />
+              
+              <RangeSlider
+                label="Y軸刻度數量"
+                value={yTickCount}
+                min={3}
+                max={10}
+                step={1}
+                onChange={setYTickCount}
+                suffix="個"
               />
             </ControlGroup>
 
@@ -408,73 +422,41 @@ export default function ScatterPlotDemo() {
             </div>
           )}
           
-          <div className="flex justify-center">
-            <motion.div
-              key={`${chartWidth}-${chartHeight}-${selectedDataset}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ScatterPlot
-                data={currentData}
-                xKey={currentConfig.xKey}
-                yKey={currentConfig.yKey}
-                colorKey={currentConfig.colorKey}
-                sizeKey={currentConfig.sizeKey}
-                groupBy={currentConfig.groupBy}
-                width={chartWidth}
-                height={chartHeight}
-                radius={radius}
-                opacity={opacity}
-                showTrendline={showTrendline}
-                animate={animate}
-                interactive={interactive}
-                showTooltip={showTooltip}
-                colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
-                onDataClick={(data) => console.log('Clicked:', data)}
-                onHover={(data) => console.log('Hovered:', data)}
-                
-                // 交互功能
-                enableBrushZoom={enableBrushZoom}
-                brushZoomConfig={{
-                  direction: brushDirection,
-                  resetOnDoubleClick: true
-                }}
-                onZoom={(domain) => {
-                  setZoomDomain(domain)
-                  console.log('ScatterPlot 縮放:', domain)
-                }}
-                onZoomReset={() => {
-                  setZoomDomain(null)
-                  console.log('ScatterPlot 縮放重置')
-                }}
-                enableCrosshair={enableCrosshair}
-                crosshairConfig={{
-                  showCircle: true,
-                  showLines: true,
-                  showText: true,
-                  formatText: (data) => `X: ${data[currentConfig.xKey]?.toFixed?.(2) || data[currentConfig.xKey]}\nY: ${data[currentConfig.yKey]?.toFixed?.(2) || data[currentConfig.yKey]}`
-                }}
-                enableDropShadow={enableDropShadow}
-                enableGlowEffect={enableGlowEffect}
-                glowColor="#3b82f6"
-                
-                // 群組功能
-                enableGroupHighlight={enableGroupHighlight && !!currentConfig.groupBy}
-                enableGroupFilter={enableGroupFilter && !!currentConfig.groupBy}
-                showGroupLegend={showGroupLegend && !!currentConfig.groupBy}
-                groupColors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981']}
-                onGroupSelect={(group, isSelected) => {
-                  setSelectedGroup(isSelected ? group : null)
-                  console.log('群組選擇:', group, isSelected)
-                }}
-                onGroupHover={(group) => {
-                  setHoveredGroup(group)
-                  console.log('群組懸停:', group)
-                }}
-              />
-            </motion.div>
-          </div>
+          <motion.div
+            key={`${selectedDataset}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ScatterPlot
+              data={currentData}
+              xAccessor={currentConfig.xAccessor}
+              yAccessor={currentConfig.yAccessor}
+              colorAccessor={currentConfig.colorAccessor}
+              sizeAccessor={currentConfig.sizeAccessor}
+              width={800}
+              height={400}
+              pointRadius={radius}
+              opacity={opacity}
+              showTrendline={showTrendline}
+              animate={animate}
+              interactive={interactive}
+              showTooltip={showTooltip}
+              colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
+              onDataClick={(data) => console.log('Clicked:', data)}
+              onDataHover={(data) => console.log('Hovered:', data)}
+              onError={(error) => console.error('ScatterPlot Error:', error)}
+              
+              // 基本交互功能
+              enableBrushZoom={enableBrushZoom}
+              enableCrosshair={enableCrosshair}
+              
+              // 新增：統一軸線系統配置
+              showGrid={showGrid}
+              xTickCount={xTickCount}
+              yTickCount={yTickCount}
+            />
+          </motion.div>
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
@@ -493,28 +475,31 @@ export default function ScatterPlotDemo() {
           title="使用範例"
           language="tsx"
           code={`import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
+import { ChartContainer } from '@registry/components'
 
 // ${selectedDataset === 'correlation' ? '相關性數據' : selectedDataset === 'iris' ? '鳶尾花數據' : 'GDP-幸福指數數據'}
 const data = [
-  { ${currentConfig.xKey}: ${currentData[0]?.[currentConfig.xKey]}, ${currentConfig.yKey}: ${currentData[0]?.[currentConfig.yKey]}${currentConfig.groupBy ? `, ${currentConfig.groupBy}: '${currentData[0]?.[currentConfig.groupBy]}'` : ''}${currentConfig.sizeKey ? `, ${currentConfig.sizeKey}: ${currentData[0]?.[currentConfig.sizeKey]}` : ''} },
+  { ${currentConfig.xAccessor}: ${currentData[0]?.[currentConfig.xAccessor]}, ${currentConfig.yAccessor}: ${currentData[0]?.[currentConfig.yAccessor]}${currentConfig.colorAccessor ? `, ${currentConfig.colorAccessor}: '${currentData[0]?.[currentConfig.colorAccessor]}'` : ''}${currentConfig.sizeAccessor ? `, ${currentConfig.sizeAccessor}: ${currentData[0]?.[currentConfig.sizeAccessor]}` : ''} },
   // ... more data
 ]
 
-<ScatterPlot
-  data={data}
-  xKey="${currentConfig.xKey}"
-  yKey="${currentConfig.yKey}"${currentConfig.colorKey ? `\n  colorKey="${currentConfig.colorKey}"` : ''}${currentConfig.sizeKey ? `\n  sizeKey="${currentConfig.sizeKey}"` : ''}${currentConfig.groupBy ? `\n  groupBy="${currentConfig.groupBy}"` : ''}
-  width={${chartWidth}}
-  height={${chartHeight}}
-  radius={${radius}}
-  opacity={${opacity}}
-  animate={${animate}}
-  interactive={${interactive}}
-  showTooltip={${showTooltip}}
-  showTrendline={${showTrendline}}${currentConfig.groupBy ? `\n  enableGroupHighlight={${enableGroupHighlight}}\n  enableGroupFilter={${enableGroupFilter}}\n  showGroupLegend={${showGroupLegend}}` : ''}${enableBrushZoom ? `\n  enableBrushZoom={${enableBrushZoom}}\n  brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n  enableCrosshair={${enableCrosshair}}` : ''}
-  onDataClick={(data) => console.log('Clicked:', data)}
-  onHover={(data) => console.log('Hovered:', data)}
-/>`}
+<ChartContainer>
+  <ScatterPlot
+    data={data}
+    xAccessor="${currentConfig.xAccessor}"
+    yAccessor="${currentConfig.yAccessor}"${currentConfig.colorAccessor ? `\n    colorAccessor="${currentConfig.colorAccessor}"` : ''}${currentConfig.sizeAccessor ? `\n    sizeAccessor="${currentConfig.sizeAccessor}"` : ''}
+    width={800}
+    height={400}
+    radius={${radius}}
+    opacity={${opacity}}
+    animate={${animate}}
+    interactive={${interactive}}
+    showTooltip={${showTooltip}}
+    showTrendline={${showTrendline}}${showGrid ? `\n    showGrid={${showGrid}}` : ''}${xTickCount !== 5 ? `\n    xTickCount={${xTickCount}}` : ''}${yTickCount !== 5 ? `\n    yTickCount={${yTickCount}}` : ''}${enableBrushZoom ? `\n    enableBrushZoom={${enableBrushZoom}}\n    brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n    enableCrosshair={${enableCrosshair}}` : ''}
+    onDataClick={(data) => console.log('Clicked:', data)}
+    onDataHover={(data) => console.log('Hovered:', data)}
+  />
+</ChartContainer>`}
         />
         </div>
       </div>
