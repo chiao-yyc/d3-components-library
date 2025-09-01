@@ -5,7 +5,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
+import { CandlestickChartV2 } from '../../../registry/components/financial/candlestick-chart/candlestick-chart-v2'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -417,44 +417,48 @@ export default function CandlestickDemo() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <CandlestickChart
-                  data={currentData}
+                <CandlestickChartV2
+                  data={currentData.map((d, i) => ({
+                    date: d.date,
+                    open: d.open,
+                    high: d.high,
+                    low: d.low,
+                    close: d.close,
+                    volume: d.volume,
+                    index: i
+                  }))}
+                  dateAccessor="date"
+                  openAccessor="open"
+                  highAccessor="high"
+                  lowAccessor="low"
+                  closeAccessor="close"
+                  volumeAccessor="volume"
                   colorMode={colorMode}
                   showVolume={showVolume}
                   showGrid={showGrid}
-                  showTooltip={showTooltip}
                   animate={animate}
-                  interactive={interactive}
-                  showCrosshair={showCrosshair}
+                  candleWidth={candleWidth / 10}
                   enableZoom={enableZoom}
                   enablePan={enablePan}
+                  showCrosshair={showCrosshair}
                   crosshairConfig={{
                     color: '#666666',
                     opacity: 0.7,
                     strokeWidth: 1,
                     strokeDasharray: '3,3'
                   }}
-                  zoomConfig={{
-                    scaleExtent: [0.5, 10],
-                    constrainToData: true,
-                    resetOnDoubleClick: true,
-                    enableX: true,
-                    enableY: false
-                  }}
-                  onDataClick={(data) => {
+                  onDataClick={(data, event) => {
                     if (interactive) {
                       console.log('K線點擊:', data)
                     }
                   }}
-                  onDataHover={(data) => {
-                    if (interactive && showTooltip) {
+                  onDataHover={(data, event) => {
+                    if (interactive) {
                       console.log('K線懸停:', data)
                     }
                   }}
-                  responsive
                   width={width}
                   height={height}
-                  candleWidth={candleWidth / 10}
                 />
               </motion.div>
               
@@ -548,7 +552,7 @@ export default function CandlestickDemo() {
         <CodeExample
           title="使用範例"
           language="tsx"
-          code={`import { CandlestickChart } from '@registry/components/financial/candlestick-chart'
+          code={`import { CandlestickChartV2 } from '../../../registry/components/financial/candlestick-chart/candlestick-chart-v2'
 
 const data = [
   { date: '2024-01-02', open: 593, high: 598, low: 590, close: 596, volume: 15234567 },
