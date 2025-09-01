@@ -40,6 +40,11 @@ export default function BarChartDemo() {
   const [showLabels, setShowLabels] = useState(false)
   const [labelPosition, setLabelPosition] = useState<'top' | 'center' | 'bottom'>('top')
   
+  // 軸線配置（新增的統一軸線系統選項）
+  const [showGrid, setShowGrid] = useState(false)
+  const [xTickCount, setXTickCount] = useState(5)
+  const [yTickCount, setYTickCount] = useState(5)
+  
   // 移除 margin 設定，使用系統預設以確保一致性
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
@@ -158,6 +163,36 @@ export default function BarChartDemo() {
                 />
               </ControlGroup>
             )}
+
+            {/* 軸線配置 */}
+            <ControlGroup title="軸線配置" icon="📊" cols={1}>
+              <ToggleControl
+                label="顯示網格"
+                checked={showGrid}
+                onChange={setShowGrid}
+                description="顯示背景網格線"
+              />
+              
+              <RangeSlider
+                label="X 軸刻度數"
+                value={xTickCount}
+                onChange={setXTickCount}
+                min={2}
+                max={10}
+                step={1}
+                description="調整 X 軸刻度標籤數量"
+              />
+              
+              <RangeSlider
+                label="Y 軸刻度數"
+                value={yTickCount}
+                onChange={setYTickCount}
+                min={2}
+                max={10}
+                step={1}
+                description="調整 Y 軸刻度標籤數量"
+              />
+            </ControlGroup>
           </div>
         </ModernControlPanel>
         </div>
@@ -198,6 +233,9 @@ export default function BarChartDemo() {
                 showTooltip={showTooltip}
                 showLabels={showLabels}
                 labelPosition={labelPosition}
+                showGrid={showGrid}
+                xTickCount={xTickCount}
+                yTickCount={yTickCount}
                 onDataClick={(data) => console.log('Clicked:', data)}
                 onHover={(data) => console.log('Hovered:', data)}
               />
@@ -248,6 +286,9 @@ const data = [
       showTooltip={${showTooltip}}
       showLabels={${showLabels}}
       labelPosition="${labelPosition}"
+      showGrid={${showGrid}}
+      xTickCount={${xTickCount}}
+      yTickCount={${yTickCount}}
       onDataClick={(data) => console.log('Clicked:', data)}
       onHover={(data) => console.log('Hovered:', data)}
     />
