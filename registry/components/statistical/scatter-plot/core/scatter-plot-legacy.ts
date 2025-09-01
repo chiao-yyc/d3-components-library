@@ -1,4 +1,5 @@
 
+import React from 'react';
 import * as d3 from 'd3';
 import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
@@ -170,6 +171,7 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   }
 
   protected renderChart(): void {
+    console.log('🚨🚨🚨 RENDERCHART CALLED!!! 🚨🚨🚨');
     const { radius = 4, opacity = 0.7, strokeWidth = 1, strokeColor = 'white', 
             showTrendline = false, trendlineColor = '#ef4444', trendlineWidth = 2, 
             animate, animationDuration = 750, colors } = this.props;
@@ -276,12 +278,13 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
 
     // === 添加群組互動功能 ===
     if (this.props.enableGroupHighlight || this.props.enableGroupFilter) {
-      console.log('🎨 ScatterPlot: 開始設置群組交互功能');
       this.setupGroupInteractions(circles);
     }
 
     // === 添加基本數據交互功能 ===
+    console.log('🚨 About to call setupEventListeners...');
     this.setupEventListeners();
+    console.log('🚨 setupEventListeners call completed');
 
     // === 添加交互功能 ===
     this.addInteractionFeatures(g);
@@ -293,14 +296,12 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   private setupGroupInteractions(circles: d3.Selection<SVGCircleElement, ProcessedScatterDataPoint, SVGGElement, unknown>): void {
     if (!this.props.groupBy) return;
 
-    console.log('🎨 ScatterPlot: 設置群組交互事件');
 
     if (this.props.enableGroupHighlight) {
       circles
         .on('mouseover.group', (event, d) => {
           const group = d.group;
           if (group) {
-            console.log('🎯 群組懸停:', group);
             
             // 高亮同群組的所有散點 - 僅使用顏色和透明度
             circles
@@ -315,7 +316,6 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
           }
         })
         .on('mouseleave.group', (event, d) => {
-          console.log('🎯 群組離開');
           
           // 重置所有散點
           circles
@@ -336,7 +336,6 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         .on('click.group', (event, d) => {
           const group = d.group;
           if (group && this.props.onGroupSelect) {
-            console.log('🎯 群組點擊:', group);
             // 這裡可以實現群組篩選邏輯
             this.props.onGroupSelect(group, true);
           }
@@ -348,7 +347,6 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
    * 添加交互功能 (針對 Scatter Plot 優化，支援 XY 雙軸縮放)
    */
   private addInteractionFeatures(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    console.log('🔧 ScatterPlot: addInteractionFeatures 開始執行');
     
     // 清理舊的交互控制器和元素
     this.cleanupInteractionControllers();
@@ -369,30 +367,19 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       dataAccessor
     } = this.props;
 
-    console.log('⚙️ ScatterPlot 交互功能配置:', { 
-      enableBrushZoom, 
-      enableCrosshair, 
-      enableDropShadow, 
-      enableGlowEffect,
-      brushZoomDirection: brushZoomConfig?.direction || 'xy'
-    });
-
     const { xScale, yScale, chartWidth, chartHeight } = this.scales;
 
     // === 默認剪裁路徑：防止圖表內容溢出軸線區域 ===
     let defaultClipPathId = null;
     if (this.svgRef?.current) {
-      console.log('✂️ ScatterPlot: 創建默認剪裁路徑，防止圖表內容溢出軸線區域');
       const svg = d3.select(this.svgRef.current);
       
       defaultClipPathId = createChartClipPath(svg, { width: chartWidth, height: chartHeight });
-      console.log('✂️ ScatterPlot: 默認剪裁路徑創建完成:', defaultClipPathId);
       
       // 將剪裁路徑應用到所有散點元素，保護軸線
       const dotElements = container.selectAll('circle.dot');
       const trendlineElements = container.selectAll('path.trendline');
       
-      console.log('✂️ ScatterPlot: 應用默認剪裁路徑 - 散點:', dotElements.size(), '趨勢線:', trendlineElements.size());
       
       dotElements.attr('clip-path', defaultClipPathId);
       trendlineElements.attr('clip-path', defaultClipPathId);
@@ -400,33 +387,26 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       // 確保軸線永遠不被剪裁
       const axisElements = container.selectAll('.bottom-axis, .left-axis, .top-axis, .right-axis, .x-axis, .y-axis, g[class*="axis"]');
       axisElements.attr('clip-path', null);
-      console.log('✂️ ScatterPlot: 軸線保護完成，保護了', axisElements.size(), '個軸線元素');
     }
 
     // 應用視覺效果
     if (enableDropShadow && this.svgRef?.current) {
-      console.log('🌑 ScatterPlot: 開始應用陰影效果');
       const svg = d3.select(this.svgRef.current);
       const dotElements = container.selectAll('circle.dot');
       this.addDropShadow(svg, dotElements);
-      console.log('🌑 ScatterPlot: 陰影效果應用完成');
     }
 
     if (enableGlowEffect && this.svgRef?.current) {
-      console.log('✨ ScatterPlot: 開始應用光暈效果, 顏色:', glowColor);
       const svg = d3.select(this.svgRef.current);
       const dotElements = container.selectAll('circle.dot');
       this.addGlowEffect(svg, dotElements, glowColor);
-      console.log('✨ ScatterPlot: 光暈效果應用完成');
     }
 
     // 筆刷縮放功能 (Scatter Plot 的特色：支援 XY 雙軸縮放)
     if (enableBrushZoom) {
-      console.log('🖱️ ScatterPlot: 開始創建筆刷縮放功能');
       
       // ScatterPlot 預設使用 XY 雙軸縮放，這是它的優勢
       const direction = brushZoomConfig?.direction || 'xy';
-      console.log('🖱️ ScatterPlot: 縮放方向:', direction);
       
       // 使用統一的控制器建立筆刷縮放功能
       this.brushZoomController = createBrushZoom(
@@ -442,14 +422,11 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         { width: chartWidth, height: chartHeight }
       );
       
-      console.log('🖌️ ScatterPlot: 筆刷控制器建立完成');
       
-      console.log('🖱️ ScatterPlot: 筆刷縮放功能創建完成');
     }
 
     // 十字游標功能
     if (enableCrosshair) {
-      console.log('🎯 ScatterPlot: 開始創建十字游標功能');
       
       // 使用統一的控制器建立十字游標功能
       this.crosshairController = createCrosshair(
@@ -466,10 +443,8 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         dataAccessor
       );
 
-      console.log('🎯 ScatterPlot: 十字游標控制器建立完成');
     }
 
-    console.log('🔧 ScatterPlot: addInteractionFeatures 執行完成');
   }
 
   /**
@@ -510,14 +485,11 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
     onZoomReset?: () => void,
     direction: string = 'xy'
   ): void {
-    console.log('🖌️ ScatterPlot: handleBrushEnd 開始處理, 方向:', direction);
     const selection = event.selection;
     
     if (!selection) {
-      console.log('🖌️ ScatterPlot: 沒有選擇區域，執行重置');
       this.resetZoom(scales, onZoomReset);
     } else {
-      console.log('🖌️ ScatterPlot: 有選擇區域，進行縮放');
       
       let newDomain: { x?: [any, any]; y?: [any, any] } = {};
       
@@ -539,7 +511,6 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         scales.yScale.domain(newDomain.y);
       }
       
-      console.log('🖌️ ScatterPlot: 縮放到新域值:', newDomain);
       
       // 重新渲染圖表內容
       this.updateChartAfterZoom(scales);
@@ -556,11 +527,9 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       
       // 觸發用戶回調
       if (onZoom) {
-        console.log('🖌️ ScatterPlot: 觸發用戶縮放回調');
         onZoom(newDomain);
       }
     }
-    console.log('🖌️ ScatterPlot: handleBrushEnd 處理完成');
   }
 
   /**
@@ -592,22 +561,18 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
     // 更新軸線
     const xAxisGroup = container.select('.bottom-axis');
     if (!xAxisGroup.empty()) {
-      console.log('🔄 ScatterPlot: 找到 X 軸組，開始更新');
       xAxisGroup
         .transition()
         .duration(1000)
         .call(d3.axisBottom(scales.xScale));
-      console.log('🔄 ScatterPlot: X 軸更新完成');
     }
     
     const yAxisGroup = container.select('.left-axis');
     if (!yAxisGroup.empty()) {
-      console.log('🔄 ScatterPlot: 找到 Y 軸組，開始更新');
       yAxisGroup
         .transition()
         .duration(1000)
         .call(d3.axisLeft(scales.yScale));
-      console.log('🔄 ScatterPlot: Y 軸更新完成');
     }
     
     // 更新散點位置
@@ -629,7 +594,6 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
         .attr('d', lineGenerator(this.trendlineData));
     }
 
-    console.log('🔄 ScatterPlot: 圖表更新完成');
   }
 
   /**
@@ -727,31 +691,41 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
   }
 
   protected setupEventListeners(): void {
+    console.log('🎯🎯🎯 SETUPEVENTLISTENERS CALLED!!! 🎯🎯🎯');
     const { onDataClick, onHover, interactive = true } = this.props;
     
-    if (!interactive) return;
+    if (!interactive) {
+      console.log('🎯 Interactive disabled, returning early');
+      return;
+    }
 
+    console.log('🎯 scatterGroup exists:', !!this.scatterGroup);
     if (this.scatterGroup) {
-      this.scatterGroup.selectAll('.dot')
+      const dots = this.scatterGroup.selectAll('.dot');
+      console.log('🎯 Found dots:', dots.size(), 'elements');
+      
+      dots
         // 🎯 使用統一的事件處理系統
         .on('click', (event, d: any) => {
-          // 調用統一的點擊處理
           this.handleDataClick(event, d);
-          // 向下兼容
           onDataClick?.(d);
         })
         .on('mouseover', (event, d: any) => {
-          // 🎯 顯示統一的 tooltip
+          console.log('🎯 ScatterPlot mouseover - this.showTooltip type:', typeof this.showTooltip);
+          console.log('🎯 ScatterPlot mouseover - this instanceof:', this.constructor.name);
+          console.log('🎯 About to call this.showTooltip...');
           this.showTooltip(event, d);
-          // 向下兼容
+          console.log('🎯 this.showTooltip call completed');
           onHover?.(d);
         })
         .on('mouseout', (event) => {
-          // 🎯 隱藏統一的 tooltip
           this.hideTooltip();
-          // 向下兼容
           onHover?.(null);
         });
+      
+      console.log('🎯 Event listeners attached to', dots.size(), 'dots');
+    } else {
+      console.log('🎯 No scatterGroup found - events not attached');
     }
   }
 

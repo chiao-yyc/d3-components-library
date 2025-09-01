@@ -22,8 +22,8 @@ export const ScatterPlotV2 = React.forwardRef<ScatterPlotCore, ScatterPlotV2Prop
 
 ScatterPlotV2.displayName = 'ScatterPlotV2';
 
-// 默認配置
-export const defaultScatterPlotProps: Partial<ScatterPlotV2Props> = {
+// 默認配置 (使用函數形式以避免 HMR 問題)
+const getDefaultScatterPlotProps = (): Partial<ScatterPlotV2Props> => ({
   width: 600,
   height: 400,
   margin: { top: 20, right: 20, bottom: 60, left: 60 },
@@ -52,13 +52,20 @@ export const defaultScatterPlotProps: Partial<ScatterPlotV2Props> = {
   enableCrosshair: false,
   enableVoronoi: false,
   
+  // 智能邊距功能（默認啟用）
+  autoMargin: true,
+  paddingRatio: 0.05,  // 5% 邊距
+  minPadding: 5,       // 最小 5px
+  
   // 動畫
   animate: true,
   animationDuration: 750,
   
   // 響應式
   responsive: true
-};
+});
+
+export const defaultScatterPlotProps = getDefaultScatterPlotProps();
 
 // 為向下兼容，提供舊 props 名稱的映射
 export interface ScatterPlotPropsLegacy {

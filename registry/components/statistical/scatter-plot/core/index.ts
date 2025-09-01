@@ -1,2 +1,2 @@
-export * from './scatter-plot';
+export * from './scatter-plot-legacy';
 export * from './types';

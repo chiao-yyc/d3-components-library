@@ -479,4 +479,106 @@ export class ScatterPlotCanvasCore extends CanvasFallbackCore<CanvasScatterPlotD
       ...this.getPerformanceMetrics()
     };
   }
+
+  // === Canvas Tooltip 支援 ===
+  
+  /**
+   * 實現抽象方法：在指定座標查找數據點
+   * 支援 Canvas 模式的 Tooltip 交互
+   */
+  protected findDataPointAt(x: number, y: number, hitRadius = 10): ProcessedCanvasScatterPoint | null {
+    if (!this.scales || this.processedPoints.length === 0) {
+      return null;
+    }
+
+    const { xScale, yScale } = this.scales;
+    let closestPoint: ProcessedCanvasScatterPoint | null = null;
+    let minDistance = hitRadius;
+
+    // 高效檢測：只檢查可見的數據點
+    const visiblePoints = this.getVisibleData(this.processedPoints) as ProcessedCanvasScatterPoint[];
+
+    for (const point of visiblePoints) {
+      const screenX = xScale(point.x) as number;
+      const screenY = yScale(point.y);
+      
+      // 計算點擊位置與數據點的距離
+      const distance = Math.sqrt(
+        Math.pow(x - screenX, 2) + Math.pow(y - screenY, 2)
+      );
+      
+      // 考慮點的大小作為額外的碰撞半徑
+      const effectiveHitRadius = Math.max(hitRadius, point.size + 2);
+      
+      if (distance <= effectiveHitRadius && distance < minDistance) {
+        closestPoint = point;
+        minDistance = distance;
+      }
+    }
+
+    return closestPoint;
+  }
+
+  /**
+   * 為 Canvas 模式設置統一的 Tooltip 事件處理
+   * 繼承來自 BaseChart 的統一 Tooltip 系統
+   */
+  protected setupCanvasTooltipIntegration(): void {
+    if (!this.isCanvasTooltipEnabled) {
+      return;
+    }
+
+    const config = this.config as ScatterPlotCanvasConfig;
+    
+    // 設置 Canvas 事件處理器，自動整合到統一 Tooltip 系統
+    this.updateCanvasConfig({
+      enableCanvasTooltip: true,
+      tooltipHitRadius: Math.max(8, (config.pointRadius || 3) + 5),
+      tooltipThrottleMs: 16, // 60fps
+      
+      // Canvas 數據懸停處理 - 整合到統一系統
+      onCanvasDataHover: (data: ProcessedCanvasScatterPoint | null, event: MouseEvent) => {
+        if (data) {
+          // 調用統一的 BaseChart showTooltip 方法
+          this.showTooltip?.(event, {
+            title: `數據點 ${data.index + 1}`,
+            content: [
+              { label: 'X', value: data.x.toFixed(2) },
+              { label: 'Y', value: data.y.toFixed(2) },
+              { label: '大小', value: data.size.toFixed(1) }
+            ],
+            rawData: data.originalData
+          });
+          
+          // 觸發用戶自定義 hover 處理
+          config.onDataHover?.(data, event);
+        } else {
+          // 隱藏 Tooltip
+          this.hideTooltip?.();
+          config.onDataHover?.(null, event);
+        }
+      },
+      
+      // Canvas 數據點擊處理
+      onCanvasDataClick: (data: ProcessedCanvasScatterPoint, event: MouseEvent) => {
+        // 調用統一的 BaseChart 點擊處理
+        this.handleDataClick?.(event, data.originalData);
+        
+        // 觸發用戶自定義 click 處理
+        config.onDataClick?.(data, event);
+      }
+    });
+  }
+
+  /**
+   * 重寫初始化方法，確保 Canvas Tooltip 整合
+   */
+  public initialize(): void {
+    super.initialize();
+    
+    // 設置 Canvas Tooltip 整合
+    this.setupCanvasTooltipIntegration();
+    
+    console.log(`[ScatterPlotCanvas] Canvas Tooltip integration ${this.isCanvasTooltipEnabled ? 'enabled' : 'disabled'}`);
+  }
 }
