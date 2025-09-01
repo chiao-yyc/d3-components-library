@@ -148,14 +148,11 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   // 🎯 統一 Tooltip 管理
   protected tooltipConfig: TooltipConfig
   protected shouldShowTooltip: boolean = true
+  
+  // 🎯 React tooltip setter 由 createChartComponent 注入
+  public reactTooltipSetter: ((tooltip: BaseChartState['tooltip']) => void) | null = null
 
   constructor(props: TProps) {
-    console.log('🎯 BaseChart constructor called with props:', {
-      responsive: props.responsive,
-      width: props.width, 
-      height: props.height,
-      containerWidth: (props as any).containerWidth
-    })
     this.props = props
     this.state = {
       tooltip: null,
@@ -194,18 +191,11 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
     
     if (shouldAutoDisable && this.tooltipConfig.mode === 'auto') {
       this.shouldShowTooltip = false
-      console.log(`🎯 Tooltip 自動禁用: 數據量 ${dataSize} 超過閾值 ${this.tooltipConfig.performanceThreshold}`)
     } else if (this.tooltipConfig.mode === 'disabled') {
       this.shouldShowTooltip = false
     } else {
-      this.shouldShowTooltip = this.tooltipConfig.enabled || false
+      this.shouldShowTooltip = this.tooltipConfig.enabled !== false
     }
-    
-    console.log('🎯 Tooltip 配置已初始化:', {
-      config: this.tooltipConfig,
-      shouldShow: this.shouldShowTooltip,
-      dataSize
-    })
   }
 
   // Initialize group managers based on props
@@ -242,20 +232,23 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 
   // New method to update props and trigger re-render cycle
   public update(newProps: TProps) {
-    
+    console.log('🚨🚨🚨 BASECHART UPDATE CALLED!!! 🚨🚨🚨');
     this.props = newProps; // Update internal props
     this.initializeTooltipConfig(); // Re-initialize tooltip config
     this.initializeGroupManagers(); // Re-initialize group managers with new props
     
+    console.log('🚨 svgRef.current exists:', !!this.svgRef?.current);
     if (this.svgRef?.current) { // Only proceed if SVG is ready
       try {
+        console.log('🚨 About to call processData, createScales, renderChart...');
         this.processData();
         this.createScales();
         this.renderChart();
+        console.log('🚨 processData, createScales, renderChart completed');
       } catch (error) {
+        console.error('🚨 Error in update:', error);
         this.handleError(error as Error);
       }
-    } else {
     }
   }
 
@@ -305,13 +298,6 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
       mode = 'fallback'
     }
     
-    console.log('🔧 Chart dimensions calculated:', {
-      mode,
-      width: finalWidth,
-      height: finalHeight,
-      responsive,
-      props: { width, height, responsive }
-    })
     
     return {
       width: finalWidth,
@@ -453,21 +439,33 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   }
 
   protected createTooltip(x: number, y: number, content: ReactNode) {
+    // 統一檢查：確保與新系統行為一致
+    if (!this.shouldShowTooltip) return
+    
+    // 🎯 將相對於圖表群組的座標轉換為頁面絕對座標
+    // 確保與 showTooltip 使用相同的座標系統
+    let pageX = x;
+    let pageY = y;
+    
+    if (this.svgRef && this.svgRef.current) {
+      const svgRect = this.svgRef.current.getBoundingClientRect();
+      const { margin } = this.getChartDimensions();
+      
+      // 轉換：圖表群組座標 → 頁面絕對座標
+      pageX = svgRect.left + margin.left + x;
+      pageY = svgRect.top + margin.top + y;
+    }
+    
     this.setState({
       tooltip: {
-        x,
-        y,
+        x: pageX,
+        y: pageY,
         content,
         visible: true
       }
     })
   }
 
-  protected hideTooltip() {
-    this.setState({
-      tooltip: null
-    })
-  }
 
   protected setState(newState: Partial<BaseChartState>) {
     this.state = { ...this.state, ...newState }
@@ -480,20 +478,35 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
    * 顯示 tooltip
    */
   protected showTooltip(event: MouseEvent | Event, data: any): void {
-    if (!this.shouldShowTooltip) return
+    console.log('🚨🚨🚨 SHOWTOOLTIP CALLED!!! 🚨🚨🚨');
+    
+    if (!this.shouldShowTooltip) {
+      return;
+    }
     
     const position = this.getTooltipPosition(event)
     const content = this.formatTooltipContent(data)
     
-    this.setState({
-      tooltip: {
-        x: position.x,
-        y: position.y,
-        content,
-        visible: true,
-        data
-      }
-    })
+    // 🎯 更新除錯座標顯示
+    this.debugCoordinates = { x: position.x, y: position.y }
+    
+    const tooltipState = {
+      x: position.x,
+      y: position.y,
+      content,
+      visible: true
+    }
+    
+    console.log('🎯 Final tooltip position set to:', { x: position.x, y: position.y });
+    console.log('🎯 Tooltip state:', tooltipState);
+    
+    // 🎯 直接使用 React state
+    if (this.reactTooltipSetter) {
+      this.reactTooltipSetter(tooltipState);
+    } else {
+      // 回退到舊系統
+      this.setState({ tooltip: tooltipState });
+    }
     
     // 調用用戶自定義處理器
     this.props.onDataHover?.(data, event)
@@ -503,9 +516,18 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
    * 隱藏 tooltip
    */
   protected hideTooltip(): void {
-    this.setState({
-      tooltip: this.state.tooltip ? { ...this.state.tooltip, visible: false } : null
-    })
+    // 🎯 清除除錯座標顯示
+    this.debugCoordinates = null
+    
+    // 🎯 直接使用 React state
+    if (this.reactTooltipSetter) {
+      this.reactTooltipSetter(null);
+    } else {
+      // 回退到舊系統
+      this.setState({
+        tooltip: this.state.tooltip ? { ...this.state.tooltip, visible: false } : null
+      });
+    }
     
     // 調用用戶自定義處理器
     this.props.onDataHover?.(null)
@@ -519,14 +541,128 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   }
   
   /**
+   * 🎯 座標除錯狀態管理
+   */
+  private debugCoordinates: { x: number; y: number } | null = null
+  
+  /**
+   * 是否顯示座標除錯資訊
+   */
+  private shouldShowCoordinateDebug(): boolean {
+    // 可以通過環境變數或 props 控制
+    return typeof window !== 'undefined' && !!this.debugCoordinates
+  }
+  
+  /**
+   * 渲染實時座標除錯顯示
+   */
+  private renderCoordinateDebug(): ReactNode {
+    if (!this.debugCoordinates) return null
+    
+    const { x, y } = this.debugCoordinates
+    
+    return (
+      <div 
+        className="fixed z-[9999] pointer-events-none bg-black/80 text-white text-xs px-2 py-1 rounded font-mono"
+        style={{
+          left: x + 15,
+          top: y - 40,
+          fontSize: '10px',
+          lineHeight: '1.2'
+        }}
+      >
+        <div>🎯 Mouse: ({x}, {y})</div>
+        <div>📍 Scroll: ({window.scrollX}, {window.scrollY})</div>
+        <div>📐 Viewport: {window.innerWidth}×{window.innerHeight}</div>
+      </div>
+    )
+  }
+  
+  /**
    * 從事件中獲取 tooltip 位置
    */
   private getTooltipPosition(event: Event): { x: number; y: number } {
+    const scrollY = window.scrollY || window.pageYOffset;
+    const scrollX = window.scrollX || window.pageXOffset;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    console.log('🔍 getTooltipPosition event type:', event.constructor.name);
+    
+    let coordinates: any = {};
+    let finalPosition = { x: 0, y: 0 };
+    
     if (event instanceof MouseEvent) {
-      return { x: event.clientX, y: event.clientY }
+      coordinates = {
+        client: { x: event.clientX, y: event.clientY },
+        page: { x: event.pageX, y: event.pageY },
+        offset: { x: event.offsetX, y: event.offsetY },
+        screen: { x: event.screenX, y: event.screenY }
+      };
+      finalPosition = { x: event.clientX, y: event.clientY };
+    } else {
+      // 處理 D3 事件（非標準 MouseEvent）
+      const d3Event = event as any;
+      if (d3Event.clientX !== undefined && d3Event.clientY !== undefined) {
+        coordinates = {
+          client: { x: d3Event.clientX, y: d3Event.clientY },
+          page: { x: d3Event.pageX || 0, y: d3Event.pageY || 0 },
+          offset: { x: d3Event.offsetX || 0, y: d3Event.offsetY || 0 },
+          screen: { x: d3Event.screenX || 0, y: d3Event.screenY || 0 }
+        };
+        finalPosition = { x: d3Event.clientX, y: d3Event.clientY };
+      }
     }
-    // 後備位置
-    return { x: 0, y: 0 }
+    
+    // 🎯 完整座標系統分析
+    const windowInfo = {
+      scroll: { x: scrollX, y: scrollY },
+      viewport: { width: viewportWidth, height: viewportHeight },
+      document: { 
+        height: document.documentElement.scrollHeight,
+        width: document.documentElement.scrollWidth
+      }
+    };
+    
+    // 計算座標系統間的關係和一致性驗證
+    const calculatedPageFromClient = {
+      x: (coordinates.client?.x || 0) + scrollX,
+      y: (coordinates.client?.y || 0) + scrollY
+    };
+    
+    const coordinateDiff = {
+      pageVsCalculated: {
+        x: (coordinates.page?.x || 0) - calculatedPageFromClient.x,
+        y: (coordinates.page?.y || 0) - calculatedPageFromClient.y
+      },
+      clientVsOffset: {
+        x: (coordinates.client?.x || 0) - (coordinates.offset?.x || 0),
+        y: (coordinates.client?.y || 0) - (coordinates.offset?.y || 0)
+      }
+    };
+    
+    // 檢查座標系統一致性
+    const isPageConsistent = Math.abs(coordinateDiff.pageVsCalculated.x) < 2 && Math.abs(coordinateDiff.pageVsCalculated.y) < 2;
+    
+    console.log('📊 ===== 座標系統完整對比分析 =====');
+    console.log('  🖱️ 各種滑鼠座標:', coordinates);
+    console.log('  🌍 視窗與文檔資訊:', windowInfo);
+    console.log('  🧮 座標一致性驗證:');
+    console.log('    - client + scroll =', calculatedPageFromClient);
+    console.log('    - page 實際值 =', coordinates.page);
+    console.log('  📏 座標差異分析:', coordinateDiff);
+    console.log('  ✅ 座標系統一致性:', { 
+      isPageConsistent,
+      pageDiff: coordinateDiff.pageVsCalculated,
+      maxDiff: Math.max(
+        Math.abs(coordinateDiff.pageVsCalculated.x), 
+        Math.abs(coordinateDiff.pageVsCalculated.y)
+      )
+    });
+    console.log('🎯 最終使用座標 (client):', finalPosition);
+    console.log('==================================');
+    
+    return finalPosition;
   }
   
   /**
@@ -758,18 +894,14 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   }
 
   // 渲染方法 - 用於 createChartComponent
-  renderContent(containerRef: React.RefObject<HTMLDivElement>, svgRef: React.RefObject<SVGSVGElement>, overrideProps?: Partial<BaseChartProps>): ReactNode {
+  renderContent(containerRef: React.RefObject<HTMLDivElement>, svgRef: React.RefObject<SVGSVGElement>, overrideProps?: Partial<BaseChartProps>, reactTooltip?: BaseChartState['tooltip']): ReactNode {
     const currentProps = overrideProps ? { ...this.props, ...overrideProps } : this.props
     const { className, style, width, height, responsive } = currentProps
-    const { tooltip, error } = this.state
+    const { error } = this.state
+    // 🎯 優先使用 React state 的 tooltip，回退到 class state
+    const tooltip = reactTooltip || this.state.tooltip
     
-    console.log('🎨 renderContent called:', {
-      originalProps: { width: this.props.width, height: this.props.height },
-      overrideProps,
-      currentProps: { width: currentProps.width, height: currentProps.height },
-      extractedProps: { width, height },
-      responsive
-    })
+    
     
     if (error) {
       return (
@@ -795,6 +927,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 
     const containerStyle = responsive ? { ...style, width: '100%' } : style
 
+
     return (
       <div ref={containerRef} className={cn('relative', className)} style={containerStyle}>
         <svg
@@ -806,7 +939,17 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
         />
         
         {/* 🎯 統一 Tooltip 系統 */}
-        {tooltip && tooltip.visible && this.shouldShowTooltip && this.renderTooltip(tooltip)}
+        {(() => {
+          console.log('🔍 Tooltip render condition check:', { 
+            tooltip: !!tooltip, 
+            visible: tooltip?.visible, 
+            shouldRender: !!(tooltip && tooltip.visible)
+          });
+          return tooltip && tooltip.visible ? this.renderTooltip(tooltip) : null;
+        })()}
+        
+        {/* 🎯 實時座標除錯顯示 */}
+        {this.shouldShowCoordinateDebug() && this.renderCoordinateDebug()}
       </div>
     )
   }
@@ -815,17 +958,37 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
    * 🎯 渲染統一的 Tooltip 組件
    */
   private renderTooltip(tooltip: NonNullable<BaseChartState['tooltip']>): ReactNode {
+    // 🔍 詳細座標驗證日誌
+    console.log('🎯🔴 TOOLTIP 座標驗證:');
+    console.log('  📍 原始滑鼠位置 (clientX/Y):', { x: tooltip.x, y: tooltip.y });
+    console.log('  🔴 紅點位置 (position: fixed):', { 
+      left: tooltip.x - 2, 
+      top: tooltip.y - 2,
+      center: { x: tooltip.x, y: tooltip.y }
+    });
+    console.log('  🟦 Tooltip 預期位置 (含offset):', { 
+      originalX: tooltip.x,
+      originalY: tooltip.y,
+      offsetX: tooltip.x - 10,
+      offsetY: tooltip.y - 10,
+      offset: { x: -10, y: -10 }
+    });
+    
     return (
-      <ChartTooltip
-        visible={tooltip.visible}
-        position={{ x: tooltip.x, y: tooltip.y }}
-        content={tooltip.content}
-        theme={this.tooltipConfig.theme}
-        hideDelay={this.tooltipConfig.hideDelay}
-        showDelay={this.tooltipConfig.showDelay}
-        animate={this.props.animate}
-        animationDuration={200}
-      />
+      <>
+        <ChartTooltip
+          visible={tooltip.visible}
+          position={{ x: tooltip.x, y: tooltip.y }}
+          content={tooltip.content}
+          theme={this.tooltipConfig.theme}
+          hideDelay={this.tooltipConfig.hideDelay}
+          showDelay={this.tooltipConfig.showDelay}
+          animate={this.props.animate}
+          animationDuration={200}
+          offset={{ x: -10, y: -10 }}
+          placement="none"
+        />
+      </>
     )
   }
 
@@ -839,6 +1002,8 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 export function createChartComponent<TProps extends BaseChartProps>(
   ChartClass: new (props: TProps) => BaseChart<TProps>
 ) {
+  console.log('🚀 createChartComponent called for:', ChartClass.name);
+  
   const ForwardedComponent = React.forwardRef<BaseChart<TProps>, TProps>((props, ref) => {
     // 🎯 應用預設配置（響應式優先）
     const propsWithDefaults = useMemo(() => ({
@@ -850,27 +1015,18 @@ export function createChartComponent<TProps extends BaseChartProps>(
         : (props.responsive !== undefined ? props.responsive : DEFAULT_CHART_CONFIG.responsive)
     }), [props])
     
-    console.log('🎯 createChartComponent: forwardRef render function called!')
-    console.log('🎯 createChartComponent: rendering with props:', { 
-      responsive: propsWithDefaults.responsive, 
-      width: propsWithDefaults.width, 
-      height: propsWithDefaults.height,
-      mode: propsWithDefaults.width && propsWithDefaults.height ? 'fixed' : 'responsive'
-    })
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
     const [, forceUpdate] = useState({});
     const [responsiveDimensions, setResponsiveDimensions] = useState<{ width: number; height: number } | null>(null);
     
+    // 🎯 直接用 React state 管理 tooltip
+    const [tooltip, setTooltip] = useState<BaseChartState['tooltip']>(null);
+    
+    
     // 監聽 props 變化
     useEffect(() => {
-      console.log('🎯 createChartComponent: props changed via useEffect:', { 
-        responsive: propsWithDefaults.responsive, 
-        width: propsWithDefaults.width, 
-        height: propsWithDefaults.height 
-      })
-      console.log('🎯 createChartComponent: will enter responsive mode?', propsWithDefaults.responsive)
     }, [propsWithDefaults.responsive, propsWithDefaults.width, propsWithDefaults.height])
     
     // 計算最終的 props (包含響應式尺寸)
@@ -881,33 +1037,46 @@ export function createChartComponent<TProps extends BaseChartProps>(
       return propsWithDefaults
     }, [propsWithDefaults, responsiveDimensions])
     
-    const chartInstance = useMemo(() => {
-      const instance = new ChartClass(finalProps);
-      
-      // 重寫 setState 以觸發 React 重新渲染
-      const originalSetState = instance.setState.bind(instance);
-      instance.setState = (newState: Partial<BaseChartState>) => {
-        originalSetState(newState);
-        forceUpdate({}); // 強制 React 重新渲染
-      };
-      
-      return instance;
-    }, []);
+    // 只創建一次 chart 實例
+    const chartInstanceRef = useRef<BaseChart<TProps> | null>(null);
+    
+    if (!chartInstanceRef.current) {
+      const instance = new ChartClass(propsWithDefaults);
+      chartInstanceRef.current = instance;
+    }
+    
+    const chartInstance = chartInstanceRef.current;
+    
+    // 🎯 直接注入 React 的 tooltip setter
+    chartInstance.reactTooltipSetter = setTooltip;
+    
 
     // Assign refs to the instance
     chartInstance.containerRef = containerRef;
     chartInstance.svgRef = svgRef;
     
     useEffect(() => {
+      console.log('🎯 createChartComponent useEffect triggered!');
+      console.log('🎯 svgRef.current exists:', !!chartInstance.svgRef?.current);
+      console.log('🎯 finalProps:', finalProps);
       if (chartInstance.svgRef?.current) {
+        console.log('🎯 About to call chartInstance.update...');
         chartInstance.update(finalProps);
+        console.log('🎯 chartInstance.update call completed');
+      } else {
+        console.log('🎯 SVG ref not available, skipping update');
       }
     }, [finalProps, chartInstance]);
     
     // 單獨的 useEffect 用於 SVG ref 變化
     useEffect(() => {
+      console.log('🔧 SVG ref useEffect triggered!');
+      console.log('🔧 svgRef.current:', !!chartInstance.svgRef?.current);
+      console.log('🔧 finalProps exists:', !!finalProps);
       if (chartInstance.svgRef?.current && finalProps) {
+        console.log('🔧 About to call chartInstance.update from SVG ref effect...');
         chartInstance.update(finalProps);
+        console.log('🔧 chartInstance.update from SVG ref effect completed');
       }
     }, [chartInstance.svgRef?.current]);
 
@@ -915,19 +1084,9 @@ export function createChartComponent<TProps extends BaseChartProps>(
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance])
 
     // 如果啟用響應式模式，使用 ResponsiveChartContainer
-    console.log('🔍 Checking responsive condition:', { 
-      propsResponsive: props.responsive, 
-      propsWithDefaultsResponsive: propsWithDefaults.responsive 
-    })
+    console.log('🎨 Checking responsive mode:', propsWithDefaults.responsive);
     if (propsWithDefaults.responsive) {
-      console.log('🎯 BaseChart: entering responsive mode with ResponsiveChartContainer')
-      console.log('🎯 ResponsiveChartContainer props:', { 
-        aspect: propsWithDefaults.aspect, 
-        minWidth: propsWithDefaults.minWidth, 
-        maxWidth: propsWithDefaults.maxWidth, 
-        minHeight: propsWithDefaults.minHeight, 
-        maxHeight: propsWithDefaults.maxHeight 
-      })
+      console.log('🎨 Using ResponsiveChartContainer');
       
       return (
         <ResponsiveChartContainer
@@ -940,15 +1099,11 @@ export function createChartComponent<TProps extends BaseChartProps>(
           style={propsWithDefaults.style}
         >
           {(dimensions: { width: number; height: number }) => {
-            console.log('📊 BaseChart render function called with dimensions:', dimensions)
-            console.log('📊 Current props:', { width: props.width, height: props.height, responsive: props.responsive })
-            console.log('🔍 Creating currentProps with dimensions:', { ...props, width: dimensions.width, height: dimensions.height })
             
             // 更新響應式尺寸狀態 - 延遲到下一個事件循環避免在 render 中更新 state
             if (!responsiveDimensions || 
                 responsiveDimensions.width !== dimensions.width || 
                 responsiveDimensions.height !== dimensions.height) {
-              console.log('📊 Scheduling responsiveDimensions state update:', dimensions)
               
               // 使用 setTimeout 延遲狀態更新到下一個事件循環
               setTimeout(() => {
@@ -956,28 +1111,34 @@ export function createChartComponent<TProps extends BaseChartProps>(
                 
                 // 當尺寸改變時，同步更新圖表實例
                 if (chartInstance.svgRef?.current && dimensions.width > 0 && dimensions.height > 0) {
-                  const updatedProps = { ...props, width: dimensions.width, height: dimensions.height }
-                  console.log('📊 Updating chartInstance with props:', updatedProps)
+                  console.log('📐 ResponsiveChartContainer calling update with dimensions:', dimensions);
+                  const updatedProps = { ...props, width: dimensions.width, height: dimensions.height } as TProps
                   chartInstance.update(updatedProps)
+                  console.log('📐 ResponsiveChartContainer update call completed');
+                } else {
+                  console.log('📐 ResponsiveChartContainer skipping update - svgRef:', !!(chartInstance as any).svgRef?.current, 'dimensions:', dimensions);
                 }
               }, 0)
             }
             
             // 使用最新的尺寸渲染
             const currentProps = { ...props, width: dimensions.width, height: dimensions.height }
-            console.log('📊 Rendering with currentProps:', currentProps)
-            return chartInstance.renderContent(containerRef, svgRef, currentProps)
+            return chartInstance.renderContent(containerRef, svgRef, currentProps, tooltip)
           }}
         </ResponsiveChartContainer>
       )
     }
 
-    return chartInstance.renderContent(containerRef, svgRef)
+    // 使用 React state 的 tooltip 而不是 chartInstance.state.tooltip
+    return (
+      <div ref={containerRef} className={cn('relative', propsWithDefaults.className)} style={propsWithDefaults.style}>
+        {chartInstance.renderContent(containerRef, svgRef, undefined, tooltip)}
+      </div>
+    )
   })
   
   // 添加顯示名稱和調試信息
   ForwardedComponent.displayName = `createChartComponent(${ChartClass.name})`
-  console.log('🎯 createChartComponent created:', ForwardedComponent.displayName)
   
   return ForwardedComponent
 }
@@ -1046,7 +1207,7 @@ export const chartUtils = {
 // === 新架構導出 ===
 // 框架無關的核心邏輯
 export { BaseChartCore } from './core';
-export type { BaseChartCoreConfig, ChartStateCallbacks } from './core';
+export type { BaseChartCoreConfig, ChartStateCallbacks } from '../types';
 
 // React 包裝層
 export { createReactChartWrapper } from './react-chart-wrapper';
