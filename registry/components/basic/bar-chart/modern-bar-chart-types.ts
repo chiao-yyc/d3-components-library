@@ -40,6 +40,11 @@ export interface ModernBarChartProps extends ModernChartProps {
   showYAxis?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  showGrid?: boolean;
+  xTickCount?: number;
+  yTickCount?: number;
+  xTickFormat?: (domainValue: any, index: number) => string;
+  yTickFormat?: (domainValue: any, index: number) => string;
   
   // 標籤配置
   showLabels?: boolean;
