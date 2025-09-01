@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Correlogram } from '../../../registry/components/statistical/correlogram';
+import { CorrelogramV2 } from '../../../registry/components/statistical/correlogram/correlogram-v2';
 import { 
   DemoPageTemplate,
   ModernControlPanel,
@@ -132,7 +132,7 @@ export default function CorrelogramDemo() {
   const [showLowerTriangle, setShowLowerTriangle] = useState(true);
   const [showDiagonal, setShowDiagonal] = useState(true);
   const [threshold, setThreshold] = useState(0);
-  const [maxCircleRadius, setMaxCircleRadius] = useState(9);
+  const [maxCircleRadius, setMaxCircleRadius] = useState(18);
   const [colorScheme, setColorScheme] = useState('default');
   const [customColors, setCustomColors] = useState(['#B22222', '#fff', '#000080']);
   const [isLoading, setIsLoading] = useState(false);
@@ -271,8 +271,8 @@ export default function CorrelogramDemo() {
                     </label>
                     <input
                       type="range"
-                      min="5"
-                      max="15"
+                      min="8"
+                      max="25"
                       step="1"
                       value={maxCircleRadius}
                       onChange={(e) => setMaxCircleRadius(parseInt(e.target.value))}
@@ -352,27 +352,47 @@ export default function CorrelogramDemo() {
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="w-full h-96 flex items-center justify-center"
                 >
-                  <Correlogram
-                    {...correlationData}
+                  <CorrelogramV2
+                    data={correlationData.correlationMatrix ? 
+                      correlationData.variables?.map((variable: string, i: number) => ({
+                        variable,
+                        correlations: correlationData.correlationMatrix?.[i] || [],
+                        index: i
+                      })) || [] :
+                      (correlationData as any).data || []
+                    }
+                    dataFormat={correlationData.correlationMatrix ? 'matrix' : 'wide'}
+                    variables={correlationData.variables}
+                    correlationMatrix={correlationData.correlationMatrix}
                     width={600}
                     height={480}
                     margin={{ top: 50, right: 50, bottom: 70, left: 70 }}
+                    visualizationType="circle"
+                    colorScheme={colorScheme === 'custom' ? 'custom' : 'RdBu'}
+                    customColorRange={colorScheme === 'custom' ? customColors as [string, string, string] : undefined}
+                    showLabels={true}
+                    showValues={true}
+                    cellPadding={0.1}
+                    minRadius={1}
+                    maxRadius={maxCircleRadius}
+                    strokeWidth={1}
+                    strokeColor="#333"
+                    animate={true}
+                    animationDuration={750}
+                    interactive={true}
                     showUpperTriangle={showUpperTriangle}
                     showLowerTriangle={showLowerTriangle}
                     showDiagonal={showDiagonal}
+                    upperTriangleType="visual"
+                    lowerTriangleType="text"
                     threshold={threshold}
-                    maxCircleRadius={maxCircleRadius}
-                    colorScheme={colorScheme as 'default' | 'custom'}
-                    customColors={colorScheme === 'custom' ? customColors as [string, string, string] : undefined}
-                    showValues={true}
-                    animate={true}
-                    animationDuration={750}
-                    onCellHover={(x, y, value) => {
-                      console.log(`Hover: ${x} ↔ ${y} = ${value.toFixed(3)}`);
+                    onHover={(dataPoint) => {
+                      console.log(`Hover: ${dataPoint.xVar} ↔ ${dataPoint.yVar} = ${dataPoint.correlation.toFixed(3)}`);
                     }}
-                    onCellClick={(x, y, value) => {
-                      console.log(`Click: ${x} ↔ ${y} = ${value.toFixed(3)}`);
-                      alert(`相關性詳情:\n${x} ↔ ${y}\n係數: ${value.toFixed(3)}\n強度: ${Math.abs(value) > 0.7 ? '強' : Math.abs(value) > 0.3 ? '中' : '弱'}相關`);
+                    onClick={(dataPoint) => {
+                      const value = dataPoint.correlation;
+                      console.log(`Click: ${dataPoint.xVar} ↔ ${dataPoint.yVar} = ${value.toFixed(3)}`);
+                      alert(`相關性詳情:\n${dataPoint.xVar} ↔ ${dataPoint.yVar}\n係數: ${value.toFixed(3)}\n強度: ${Math.abs(value) > 0.7 ? '強' : Math.abs(value) > 0.3 ? '中' : '弱'}相關`);
                     }}
                   />
                 </motion.div>
@@ -486,20 +506,26 @@ const correlationData = {
   variables: ['GDP', 'Inflation', 'Employment']
 };
 
-<Correlogram
-  correlationMatrix={correlationData.correlationMatrix}
+<CorrelogramV2
+  data={correlationData.variables.map((variable, i) => ({
+    variable,
+    correlations: correlationData.correlationMatrix[i],
+    index: i
+  }))}
+  dataFormat="matrix"
   variables={correlationData.variables}
+  correlationMatrix={correlationData.correlationMatrix}
   width={600}
   height={480}
-  showUpperTriangle={true}
-  showLowerTriangle={true}
-  showDiagonal={true}
-  threshold={0.3}
-  maxCircleRadius={12}
-  colorScheme="default"
+  visualizationType="circle"
+  colorScheme="RdBu"
+  showLabels={true}
+  showValues={true}
+  minRadius={2}
+  maxRadius={12}
   animate={true}
-  onCellClick={(x, y, value) => {
-    console.log(\`\${x} ↔ \${y}: \${value.toFixed(3)}\`);
+  onClick={(dataPoint) => {
+    console.log(\`\${dataPoint.xVar} ↔ \${dataPoint.yVar}: \${dataPoint.correlation.toFixed(3)}\`);
   }}
 />`}
           />
@@ -520,17 +546,20 @@ const wideFormatData = [
   { "": "StockC", "StockA": -0.42, "StockB": -0.61, "StockC": 1.00 }
 ];
 
-<Correlogram
+<CorrelogramV2
   data={wideFormatData}
+  dataFormat="wide"
   width={600}
   height={480}
-  customColors={['#e74c3c', '#ecf0f1', '#3498db']}
+  visualizationType="circle"
   colorScheme="custom"
-  threshold={0.5}
+  customColorRange={['#e74c3c', '#ecf0f1', '#3498db']}
+  showLabels={true}
+  showValues={true}
   animationDuration={1000}
-  onCellHover={(x, y, value) => {
+  onHover={(dataPoint) => {
     // 懸停事件處理
-    console.log(\`Hover: \${x} ↔ \${y} = \${value}\`);
+    console.log(\`Hover: \${dataPoint.xVar} ↔ \${dataPoint.yVar} = \${dataPoint.correlation}\`);
   }}
 />`}
           />

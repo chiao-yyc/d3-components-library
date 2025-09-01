@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot'
+import { ViolinPlotV2 as ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot-v2'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -509,8 +509,8 @@ export default function ViolinPlotDemo() {
             >
               <ViolinPlot
                 data={currentData}
-                labelKey={dataKeys.labelKey}
-                valuesKey={dataKeys.valuesKey}
+                labelAccessor={dataKeys.labelKey}
+                valuesAccessor={dataKeys.valuesKey}
                 width={800}
                 height={500}
                 orientation={orientation}
@@ -616,8 +616,8 @@ const data = [
   {({ width, height }) => (
     <ViolinPlot
       data={data}
-      labelKey="${dataKeys.labelKey}"
-  valuesKey="${dataKeys.valuesKey}"
+      labelAccessor="${dataKeys.labelKey}"
+  valuesAccessor="${dataKeys.valuesKey}"
   width={width}
   height={height}
   orientation="${orientation}"
