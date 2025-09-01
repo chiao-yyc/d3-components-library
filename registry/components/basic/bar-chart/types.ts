@@ -26,6 +26,15 @@ export interface BarChartProps extends BaseChartProps {
   labelPosition?: 'top' | 'center' | 'bottom';
   labelFormat?: (value: any) => string;
   
+  // Axis configuration (unified axis system)
+  showGrid?: boolean;
+  xTickCount?: number;
+  yTickCount?: number;
+  xTickFormat?: (domainValue: any, index: number) => string;
+  yTickFormat?: (domainValue: any, index: number) => string;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
+  
   // Tooltip
   tooltipFormat?: (data: ProcessedDataPoint) => string;
   

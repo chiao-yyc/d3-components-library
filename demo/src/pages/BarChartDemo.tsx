@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart } from '@registry/components/basic/bar-chart'
+import { ModernBarChart as BarChart } from '@registry/components/basic/bar-chart'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import { 
   DemoPageTemplate,
@@ -258,7 +258,7 @@ export default function BarChartDemo() {
         <CodeExample
           title="使用範例"
           language="tsx"
-          code={`import { BarChart } from '@registry/components/basic/bar-chart'
+          code={`import { ModernBarChart as BarChart } from '@registry/components/basic/bar-chart'
 import { ChartContainer } from '@registry/components/ui'
 
 const data = [
