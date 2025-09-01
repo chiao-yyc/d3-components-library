@@ -13,7 +13,6 @@ export interface BarChartV2Props extends ReactChartWrapperProps, BarChartCoreCon
 }
 
 // 創建 BarChart 組件
-console.log('🚀 BarChartV2: Creating component with BarChartCore');
 const BarChartComponent = createReactChartWrapper(BarChartCore);
 
 // 導出最終組件
