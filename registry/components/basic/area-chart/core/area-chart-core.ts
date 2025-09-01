@@ -71,6 +71,12 @@ export interface AreaChartCoreConfig extends BaseChartCoreConfig {
   xAxisLabel?: string;
   yAxisLabel?: string;
   
+  // 新增：統一軸線系統配置
+  xTickCount?: number;
+  yTickCount?: number;
+  xTickFormat?: (domainValue: any, index: number) => string;
+  yTickFormat?: (domainValue: any, index: number) => string;
+  
   // 特殊功能
   enableBrushZoom?: boolean;
   enableCrosshair?: boolean;
@@ -314,11 +320,26 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     }
 
     // 渲染軸線
-    if (config.showXAxis !== false) this.renderXAxis(xScale);
-    if (config.showYAxis !== false) this.renderYAxis(yScale);
+    // 使用 BaseChartCore 的統一軸線系統
+    if (config.showXAxis !== false) {
+      this.renderXAxis(xScale, {
+        label: config.xAxisLabel,
+        tickCount: config.xTickCount,
+        tickFormat: config.xTickFormat,
+        showGrid: config.showGrid
+      });
+    }
+    
+    if (config.showYAxis !== false) {
+      this.renderYAxis(yScale, {
+        label: config.yAxisLabel,
+        tickCount: config.yTickCount,
+        tickFormat: config.yTickFormat,
+        showGrid: config.showGrid
+      });
+    }
 
-    // 渲染網格
-    if (config.showGrid) this.renderGrid(xScale, yScale);
+    // 網格現在由 BaseChartCore 的統一軸線系統處理
 
     // 設置交互功能
     this.setupInteractions(xScale, yScale);
@@ -474,53 +495,23 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     }
   }
 
-  private renderXAxis(scale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>): void {
-    if (!this.chartGroup) return;
-
-    const config = this.config as AreaChartCoreConfig;
-    const axis = d3.axisBottom(scale);
-
-    this.chartGroup
-      .append('g')
-      .attr('class', 'x-axis')
-      .attr('transform', `translate(0, ${this.chartHeight})`)
-      .call(axis);
-
-    // 添加軸標籤
-    if (config.xAxisLabel) {
-      this.chartGroup
-        .append('text')
-        .attr('class', 'x-axis-label')
-        .attr('x', this.chartWidth / 2)
-        .attr('y', this.chartHeight + 40)
-        .attr('text-anchor', 'middle')
-        .text(config.xAxisLabel);
-    }
-  }
-
-  private renderYAxis(scale: d3.ScaleLinear<number, number>): void {
-    if (!this.chartGroup) return;
-
-    const config = this.config as AreaChartCoreConfig;
-    const axis = d3.axisLeft(scale);
-
-    this.chartGroup
-      .append('g')
-      .attr('class', 'y-axis')
-      .call(axis);
-
-    // 添加軸標籤
-    if (config.yAxisLabel) {
-      this.chartGroup
-        .append('text')
-        .attr('class', 'y-axis-label')
-        .attr('transform', 'rotate(-90)')
-        .attr('x', -this.chartHeight / 2)
-        .attr('y', -40)
-        .attr('text-anchor', 'middle')
-        .text(config.yAxisLabel);
-    }
-  }
+  /* 
+   * 舊的軸線實現已移除，現在使用 BaseChartCore 的統一軸線系統
+   * 備份的舊實現保留在註解中以供參考：
+   * 
+   * private renderXAxis(scale) {
+   *   const axis = d3.axisBottom(scale);
+   *   this.chartGroup.append('g').attr('class', 'x-axis')
+   *     .attr('transform', `translate(0, ${this.chartHeight})`).call(axis);
+   *   // 軸標籤實現...
+   * }
+   * 
+   * private renderYAxis(scale) {
+   *   const axis = d3.axisLeft(scale);  
+   *   this.chartGroup.append('g').attr('class', 'y-axis').call(axis);
+   *   // 軸標籤實現...
+   * }
+   */
 
   private renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,

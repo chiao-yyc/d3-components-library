@@ -19,6 +19,12 @@ export interface BarChartCoreConfig extends BaseChartCoreConfig {
   showYAxis?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
+  
+  // 統一軸線系統配置
+  xTickCount?: number;
+  yTickCount?: number;
+  xTickFormat?: (domainValue: any, index: number) => string;
+  yTickFormat?: (domainValue: any, index: number) => string;
   showLabels?: boolean;
   labelPosition?: 'top' | 'center' | 'bottom';
   labelFormat?: (value: any) => string;
@@ -220,37 +226,47 @@ export class BarChartCore extends BaseChartCore<any> {
   }
 
   /**
-   * 渲染軸線
+   * 渲染軸線 - 使用 BaseChartCore 的統一軸線系統
    */
   private renderAxes(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
     const config = this.config as BarChartCoreConfig;
-    const { showXAxis = true, showYAxis = true, orientation = 'vertical' } = config;
-    const { chartWidth, chartHeight } = this.getChartDimensions();
+    const { showXAxis = true, showYAxis = true } = config;
     const { xScale, yScale } = this.scales;
 
-    // X 軸
+    // 使用 BaseChartCore 的統一軸線系統
     if (showXAxis && xScale) {
-      const xAxis = orientation === 'vertical' 
-        ? d3.axisBottom(xScale as any)
-        : d3.axisBottom(xScale as d3.ScaleLinear<number, number>);
-      
-      container.append('g')
-        .attr('class', 'x-axis')
-        .attr('transform', `translate(0, ${chartHeight})`)
-        .call(xAxis);
+      this.renderXAxis(xScale, {
+        label: config.xAxisLabel,
+        tickCount: config.xTickCount,
+        tickFormat: config.xTickFormat,
+        showGrid: config.showGrid
+      });
     }
 
-    // Y 軸
     if (showYAxis && yScale) {
-      const yAxis = orientation === 'vertical'
-        ? d3.axisLeft(yScale as d3.ScaleLinear<number, number>)
-        : d3.axisLeft(yScale as any);
-      
-      container.append('g')
-        .attr('class', 'y-axis')
-        .call(yAxis);
+      this.renderYAxis(yScale, {
+        label: config.yAxisLabel,
+        tickCount: config.yTickCount,
+        tickFormat: config.yTickFormat,
+        showGrid: config.showGrid
+      });
     }
   }
+
+  /**
+   * 舊的軸線實現已移除，現在使用 BaseChartCore 的統一軸線系統
+   * 備份的舊實現保留在註解中以供參考：
+   * 
+   * X 軸渲染（根據 orientation 調整）:
+   * const xAxis = orientation === 'vertical' 
+   *   ? d3.axisBottom(xScale as any)
+   *   : d3.axisBottom(xScale as d3.ScaleLinear<number, number>);
+   * 
+   * Y 軸渲染（根據 orientation 調整）:
+   * const yAxis = orientation === 'vertical'
+   *   ? d3.axisLeft(yScale as d3.ScaleLinear<number, number>)
+   *   : d3.axisLeft(yScale as any);
+   */
 
   /**
    * 公開 API - 獲取處理後的數據
