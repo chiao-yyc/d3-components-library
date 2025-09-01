@@ -47,7 +47,7 @@ export interface ChartTooltipProps {
   
   // 位置調整
   offset?: { x: number; y: number }
-  placement?: 'auto' | 'top' | 'bottom' | 'left' | 'right'
+  placement?: 'auto' | 'top' | 'bottom' | 'left' | 'right' | 'none'
   
   // 容器配置
   container?: HTMLElement | null
