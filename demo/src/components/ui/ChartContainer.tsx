@@ -3,10 +3,9 @@
  * 提供統一的圖表展示區域，包含載入狀態和錯誤處理
  */
 
-import React from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { designTokens, commonStyles } from '../../design/design-tokens'
-import { ResponsiveChart } from './ResponsiveChart'
 
 export interface ChartContainerProps {
   title?: string
@@ -40,8 +39,49 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   maxWidth = 1200,
   maxHeight = 800
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+
+  const updateDimensions = useCallback(() => {
+    if (!containerRef.current || !responsive) return
+    
+    const containerWidth = containerRef.current.clientWidth
+    if (containerWidth === 0) return
+    
+    let width = Math.max(minWidth, Math.min(maxWidth, containerWidth))
+    let height = Math.round(width / aspectRatio)
+    
+    if (height < minHeight) {
+      height = minHeight
+      width = Math.round(height * aspectRatio)
+    } else if (height > maxHeight) {
+      height = maxHeight
+      width = Math.round(height * aspectRatio)
+    }
+    
+    setDimensions({ width, height })
+  }, [responsive, aspectRatio, minWidth, maxWidth, minHeight, maxHeight])
+
+  useEffect(() => {
+    if (!responsive || typeof children !== 'function') return
+    
+    updateDimensions()
+    
+    const resizeObserver = new ResizeObserver(() => {
+      updateDimensions()
+    })
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+    
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [updateDimensions, responsive, children])
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
@@ -78,20 +118,14 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            {responsive && typeof children === 'function' ? (
-              <ResponsiveChart
-                aspectRatio={aspectRatio}
-                minWidth={minWidth}
-                minHeight={minHeight}
-                maxWidth={maxWidth}
-                maxHeight={maxHeight}
-              >
-                {children}
-              </ResponsiveChart>
+            {typeof children === 'function' ? (
+              responsive && dimensions.width > 0 && dimensions.height > 0 ? (
+                children(dimensions)
+              ) : (
+                children({ width: 800, height: 600 })
+              )
             ) : (
-              typeof children === 'function' ? 
-                children({ width: 800, height: 500 }) : 
-                children
+              children
             )}
           </motion.div>
         )}

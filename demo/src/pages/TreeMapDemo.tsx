@@ -212,13 +212,8 @@ export default function TreeMapDemo() {
   const [colorStrategy, setColorStrategy] = useState<'depth' | 'parent' | 'value' | 'custom'>('custom')
   const [tileAlgorithm, setTileAlgorithm] = useState<'squarify' | 'binary' | 'dice' | 'slice'>('squarify')
   
-  // 圖表設定
-  const [chartWidth, setChartWidth] = useState(800)
-  const [chartHeight, setChartHeight] = useState(500)
-  
-  // 響應式控制
-  const [responsive, setResponsive] = useState(true)
-  const [aspect, setAspect] = useState(16/9)
+  // 響應式設定
+  const aspectRatio = 16/9
   
   const [padding, setPadding] = useState(2)
   const [strokeWidth, setStrokeWidth] = useState(1)
@@ -324,8 +319,8 @@ export default function TreeMapDemo() {
     { label: '數據集', value: config.title },
     { label: '葉節點數', value: analysis.leafNodes },
     { label: '最大深度', value: analysis.maxDepth },
-    { label: '圖表模式', value: responsive ? '響應式' : '固定尺寸', color: responsive ? '#10b981' : '#6b7280' },
-    { label: '圖表尺寸', value: responsive ? `比例 ${aspect.toFixed(2)}:1` : `${chartWidth} × ${chartHeight}` },
+    { label: '圖表模式', value: '響應式', color: '#10b981' },
+    { label: '圖表尺寸', value: `比例 ${aspectRatio.toFixed(2)}:1` },
     { label: '瓦片算法', value: analysis.algorithm.label },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
@@ -420,52 +415,6 @@ export default function TreeMapDemo() {
               />
             </ControlGroup>
 
-            {/* 響應式配置 */}
-            <ControlGroup title="響應式配置" icon="📱" cols={1}>
-              <ToggleControl
-                label="響應式模式"
-                checked={responsive}
-                onChange={setResponsive}
-                description="自動適應容器寬度變化"
-              />
-              
-              {responsive && (
-                <RangeSlider
-                  label="寬高比"
-                  value={aspect}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  onChange={setAspect}
-                  suffix=":1"
-                />
-              )}
-            </ControlGroup>
-
-            {/* 固定尺寸設定 */}
-            {!responsive && (
-              <ControlGroup title="固定尺寸" icon="📏" cols={1}>
-                <RangeSlider
-                  label="圖表寬度"
-                  value={chartWidth}
-                  min={400}
-                  max={1200}
-                  step={50}
-                  onChange={setChartWidth}
-                  suffix="px"
-                />
-                
-                <RangeSlider
-                  label="圖表高度"
-                  value={chartHeight}
-                  min={300}
-                  max={800}
-                  step={25}
-                  onChange={setChartHeight}
-                  suffix="px"
-                />
-              </ControlGroup>
-            )}
 
             {/* 佈局配置 */}
             <ControlGroup title="佈局配置" icon="📊" cols={1}>

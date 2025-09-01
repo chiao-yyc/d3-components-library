@@ -28,12 +28,9 @@ export default function BarChartDemo() {
   // 基本狀態
   const [selectedDataset, setSelectedDataset] = useState('basic')
   const [selectedColor, setSelectedColor] = useState('default')
-  const [chartWidth, setChartWidth] = useState(700)
-  const [chartHeight, setChartHeight] = useState(400)
   
-  // 響應式控制
-  const [responsive, setResponsive] = useState(false)
-  const [aspect, setAspect] = useState(16/9)
+  // 響應式設定
+  const aspectRatio = 16/9
   
   // 圖表選項
   const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical')
@@ -51,8 +48,8 @@ export default function BarChartDemo() {
   const statusItems = [
     { label: '數據集', value: currentDataset.label },
     { label: '數據點數', value: currentDataset.data.length },
-    { label: '圖表模式', value: responsive ? '響應式' : '固定尺寸', color: responsive ? '#10b981' : '#6b7280' },
-    { label: '圖表尺寸', value: responsive ? `比例 ${aspect.toFixed(2)}:1` : `${chartWidth} × ${chartHeight}` },
+    { label: '圖表模式', value: '響應式', color: '#10b981' },
+    { label: '圖表尺寸', value: `比例 ${aspectRatio.toFixed(2)}:1` },
     { label: '方向', value: orientation === 'vertical' ? '垂直' : '水平' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
@@ -112,52 +109,6 @@ export default function BarChartDemo() {
               />
             </ControlGroup>
 
-            {/* 響應式設定 */}
-            <ControlGroup title="響應式配置" icon="📱" cols={1}>
-              <ToggleControl
-                label="響應式模式"
-                checked={responsive}
-                onChange={setResponsive}
-                description="自動適應容器寬度變化"
-              />
-              
-              {responsive && (
-                <RangeSlider
-                  label="寬高比"
-                  value={aspect}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  onChange={setAspect}
-                  suffix=":1"
-                />
-              )}
-            </ControlGroup>
-
-            {/* 固定尺寸設定 */}
-            {!responsive && (
-              <ControlGroup title="固定尺寸" icon="📏" cols={1}>
-                <RangeSlider
-                  label="寬度"
-                  value={chartWidth}
-                  min={400}
-                  max={1000}
-                  step={50}
-                  onChange={setChartWidth}
-                  suffix="px"
-                />
-                
-                <RangeSlider
-                  label="高度"
-                  value={chartHeight}
-                  min={300}
-                  max={600}
-                  step={25}
-                  onChange={setChartHeight}
-                  suffix="px"
-                />
-              </ControlGroup>
-            )}
 
             {/* 移除邊距設定控制項，統一使用系統預設 margin 以確保一致性 */}
 
@@ -217,6 +168,8 @@ export default function BarChartDemo() {
         <ChartContainer
           title="圖表預覽"
           subtitle="即時預覽配置效果"
+          responsive={true}
+          aspectRatio={aspectRatio}
           actions={
             <div className="flex items-center gap-2">
               <ChartBarIcon className="w-5 h-5 text-blue-500" />
@@ -224,25 +177,20 @@ export default function BarChartDemo() {
             </div>
           }
         >
-          <div className={responsive ? 'w-full' : 'flex justify-center'}>
+          {({ width, height }) => (
             <motion.div
-              key={`${responsive ? 'responsive' : 'fixed'}-${chartWidth}-${chartHeight}-${orientation}-${aspect}`}
+              key={`${orientation}-${aspectRatio}`}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className={responsive ? 'w-full' : ''}
+              className="w-full"
             >
               <BarChart
                 data={currentDataset.data}
                 xKey={currentDataset.xKey}
                 yKey={currentDataset.yKey}
-                width={responsive ? undefined : chartWidth}
-                height={responsive ? undefined : chartHeight}
-                responsive={responsive}
-                aspect={responsive ? aspect : undefined}
-                minWidth={300}
-                maxWidth={1200}
-                minHeight={200}
+                width={width}
+                height={height}
                 orientation={orientation}
                 colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
                 animate={animate}
@@ -254,7 +202,7 @@ export default function BarChartDemo() {
                 onHover={(data) => console.log('Hovered:', data)}
               />
             </motion.div>
-          </div>
+          )}
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
@@ -273,6 +221,7 @@ export default function BarChartDemo() {
           title="使用範例"
           language="tsx"
           code={`import { BarChart } from '@registry/components/basic/bar-chart'
+import { ChartContainer } from '@registry/components/ui'
 
 const data = [
   { ${currentDataset.xKey}: '${currentDataset.data[0]?.[currentDataset.xKey]}', ${currentDataset.yKey}: ${currentDataset.data[0]?.[currentDataset.yKey]} },
@@ -280,42 +229,30 @@ const data = [
   // ... more data
 ]
 
-${responsive ? `// 響應式模式 - 自動適應容器大小
-<BarChart
-  data={data}
-  xKey="${currentDataset.xKey}"
-  yKey="${currentDataset.yKey}"
+// 響應式模式 - 自動適應容器大小
+<ChartContainer
   responsive={true}
-  aspect={${aspect}}
-  minWidth={300}
-  maxWidth={1200}
-  minHeight={200}
-  orientation="${orientation}"
-  colors={${JSON.stringify(colorSchemes[selectedColor as keyof typeof colorSchemes], null, 2)}}
-  animate={${animate}}
-  interactive={${interactive}}
-  showTooltip={${showTooltip}}
-  showLabels={${showLabels}}
-  labelPosition="${labelPosition}"
-  onDataClick={(data) => console.log('Clicked:', data)}
-  onHover={(data) => console.log('Hovered:', data)}
-/>` : `// 固定尺寸模式
-<BarChart
-  data={data}
-  xKey="${currentDataset.xKey}"
-  yKey="${currentDataset.yKey}"
-  width={${chartWidth}}
-  height={${chartHeight}}
-  orientation="${orientation}"
-  colors={${JSON.stringify(colorSchemes[selectedColor as keyof typeof colorSchemes], null, 2)}}
-  animate={${animate}}
-  interactive={${interactive}}
-  showTooltip={${showTooltip}}
-  showLabels={${showLabels}}
-  labelPosition="${labelPosition}"
-  onDataClick={(data) => console.log('Clicked:', data)}
-  onHover={(data) => console.log('Hovered:', data)}
-/>`}`}
+  aspectRatio={${aspectRatio}}
+>
+  {({ width, height }) => (
+    <BarChart
+      data={data}
+      xKey="${currentDataset.xKey}"
+      yKey="${currentDataset.yKey}"
+      width={width}
+      height={height}
+      orientation="${orientation}"
+      colors={${JSON.stringify(colorSchemes[selectedColor as keyof typeof colorSchemes], null, 2)}}
+      animate={${animate}}
+      interactive={${interactive}}
+      showTooltip={${showTooltip}}
+      showLabels={${showLabels}}
+      labelPosition="${labelPosition}"
+      onDataClick={(data) => console.log('Clicked:', data)}
+      onHover={(data) => console.log('Hovered:', data)}
+    />
+  )}
+</ChartContainer>`}
         />
 
           {/* 功能說明 */}
