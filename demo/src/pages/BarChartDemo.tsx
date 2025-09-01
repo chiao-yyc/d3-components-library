@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChartV2 as BarChart } from '../../../registry/components/basic/bar-chart/bar-chart-v2'
+import { BarChartV2 as BarChart } from '@registry/components/basic/bar-chart/bar-chart-v2'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import { 
   DemoPageTemplate,
@@ -203,8 +203,6 @@ export default function BarChartDemo() {
         <ChartContainer
           title="圖表預覽"
           subtitle="即時預覽配置效果"
-          responsive={true}
-          aspectRatio={aspectRatio}
           actions={
             <div className="flex items-center gap-2">
               <ChartBarIcon className="w-5 h-5 text-blue-500" />
@@ -212,35 +210,32 @@ export default function BarChartDemo() {
             </div>
           }
         >
-          {({ width, height }) => (
-            <motion.div
-              key={`${orientation}-${aspectRatio}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              className="w-full"
-            >
-              <BarChart
-                data={currentDataset.data}
-                xKey={currentDataset.xKey}
-                yKey={currentDataset.yKey}
-                width={width}
-                height={height}
-                orientation={orientation}
-                colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
-                animate={animate}
-                interactive={interactive}
-                showTooltip={showTooltip}
-                showLabels={showLabels}
-                labelPosition={labelPosition}
-                showGrid={showGrid}
-                xTickCount={xTickCount}
-                yTickCount={yTickCount}
-                onDataClick={(data) => console.log('Clicked:', data)}
-                onHover={(data) => console.log('Hovered:', data)}
-              />
-            </motion.div>
-          )}
+          <motion.div
+            key={`${orientation}-${aspectRatio}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BarChart
+              data={currentDataset.data}
+              xKey={currentDataset.xKey}
+              yKey={currentDataset.yKey}
+              width={800}
+              height={400}
+              orientation={orientation}
+              colors={colorSchemes[selectedColor as keyof typeof colorSchemes]}
+              animate={animate}
+              interactive={interactive}
+              showTooltip={showTooltip}
+              showLabels={showLabels}
+              labelPosition={labelPosition}
+              showGrid={showGrid}
+              xTickCount={xTickCount}
+              yTickCount={yTickCount}
+              onDataClick={(data) => console.log('Clicked:', data)}
+              onHover={(data) => console.log('Hovered:', data)}
+            />
+          </motion.div>
           
           <StatusDisplay items={statusItems} />
         </ChartContainer>
