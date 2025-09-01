@@ -155,8 +155,7 @@ const marketAnalysisData = [
 export default function RadarChartDemo() {
   // 基本設定
   const [selectedDataset, setSelectedDataset] = useState('skills')
-  const [chartWidth, setChartWidth] = useState(600)
-  const [chartHeight, setChartHeight] = useState(600)
+  const aspectRatio = 1  // 雷達圖通常是正方形
   const [radius, setRadius] = useState(180)
   
   // 網格設定
@@ -256,7 +255,8 @@ export default function RadarChartDemo() {
     { label: '數據集', value: config.title },
     { label: '數據項目', value: currentData.length },
     { label: '維度數量', value: currentAxes.length },
-    { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
+    { label: '圖表模式', value: '響應式', color: '#10b981' },
+    { label: '圖表尺寸', value: `比例 ${aspectRatio}:1` },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
 

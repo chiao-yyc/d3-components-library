@@ -28,8 +28,8 @@ export interface RealPerformanceScatterPlotProps {
   /** 自動切換閾值 */
   canvasThreshold?: number;
   /** 交互事件 */
-  onDataClick?: (d: any, event: MouseEvent) => void;
-  onDataHover?: (d: any, event: MouseEvent) => void;
+  onDataClick?: (d: any, event?: MouseEvent) => void;
+  onDataHover?: (d: any, event?: MouseEvent) => void;
   /** 性能監控回調 */
   onPerformanceMetrics?: (metrics: {
     renderMode: 'svg' | 'canvas';
@@ -42,6 +42,18 @@ export interface RealPerformanceScatterPlotProps {
   className?: string;
   /** 是否顯示性能覆蓋層 */
   showPerformanceOverlay?: boolean;
+  
+  // 🎯 統一 Tooltip 配置
+  /** 是否顯示 Tooltip */
+  showTooltip?: boolean;
+  /** Tooltip 配置 */
+  tooltip?: {
+    enabled?: boolean;
+    mode?: 'auto' | 'always' | 'disabled';
+    theme?: 'light' | 'dark' | 'auto';
+    performanceThreshold?: number;
+    disableOnLargeDataset?: boolean;
+  };
 }
 
 /**
@@ -60,7 +72,9 @@ export function RealPerformanceScatterPlot({
   onDataHover,
   onPerformanceMetrics,
   className = '',
-  showPerformanceOverlay = true
+  showPerformanceOverlay = true,
+  showTooltip = true,
+  tooltip = {}
 }: RealPerformanceScatterPlotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const performanceRef = useRef<{
@@ -252,6 +266,15 @@ export function RealPerformanceScatterPlot({
     return null;
   };
 
+  // 創建適配器函數處理事件簽名不匹配
+  const handleDataClick = useCallback((d: any) => {
+    onDataClick?.(d);
+  }, [onDataClick]);
+
+  const handleDataHover = useCallback((d: any) => {
+    onDataHover?.(d);
+  }, [onDataHover]);
+
   // 創建圖表 props
   const chartProps = {
     data: data.map((d, i) => ({
@@ -267,8 +290,8 @@ export function RealPerformanceScatterPlot({
     margin: { top: 20, right: 20, bottom: 40, left: 40 },
     colors,
     pointRadius,
-    onDataClick,
-    onDataHover,
+    onDataClick: handleDataClick,
+    onHover: handleDataHover, // ScatterPlot uses onHover, not onDataHover
     // 明確指定數據映射
     mapping: {
       x: 'x',
@@ -278,8 +301,23 @@ export function RealPerformanceScatterPlot({
     },
     // 根據模式選擇是否啟用高性能渲染
     enableCanvasMode: actualRenderMode === 'canvas',
-    className: `scatter-plot-${actualRenderMode}`
+    className: `scatter-plot-${actualRenderMode}`,
+    
+    // 🎯 確保交互功能啟用
+    interactive: true,
+    
+    // 🎯 統一 Tooltip 配置 - 支援 SVG/Canvas 模式
+    showTooltip,
+    tooltip: {
+      enabled: showTooltip,
+      mode: tooltip.mode || 'auto',
+      theme: tooltip.theme || 'dark',
+      performanceThreshold: tooltip.performanceThreshold || 50000,
+      disableOnLargeDataset: tooltip.disableOnLargeDataset !== false,
+      ...tooltip
+    }
   };
+
 
   return (
     <div 
