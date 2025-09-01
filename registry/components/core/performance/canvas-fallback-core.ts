@@ -24,9 +24,16 @@ export interface CanvasFallbackConfig {
   batchSize?: number;           // 批次渲染大小
   animationFrameLimit?: number; // 動畫幀數限制
   
+  // 🎯 Canvas Tooltip 配置
+  enableCanvasTooltip?: boolean;  // Canvas 模式是否啟用 tooltip (默認: true)
+  tooltipHitRadius?: number;      // Tooltip 碰撞半徑 (默認: 10px)
+  tooltipThrottleMs?: number;     // Tooltip 事件節流延遲 (默認: 16ms ~60fps)
+  
   // 回調函數
   onRenderModeChange?: (mode: 'svg' | 'canvas') => void;
   onPerformanceMetrics?: (metrics: PerformanceMetrics) => void;
+  onCanvasDataHover?: (data: any, event: MouseEvent) => void;  // Canvas 專用 hover 事件
+  onCanvasDataClick?: (data: any, event: MouseEvent) => void;  // Canvas 專用 click 事件
 }
 
 // 性能指標
@@ -60,6 +67,11 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
   // 性能監控
   private renderStartTime = 0;
   private animationFrameId: number | null = null;
+  
+  // 🎯 Canvas Tooltip 支援
+  private isCanvasTooltipEnabled = true;
+  private tooltipThrottleTimer: number | null = null;
+  private lastHoveredData: any = null;
 
   constructor(
     config: BaseChartCoreConfig & CanvasFallbackConfig,
@@ -75,8 +87,15 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
       enableVirtualization: true,
       batchSize: 1000,
       animationFrameLimit: 60,
+      // 🎯 Canvas Tooltip 預設配置
+      enableCanvasTooltip: true,
+      tooltipHitRadius: 10,
+      tooltipThrottleMs: 16,
       ...config
     };
+    
+    // 初始化 Canvas tooltip 狀態
+    this.isCanvasTooltipEnabled = this.canvasConfig.enableCanvasTooltip !== false;
   }
 
   // === 抽象方法：子類需實現的 Canvas 渲染方法 ===
@@ -92,6 +111,16 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
    * 用於處理超大數據集
    */
   protected abstract getVisibleData(allData: any[]): any[];
+  
+  /**
+   * 🎯 Canvas 模式的數據點檢測
+   * 根據滑鼠位置找到最近的數據點，用於 tooltip 顯示
+   * @param mouseX 滑鼠 X 座標 (相對於 canvas)
+   * @param mouseY 滑鼠 Y 座標 (相對於 canvas)
+   * @param hitRadius 碰撞檢測半徑
+   * @returns 最近的數據點，沒有則返回 null
+   */
+  protected abstract findDataPointAt(mouseX: number, mouseY: number, hitRadius: number): any | null;
 
   // === 渲染模式決策 ===
   
@@ -179,6 +208,9 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
       pixelRatio
     };
 
+    // 🎯 設置 Canvas Tooltip 事件監聽器
+    this.setupCanvasTooltipListeners(canvas);
+
     return this.canvasContext;
   }
   
@@ -187,6 +219,9 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
    */
   protected destroyCanvasContext(): void {
     if (this.canvasContext) {
+      // 🎯 清理 Canvas 事件監聽器
+      this.cleanupCanvasTooltipListeners(this.canvasContext.canvas);
+      
       // 移除 Canvas 元素
       if (this.canvasContext.canvas.parentNode) {
         this.canvasContext.canvas.parentNode.removeChild(this.canvasContext.canvas);
@@ -200,6 +235,122 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
       this.svgElement.style.display = 'block';
     }
   }
+  
+  // === 🎯 Canvas Tooltip 事件處理系統 ===
+  
+  /**
+   * 設置 Canvas 的 tooltip 事件監聽器
+   */
+  private setupCanvasTooltipListeners(canvas: HTMLCanvasElement): void {
+    if (!this.isCanvasTooltipEnabled) return;
+    
+    // 綁定事件處理器到 canvas 元素
+    canvas.addEventListener('mousemove', this.handleCanvasMouseMove);
+    canvas.addEventListener('mouseout', this.handleCanvasMouseOut);
+    canvas.addEventListener('click', this.handleCanvasClick);
+    
+    console.log('🎯 Canvas tooltip 事件監聽器已設置');
+  }
+  
+  /**
+   * 清理 Canvas 的 tooltip 事件監聽器
+   */
+  private cleanupCanvasTooltipListeners(canvas: HTMLCanvasElement): void {
+    canvas.removeEventListener('mousemove', this.handleCanvasMouseMove);
+    canvas.removeEventListener('mouseout', this.handleCanvasMouseOut);
+    canvas.removeEventListener('click', this.handleCanvasClick);
+    
+    // 清理節流器
+    if (this.tooltipThrottleTimer) {
+      clearTimeout(this.tooltipThrottleTimer);
+      this.tooltipThrottleTimer = null;
+    }
+    
+    console.log('🎯 Canvas tooltip 事件監聽器已清理');
+  }
+  
+  /**
+   * Canvas 滑鼠移動事件處理器（帶節流）
+   */
+  private handleCanvasMouseMove = (event: MouseEvent): void => {
+    if (!this.isCanvasTooltipEnabled || !this.canvasContext) return;
+    
+    // 節流處理，避免過於頻繁的處理
+    if (this.tooltipThrottleTimer) return;
+    
+    this.tooltipThrottleTimer = setTimeout(() => {
+      this.processCanvasMouseMove(event);
+      this.tooltipThrottleTimer = null;
+    }, this.canvasConfig.tooltipThrottleMs || 16);
+  };
+  
+  /**
+   * 處理 Canvas 滑鼠移動的核心邏輯
+   */
+  private processCanvasMouseMove(event: MouseEvent): void {
+    if (!this.canvasContext) return;
+    
+    const rect = this.canvasContext.canvas.getBoundingClientRect();
+    const scaleX = this.canvasContext.width / rect.width;
+    const scaleY = this.canvasContext.height / rect.height;
+    
+    // 轉換為 canvas 座標
+    const canvasX = (event.clientX - rect.left) * scaleX;
+    const canvasY = (event.clientY - rect.top) * scaleY;
+    
+    // 尋找最近的數據點
+    const hitRadius = this.canvasConfig.tooltipHitRadius || 10;
+    const hitData = this.findDataPointAt(canvasX, canvasY, hitRadius);
+    
+    // 如果找到的數據點與上次不同，觸發事件
+    if (hitData !== this.lastHoveredData) {
+      this.lastHoveredData = hitData;
+      
+      if (hitData) {
+        // 觸發用戶自定義 hover 事件
+        this.canvasConfig.onCanvasDataHover?.(hitData, event);
+        console.log('🎯 Canvas tooltip hover:', hitData);
+      } else {
+        // 觸發 hover out 事件
+        this.canvasConfig.onCanvasDataHover?.(null, event);
+      }
+    }
+  }
+  
+  /**
+   * Canvas 滑鼠離開事件處理器
+   */
+  private handleCanvasMouseOut = (event: MouseEvent): void => {
+    if (this.lastHoveredData) {
+      this.lastHoveredData = null;
+      this.canvasConfig.onCanvasDataHover?.(null, event);
+      console.log('🎯 Canvas tooltip mouse out');
+    }
+  };
+  
+  /**
+   * Canvas 點擊事件處理器
+   */
+  private handleCanvasClick = (event: MouseEvent): void => {
+    if (!this.isCanvasTooltipEnabled || !this.canvasContext) return;
+    
+    const rect = this.canvasContext.canvas.getBoundingClientRect();
+    const scaleX = this.canvasContext.width / rect.width;
+    const scaleY = this.canvasContext.height / rect.height;
+    
+    // 轉換為 canvas 座標
+    const canvasX = (event.clientX - rect.left) * scaleX;
+    const canvasY = (event.clientY - rect.top) * scaleY;
+    
+    // 尋找最近的數據點
+    const hitRadius = this.canvasConfig.tooltipHitRadius || 10;
+    const hitData = this.findDataPointAt(canvasX, canvasY, hitRadius);
+    
+    if (hitData) {
+      this.canvasConfig.onCanvasDataClick?.(hitData, event);
+      console.log('🎯 Canvas tooltip click:', hitData);
+    }
+  };
 
   // === 重寫基礎渲染邏輯 ===
   

@@ -69,21 +69,33 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
     // 創建圖表核心實例
     const chartInstance = useMemo(() => {
       return new ChartCoreClass(props, callbacks);
-    }, [ChartCoreClass]);
+    }, [ChartCoreClass, callbacks]);
 
     // 暴露實例給 ref
     React.useImperativeHandle(ref, () => chartInstance, [chartInstance]);
 
-    // 初始化和更新邏輯
+    // 初始化邏輯 - 確保 DOM 準備好後才初始化
     useEffect(() => {
-      if (containerRef.current && svgRef.current) {
-        chartInstance.initialize(containerRef.current, svgRef.current);
-      }
+      // 延遲一個微任務，確保 DOM 完全渲染
+      const timeoutId = setTimeout(() => {
+        if (containerRef.current && svgRef.current) {
+          chartInstance.initialize(containerRef.current, svgRef.current);
+        }
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }, [chartInstance]);
 
-    // 響應 props 變化
+    // 響應 props 變化 - 只有在初始化後才更新
     useEffect(() => {
-      chartInstance.updateConfig(props);
+      // 延遲更新，確保 initialize 先執行
+      const timeoutId = setTimeout(() => {
+        if (containerRef.current && svgRef.current) {
+          chartInstance.updateConfig(props);
+        }
+      }, 10); // 稍微延遲，讓 initialize 先執行
+      
+      return () => clearTimeout(timeoutId);
     }, [props, chartInstance]);
 
     // 組件卸載時清理
@@ -156,14 +168,17 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
         {/* 工具提示 */}
         {showTooltip && state.tooltip && state.tooltip.visible && (
           <div
-            className="absolute z-50 px-2 py-1 text-sm bg-gray-800 text-white rounded shadow-lg pointer-events-none"
+            className="absolute z-50 px-2 py-1 text-sm bg-gray-800 text-white rounded shadow-lg pointer-events-none whitespace-pre-line"
             style={{
               left: state.tooltip.x + 10,
               top: state.tooltip.y - 10,
               transform: 'translate(0, -100%)'
             }}
           >
-            {state.tooltip.content}
+            {typeof state.tooltip.content === 'string' 
+              ? state.tooltip.content 
+              : JSON.stringify(state.tooltip.content)
+            }
           </div>
         )}
       </div>

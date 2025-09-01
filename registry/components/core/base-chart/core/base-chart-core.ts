@@ -317,6 +317,57 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     });
   }
 
+  // === 智能邊距工具方法 ===
+  
+  /**
+   * 計算智能邊距值 (通用方法)
+   * @param elementSize 元素大小（如點半徑）
+   * @param elementType 元素類型（points, lines, bars）
+   * @returns 計算出的邊距值
+   */
+  protected calculateSmartPadding(elementSize: number, elementType: 'points' | 'lines' | 'bars' = 'points'): number {
+    const paddingRatio = this.config.paddingRatio ?? 0.05;  // 默認 5%
+    const minPadding = this.config.minPadding ?? 5;         // 默認 5px
+    const elementPadding = this.config.elementPadding?.[elementType] ?? 0;
+    
+    const { chartWidth, chartHeight } = this.getChartDimensions();
+    
+    // 使用比例和固定值的較大值
+    const ratioBasedPadding = Math.max(chartWidth, chartHeight) * paddingRatio;
+    const elementBasedPadding = elementSize + elementPadding + 2; // 元素大小加緩衝
+    
+    return Math.max(minPadding, ratioBasedPadding, elementBasedPadding);
+  }
+  
+  /**
+   * 獲取考慮智能邊距的比例尺範圍
+   * @param totalSize 總尺寸（寬度或高度）
+   * @param elementSize 元素大小
+   * @param elementType 元素類型
+   * @param isYAxis 是否為 Y 軸（影響範圍順序）
+   * @returns [rangeStart, rangeEnd]
+   */
+  protected getSmartScaleRange(
+    totalSize: number, 
+    elementSize: number, 
+    elementType: 'points' | 'lines' | 'bars' = 'points',
+    isYAxis: boolean = false
+  ): [number, number] {
+    const autoMargin = this.config.autoMargin ?? true;
+    
+    if (!autoMargin) {
+      return isYAxis ? [totalSize, 0] : [0, totalSize];
+    }
+    
+    const padding = this.calculateSmartPadding(elementSize, elementType);
+    
+    if (isYAxis) {
+      return [totalSize - padding, padding];
+    } else {
+      return [padding, totalSize - padding];
+    }
+  }
+
   // === 公開 API ===
   
   public getConfig(): BaseChartCoreConfig<TData> {

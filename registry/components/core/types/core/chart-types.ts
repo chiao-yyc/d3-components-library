@@ -43,6 +43,16 @@ export interface BaseChartCoreConfig<TData = BaseChartData> {
   animationDuration?: number;
   interactive?: boolean;
   
+  // 智能邊距功能（通用配置）
+  autoMargin?: boolean;              // 自動邊距，默認 true
+  paddingRatio?: number;             // 邊距比例，默認 0.05 (5%)
+  minPadding?: number;               // 最小邊距像素，默認 5px
+  elementPadding?: {                 // 元素特定邊距設置
+    points?: number;                 // 點元素額外邊距
+    lines?: number;                  // 線元素額外邊距
+    bars?: number;                   // 條形元素額外邊距
+  };
+  
   // 分組功能
   groupBy?: DataKeyOrAccessor<ChartData<TData>, string>;
   groupColors?: string[];
