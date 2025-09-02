@@ -5,7 +5,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CandlestickChartV2 } from '../../../registry/components/financial/candlestick-chart/candlestick-chart-v2'
+import { CandlestickChart } from '../../../registry/components/financial/candlestick-chart/candlestick-chart'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -417,7 +417,7 @@ export default function CandlestickDemo() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <CandlestickChartV2
+                <CandlestickChart
                   data={currentData.map((d, i) => ({
                     date: d.date,
                     open: d.open,
@@ -552,7 +552,7 @@ export default function CandlestickDemo() {
         <CodeExample
           title="使用範例"
           language="tsx"
-          code={`import { CandlestickChartV2 } from '../../../registry/components/financial/candlestick-chart/candlestick-chart-v2'
+          code={`import { CandlestickChart } from '../../../registry/components/financial/candlestick-chart/candlestick-chart'
 
 const data = [
   { date: '2024-01-02', open: 593, high: 598, low: 590, close: 596, volume: 15234567 },

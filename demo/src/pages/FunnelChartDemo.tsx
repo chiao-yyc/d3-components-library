@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { FunnelChartV2 as FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart-v2'
-import { ExactFunnelChartV2 as ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
+import { FunnelChart } from '@registry/components/basic/funnel-chart'
+import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 import DemoPageTemplate from '../components/ui/DemoPageTemplate'
 import ModernControlPanel, { ControlGroup, RangeSlider, SelectControl, ToggleControl } from '../components/ui/ModernControlPanel'
 import DataTable from '../components/ui/DataTable'
@@ -817,9 +817,12 @@ export default function FunnelChartDemo() {
                     ]}
                     width={350}
                     height={200}
-                    background="#2a2a2a"
+                    background="#f5f5f5"
                     gradient1="#FF6B6B"
                     gradient2="#4ECDC4"
+                    values="#333333"
+                    labels="#555555"
+                    percentages="#666666"
                   />
                 </div>
 
@@ -834,9 +837,12 @@ export default function FunnelChartDemo() {
                     ]}
                     width={350}
                     height={200}
-                    background="#1a1a1a"
+                    background="#f9f9f9"
                     gradient1="#8B5CF6"
                     gradient2="#06B6D4"
+                    values="#333333"
+                    labels="#555555"
+                    percentages="#666666"
                   />
                 </div>
               </div>

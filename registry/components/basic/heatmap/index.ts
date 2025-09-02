@@ -2,30 +2,29 @@
 import React from 'react';
 import './heatmap.css';
 
-// 舊版本 (向下兼容)
-export { Heatmap } from './heatmap';
-export type { HeatmapProps, HeatmapDataPoint, ProcessedHeatmapDataPoint, LegendTick } from './types';
-// 導出新的 HeatmapCore 作為 D3Heatmap (BaseChartCore 實現)
-export { HeatmapCore as D3Heatmap } from './core/heatmap-core';
-
-// 新版本 (推薦使用)
+// 主要導出（統一版本）
 export { 
-  HeatmapV2, 
+  Heatmap, 
   HeatmapWithLegacySupport,
-  BluesHeatmapV2,
-  GreensHeatmapV2,
-  RedsHeatmapV2,
-  ValueLabelHeatmapV2,
-  RoundedHeatmapV2,
+  BluesHeatmap,
+  GreensHeatmap,
+  RedsHeatmap,
+  ValueLabelHeatmap,
+  RoundedHeatmap,
   defaultHeatmapProps 
-} from './heatmap-v2';
-export type { HeatmapV2Props } from './heatmap-v2';
+} from './heatmap';
+export type { HeatmapProps, HeatmapPropsLegacy } from './heatmap';
+
+// 核心實現導出
 export { HeatmapCore } from './core/heatmap-core';
 export type { 
   HeatmapCoreConfig, 
   HeatmapData, 
-  HeatmapDataPoint as HeatmapV2DataPoint
+  HeatmapDataPoint
 } from './core/heatmap-core';
+
+// 向下兼容類型（舊版本支持）
+export type { HeatmapDataPoint as OldHeatmapDataPoint, ProcessedHeatmapDataPoint, LegendTick } from './types';
 
 // 舊版本的專用變體組件 (向下兼容)
 export const CorrelationHeatmap = (props: any) => {

@@ -1,5 +1,5 @@
 /**
- * FunnelChart v2 - 使用新架構的漏斗圖組件
+ * FunnelChart - 統一架構的漏斗圖組件
  * 核心邏輯在 FunnelChartCore 中實現，React 只負責包裝
  */
 
@@ -16,11 +16,14 @@ export interface FunnelChartProps extends ReactChartWrapperProps, FunnelChartCor
 const FunnelChartComponent = createReactChartWrapper(FunnelChartCore);
 
 // 導出最終組件
-export const FunnelChartV2 = React.forwardRef<FunnelChartCore, FunnelChartProps>((props, ref) => {
+export const FunnelChart = React.forwardRef<FunnelChartCore, FunnelChartProps>((props, ref) => {
   return <FunnelChartComponent ref={ref} {...props} />;
 });
 
-FunnelChartV2.displayName = 'FunnelChartV2';
+FunnelChart.displayName = 'FunnelChart';
+
+// 向下兼容導出
+export const FunnelChartV2 = FunnelChart;
 
 // 默認配置
 export const defaultFunnelChartProps: Partial<FunnelChartProps> = {

@@ -1,6 +1,6 @@
 import { BarChart } from '@registry/components/basic/bar-chart'
 import { LineChart } from '@registry/components/basic/line-chart'
-import { ScatterPlotV2 as ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot-v2'
+import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
 import { PieChart } from '@registry/components/basic/pie-chart'
 import { AreaChart } from '@registry/components/basic/area-chart'
 import { Heatmap } from '@registry/components/basic/heatmap'

@@ -4,7 +4,7 @@
  */
 
 import * as d3 from 'd3';
-import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
+import { BaseChartCore } from '../../../core/base-chart/core';
 import { 
   BaseChartData, 
   ChartData, 
@@ -22,7 +22,6 @@ export interface ViolinPlotData extends BaseChartData {
   label?: string;
   value?: number;
   values?: number[]; 
-  category?: string;
   [key: string]: any;
 }
 
@@ -33,7 +32,7 @@ export interface DensityPoint {
 }
 
 // 處理後的小提琴圖數據點
-export interface ProcessedViolinDataPoint extends BaseChartData {
+export interface ProcessedViolinDataPoint {
   label: string;
   values: number[];
   statistics: StatisticalData;
@@ -41,7 +40,6 @@ export interface ProcessedViolinDataPoint extends BaseChartData {
   originalData: ChartData<ViolinPlotData>;
   index: number;
   color: string;
-  [key: string]: any; // 索引簽名以符合 BaseChartData
 }
 
 // ViolinPlot 專用配置接口
@@ -50,7 +48,6 @@ export interface ViolinPlotCoreConfig extends BaseChartCoreConfig<ViolinPlotData
   labelAccessor?: DataKeyOrAccessor<ViolinPlotData, string>;
   valueAccessor?: DataKeyOrAccessor<ViolinPlotData, number>;
   valuesAccessor?: DataKeyOrAccessor<ViolinPlotData, number[]>;
-  categoryAccessor?: DataKeyOrAccessor<ViolinPlotData, string>;
   
   // 小提琴圖配置
   orientation?: 'vertical' | 'horizontal';
@@ -83,9 +80,12 @@ export interface ViolinPlotCoreConfig extends BaseChartCoreConfig<ViolinPlotData
   violinStrokeWidth?: number;
   boxPlotStroke?: string;
   boxPlotStrokeWidth?: number;
+  boxPlotFillOpacity?: number;
   medianStroke?: string;
   medianStrokeWidth?: number;
   meanStyle?: 'circle' | 'diamond' | 'square';
+  outlierRadius?: number;
+  jitterWidth?: number;
   
   // 軸線配置
   showXAxis?: boolean;
@@ -107,6 +107,7 @@ export interface ViolinPlotCoreConfig extends BaseChartCoreConfig<ViolinPlotData
 // 主要的 ViolinPlot 核心類
 export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
   protected processedData: ProcessedViolinDataPoint[] = [];
+  protected scales: Record<string, any> = {};
   private colorScale: ColorScale | null = null;
   private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number> | null = null;
@@ -120,97 +121,74 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     super(config, callbacks);
   }
 
+  public getChartType(): string {
+    return 'violin-plot';
+  }
+
   protected processData(): ChartData<ViolinPlotData>[] {
     const config = this.config as ViolinPlotCoreConfig;
-    const { data, labelAccessor, valueAccessor, valuesAccessor, categoryAccessor, statisticsMethod } = config;
+    const { data, labelAccessor, valueAccessor, valuesAccessor, statisticsMethod } = config;
+
+    console.log('🎻 NEW ViolinPlotCore processData called!', {
+      dataLength: data?.length,
+      labelAccessor,
+      valuesAccessor
+    });
 
     if (!data || data.length === 0) {
       this.processedData = [];
       return [];
     }
 
-    // 處理數據點
-    let rawProcessedData: any[];
+    // 處理數據點 - 使用統一的數據存取模式
+    this.processedData = data.map((item, index) => {
+      // 處理 Label 值
+      let label: string;
+      if (typeof labelAccessor === 'function') {
+        label = labelAccessor(item, index, data);
+      } else if (typeof labelAccessor === 'string' || typeof labelAccessor === 'number') {
+        label = String(item[labelAccessor]) || `Series ${index + 1}`;
+      } else {
+        label = String(item.label) || `Series ${index + 1}`;
+      }
 
-    if (valuesAccessor) {
-      // 情況1: 每個類別對應一個數組 (valuesAccessor 模式)
-      rawProcessedData = data.map((item, index) => {
-        // 處理 Label 值
-        let label: string;
-        if (typeof labelAccessor === 'function') {
-          label = labelAccessor(item, index, data);
-        } else if (typeof labelAccessor === 'string' || typeof labelAccessor === 'number') {
-          label = String(item[labelAccessor]) || `Series ${index + 1}`;
-        } else {
-          label = String(item.label || item.category) || `Series ${index + 1}`;
-        }
-
-        // 處理 Values 數組
-        let values: number[];
+      // 處理 Values 數組
+      let values: number[];
+      if (valuesAccessor) {
         if (typeof valuesAccessor === 'function') {
           values = valuesAccessor(item, index, data) || [];
         } else if (typeof valuesAccessor === 'string' || typeof valuesAccessor === 'number') {
           values = (item[valuesAccessor] as number[]) || [];
-        } else {
-          values = [];
         }
+      } else if (item.values && Array.isArray(item.values)) {
+        values = item.values;
+      } else if (valueAccessor) {
+        // 單一值轉換為數組
+        if (typeof valueAccessor === 'function') {
+          values = [valueAccessor(item, index, data)];
+        } else if (typeof valueAccessor === 'string' || typeof valueAccessor === 'number') {
+          values = [Number(item[valueAccessor]) || 0];
+        }
+      } else if (typeof item.value === 'number') {
+        values = [item.value];
+      } else {
+        values = [];
+      }
 
-        if (!Array.isArray(values) || values.length === 0) return null;
+      // 計算統計數據和密度數據
+      const statistics = StatisticalUtils.calculateStatistics(values, statisticsMethod);
+      const densityData = this.calculateKernelDensity(values);
 
-        // 過濾有效數值
-        const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
-        if (numericValues.length === 0) return null;
-
-        // 計算統計數據
-        const statistics = StatisticalUtils.calculateStatistics(numericValues, statisticsMethod);
-        const densityData = this.calculateKernelDensity(numericValues);
-
-        return {
-          label,
-          values: numericValues,
-          statistics,
-          densityData,
-          originalData: item,
-          index,
-          color: config.colors?.[index % (config.colors?.length || 1)] || '#3b82f6'
-        };
-      }).filter(d => d !== null);
-    } else {
-      // 情況2: 長格式數據，需要分組
-      const categoryKey = typeof categoryAccessor === 'string' ? categoryAccessor : 
-                         typeof labelAccessor === 'string' ? labelAccessor : 'category';
-      const valueKey = typeof valueAccessor === 'string' ? valueAccessor : 'value';
-
-      // 按類別分組數據
-      const groupedData = d3.group(data, d => String(d[categoryKey] || d.label || d.category || ''));
-      
-      rawProcessedData = Array.from(groupedData.entries()).map(([label, values], index) => {
-        const numericValues = values.map(v => {
-          if (typeof valueAccessor === 'function') {
-            return valueAccessor(v, 0, values);
-          }
-          return Number(v[valueKey]);
-        }).filter(v => typeof v === 'number' && !isNaN(v));
-        
-        if (numericValues.length === 0) return null;
-
-        // 計算統計數據
-        const statistics = StatisticalUtils.calculateStatistics(numericValues, statisticsMethod);
-        const densityData = this.calculateKernelDensity(numericValues);
-        
-        return {
-          label: String(label),
-          values: numericValues,
-          statistics,
-          densityData,
-          originalData: values,
-          index,
-          color: config.colors?.[index % (config.colors?.length || 1)] || '#3b82f6'
-        };
-      }).filter(d => d !== null);
-    }
-
-    this.processedData = rawProcessedData as ProcessedViolinDataPoint[];
+      return {
+        label,
+        values,
+        statistics,
+        densityData,
+        originalData: item,
+        index,
+        color: config.colors?.[index % (config.colors?.length || 1)] || '#3b82f6'
+      };
+    });
 
     // 創建顏色比例尺
     if (config.colors) {
@@ -265,11 +243,14 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
       .domain([0, maxDensity])
       .range([0, (config.violinWidth || 80) / 2]);
 
-    return {
+    // Store scales in protected member
+    this.scales = {
       xScale: this.xScale,
       yScale: this.yScale,
       densityScale: this.densityScale
     };
+
+    return this.scales;
   }
 
   protected renderChart(): void {
@@ -278,11 +259,10 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
 
     // 使用已處理的數據
     if (!this.processedData || this.processedData.length === 0) {
+      console.warn('ViolinPlotCore: No processed data available');
       this.chartGroup.selectAll('*').remove();
       return;
     }
-
-    const config = this.config as ViolinPlotCoreConfig;
 
     // 渲染小提琴圖
     this.renderViolins();
@@ -327,12 +307,12 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
         .attr('stroke-width', violinStrokeWidth);
 
       if (animate) {
-        // 動畫效果
+        // 動畫效果：與 BoxPlot 一致的延遲模式
         const initialPath = this.generateInitialViolinPath(d, orientation);
         violinElement
           .attr('d', initialPath)
           .transition()
-          .delay(animationDelay + i * 200)
+          .delay(animationDelay + i * 100)
           .duration(animationDuration)
           .ease(d3.easeBackOut)
           .attr('d', violinPath);
@@ -428,15 +408,38 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
   ): void {
     const config = this.config as ViolinPlotCoreConfig;
     const { orientation = 'vertical' } = config;
+    const { chartWidth, chartHeight } = this.getChartDimensions();
 
+    if (!this.xScale || !this.yScale) {
+      console.error('🚨 Scales not initialized for BoxPlot rendering!');
+      return;
+    }
+
+    // 像 BoxPlot 一樣，重新創建適當的數值 scale
+    const allValues = data.values;
+    const valueExtent = d3.extent(allValues) as [number, number];
+    
+    let xScale: any, yScale: any;
     let centerX: number = 0, centerY: number = 0;
 
-    if (orientation === 'vertical') {
-      const xBandScale = this.xScale as d3.ScaleBand<string>;
-      centerX = (xBandScale(data.label) || 0) + xBandScale.bandwidth() / 2;
-    } else {
-      const yBandScale = this.yScale as d3.ScaleBand<string>;
+    if (orientation === 'horizontal') {
+      // 水平方向：X軸數值，Y軸類別
+      xScale = d3.scaleLinear()
+        .domain(valueExtent)
+        .range([0, chartWidth])
+        .nice();
+      yScale = this.yScale; // 使用現有的 band scale
+      const yBandScale = yScale as d3.ScaleBand<string>;
       centerY = (yBandScale(data.label) || 0) + yBandScale.bandwidth() / 2;
+    } else {
+      // 垂直方向：X軸類別，Y軸數值  
+      xScale = this.xScale; // 使用現有的 band scale
+      yScale = d3.scaleLinear()
+        .domain(valueExtent)
+        .range([chartHeight, 0])
+        .nice();
+      const xBandScale = xScale as d3.ScaleBand<string>;
+      centerX = (xBandScale(data.label) || 0) + xBandScale.bandwidth() / 2;
     }
 
     BoxPlotRenderer.renderEmbedded(violinGroup, data.statistics, {
@@ -450,22 +453,24 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
       showWhiskers: config.showWhiskers ?? true,
       showOutliers: config.showOutliers,
       whiskerWidth: 10,
-      xScale: this.xScale!,
-      yScale: this.yScale!,
-      boxFill: 'white',
-      boxFillOpacity: 0.8,
+      xScale: xScale,
+      yScale: yScale,
+      // 樣式參數（與 BoxPlot 一致）
+      boxFill: data.color,
+      boxFillOpacity: config.boxPlotFillOpacity || 0.7,
       boxStroke: config.boxPlotStroke || '#374151',
-      boxStrokeWidth: config.boxPlotStrokeWidth || 2,
+      boxStrokeWidth: config.boxPlotStrokeWidth || 1,
       medianStroke: config.medianStroke || '#000',
       medianStrokeWidth: config.medianStrokeWidth || 3,
       meanStyle: config.meanStyle || 'diamond',
-      outlierRadius: 2,
+      outlierRadius: config.outlierRadius || 3,
       outlierColor: data.color,
-      categoryIndex: index,
-      jitterWidth: 0.5,
+      jitterWidth: config.jitterWidth || 0.6,
+      // 動畫參數
       animate: config.animate,
-      animationDuration: (config.animationDuration || 1000) * 0.8,
-      animationDelay: (config.animationDelay || 100) + index * 200 + 500
+      animationDuration: config.animationDuration,
+      animationDelay: config.animationDelay,
+      categoryIndex: index
     });
   }
 
@@ -474,23 +479,29 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     data: ProcessedViolinDataPoint
   ): void {
     const config = this.config as ViolinPlotCoreConfig;
-    
-    violinGroup
-      .style('cursor', 'pointer')
-      .on('click', (event) => {
-        config.onDataClick?.(data, event);
-      })
-      .on('mouseenter', (event) => {
-        // 顯示工具提示
-        const [x, y] = d3.pointer(event, this.containerElement);
-        const tooltipContent = `${data.label}: ${data.values.length} samples`;
-        this.showTooltip(x, y, tooltipContent);
-        config.onDataHover?.(data, event);
-      })
-      .on('mouseleave', (event) => {
-        this.hideTooltip();
-        config.onDataHover?.(null, event);
-      });
+
+    if (config.interactive) {
+      violinGroup
+        .style('cursor', 'pointer')
+        .on('click', (event) => {
+          config.onDataClick?.(data, event);
+        })
+        .on('mouseover', (event) => {
+          config.onDataHover?.(data, event);
+          
+          // 計算相對於圖表容器的座標
+          const containerRect = this.containerElement?.getBoundingClientRect();
+          if (containerRect) {
+            const tooltipX = event.clientX - containerRect.left;
+            const tooltipY = event.clientY - containerRect.top;
+            this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(data));
+          }
+        })
+        .on('mouseout', (event) => {
+          config.onDataHover?.(null, event);
+          this.hideTooltip();
+        });
+    }
   }
 
   private renderUnifiedAxes(): void {
@@ -516,49 +527,51 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
    * 計算核密度估計
    */
   private calculateKernelDensity(values: number[]): DensityPoint[] {
+    if (!values.length) return [];
+    
     const config = this.config as ViolinPlotCoreConfig;
-    const {
-      bandwidth,
-      resolution = 100,
-      kdeMethod = 'gaussian',
-      smoothing = 1,
-      clipMin,
-      clipMax
-    } = config;
+    const { resolution = 100, smoothing = 1, kdeMethod = 'gaussian', bandwidth } = config;
 
-    if (values.length === 0) return [];
+    const sortedValues = values.sort((a, b) => a - b);
+    const min = d3.min(sortedValues) as number;
+    const max = d3.max(sortedValues) as number;
 
-    // 計算自動帶寬
-    const autoBandwidth = bandwidth || StatisticalUtils.calculateBandwidth(values);
-    const adjustedBandwidth = autoBandwidth * smoothing;
-
-    const min = clipMin ?? Math.min(...values);
-    const max = clipMax ?? Math.max(...values);
-    const range = max - min;
-    const step = range / resolution;
-
-    const kernelFunction = this.getKernelFunction(kdeMethod);
-    const densityPoints: DensityPoint[] = [];
-
-    for (let i = 0; i <= resolution; i++) {
-      const x = min + i * step;
-      let density = 0;
-
-      for (const value of values) {
-        const u = (x - value) / adjustedBandwidth;
-        density += kernelFunction(u);
-      }
-
-      density = density / (values.length * adjustedBandwidth);
-      densityPoints.push({ value: x, density });
+    if (min === max) {
+      // 單一值情況，返回一個點
+      return [{ value: min, density: 1 }];
     }
 
+    const range = max - min;
+    const step = range / (resolution - 1);
+    
+    const h = bandwidth || this.calculateBandwidth(values) * smoothing;
+    const kernel = this.getKernelFunction(kdeMethod);
+    
+    const densityPoints: DensityPoint[] = [];
+    
+    for (let i = 0; i < resolution; i++) {
+      const x = min + i * step;
+      let density = 0;
+      
+      for (const value of values) {
+        const u = (x - value) / h;
+        density += kernel(u);
+      }
+      
+      density = density / (values.length * h);
+      densityPoints.push({ value: x, density });
+    }
+    
     return densityPoints;
   }
 
-  /**
-   * 獲取核函數
-   */
+  private calculateBandwidth(values: number[]): number {
+    const n = values.length;
+    const std = d3.deviation(values) || 1;
+    // Silverman's rule of thumb
+    return 1.06 * std * Math.pow(n, -1/5);
+  }
+
   private getKernelFunction(method: string): (u: number) => number {
     switch (method) {
       case 'epanechnikov':
@@ -571,8 +584,8 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     }
   }
 
-  public getChartType(): string {
-    return 'violin-plot';
+  private formatTooltipContent(data: ProcessedViolinDataPoint): string {
+    return `${data.label}: ${d3.format(',')(data.values.length)} values`;
   }
 
   // 公共方法：更新配置
@@ -583,5 +596,14 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
   // 公共方法：獲取處理後的數據
   public getProcessedData(): ChartData<ViolinPlotData>[] {
     return this.processedData;
+  }
+
+  // 公共方法：獲取比例尺
+  public getScales() {
+    return {
+      xScale: this.xScale,
+      yScale: this.yScale,
+      densityScale: this.densityScale
+    };
   }
 }

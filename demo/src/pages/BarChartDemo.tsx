@@ -253,7 +253,7 @@ export default function BarChartDemo() {
         <CodeExample
           title="使用範例"
           language="tsx"
-          code={`import { BarChartV2 as BarChart } from '../../../registry/components/basic/bar-chart/bar-chart-v2'
+          code={`import { BarChart } from '../../../registry/components/basic/bar-chart'
 import { ChartContainer } from '@registry/components/ui'
 
 const data = [
