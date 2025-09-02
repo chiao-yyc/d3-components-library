@@ -1,10 +1,15 @@
 // UI Wrapper for PieChart component
 // This file provides a simple import path for the demo environment
 
-export { PieChart } from '@registry/components/basic/pie-chart'
+export { 
+  PieChart,
+  DonutChart,
+  PieChartWithLegend,
+  PieChartLegacy
+} from '@registry/components/basic/pie-chart'
 export type { 
-  PieChartProps, 
-  PieDataPoint, 
+  PieChartProps,
+  PieChartData as PieDataPoint, 
   ProcessedPieDataPoint,
   LegendItem 
 } from '@registry/components/basic/pie-chart'

@@ -360,6 +360,7 @@ export default function PieChartDemo() {
                 interactive={interactive}
                 showCenterText={showCenterText}
                 hoverEffect={hoverEffect}
+                showTooltip={true}
                 onSliceClick={(data) => {
                   console.log('Pie slice clicked:', data)
                 }}

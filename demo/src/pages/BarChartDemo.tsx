@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChartV2 as BarChart } from '@registry/components/basic/bar-chart/bar-chart-v2'
+import { BarChart } from '../components/ui'
 import { datasetOptions, colorSchemes } from '../data/sample-data'
 import { 
   DemoPageTemplate,

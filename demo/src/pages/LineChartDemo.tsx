@@ -17,6 +17,7 @@ import {
   StatusDisplay,
   DataTable,
   CodeExample,
+  ChartTooltip,
   type DataTableColumn
 } from '../components/ui'
 import { CogIcon, ChartBarIcon, SparklesIcon } from '@heroicons/react/24/outline'
@@ -80,9 +81,19 @@ export default function LineChartDemo() {
   const [enableDropShadow, setEnableDropShadow] = useState(false)
   const [enableGlowEffect, setEnableGlowEffect] = useState(false)
   
+  // Tooltip 功能
+  const [enableTooltip, setEnableTooltip] = useState(true)
+  const [tooltipMode, setTooltipMode] = useState<'point' | 'vertical-line' | 'line'>('vertical-line')
+  const [showCrosshair, setShowCrosshair] = useState(true)
+  
   // 交互狀態
   const [zoomDomain, setZoomDomain] = useState<[any, any] | null>(null)
   const [crosshairData, setCrosshairData] = useState<any>(null)
+  
+  // Tooltip 狀態
+  const [tooltipVisible, setTooltipVisible] = useState(false)
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
+  const [tooltipContent, setTooltipContent] = useState('')
   
   // 邊距設定
 
@@ -117,7 +128,8 @@ export default function LineChartDemo() {
     { label: '數據點數', value: currentData.length },
     { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
     { label: '曲線類型', value: curve },
-    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
+    { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' },
+    { label: 'Tooltip', value: enableTooltip ? '開啟' : '關閉', color: enableTooltip ? '#10b981' : '#6b7280' }
   ]
 
   // 數據表格列定義
@@ -287,6 +299,38 @@ export default function LineChartDemo() {
               />
             </ControlGroup>
 
+            {/* Tooltip 配置 */}
+            <ControlGroup title="Tooltip 配置" icon="💬" cols={2}>
+              <ToggleControl
+                label="啟用 Tooltip"
+                checked={enableTooltip}
+                onChange={setEnableTooltip}
+                description="啟用折線圖 tooltip 功能"
+              />
+              
+              {enableTooltip && (
+                <>
+                  <SelectControl
+                    label="Tooltip 模式"
+                    value={tooltipMode}
+                    onChange={(value) => setTooltipMode(value as any)}
+                    options={[
+                      { value: 'point', label: '點模式' },
+                      { value: 'vertical-line', label: '垂直線模式' },
+                      { value: 'line', label: '線條模式' }
+                    ]}
+                  />
+                  
+                  <ToggleControl
+                    label="顯示十字線"
+                    checked={showCrosshair}
+                    onChange={setShowCrosshair}
+                    description="在 tooltip 中顯示十字定位線"
+                  />
+                </>
+              )}
+            </ControlGroup>
+
             {/* 視覺效果 */}
             <ControlGroup title="視覺效果" icon="✨" cols={2}>
               <ToggleControl
@@ -388,6 +432,30 @@ export default function LineChartDemo() {
                     enableDropShadow={enableDropShadow}
                     enableGlowEffect={enableGlowEffect}
                     glowColor="#3b82f6"
+                    
+                    // Tooltip 配置
+                    enableTooltip={enableTooltip}
+                    tooltipMode={tooltipMode}
+                    showCrosshair={showCrosshair}
+                    tooltipFormat={(data, x, category) => {
+                      if (data.length === 0) return '';
+                      
+                      const header = `X: ${x}`;
+                      const items = data.map(d => 
+                        `${d.category ? `${d.category}: ` : ''}${d.y?.toLocaleString()}`
+                      ).join('\n');
+                      
+                      return `${header}\n${items}`;
+                    }}
+                    // Tooltip 回調
+                    onTooltipShow={(x, y, content) => {
+                      setTooltipPosition({ x, y })
+                      setTooltipContent(content)
+                      setTooltipVisible(true)
+                    }}
+                    onTooltipHide={() => {
+                      setTooltipVisible(false)
+                    }}
                   />
                 </motion.div>
               </>
@@ -494,6 +562,14 @@ const data = [
           </div>
         </div>
       </div>
+      
+      {/* Tooltip 組件 */}
+      <ChartTooltip
+        visible={tooltipVisible}
+        x={tooltipPosition.x}
+        y={tooltipPosition.y}
+        content={tooltipContent}
+      />
     </DemoPageTemplate>
   )
 }

@@ -5,7 +5,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ScatterPlotV2 as ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot-v2'
+import { ScatterPlot } from '../components/ui'
 import { 
   DemoPageTemplate,
   ContentSection,

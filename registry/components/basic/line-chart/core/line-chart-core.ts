@@ -94,6 +94,11 @@ export interface LineChartCoreConfig extends BaseChartCoreConfig {
   enableTooltip?: boolean;
   enableLegend?: boolean;
   
+  // Tooltip 進階配置
+  tooltipMode?: 'point' | 'vertical-line' | 'line';
+  showCrosshair?: boolean;
+  tooltipFormat?: (data: ProcessedLineDataPoint[], x: number | Date, category?: string) => string;
+  
   // 高級功能
   enableDropShadow?: boolean;
   enableGlowEffect?: boolean;
@@ -109,51 +114,66 @@ export interface LineChartCoreConfig extends BaseChartCoreConfig {
 
 // 主要的 LineChart 核心類
 export class LineChartCore extends BaseChartCore<LineChartData> {
-  private processedData: ProcessedLineDataPoint[] = [];
+  protected processedData: ChartData<LineChartData>[] = [];
+  private internalProcessedData: ProcessedLineDataPoint[] = [];
   private seriesData: LineSeriesData[] = [];
   private colorScale: ColorScale | null = null;
-  private lineGroup: D3Selection | null = null;
-  private pointsGroup: D3Selection | null = null;
+  private lineGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
+  private pointsGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private clipPathId: string;
+  
+  // 添加缺失的屬性（與其他 Core 類別一致）
+  private chartWidth: number = 0;
+  private chartHeight: number = 0;
+  private chartGroup: D3Selection | null = null;
   
   // 交互控制器
   private brushZoomController: any = null;
   private crosshairController: any = null;
+  
+  // Tooltip 相關
+  private tooltipOverlay: D3Selection | null = null;
+  private crosshairGroup: D3Selection | null = null;
 
   constructor(
     config: LineChartCoreConfig,
-    callbacks?: ChartStateCallbacks<LineChartData>
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
     this.clipPathId = `line-chart-clip-${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  protected processData(): { 
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>;
-    yScale: d3.ScaleLinear<number, number>;
-    data: ProcessedLineDataPoint[] 
-  } {
+  public getChartType(): string {
+    return 'line-chart'; // v9-FIXED-CREATESCALES
+  }
+
+  protected processData(): ChartData<LineChartData>[] {
     const config = this.config as LineChartCoreConfig;
     const { data, xAccessor, yAccessor, categoryAccessor } = config;
 
     if (!data || data.length === 0) {
-      this.processedData = [];
+      this.internalProcessedData = [];
+      this.processedData = data;
       this.seriesData = [];
-      return {
-        xScale: d3.scaleLinear().range([0, this.chartWidth]),
-        yScale: d3.scaleLinear().range([this.chartHeight, 0]),
-        data: []
-      };
+      return data;
     }
     
     // 處理數據點 - 使用統一的數據存取模式
-    this.processedData = data.map((item, index) => {
+    this.internalProcessedData = data.map((item, index) => {
       // 處理 X 值
       let x: number | Date;
       if (typeof xAccessor === 'function') {
-        x = xAccessor(item, index, data);
-      } else if (typeof xAccessor === 'string' || typeof xAccessor === 'number') {
-        x = item[xAccessor] as number | Date;
+        x = xAccessor(item, index, data) as number | Date;
+      } else if (typeof xAccessor === 'string') {
+        const xValue = item[xAccessor as keyof LineChartData];
+        // 嘗試解析日期字符串
+        if (typeof xValue === 'string') {
+          // 檢查是否為日期格式
+          const dateValue = new Date(xValue);
+          x = !isNaN(dateValue.getTime()) ? dateValue : Number(xValue) || 0;
+        } else {
+          x = xValue as number | Date;
+        }
       } else {
         x = item.x as number | Date;
       }
@@ -162,8 +182,9 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
       let y: number;
       if (typeof yAccessor === 'function') {
         y = yAccessor(item, index, data);
-      } else if (typeof yAccessor === 'string' || typeof yAccessor === 'number') {
-        y = Number(item[yAccessor]) || 0;
+      } else if (typeof yAccessor === 'string') {
+        const yValue = item[yAccessor as keyof LineChartData];
+        y = Number(yValue) || 0;
       } else {
         y = Number(item.y) || 0;
       }
@@ -187,17 +208,31 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
       };
     });
 
+    // 設置 BaseChartCore 要求的 processedData
+    this.processedData = data;
+    
     // 處理系列數據
     this.processSeriesData();
 
-    // 創建比例尺
-    const xValues = this.processedData.map(d => d.x);
-    const yValues = this.processedData.map(d => d.y);
+    // 返回原始數據以符合 BaseChartCore 介面
+    return data;
+  }
+
+  protected createScales(): Record<string, any> {
+    if (!this.internalProcessedData || this.internalProcessedData.length === 0) {
+      return {
+        xScale: d3.scaleLinear().range([0, this.chartWidth || 600]),
+        yScale: d3.scaleLinear().range([this.chartHeight || 400, 0])
+      };
+    }
+
+    const xValues = this.internalProcessedData.map(d => d.x);
+    const yValues = this.internalProcessedData.map(d => d.y);
     
     const xScale = this.createXScale(xValues);
     const yScale = this.createYScale(yValues);
 
-    return { xScale, yScale, data: this.processedData };
+    return { xScale, yScale };
   }
 
   private processSeriesData(): void {
@@ -207,13 +242,13 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
       // 單一系列
       this.seriesData = [{
         category: 'default',
-        data: this.processedData,
+        data: this.internalProcessedData,
         color: config.colors?.[0] || '#3b82f6',
         visible: true
       }];
     } else {
       // 多系列
-      const categoryGroups = d3.group(this.processedData, d => d.category || 'default');
+      const categoryGroups = d3.group(this.internalProcessedData, d => d.category || 'default');
       const categories = Array.from(categoryGroups.keys());
       
       this.seriesData = categories.map((category, index) => ({
@@ -263,10 +298,55 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   }
 
   protected renderChart(): void {
-    if (!this.chartGroup || this.processedData.length === 0) return;
+    // Process series data first to ensure we have data to render
+    if (!this.internalProcessedData || this.internalProcessedData.length === 0) {
+      // If internal data not yet processed, do it now
+      if (this.processedData && this.processedData.length > 0) {
+        this.internalProcessedData = this.processedData.map((d, i, arr) => {
+          const config = this.config as LineChartCoreConfig;
+          const xAccessor = config.xAccessor || ((d: any) => d.x);
+          const yAccessor = config.yAccessor || ((d: any) => d.y);
+          const categoryAccessor = config.categoryAccessor;
+          
+          const xValue = typeof xAccessor === 'function' ? xAccessor(d, i, arr) : d[xAccessor as keyof LineChartData];
+          const yValue = typeof yAccessor === 'function' ? yAccessor(d, i, arr) : d[yAccessor as keyof LineChartData];
+          const categoryValue = categoryAccessor ? 
+            (typeof categoryAccessor === 'function' ? categoryAccessor(d, i, arr) : d[categoryAccessor as keyof LineChartData]) : 
+            undefined;
+
+          return {
+            x: xValue as number | Date,
+            y: Number(yValue) || 0,
+            category: categoryValue as string | number | undefined,
+            originalData: d,
+            index: i
+          };
+        });
+      }
+    }
+    
+    // Now process series data
+    this.processSeriesData();
+    
+    if (!this.internalProcessedData || this.internalProcessedData.length === 0) {
+      return;
+    }
 
     const config = this.config as LineChartCoreConfig;
-    const { xScale, yScale } = this.processData();
+    
+    // 始終重新計算圖表尺寸（與其他 Core 類別一致）
+    const margin = config.margin || { top: 20, right: 20, bottom: 60, left: 60 };
+    const width = config.width || 600;
+    const height = config.height || 400;
+    this.chartWidth = width - margin.left - margin.right;
+    this.chartHeight = height - margin.top - margin.bottom;
+    
+    // 創建或獲取圖表組
+    if (!this.chartGroup) {
+      this.chartGroup = this.createSVGContainer();
+    }
+    
+    const { xScale, yScale } = this.createScales();
 
     // 清除之前的內容
     this.chartGroup.selectAll('*').remove();
@@ -530,6 +610,11 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
     if (config.enableCrosshair) {
       this.setupCrosshair();
     }
+    
+    // 實現 Tooltip 交互
+    if (config.enableTooltip !== false) {
+      this.setupTooltipInteraction(xScale, yScale);
+    }
   }
 
   private setupBrushZoom(
@@ -543,6 +628,251 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
     console.log('Setting up crosshair for LineChart');
   }
 
+  private setupTooltipInteraction(
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    yScale: d3.ScaleLinear<number, number>
+  ): void {
+    if (!this.chartGroup) return;
+
+    const config = this.config as LineChartCoreConfig;
+    
+    // 創建透明的覆蓋層來捕獲鼠標事件
+    this.tooltipOverlay = this.chartGroup
+      .append('rect')
+      .attr('class', 'line-chart-tooltip-overlay')
+      .attr('width', this.chartWidth)
+      .attr('height', this.chartHeight)
+      .attr('fill', 'none')
+      .attr('pointer-events', 'all')
+      .style('cursor', 'crosshair');
+
+    // 創建十字線組
+    if (config.showCrosshair !== false) {
+      this.crosshairGroup = this.chartGroup
+        .append('g')
+        .attr('class', 'line-chart-crosshair')
+        .style('display', 'none');
+
+      // 垂直線
+      this.crosshairGroup
+        .append('line')
+        .attr('class', 'crosshair-vertical')
+        .attr('y1', 0)
+        .attr('y2', this.chartHeight)
+        .attr('stroke', '#666')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '3,3')
+        .style('pointer-events', 'none');
+
+      // 水平線
+      this.crosshairGroup
+        .append('line')
+        .attr('class', 'crosshair-horizontal')
+        .attr('x1', 0)
+        .attr('x2', this.chartWidth)
+        .attr('stroke', '#666')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '3,3')
+        .style('pointer-events', 'none');
+    }
+
+    // 綁定鼠標事件
+    this.tooltipOverlay
+      .on('mousemove', (event: MouseEvent) => {
+        this.handleLineMouseMove(event, xScale, yScale);
+      })
+      .on('mouseleave', () => {
+        this.handleLineMouseLeave();
+      });
+  }
+
+  private handleLineMouseMove(
+    event: MouseEvent,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    yScale: d3.ScaleLinear<number, number>
+  ): void {
+    if (!this.containerElement || !this.tooltipOverlay) return;
+
+    const config = this.config as LineChartCoreConfig;
+    const [mouseX, mouseY] = d3.pointer(event, this.tooltipOverlay.node());
+    
+    // 轉換鼠標座標為數據座標
+    const xValue = xScale.invert(mouseX);
+    
+    // 根據 tooltip 模式找到相應的數據點
+    const dataPoints = this.findDataPointsAtX(xValue);
+    
+    if (dataPoints.length === 0) {
+      this.handleLineMouseLeave();
+      return;
+    }
+
+    // 更新十字線位置
+    if (this.crosshairGroup && config.showCrosshair !== false) {
+      this.crosshairGroup.style('display', 'block');
+      
+      this.crosshairGroup
+        .select('.crosshair-vertical')
+        .attr('x1', mouseX)
+        .attr('x2', mouseX);
+        
+      this.crosshairGroup
+        .select('.crosshair-horizontal')
+        .attr('y1', mouseY)
+        .attr('y2', mouseY);
+    }
+
+    // 格式化 tooltip 內容
+    const tooltipContent = this.formatLineTooltipContent(dataPoints, xValue);
+    
+    // 獲取相對於容器的座標
+    const containerRect = this.containerElement.getBoundingClientRect();
+    const x = event.clientX - containerRect.left;
+    const y = event.clientY - containerRect.top;
+    
+    // 調用 tooltip 顯示回調
+    this.callbacks.onTooltipShow?.(x, y, tooltipContent);
+  }
+
+  private handleLineMouseLeave(): void {
+    // 隱藏十字線
+    if (this.crosshairGroup) {
+      this.crosshairGroup.style('display', 'none');
+    }
+    
+    // 隱藏 tooltip
+    this.callbacks.onTooltipHide?.();
+  }
+
+  private findDataPointsAtX(xValue: number | Date): ProcessedLineDataPoint[] {
+    const config = this.config as LineChartCoreConfig;
+    const isTimeScale = xValue instanceof Date || typeof xValue === 'object';
+    
+    // 根據 tooltip 模式決定查找邏輯
+    switch (config.tooltipMode) {
+      case 'point':
+        // 點模式：找到最接近的單個數據點
+        return this.findClosestDataPoint(xValue);
+        
+      case 'line':
+        // 線條模式：找到特定系列在 X 位置的數據點
+        return this.findDataPointsOnLines(xValue);
+        
+      case 'vertical-line':
+      default:
+        // 垂直線模式：找到所有系列在相同 X 位置的數據點
+        return this.findAllDataPointsAtX(xValue);
+    }
+  }
+
+  private findClosestDataPoint(xValue: number | Date): ProcessedLineDataPoint[] {
+    let closestPoint: ProcessedLineDataPoint | null = null;
+    let minDistance = Infinity;
+    
+    for (const series of this.seriesData) {
+      if (!series.visible) continue;
+      
+      for (const point of series.data) {
+        const distance = typeof xValue === 'number' && typeof point.x === 'number'
+          ? Math.abs(point.x - xValue)
+          : xValue instanceof Date && point.x instanceof Date
+            ? Math.abs(point.x.getTime() - xValue.getTime())
+            : Infinity;
+            
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPoint = point;
+        }
+      }
+    }
+    
+    return closestPoint ? [closestPoint] : [];
+  }
+
+  private findDataPointsOnLines(xValue: number | Date): ProcessedLineDataPoint[] {
+    // 這個方法可以用於實現沿著線條的 tooltip
+    // 暫時使用與垂直線相同的邏輯
+    return this.findAllDataPointsAtX(xValue);
+  }
+
+  private findAllDataPointsAtX(xValue: number | Date): ProcessedLineDataPoint[] {
+    const result: ProcessedLineDataPoint[] = [];
+    const tolerance = this.calculateTolerance(xValue);
+    
+    for (const series of this.seriesData) {
+      if (!series.visible) continue;
+      
+      // 找到最接近的 X 值
+      let closestPoint: ProcessedLineDataPoint | null = null;
+      let minDistance = Infinity;
+      
+      for (const point of series.data) {
+        const distance = typeof xValue === 'number' && typeof point.x === 'number'
+          ? Math.abs(point.x - xValue)
+          : xValue instanceof Date && point.x instanceof Date
+            ? Math.abs(point.x.getTime() - xValue.getTime())
+            : Infinity;
+            
+        if (distance < minDistance && distance <= tolerance) {
+          minDistance = distance;
+          closestPoint = point;
+        }
+      }
+      
+      if (closestPoint) {
+        result.push(closestPoint);
+      }
+    }
+    
+    return result;
+  }
+
+  private calculateTolerance(xValue: number | Date): number {
+    if (typeof xValue === 'number') {
+      // 對於數值，使用數據範圍的 5%
+      const extent = d3.extent(this.internalProcessedData, d => d.x as number);
+      return extent[0] !== undefined && extent[1] !== undefined 
+        ? (extent[1] - extent[0]) * 0.05 
+        : 1;
+    } else {
+      // 對於日期，使用 1 天的毫秒數
+      return 24 * 60 * 60 * 1000;
+    }
+  }
+
+  private formatLineTooltipContent(
+    dataPoints: ProcessedLineDataPoint[], 
+    xValue: number | Date
+  ): string {
+    const config = this.config as LineChartCoreConfig;
+    
+    // 如果用戶提供了自定義格式化函數，使用它
+    if (config.tooltipFormat) {
+      return config.tooltipFormat(dataPoints, xValue);
+    }
+    
+    // 默認格式化
+    if (dataPoints.length === 0) return '';
+    
+    const header = `X: ${this.formatValue(xValue)}`;
+    const items = dataPoints.map(point => {
+      const categoryLabel = point.category ? `${point.category}: ` : '';
+      return `${categoryLabel}${this.formatValue(point.y)}`;
+    }).join('\n');
+    
+    return `${header}\n${items}`;
+  }
+
+  private formatValue(value: number | Date | string): string {
+    if (value instanceof Date) {
+      return value.toLocaleDateString();
+    } else if (typeof value === 'number') {
+      return value.toLocaleString();
+    } else {
+      return String(value);
+    }
+  }
+
   // 公共方法：更新配置
   public updateConfig(newConfig: Partial<LineChartCoreConfig>): void {
     this.config = { ...this.config, ...newConfig };
@@ -551,7 +881,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
 
   // 公共方法：獲取當前數據
   public getCurrentData(): ProcessedLineDataPoint[] {
-    return this.processedData;
+    return this.internalProcessedData;
   }
 
   // 公共方法：獲取系列數據

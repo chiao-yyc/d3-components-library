@@ -1,3 +1,14 @@
-// 直接引用 Registry 中的組件，支援即時開發預覽
-export { ScatterPlotV2 as ScatterPlot } from '@registry/components/statistical/scatter-plot/scatter-plot-v2'
-export type { ScatterPlotV2Props as ScatterPlotProps } from '@registry/components/statistical/scatter-plot/scatter-plot-v2'
+// UI Wrapper for ScatterPlot component
+// This file provides a simple import path for the demo environment
+
+export { 
+  ScatterPlot,
+  BubbleChart,
+  TrendlineScatterPlot,
+  ScatterPlotLegacy
+} from '@registry/components/statistical/scatter-plot'
+export type { 
+  ScatterPlotProps,
+  ScatterPlotData,
+  ProcessedScatterDataPoint
+} from '@registry/components/statistical/scatter-plot'

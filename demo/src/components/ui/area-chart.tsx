@@ -4,7 +4,7 @@
 export { AreaChart } from '@registry/components/basic/area-chart'
 export type { 
   AreaChartProps, 
-  AreaDataPoint, 
+  AreaChartData, 
   ProcessedAreaDataPoint,
-  AreaSeriesData 
+  AreaSeries 
 } from '@registry/components/basic/area-chart'

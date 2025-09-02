@@ -7,9 +7,15 @@ import React from 'react';
 import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base-chart/react-chart-wrapper';
 import { LineChartCore, LineChartCoreConfig, PointMarkerConfig } from './core/line-chart-core';
 
-// 擴展 React props 接口
+// 擴展 React props 接口，包含向下兼容的 key-based props
 export interface LineChartV2Props extends ReactChartWrapperProps, LineChartCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
+  
+  // 向下兼容的 key-based 屬性
+  xKey?: string;
+  yKey?: string;
+  seriesKey?: string;
+  categoryKey?: string;
 }
 
 // 創建 LineChart 組件
@@ -17,7 +23,23 @@ const LineChartComponent = createReactChartWrapper(LineChartCore);
 
 // 導出最終組件
 export const LineChartV2 = React.forwardRef<LineChartCore, LineChartV2Props>((props, ref) => {
-  return <LineChartComponent ref={ref} {...props} />;
+  // 處理向下兼容的 key-based props
+  const {
+    xKey, yKey, seriesKey, categoryKey,
+    xAccessor, yAccessor, categoryAccessor,
+    ...restProps
+  } = props;
+
+  // 映射 key-based props 到 accessor
+  const finalProps: LineChartCoreConfig = {
+    ...restProps,
+    xAccessor: xAccessor || xKey || 'x',
+    yAccessor: yAccessor || yKey || 'y',
+    categoryAccessor: categoryAccessor || seriesKey || categoryKey,
+  };
+
+
+  return <LineChartComponent ref={ref} {...finalProps} />;
 });
 
 LineChartV2.displayName = 'LineChartV2';

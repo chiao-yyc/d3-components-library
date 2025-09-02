@@ -13,6 +13,7 @@ import {
   D3Selection,
   ChartStateCallbacks
 } from '../../../core/types';
+import { TooltipContent } from '../../../ui/chart-tooltip/types';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 
 // PieChart 專用數據接口
@@ -105,6 +106,10 @@ export interface PieChartCoreConfig extends BaseChartCoreConfig {
   // 動畫
   animationType?: 'fade' | 'scale' | 'rotate' | 'none';
   
+  // Tooltip 配置
+  enableTooltip?: boolean;
+  tooltipFormatter?: (data: ProcessedPieDataPoint) => TooltipContent;
+  
   // 事件處理
   onSegmentClick?: (data: ProcessedPieDataPoint, event: Event) => void;
   onSegmentHover?: (data: ProcessedPieDataPoint | null, event: Event) => void;
@@ -117,6 +122,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   private processedData: ProcessedPieDataPoint[] = [];
   private segments: PieSegment[] = [];
   private colorScale: ColorScale | null = null;
+  private chartGroup: D3Selection | null = null;
   private pieGroup: D3Selection | null = null;
   private legendGroup: D3Selection | null = null;
   private radius: number = 0;
@@ -220,10 +226,19 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     // 創建顏色比例尺
     this.createColorScale();
 
-    // 應用顏色
+    // 應用顏色 - 優先使用色彩比例尺，檢查是否為有效顏色
     this.processedData.forEach((item, index) => {
-      if (!item.color) {
-        item.color = this.colorScale?.getColor(index) || config.colors?.[index % (config.colors?.length || 1)] || '#3b82f6';
+      const isValidColor = item.color && (
+        item.color.startsWith('#') || 
+        item.color.startsWith('rgb') || 
+        item.color.startsWith('hsl') ||
+        /^[a-z]+$/i.test(item.color) && ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'brown'].includes(item.color.toLowerCase())
+      );
+      
+      if (!isValidColor) {
+        const scaleColor = this.colorScale?.getColor(index);
+        const fallbackColor = config.colors?.[index % (config.colors?.length || 8)] || '#3b82f6';
+        item.color = scaleColor || fallbackColor;
       }
     });
 
@@ -263,17 +278,23 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   private createColorScale(): void {
     const config = this.config as PieChartCoreConfig;
     
-    if (config.colors) {
-      this.colorScale = createColorScale(config.colors, this.processedData.length);
-    }
+    // 使用默認顏色或配置的顏色
+    const colors = config.colors || ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+    this.colorScale = createColorScale({
+      type: 'custom',
+      colors: colors,
+      count: this.processedData.length,
+      interpolate: false
+    });
   }
 
   private calculateDimensions(): void {
     const config = this.config as PieChartCoreConfig;
+    const { chartWidth, chartHeight } = this.getChartDimensions();
     
     // 計算可用空間（考慮圖例位置）
-    let availableWidth = this.chartWidth;
-    let availableHeight = this.chartHeight;
+    let availableWidth = chartWidth;
+    let availableHeight = chartHeight;
     
     if (config.legend?.show) {
       if (config.legend.position === 'right' || config.legend.position === 'left') {
@@ -292,7 +313,15 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   }
 
   protected renderChart(): void {
-    if (!this.chartGroup || this.processedData.length === 0) return;
+    
+    // 創建 SVG 容器和圖表群組
+    if (!this.chartGroup) {
+      this.chartGroup = this.createSVGContainer();
+    }
+    
+    if (!this.chartGroup || this.processedData.length === 0) {
+      return;
+    }
 
     const config = this.config as PieChartCoreConfig;
     const { pie, arc } = this.processData();
@@ -376,6 +405,29 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
         
         config.onSegmentHover?.(d.data, event);
       })
+      .on('mousemove', (event, d) => {
+        // Tooltip 顯示 - 使用 mousemove 來持續更新位置
+        if (config.enableTooltip) {
+          // 創建簡單的字符串 tooltip 內容
+          const tooltipText = `${d.data.label}\n值: ${d.data.value.toLocaleString()}\n比例: ${d.data.percentage.toFixed(1)}%`;
+          
+          // 🎯 計算容器相對座標，考慮 SVG margin 和群組 transform 偏移
+          if (this.containerElement) {
+            const containerRect = this.containerElement.getBoundingClientRect();
+            const margin = this.config.margin || { top: 20, right: 20, bottom: 20, left: 20 };
+            
+            // 滑鼠相對於容器的座標
+            const mouseX = event.clientX - containerRect.left;
+            const mouseY = event.clientY - containerRect.top;
+            
+            // 減去 SVG margin 和群組中心偏移，得到相對於圖表容器的座標
+            const x = mouseX - margin.left;
+            const y = mouseY - margin.top;
+            
+            this.callbacks?.onTooltipShow?.(x, y, tooltipText);
+          }
+        }
+      })
       .on('mouseleave', (event, d) => {
         // 重置效果
         d3.select(event.target)
@@ -383,6 +435,11 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
           .duration(150)
           .attr('opacity', 1)
           .attr('transform', 'translate(0, 0)');
+        
+        // 隱藏 Tooltip
+        if (config.enableTooltip) {
+          this.callbacks?.onTooltipHide?.();
+        }
         
         config.onSegmentHover?.(null, event);
       });
@@ -460,6 +517,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
     const config = this.config as PieChartCoreConfig;
     const legendConfig = config.legend!;
+    const { chartHeight } = this.getChartDimensions();
 
     // 創建圖例組
     this.legendGroup = this.chartGroup
@@ -481,7 +539,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
         break;
       case 'bottom':
         legendX = 20;
-        legendY = this.chartHeight - this.processedData.length * (itemHeight + spacing) - 10;
+        legendY = chartHeight - this.processedData.length * (itemHeight + spacing) - 10;
         break;
       case 'left':
         legendX = 20;
@@ -542,6 +600,26 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   public updateConfig(newConfig: Partial<PieChartCoreConfig>): void {
     this.config = { ...this.config, ...newConfig };
     this.renderChart();
+  }
+
+  // 創建默認 Tooltip 內容
+  private createDefaultTooltipContent(data: ProcessedPieDataPoint): TooltipContent {
+    return {
+      title: data.label,
+      items: [
+        {
+          label: 'Value',
+          value: data.value,
+          color: data.color,
+          format: (value: number) => value.toLocaleString()
+        },
+        {
+          label: 'Percentage',
+          value: data.percentage,
+          format: (value: number) => `${value.toFixed(1)}%`
+        }
+      ]
+    };
   }
 
   // 公共方法：獲取當前數據

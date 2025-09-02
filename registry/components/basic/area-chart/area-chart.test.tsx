@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
 import { vi } from 'vitest';
 
-import { AreaChart } from './area-chart';
-import type { AreaChartProps } from './core/types';
+import { AreaChartV2 } from './area-chart-v2';
+import type { AreaChartV2Props } from './area-chart-v2';
 
 // Mock data for testing
 const mockData = [
@@ -14,25 +14,25 @@ const mockData = [
   { date: new Date('2023-04-01'), value: 175, category: 'A' },
 ];
 
-const defaultProps: AreaChartProps = {
+const defaultProps: AreaChartV2Props = {
   width: 400,
   height: 300,
   data: mockData,
-  xAccessor: (d) => d.date,
-  yAccessor: (d) => d.value,
+  xAccessor: 'date',
+  yAccessor: 'value',
 };
 
-describe('AreaChart', () => {
+describe('AreaChartV2', () => {
   // Test 1: Basic Rendering
   describe('Basic Rendering', () => {
     it('should render with minimal props', () => {
-      render(<AreaChart {...defaultProps} />);
+      render(<AreaChartV2 {...defaultProps} />);
       
       expect(screen.getByRole('img')).toBeInTheDocument();
     });
 
     it('should render SVG element with correct dimensions', () => {
-      render(<AreaChart {...defaultProps} />);
+      render(<AreaChartV2 {...defaultProps} />);
       
       const svg = screen.getByRole('img');
       expect(svg).toHaveAttribute('width', '400');
@@ -40,7 +40,7 @@ describe('AreaChart', () => {
     });
 
     it('should handle empty data gracefully', () => {
-      render(<AreaChart {...defaultProps} data={[]} />);
+      render(<AreaChartV2 {...defaultProps} data={[]} />);
       
       // Should show "no data" message instead of chart
       expect(screen.getByText('無數據')).toBeInTheDocument();
@@ -50,14 +50,14 @@ describe('AreaChart', () => {
   // Test 2: Data Updates
   describe('Data Updates', () => {
     it('should update when data changes', async () => {
-      const { rerender } = render(<AreaChart {...defaultProps} />);
+      const { rerender } = render(<AreaChartV2 {...defaultProps} />);
       
       const newData = [
         { date: new Date('2023-05-01'), value: 250, category: 'B' },
         { date: new Date('2023-06-01'), value: 300, category: 'B' },
       ];
       
-      rerender(<AreaChart {...defaultProps} data={newData} />);
+      rerender(<AreaChartV2 {...defaultProps} data={newData} />);
       
       await waitFor(() => {
         expect(screen.getByRole('img')).toBeInTheDocument();
@@ -65,13 +65,13 @@ describe('AreaChart', () => {
     });
 
     it('should handle accessor function changes', async () => {
-      const { rerender } = render(<AreaChart {...defaultProps} />);
+      const { rerender } = render(<AreaChartV2 {...defaultProps} />);
       
       // Change accessor functions
       rerender(
-        <AreaChart
+        <AreaChartV2
           {...defaultProps}
-          yAccessor={(d) => d.value * 2}
+          yAccessor="value" // V2 uses string accessors
         />
       );
       
@@ -86,7 +86,7 @@ describe('AreaChart', () => {
       ] as any;
 
       expect(() => {
-        render(<AreaChart {...defaultProps} data={invalidData} />);
+        render(<AreaChartV2 {...defaultProps} data={invalidData} />);
       }).not.toThrow();
     });
   });
@@ -98,7 +98,7 @@ describe('AreaChart', () => {
       const mockHoverHandler = vi.fn();
 
       render(
-        <AreaChart
+        <AreaChartV2
           {...defaultProps}
           interactive={true}
           onDataClick={mockClickHandler}
@@ -116,7 +116,7 @@ describe('AreaChart', () => {
   // Test 4: Accessibility
   describe('Accessibility', () => {
     it('should be accessible', async () => {
-      const { container } = render(<AreaChart {...defaultProps} />);
+      const { container } = render(<AreaChartV2 {...defaultProps} />);
       const results = await axe(container);
       
       expect(results).toHaveNoViolations();
@@ -124,7 +124,7 @@ describe('AreaChart', () => {
 
     it('should have proper ARIA labels', () => {
       render(
-        <AreaChart 
+        <AreaChartV2 
           {...defaultProps} 
           aria-label={`區域圖顯示 ${mockData.length} 個資料點`}
         />
@@ -134,21 +134,21 @@ describe('AreaChart', () => {
     });
 
     it('should support keyboard navigation when interactive', () => {
-      render(<AreaChart {...defaultProps} interactive={true} />);
+      render(<AreaChartV2 {...defaultProps} interactive={true} />);
       
       const chartElement = screen.getByRole('img');
       expect(chartElement).toHaveAttribute('tabindex', '0');
     });
   });
 
-  // Test 5: AreaChart-Specific Features (Essential only)
-  describe('AreaChart-Specific Features', () => {
+  // Test 5: AreaChartV2-Specific Features (Essential only)
+  describe('AreaChartV2-Specific Features', () => {
     it('should support stacked mode', () => {
       expect(() => {
         render(
-          <AreaChart
+          <AreaChartV2
             {...defaultProps}
-            stacked={true}
+            stackMode="normal"
           />
         );
       }).not.toThrow();
@@ -157,9 +157,9 @@ describe('AreaChart', () => {
     it('should support curve types', () => {
       expect(() => {
         render(
-          <AreaChart
+          <AreaChartV2
             {...defaultProps}
-            curve="smooth"
+            curve="monotone"
           />
         );
       }).not.toThrow();
@@ -169,7 +169,7 @@ describe('AreaChart', () => {
       // Just test that props are accepted without errors
       expect(() => {
         render(
-          <AreaChart 
+          <AreaChartV2 
             {...defaultProps} 
             showGrid={true}
             enableBrushZoom={true}
@@ -190,7 +190,7 @@ describe('AreaChart', () => {
       }));
 
       const startTime = performance.now();
-      render(<AreaChart {...defaultProps} data={largeData} />);
+      render(<AreaChartV2 {...defaultProps} data={largeData} />);
       const renderTime = performance.now() - startTime;
 
       expect(renderTime).toBeLessThan(3000); // Relaxed for area charts (more complex)
@@ -199,7 +199,7 @@ describe('AreaChart', () => {
     it('should handle invalid dimensions gracefully', () => {
       expect(() => {
         render(
-          <AreaChart 
+          <AreaChartV2 
             {...defaultProps} 
             width={0} 
             height={0} 
@@ -211,7 +211,7 @@ describe('AreaChart', () => {
     it('should handle missing accessor functions gracefully', () => {
       expect(() => {
         render(
-          <AreaChart 
+          <AreaChartV2 
             data={mockData}
             width={400}
             height={300}
@@ -222,7 +222,7 @@ describe('AreaChart', () => {
     });
 
     it('should clean up properly on unmount', () => {
-      const { unmount } = render(<AreaChart {...defaultProps} />);
+      const { unmount } = render(<AreaChartV2 {...defaultProps} />);
       
       expect(() => unmount()).not.toThrow();
     });
@@ -235,7 +235,7 @@ describe('AreaChart', () => {
       
       expect(() => {
         render(
-          <AreaChart 
+          <AreaChartV2 
             {...defaultProps} 
             colors={customColors}
           />
@@ -246,9 +246,9 @@ describe('AreaChart', () => {
     it('should accept opacity settings', () => {
       expect(() => {
         render(
-          <AreaChart 
+          <AreaChartV2 
             {...defaultProps} 
-            opacity={0.5}
+            fillOpacity={0.5}
           />
         );
       }).not.toThrow();

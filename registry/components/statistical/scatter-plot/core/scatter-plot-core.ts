@@ -553,10 +553,10 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   private handleMouseOver = (event: MouseEvent, data: ProcessedScatterDataPoint): void => {
     if (!this.containerElement) return;
     
-    // 獲取容器相對位置
-    const rect = this.containerElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    // 計算相對於容器的座標
+    const containerRect = this.containerElement.getBoundingClientRect();
+    const x = event.clientX - containerRect.left;
+    const y = event.clientY - containerRect.top;
     
     // 格式化 tooltip 內容
     const content = this.formatTooltipContent(data);
