@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { FunnelChartV2 as FunnelChart } from '@registry/components/basic/funnel-chart/funnel-chart-v2'
-import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
+import { ExactFunnelChartV2 as ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 import DemoPageTemplate from '../components/ui/DemoPageTemplate'
 import ModernControlPanel, { ControlGroup, RangeSlider, SelectControl, ToggleControl } from '../components/ui/ModernControlPanel'
 import DataTable from '../components/ui/DataTable'
@@ -900,7 +900,7 @@ const data = [
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">流線型漏斗圖</h4>
                   <pre className={`${designTokens.colors.codeBg} rounded-xl p-4 overflow-x-auto text-sm`}>
-                    <code className="text-gray-800">{`import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
+                    <code className="text-gray-800">{`import { ExactFunnelChartV2 as ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 
 const surveyData = [
   { step: 1, value: 62259, label: 'Survey Started' },

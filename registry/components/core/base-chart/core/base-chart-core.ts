@@ -49,16 +49,28 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
    * 初始化圖表 - 由框架層調用
    */
   public initialize(containerElement: HTMLElement, svgElement: SVGSVGElement): void {
+    console.log('🔧 BaseChartCore initialize called:', {
+      chartType: this.getChartType(),
+      container: !!containerElement,
+      svg: !!svgElement,
+      data: this.config.data?.length
+    });
+    
     this.containerElement = containerElement;
     this.svgElement = svgElement;
     
     try {
       this.setLoading(true);
+      console.log('🔧 BaseChartCore calling processData');
       this.processedData = this.processData();
+      console.log('🔧 BaseChartCore calling createScales');
       this.createScales();
+      console.log('🔧 BaseChartCore calling renderChart');
       this.renderChart();
       this.setLoading(false);
+      console.log('🔧 BaseChartCore initialization complete');
     } catch (error) {
+      console.error('🔥 BaseChartCore initialization error:', error);
       this.handleError(error as Error);
     }
   }
@@ -67,16 +79,27 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
    * 更新圖表配置
    */
   public updateConfig(newConfig: Partial<BaseChartCoreConfig<TData>>): void {
+    console.log('🔧 BaseChartCore updateConfig called:', {
+      chartType: this.getChartType(),
+      newConfig: Object.keys(newConfig).length,
+      svgElement: !!this.svgElement
+    });
+    
     this.config = { ...this.config, ...newConfig };
     
     if (this.svgElement) {
       try {
         this.setLoading(true);
+        console.log('🔧 BaseChartCore updateConfig calling processData');
         this.processedData = this.processData();
+        console.log('🔧 BaseChartCore updateConfig calling createScales');
         this.createScales();
+        console.log('🔧 BaseChartCore updateConfig calling renderChart');
         this.renderChart();
         this.setLoading(false);
+        console.log('🔧 BaseChartCore updateConfig complete');
       } catch (error) {
+        console.error('🔥 BaseChartCore updateConfig error:', error);
         this.handleError(error as Error);
       }
     }
@@ -188,6 +211,12 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
       gridConfig?: GridConfig;
     } = {}
   ): void {
+    console.log('🔧 renderStandardAxis called:', { 
+      orientation, 
+      className: options.className, 
+      svgElement: !!this.svgElement,
+      scaleDomain: scale.domain()
+    });
     if (!this.svgElement) return;
     
     const { 
@@ -219,9 +248,16 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     const svgSelection = d3.select(this.svgElement);
     let chartArea = svgSelection.select('.chart-area') as d3.Selection<SVGGElement, unknown, null, undefined>;
     
+    console.log('🔧 Chart area lookup:', { 
+      chartAreaFound: !chartArea.empty(),
+      chartType: this.getChartType(),
+      svgChildren: svgSelection.selectAll('g').size()
+    });
+    
     // 如果沒有找到 .chart-area，嘗試找圖表特定的類名
     if (chartArea.empty()) {
       chartArea = svgSelection.select(`g.${this.getChartType()}-chart`) as d3.Selection<SVGGElement, unknown, null, undefined>;
+      console.log('🔧 Fallback to chart-specific class:', !chartArea.empty());
     }
     
     // 如果仍然沒有找到，創建一個臨時的群組
@@ -231,6 +267,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
         .append('g')
         .attr('class', 'chart-area')
         .attr('transform', `translate(${margin.left},${margin.top})`) as d3.Selection<SVGGElement, unknown, null, undefined>;
+      console.log('🔧 Created temporary chart area');
     }
     
     const axisGroup = chartArea

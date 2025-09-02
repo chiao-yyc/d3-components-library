@@ -1,3 +1,11 @@
-// 直接引用 Registry 中的組件，支援即時開發預覽
-export { BarChart } from '@registry/components/basic/bar-chart'
-export type { BarChartProps } from '@registry/components/basic/bar-chart'
+// UI Wrapper for BarChart component
+// This file provides a simple import path for the demo environment
+
+export { 
+  BarChart,
+  BarChartLegacy
+} from '@registry/components/basic/bar-chart'
+export type { 
+  BarChartProps,
+  BarChartCoreConfig
+} from '@registry/components/basic/bar-chart'

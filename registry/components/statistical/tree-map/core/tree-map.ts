@@ -379,7 +379,14 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
         this.props.tooltipContent(node) : 
         `${name}: ${value}`;
       
-      this.createTooltip(event.clientX, event.clientY, tooltipContent);
+      // 計算相對於SVG的座標，因為createTooltip期望的是相對座標
+      const svgElement = this.svg?.node();
+      if (svgElement) {
+        const svgRect = svgElement.getBoundingClientRect();
+        const x = event.clientX - svgRect.left;
+        const y = event.clientY - svgRect.top;
+        this.createTooltip(x, y, tooltipContent);
+      }
     }
 
     if (this.props.onNodeHover) {

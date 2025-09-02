@@ -158,6 +158,10 @@ export default function RadarChartDemo() {
   const aspectRatio = 1  // 雷達圖通常是正方形
   const [radius, setRadius] = useState(180)
   
+  // 圖表尺寸設定
+  const [chartWidth, setChartWidth] = useState(600)
+  const [chartHeight, setChartHeight] = useState(600)
+  
   // 網格設定
   const [levels, setLevels] = useState(5)
   const [startAngle, setStartAngle] = useState(-90)

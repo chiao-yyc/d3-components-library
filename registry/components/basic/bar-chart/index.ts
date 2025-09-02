@@ -1,18 +1,26 @@
+/**
+ * BarChart 統一導出
+ * 遵循標準三層架構模式
+ */
 
-// 舊版 BarChart（向下兼容）
-export { BarChart } from './bar-chart';
+import React from 'react';
+import './bar-chart.css';
 
-// 新版現代化 BarChart
-export { ModernBarChart, BarChartV2 } from './modern-bar-chart';
+// 主要組件 (統一架構)
+export { 
+  BarChart, 
+  BarChartLegacy,
+  HorizontalBarChart,
+  StackedBarChart,
+  defaultBarChartProps
+} from './bar-chart';
+export type { BarChartProps } from './bar-chart';
 
-// 類型定義
-export type { BarChartProps } from './types';
-export type { ModernBarChartProps } from './modern-bar-chart-types';
-
-// 核心類
+// 核心系統導出
 export { BarChartCore } from './core/bar-chart-core';
-export type { BarChartCoreConfig } from './core/bar-chart-core';
+export type { 
+  BarChartCoreConfig
+} from './core/bar-chart-core';
 
-// 舊版核心邏輯（向下兼容）
-export { D3BarChart } from './core';
-export type { BarChartConfig as D3BarChartConfig } from './core';
+// 向下兼容：舊版類型定義
+export type { BarChartProps as LegacyBarChartProps } from './types';

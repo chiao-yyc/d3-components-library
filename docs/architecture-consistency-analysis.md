@@ -32,17 +32,18 @@ components/
 | **ScatterPlot** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | `xl:grid-cols-4` ✅ | Direct render ❌ | **4/5** | ✅ 已完成 |
 | **BarChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | `lg:grid-cols-4` ✅ | Fixed size ❌ | **4/5** | ✅ 已完成 |
 | **BoxPlot** | `BaseChartCore` ✅ | `renderStandardAxis` ✅ | `createReactChartWrapper` ✅ | `xl:grid-cols-4` ✅ | Render props ✅ | **5/5** | ✅ 已完成 |
-| **LineChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 待檢查 | 待檢查 | **3/5** | ⚠️ 待確認 |
-| **AreaChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 待檢查 | 待檢查 | **3/5** | ⚠️ 待確認 |
-| **ViolinPlot** | 舊 `BaseChart` ❌ | `renderAxes()` 舊方法 ❌ | `createChartComponent` 舊包裝 ❌ | 現代化佈局 ✅ | 無響應式 ❌ | **1/5** | ❌ 需遷移 |
+| **LineChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
+| **AreaChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
+| **ViolinPlot** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
 | **PieChart** | `BaseChartCore` ✅ | 無需軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 基本合格 |
 | **RadarChart** | `BaseChartCore` ✅ | 特殊極坐標軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 基本合格 |
-| **TreeMap** | 舊 `BaseChart` ❌ | 無需軸線 ✅ | `createChartComponent` 舊包裝 ❌ | 現代化佈局 ✅ | 無響應式 ❌ | **2/5** | ⚠️ 需升級 |
-| **Correlogram** | 舊 `BaseChart` ❌ | 特殊矩陣軸線 ⚠️ | `createChartComponent` 舊包裝 ❌ | 現代化佈局 ✅ | 無響應式 ❌ | **1/5** | ❌ 需遷移 |
+| **TreeMap** | `BaseChartCore` ✅ | 無需軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
+| **Correlogram** | `BaseChartCore` ✅ | 特殊矩陣軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
 | **GaugeChart** | `BaseChartCore` ✅ | 無需軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 基本合格 |
 | **FunnelChart** | `BaseChartCore` ✅ | 無需軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 基本合格 |
-| **ExactFunnelChart** | 純 D3.js 類 ❌ | 無需軸線 ✅ | 原生 React 包裝 ❌ | 無 Demo ❌ | 無響應式 ❌ | **1/5** | ❌ 需遷移 |
-| **CandlestickChart** | 舊 `BaseChart` ❌ | `d3.axisLeft/Bottom` ❌ | `createChartComponent` 舊包裝 ❌ | 現代化佈局 ✅ | 無響應式 ❌ | **1/5** | ❌ 需遷移 |
+| **ExactFunnelChart** | `BaseChartCore` ✅ | 無需軸線 ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
+| **CandlestickChart** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
+| **Heatmap** | `BaseChartCore` ✅ | `renderXAxis/YAxis` ✅ | `createReactChartWrapper` ✅ | 現代化佈局 ✅ | 無響應式 ❌ | **4/5** | ✅ 已完成 |
 
 ## 🎯 各組件詳細分析
 
@@ -73,26 +74,28 @@ components/
 - **交互支援**: 豐富的點位顯示模式和事件處理
 - **代碼位置**: `/registry/components/statistical/box-plot/`
 
-### ⚠️ LineChart - 部分現代化 (需確認)
+### ✅ LineChart - 已完成現代化
 - **核心層**: `line-chart-core.ts` 繼承 `BaseChartCore` ✅
-- **軸線系統**: 已使用統一軸線系統 ✅
+- **軸線系統**: 使用統一的 `renderXAxis()` 和 `renderYAxis()` ✅
 - **React包裝**: 使用 `createReactChartWrapper` ✅
-- **Demo整合**: 需要檢查現代化程度 ⚠️
-- **響應式**: 需要檢查實現方式 ⚠️
+- **Demo整合**: 使用現代化佈局和組件 ✅
+- **響應式**: 無響應式支援 ❌
+- **特殊功能**: 支援多系列、動畫、曲線類型
 - **代碼位置**: `/registry/components/basic/line-chart/`
 
-### ⚠️ AreaChart - 部分現代化 (需確認)
+### ✅ AreaChart - 已完成現代化
 - **核心層**: `area-chart-core.ts` 繼承 `BaseChartCore` ✅
-- **軸線系統**: 已使用統一軸線系統，移除了重複網格渲染 ✅
-- **React包裝**: 使用 `createChartComponent` (舊模式) ❌
-- **Demo整合**: 使用現代化佈局 ✅
+- **軸線系統**: 使用統一的 `renderXAxis()` 和 `renderYAxis()` ✅
+- **React包裝**: 使用 `createReactChartWrapper` ✅
+- **Demo整合**: 使用現代化佈局和組件 ✅
 - **響應式**: 無響應式支援 ❌
+- **特殊功能**: 支援堆疊模式、漸變填充、曲線類型
 - **代碼位置**: `/registry/components/basic/area-chart/`
 
-### ❌ ViolinPlot - 需要完整遷移
-- **核心層**: `violin-plot.ts` 繼承舊的 `BaseChart` ❌
-- **軸線系統**: 使用舊的 `renderAxes()` 工具函數 ❌
-- **React包裝**: 使用 `createChartComponent` (舊模式) ❌
+### ✅ ViolinPlot - 已完成遷移
+- **核心層**: `violin-plot-core.ts` 繼承 `BaseChartCore` ✅
+- **軸線系統**: 使用統一的 `renderXAxis()` 和 `renderYAxis()` ✅
+- **React包裝**: 使用 `createReactChartWrapper` ✅
 - **Demo整合**: 使用現代化佈局和組件 ✅
 - **響應式**: 無響應式支援 ❌
 - **特殊功能**: 複雜的核密度估計和小提琴形狀渲染
@@ -116,19 +119,19 @@ components/
 - **特殊功能**: 完整的極坐標變換和多軸渲染
 - **代碼位置**: `/registry/components/statistical/radar-chart/`
 
-### ⚠️ TreeMap - 需要架構升級
-- **核心層**: `tree-map.ts` 繼承舊的 `BaseChart` ❌
+### ✅ TreeMap - 已完成升級
+- **核心層**: `tree-map-core.ts` 繼承 `BaseChartCore` ✅
 - **軸線系統**: 樹狀圖無需軸線，架構正確 ✅
-- **React包裝**: 使用 `createChartComponent` (舊模式) ❌
+- **React包裝**: 使用 `createReactChartWrapper` ✅
 - **Demo整合**: 使用現代化佈局和組件 ✅
 - **響應式**: 無響應式支援 ❌
 - **特殊功能**: 複雜的樹狀圖布局和縮放交互
 - **代碼位置**: `/registry/components/statistical/tree-map/`
 
-### ❌ Correlogram - 需要完整遷移
-- **核心層**: `correlogram.ts` 繼承舊的 `BaseChart` ❌
-- **軸線系統**: 使用特殊的矩陣軸線，但非統一系統 ⚠️
-- **React包裝**: 使用 `createChartComponent` (舊模式) ❌
+### ✅ Correlogram - 已完成遷移
+- **核心層**: `correlogram-core.ts` 繼承 `BaseChartCore` ✅
+- **軸線系統**: 使用特殊的矩陣軸線，架構正確 ✅
+- **React包裝**: 使用 `createReactChartWrapper` ✅
 - **Demo整合**: 使用現代化佈局和組件 ✅
 - **響應式**: 無響應式支援 ❌
 - **特殊功能**: 相關係數矩陣和熱圖渲染
@@ -152,54 +155,236 @@ components/
 - **特殊功能**: 多種漏斗形狀和轉換率計算
 - **代碼位置**: `/registry/components/basic/funnel-chart/` (V2)
 
-### ❌ ExactFunnelChart - 特殊架構，需要遷移
-- **核心層**: 純 D3.js 類，不使用任何基礎架構 ❌
+### ✅ ExactFunnelChart - 已完成遷移
+- **核心層**: `exact-funnel-core.ts` 繼承 `BaseChartCore` ✅
 - **軸線系統**: 漏斗圖無需軸線 ✅
-- **React包裝**: 原生 React 包裝，未使用統一系統 ❌
-- **Demo整合**: 在 FunnelChartDemo 中使用，但無獨立 Demo ❌
-- **響應式**: 無響應式支援 ❌
-- **特殊性**: 專為精確漏斗設計的獨立實現
-- **代碼位置**: `/registry/components/basic/exact-funnel-chart/`
-
-### ❌ CandlestickChart - 需要完整遷移
-- **核心層**: 仍使用舊的 `BaseChart` ❌
-- **軸線系統**: 使用舊的 `d3.axisLeft/axisBottom` ❌
-- **React包裝**: 使用 `createChartComponent` (舊模式) ❌
+- **React包裝**: 使用 `createReactChartWrapper` ✅
 - **Demo整合**: 使用現代化佈局和組件 ✅
 - **響應式**: 無響應式支援 ❌
-- **遷移需求**: 需要完整的架構升級
+- **特殊功能**: 專為精確漏斗設計的精準計算
+- **代碼位置**: `/registry/components/basic/exact-funnel-chart/`
+
+### ✅ CandlestickChart - 已完成遷移
+- **核心層**: `candlestick-chart-core.ts` 繼承 `BaseChartCore` ✅
+- **軸線系統**: 使用統一的 `renderXAxis()` 和 `renderYAxis()` ✅
+- **React包裝**: 使用 `createReactChartWrapper` ✅
+- **Demo整合**: 使用現代化佈局和組件 ✅
+- **響應式**: 無響應式支援 ❌
+- **特殊功能**: K線圖專用渲染、成交量顯示、技術指標
 - **代碼位置**: `/registry/components/financial/candlestick-chart/`
+
+### ✅ Heatmap - 已完成現代化（今日完成）
+- **核心層**: `heatmap-core.ts` 繼承 `BaseChartCore` ✅
+- **軸線系統**: 使用統一的 `renderXAxis()` 和 `renderYAxis()` ✅
+- **React包裝**: 使用 `createReactChartWrapper` ✅
+- **Demo整合**: 使用現代化佈局和組件 ✅
+- **響應式**: 無響應式支援 ❌
+- **特殊功能**: 色階圖例、自定義顏色方案、數值標籤
+- **代碼位置**: `/registry/components/basic/heatmap/`
 
 ## 🚀 優先改善建議
 
 ### 立即處理 (高優先級)
-1. **ViolinPlot 完整遷移** - 從舊 `BaseChart` 遷移到 `BaseChartCore`，更新軸線系統和 React 包裝層
-2. **Correlogram 完整遷移** - 從舊 `BaseChart` 遷移到 `BaseChartCore`，更新軸線系統和 React 包裝層
-3. **CandlestickChart 完整遷移** - 從舊 `BaseChart` 遷移到 `BaseChartCore`，更新軸線系統和 React 包裝層
-4. **ExactFunnelChart 架構統一** - 遷移到 `BaseChartCore` 架構或整合到 FunnelChart
-5. **AreaChart React 包裝升級** - 從 `createChartComponent` 升級到 `createReactChartWrapper`
+1. **軸線樣式統一** - 檢查並修正 LineChart 與 BarChart 軸線顏色不一致問題
+2. **響應式標準化** - 為所有組件添加響應式支援，參考 BoxPlot 的 render props 模式
+3. **測試覆蓋擴展** - 為所有已完成的 V2 組件添加完整測試
 
 ### 近期優化 (中優先級)
-6. **TreeMap 架構升級** - 從舊 `BaseChart` 升級到 `BaseChartCore`
-7. **響應式標準化** - 為所有組件添加響應式支援，參考 BoxPlot 的 render props 模式
-8. **LineChart Demo 現代化檢查** - 確認 Demo 整合是否完全現代化
-9. **軸線系統最終統一** - 確保所有組件使用相同的軸線渲染方法
+4. **動畫系統標準化** - 為需要的組件添加統一的動畫支援
+5. **文檔完善** - 為所有 V2 組件撰寫使用文檔和 API 說明
+6. **效能優化** - 對大數據集渲染進行效能分析和優化
 
 ### 後續完善 (低優先級)
-10. **動畫系統標準化** - 為需要的組件添加統一的動畫支援  
-11. **測試覆蓋完善** - 確保所有組件有完整的測試覆蓋
-12. **類型系統完善** - 統一所有組件的 TypeScript 類型定義
+7. **主題系統建立** - 建立統一的主題系統和設計令牌
+8. **類型系統完善** - 統一所有組件的 TypeScript 類型定義
+9. **組件擴展** - 添加更多圖表類型（如 Sankey、Sunburst 等）
 
 ## 📈 架構健康度指標
 
-- **完全符合標準**: BoxPlot (5/5)
-- **基本符合標準**: ScatterPlot, BarChart, PieChart, RadarChart, GaugeChart, FunnelChart (4/5)  
-- **部分符合標準**: LineChart, AreaChart (3/5)
-- **需要升級**: TreeMap (2/5)
-- **需要遷移**: ViolinPlot, Correlogram, ExactFunnelChart, CandlestickChart (1/5)
+- **完全符合標準 (5/5)**: BoxPlot
+- **基本符合標準 (4/5)**: ScatterPlot, BarChart, PieChart, RadarChart, GaugeChart, FunnelChart, LineChart, AreaChart, ViolinPlot, TreeMap, Correlogram, ExactFunnelChart, CandlestickChart, Heatmap (14個)
+- **部分符合標準 (3/5)**: 無
+- **需要升級 (2/5)**: 無
+- **需要遷移 (1/5)**: 無
+
+### 🎉 架構優化成果
+- **已完成優化**: 15/15 圖表 (100%)
+- **有 V2 版本**: 13 個圖表
+- **使用 BaseChartCore**: 15 個圖表
+- **統一軸線系統**: 100% 完成
 
 ---
 
-**最後更新**: 2025-09-01  
+## 🎨 **三層樣式系統實施計劃** (待實施)
+
+### 🎯 設計目標
+建立符合業界標準的三層樣式優先級系統，提供從全域到單圖表的完整樣式控制能力。
+
+### 🏗️ 架構設計
+
+#### **三層優先級結構**
+```typescript
+// 第一層: 系統預設樣式 (最低優先級)
+DEFAULT_AXIS_STYLES = {
+  fontColor: '#6b7280',    // Gray-500
+  gridColor: '#e5e7eb',    // Gray-200  
+  domainColor: '#d1d5db',  // Gray-300
+  fontSize: '12px',
+  fontFamily: 'system-ui, -apple-system, sans-serif'
+}
+
+// 第二層: 全域配置檔 (中優先級)
+GLOBAL_CHART_CONFIG = {
+  axisStyles: {
+    fontColor: '#374151',  // 覆蓋預設的 Gray-500 → Gray-700
+    // 其他屬性繼承預設值
+  }
+}
+
+// 第三層: 單圖表參數 (最高優先級)
+<BarChart 
+  axisStyles={{
+    fontColor: '#1f2937'   // 只覆蓋這個圖表 → Gray-800
+  }}
+/>
+```
+
+#### **樣式合併邏輯**
+```typescript
+// 在 BaseChartCore 中實現
+protected getEffectiveAxisStyles(localStyles?: Partial<StandardAxisStyles>) {
+  return {
+    ...DEFAULT_AXIS_STYLES,           // 1. 系統預設
+    ...GLOBAL_CHART_CONFIG.axisStyles, // 2. 全域配置
+    ...localStyles                    // 3. 單圖表設定 (最高優先級)
+  };
+}
+```
+
+### 📋 實施階段規劃
+
+#### **Phase 1: 核心架構建立** (高優先級)
+**目標**: 建立全域配置系統和樣式合併機制
+
+1. **建立全域配置模組**
+   ```typescript
+   // registry/components/core/chart-config/global-config.ts
+   export interface GlobalChartConfig {
+     axisStyles?: Partial<StandardAxisStyles>;
+     tooltipStyles?: Partial<TooltipStyles>;
+     colorScheme?: string[];
+     theme?: 'light' | 'dark' | 'auto';
+   }
+   
+   export const GLOBAL_CHART_CONFIG: GlobalChartConfig = {};
+   export function updateGlobalChartConfig(config: Partial<GlobalChartConfig>);
+   ```
+
+2. **修改 BaseChartCore 樣式合併邏輯**
+   - 更新 `renderStandardAxis()` 方法
+   - 實現 `getEffectiveAxisStyles()` 方法
+   - 確保所有圖表自動使用新系統
+
+3. **更新所有 Core 類別**
+   - 確保所有繼承 BaseChartCore 的圖表都受益
+   - 測試樣式合併是否正確工作
+
+#### **Phase 2: Demo 現代化** (中優先級)  
+**目標**: 移除硬編碼樣式，整合控制面板
+
+1. **移除 Demo 中的硬編碼樣式設定**
+   ```typescript
+   // 舊的做法 ❌
+   <BarChart 
+     axisStyles={{ fontColor: '#374151' }}  
+     colors={['#3b82f6', '#ef4444']}        
+   />
+   
+   // 新的做法 ✅
+   <BarChart 
+     {...controlPanelSettings.barChart}     
+   />
+   ```
+
+2. **擴展控制面板功能**
+   ```typescript
+   interface ChartControlPanelSettings {
+     // 軸線樣式控制
+     axisStyles: {
+       fontColor: string;
+       fontSize: string;
+       gridColor: string;
+       domainColor: string;
+     };
+     
+     // 圖表特定設置
+     showXAxis: boolean;
+     showYAxis: boolean;
+     showGrid: boolean;
+     
+     // 顏色主題
+     colorScheme: 'blue' | 'green' | 'purple' | 'custom';
+     customColors?: string[];
+   }
+   ```
+
+3. **統一 Demo 的 props 傳遞模式**
+   - 所有圖表 Demo 使用相同的控制面板結構
+   - 移除重複的硬編碼配置
+
+#### **Phase 3: 進階功能** (低優先級)
+**目標**: 建立完整的主題系統和配置管理
+
+1. **主題預設系統**
+   ```typescript
+   export const THEME_PRESETS = {
+     light: { axisStyles: { fontColor: '#374151', gridColor: '#e5e7eb' } },
+     dark: { axisStyles: { fontColor: '#9ca3af', gridColor: '#374151' } },
+     minimal: { axisStyles: { fontColor: '#6b7280', gridColor: 'transparent' } }
+   };
+   ```
+
+2. **樣式預覽功能**
+   - Demo 中提供即時樣式預覽
+   - 支援拖拽調色盤選色
+
+3. **配置檔匯入/匯出**
+   - JSON 格式的配置檔案
+   - 支援團隊間共享樣式配置
+
+### 🎨 業界對比
+
+| 功能特性 | Chart.js | Recharts | D3.js | **本系統** |
+|----------|----------|----------|-------|------------|
+| 系統預設樣式 | ✅ `Chart.defaults` | ✅ 內建主題 | ❌ 需自行實現 | ✅ `DEFAULT_AXIS_STYLES` |
+| 全域配置覆蓋 | ✅ `Chart.defaults.font.color` | ✅ `<ResponsiveContainer>` | ❌ 無 | ✅ `GLOBAL_CHART_CONFIG` |
+| 單圖表參數覆蓋 | ✅ `options.scales.x.ticks.color` | ✅ 組件 props | ✅ 內聯樣式 | ✅ `axisStyles` prop |
+| 主題系統 | ✅ Plugin 支援 | ✅ 內建主題 | ❌ 需自行實現 | ✅ 計劃支援 |
+| TypeScript 支援 | ✅ 完整 | ✅ 完整 | ❌ 社群支援 | ✅ 完整 |
+
+### 💡 實施優勢
+
+1. **符合業界標準** - 與 Chart.js、Recharts 等主流套件的做法一致
+2. **漸進式升級** - 現有代碼無需大幅修改，向下兼容
+3. **高度靈活性** - 支援從全域到單圖表的各層級樣式控制
+4. **TypeScript 友好** - 完整的型別支援和智能提示
+5. **團隊協作** - 通過全域配置實現設計系統一致性
+
+### 🔧 實施時機
+
+- **文檔階段** (現在): 記錄完整的設計思路和實施計劃
+- **核心完成後** (稍後): 等待主要圖表架構穩定後實施
+- **優先順序**: 在測試覆蓋和響應式優化完成後進行
+
+### 📚 相關技術文檔
+
+- **全域配置**: `/registry/components/core/chart-config/`
+- **樣式系統**: `/registry/components/core/axis-styles/`
+- **基礎核心**: `/registry/components/core/base-chart/`
+- **控制面板**: `/demo/src/components/ui/ModernControlPanel/`
+
+---
+
+**最後更新**: 2025-09-02 (加入三層樣式系統實施計劃)  
 **評估基準**: BaseChartCore 架構標準  
 **評分標準**: 核心繼承(1) + 軸線系統(1) + React包裝(1) + Demo整合(1) + 響應式(1) = 5分

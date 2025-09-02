@@ -187,14 +187,33 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
     // 計算漏斗各點的位置
     const maxValue = Math.max(...this.processedDataPoints.map(d => d.value));
     
+    // 驗證尺寸有效性
+    if (!chartWidth || !chartHeight || chartWidth <= 0 || chartHeight <= 0) {
+      console.error('Invalid chart dimensions:', { chartWidth, chartHeight });
+      return;
+    }
+    
     // 生成上下邊界的點
     this.upperPoints = [];
     this.lowerPoints = [];
     
     this.processedDataPoints.forEach((d, i) => {
       const x = xScale(i);
+      
+      // 確保 x 值有效
+      if (isNaN(x)) {
+        console.error('Invalid x value for point', i, d);
+        return;
+      }
+      
       const ratio = Math.sqrt(d.value / maxValue);
       const halfWidth = ratio * chartWidth * 0.4; // 控制漏斗最大寬度
+      
+      // 確保計算出的值有效
+      if (isNaN(halfWidth)) {
+        console.error('Invalid halfWidth calculation', { ratio, chartWidth, value: d.value, maxValue });
+        return;
+      }
       
       // 上邊界點（中心線上方）
       this.upperPoints.push([x, chartHeight * 0.5 - halfWidth]);
@@ -221,14 +240,26 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .attr('offset', d => d.offset)
       .attr('stop-color', d => d.color);
 
+    // 確保有足夠的點來繪製漏斗
+    if (this.upperPoints.length === 0 || this.lowerPoints.length === 0) {
+      console.error('No valid points calculated for funnel');
+      return;
+    }
+
     // 使用 D3 的 area 生成器來創建漏斗形狀
     const areaGen = d3.area<ExactFunnelChartData>()
       .x((d, i) => xScale(i))
-      .y0((d, i) => this.upperPoints[i][1])  // 上邊界
-      .y1((d, i) => this.lowerPoints[i][1])  // 下邊界
+      .y0((d, i) => this.upperPoints[i] ? this.upperPoints[i][1] : 0)  // 上邊界，帶安全檢查
+      .y1((d, i) => this.lowerPoints[i] ? this.lowerPoints[i][1] : 0)  // 下邊界，帶安全檢查
       .curve(d3.curveCatmullRom.alpha(0.5));
 
     const funnelPath = areaGen(this.processedDataPoints.map(d => d.originalData));
+
+    // 檢查生成的路徑是否有效
+    if (!funnelPath || funnelPath.includes('NaN')) {
+      console.error('Invalid funnel path generated:', funnelPath);
+      return;
+    }
 
     // 繪製漏斗主體
     const funnelShape = container.append('path')
@@ -295,7 +326,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'value-label')
       .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => this.upperPoints[i][1] - 10) // 放在漏斗上方
+      .attr('y', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 10 : 0) // 放在漏斗上方，帶安全檢查
       .attr('text-anchor', 'middle')
       .attr('fill', values)
       .style('font-size', `${fontSize}px`)
@@ -310,7 +341,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'stage-label')
       .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2) // 放在中心
+      .attr('y', (d, i) => (this.upperPoints[i] && this.lowerPoints[i]) ? (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2 : 0) // 放在中心，帶安全檢查
       .attr('text-anchor', 'middle')
       .attr('fill', labels)
       .style('font-size', `${labelFontSize}px`)

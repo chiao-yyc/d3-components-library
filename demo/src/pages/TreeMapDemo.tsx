@@ -5,7 +5,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { TreeMap } from '../../../registry/components/statistical/tree-map'
+import { TreeMapV2 as TreeMap } from '../../../registry/components/statistical/tree-map'
 import type { HierarchyDataItem, StratifiedDataItem } from '../../../registry/components/statistical/tree-map/types'
 import { 
   DemoPageTemplate,
@@ -214,6 +214,12 @@ export default function TreeMapDemo() {
   
   // 響應式設定
   const aspectRatio = 16/9
+  const [responsive, setResponsive] = useState(true)
+  const [aspect, setAspect] = useState(16/9)
+  
+  // 圖表尺寸設定
+  const [chartWidth, setChartWidth] = useState(800)
+  const [chartHeight, setChartHeight] = useState(600)
   
   const [padding, setPadding] = useState(2)
   const [strokeWidth, setStrokeWidth] = useState(1)

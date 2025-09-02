@@ -28,6 +28,7 @@ export {
 export { DataTable } from './DataTable'
 export { CodeExample, CodeExamples } from './CodeExample'
 export { ResponsiveChart, useResponsiveChart } from './ResponsiveChart'
+export { ChartTooltip } from './chart-tooltip'
 
 // 類型導出
 export type { 
@@ -68,7 +69,7 @@ export type {
 export { BarChart, type BarChartProps } from './bar-chart'
 export { LineChart, type LineChartProps } from './line-chart'
 export { AreaChart, type AreaChartProps } from './area-chart'
-export { PieChart, type PieChartProps } from './pie-chart'
+export { PieChart, DonutChart, PieChartWithLegend, type PieChartProps } from './pie-chart'
 
 // === 統計圖表組件 ===
 export { ScatterPlot, type ScatterPlotProps } from './scatter-plot'

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { HeatMap } from '../components/ui'
+import { HeatmapV2 as HeatMap } from '../../../registry/components/basic/heatmap'
 import DemoPageTemplate from '../components/ui/DemoPageTemplate'
 import ModernControlPanel, { ControlGroup, RangeSlider, SelectControl, ToggleControl } from '../components/ui/ModernControlPanel'
 import DataTable from '../components/ui/DataTable'

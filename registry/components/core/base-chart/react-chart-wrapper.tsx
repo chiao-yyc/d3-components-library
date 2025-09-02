@@ -68,7 +68,12 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
 
     // 創建圖表核心實例
     const chartInstance = useMemo(() => {
-      return new ChartCoreClass(props, callbacks);
+      try {
+        return new ChartCoreClass(props, callbacks);
+      } catch (error) {
+        console.error('Failed to create chart instance:', error);
+        return null;
+      }
     }, [ChartCoreClass, callbacks]);
 
     // 暴露實例給 ref
@@ -76,31 +81,37 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
 
     // 初始化邏輯 - 確保 DOM 準備好後才初始化
     useEffect(() => {
-      // 延遲一個微任務，確保 DOM 完全渲染
       const timeoutId = setTimeout(() => {
-        if (containerRef.current && svgRef.current) {
-          chartInstance.initialize(containerRef.current, svgRef.current);
+        if (containerRef.current && svgRef.current && chartInstance) {
+          try {
+            chartInstance.initialize(containerRef.current, svgRef.current);
+          } catch (error) {
+            console.error('Chart initialization failed:', error);
+          }
         }
       }, 0);
       
       return () => clearTimeout(timeoutId);
     }, [chartInstance]);
 
-    // 響應 props 變化 - 只有在初始化後才更新
+    // 響應 props 變化
     useEffect(() => {
-      // 延遲更新，確保 initialize 先執行
       const timeoutId = setTimeout(() => {
-        if (containerRef.current && svgRef.current) {
+        if (containerRef.current && svgRef.current && chartInstance) {
           chartInstance.updateConfig(props);
         }
-      }, 10); // 稍微延遲，讓 initialize 先執行
+      }, 10);
       
       return () => clearTimeout(timeoutId);
     }, [props, chartInstance]);
 
     // 組件卸載時清理
     useEffect(() => {
-      return () => chartInstance.destroy();
+      return () => {
+        if (chartInstance) {
+          chartInstance.destroy();
+        }
+      };
     }, [chartInstance]);
 
     // 數據驗證
@@ -118,13 +129,15 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
       showTooltip = true 
     } = props;
 
-    // 錯誤狀態渲染
-    if (state.error) {
+    // 錯誤狀態渲染 
+    if (state.error || !chartInstance) {
       return (
         <div className={cn('flex items-center justify-center p-8 text-red-500', className)} style={style}>
           <div className="text-center">
             <div className="text-lg font-medium mb-2">圖表錯誤</div>
-            <div className="text-sm text-gray-600">{state.error.message}</div>
+            <div className="text-sm text-gray-600">
+              {state.error?.message || '圖表實例創建失敗'}
+            </div>
           </div>
         </div>
       );
@@ -149,11 +162,11 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
           width={width}
           height={height}
           role="img"
-          aria-label={props['aria-label'] || `${chartInstance.getChartType()} 圖表`}
+          aria-label={props['aria-label'] || `${chartInstance?.getChartType?.() || 'chart'} 圖表`}
           aria-describedby={props['aria-describedby']}
           aria-labelledby={props['aria-labelledby']}
           tabIndex={interactive ? 0 : undefined}
-          className={`${chartInstance.getChartType()}-svg overflow-visible`}
+          className={`${chartInstance?.getChartType?.() || 'chart'}-svg overflow-visible`}
         >
           {/* SVG 內容由 chartInstance 管理 */}
         </svg>
@@ -168,11 +181,10 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
         {/* 工具提示 */}
         {showTooltip && state.tooltip && state.tooltip.visible && (
           <div
-            className="absolute z-50 px-2 py-1 text-sm bg-gray-800 text-white rounded shadow-lg pointer-events-none whitespace-pre-line"
+            className="absolute z-[9999] px-3 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-lg pointer-events-none whitespace-pre-line max-w-[200px]"
             style={{
-              left: state.tooltip.x + 10,
-              top: state.tooltip.y - 10,
-              transform: 'translate(0, -100%)'
+              left: `${(state.tooltip.x ?? 0) + 10}px`,
+              top: `${(state.tooltip.y ?? 0) - 10}px`,
             }}
           >
             {typeof state.tooltip.content === 'string' 

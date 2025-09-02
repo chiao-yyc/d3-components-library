@@ -1,39 +1,32 @@
+/**
+ * LineChart 統一導出
+ * 遵循標準三層架構模式
+ */
 
 import React from 'react';
 import './line-chart.css';
 
-// 舊版本 (向下兼容)
-export { LineChart } from './line-chart';
-export type { LineChartProps } from './types';
-export { D3LineChart } from './core';
-export type { LineChartConfig as D3LineChartConfig } from './core';
-
-// 新版本 (推薦使用)
+// 主要組件 (統一架構)
 export { 
-  LineChartV2, 
-  LineChartWithLegacySupport,
-  SmoothLineChartV2,
-  SteppedLineChartV2,
-  DottedLineChartV2,
-  LineChartWithPointsV2,
-  GradientLineChartV2,
-  defaultLineChartProps 
-} from './line-chart-v2';
-export type { LineChartV2Props } from './line-chart-v2';
+  LineChart, 
+  LineChartLegacy,
+  SmoothLineChart,
+  SteppedLineChart,
+  LineChartWithPoints,
+  defaultLineChartProps
+} from './line-chart';
+export type { LineChartProps } from './line-chart';
+
+// 核心系統導出
 export { LineChartCore } from './core/line-chart-core';
 export type { 
-  LineChartCoreConfig, 
-  LineChartData, 
+  LineChartCoreConfig,
+  LineChartData,
   ProcessedLineDataPoint,
-  LineSeriesData,
-  PointMarkerConfig
+  LineSeries,
+  PointMarkerConfig,
+  CurveType
 } from './core/line-chart-core';
 
-// 專用變體組件 (使用新架構)
-export const SmoothLineChart = (props: any) => {
-  return React.createElement(LineChart, { ...props, curve: 'monotone' });
-};
-
-export const SteppedLineChart = (props: any) => {
-  return React.createElement(LineChart, { ...props, curve: 'step' });
-};
+// 向下兼容：舊版類型定義
+export type { LineChartProps as LegacyLineChartProps } from './types';
