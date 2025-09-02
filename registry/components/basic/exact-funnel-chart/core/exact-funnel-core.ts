@@ -126,9 +126,15 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
     });
 
     // 計算百分比和轉換率
-    const maxValue = Math.max(...processedPoints.map(d => d.value));
+    const values = processedPoints.map(d => d.value).filter(v => !isNaN(v) && v >= 0);
+    const maxValue = values.length > 0 ? Math.max(...values) : 1;
     
     processedPoints.forEach((d, index) => {
+      // 確保數值是有效的
+      if (isNaN(d.value) || d.value < 0) {
+        d.value = 0;
+      }
+      
       d.percentage = maxValue > 0 ? (d.value / maxValue) * 100 : 0;
       if (index > 0) {
         const previousValue = processedPoints[index - 1].value;
@@ -137,6 +143,15 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
     });
 
     this.processedDataPoints = processedPoints;
+    
+    // 調試日誌
+    console.log('ExactFunnelChart processed data:', {
+      original: data,
+      processed: processedPoints,
+      accessors: { stepKey, valueKey, labelKey },
+      maxValue
+    });
+    
     return data;
   }
 
@@ -185,7 +200,22 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
     container.style('background-color', background);
     
     // 計算漏斗各點的位置
-    const maxValue = Math.max(...this.processedDataPoints.map(d => d.value));
+    const values = this.processedDataPoints.map(d => d.value).filter(v => !isNaN(v) && v >= 0);
+    const maxValue = values.length > 0 ? Math.max(...values) : 1; // 防止除以0錯誤
+    
+    // 檢查是否有有效數據 (至少一個非零值)
+    if (values.length === 0 || values.every(v => v === 0)) {
+      console.warn('No valid data points for funnel rendering');
+      // 顯示無數據提示
+      container.append('text')
+        .attr('x', chartWidth / 2)
+        .attr('y', chartHeight / 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#666')
+        .style('font-size', '14px')
+        .text('No data to display');
+      return;
+    }
     
     // 驗證尺寸有效性
     if (!chartWidth || !chartHeight || chartWidth <= 0 || chartHeight <= 0) {
@@ -288,7 +318,14 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
         .on('mouseover', (event) => {
           const firstPoint = this.processedDataPoints[0];
           config.onDataHover?.(firstPoint, event);
-          this.showTooltip(event.pageX || 0, event.pageY || 0, this.formatTooltipContent(firstPoint));
+          
+          // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
+          const containerRect = this.containerElement?.getBoundingClientRect();
+          if (containerRect) {
+            const tooltipX = event.clientX - containerRect.left;
+            const tooltipY = event.clientY - containerRect.top;
+            this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(firstPoint));
+          }
         })
         .on('mouseout', (event) => {
           config.onDataHover?.(null, event);
@@ -319,6 +356,20 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       return;
     }
 
+    // 添加垂直 tick 線段
+    const tickLines = container.selectAll('.tick-line')
+      .data(this.processedDataPoints)
+      .enter()
+      .append('line')
+      .attr('class', 'tick-line')
+      .attr('x1', (d, i) => xScale(i))
+      .attr('x2', (d, i) => xScale(i))
+      .attr('y1', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 30 : 0) // tick 線開始位置
+      .attr('y2', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 5 : 0)  // tick 線結束位置
+      .attr('stroke', values)
+      .attr('stroke-width', 2)
+      .attr('opacity', 0.8);
+
     // 添加數值標籤
     const valueLabels = container.selectAll('.value-label')
       .data(this.processedDataPoints)
@@ -326,7 +377,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'value-label')
       .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 10 : 0) // 放在漏斗上方，帶安全檢查
+      .attr('y', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 35 : 0) // 調整位置，放在 tick 線上方
       .attr('text-anchor', 'middle')
       .attr('fill', values)
       .style('font-size', `${fontSize}px`)
@@ -356,7 +407,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'percentage-label')
       .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => this.lowerPoints[i][1] + 20) // 放在漏斗下方
+      .attr('y', (d, i) => this.lowerPoints && this.lowerPoints[i] ? this.lowerPoints[i][1] + 20 : 0) // 放在漏斗下方
       .attr('text-anchor', 'middle')
       .attr('fill', percentages)
       .style('font-size', `${percentageFontSize}px`)
@@ -366,14 +417,23 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
         return `${d.conversionRate?.toFixed(1)}%`;
       });
 
-    // 動畫標籤
+    // 動畫標籤和 tick 線
     if (animate) {
+      // 動畫 tick 線
+      tickLines
+        .attr('opacity', 0)
+        .transition()
+        .duration(animationDuration)
+        .delay((d: any, i: number) => i * 100)
+        .attr('opacity', 0.8);
+
+      // 動畫標籤
       [valueLabels, stageLabels, percentageLabels].forEach(selection => {
         selection
           .attr('opacity', 0)
           .transition()
           .duration(animationDuration)
-          .delay((d, i) => i * 100)
+          .delay((d: any, i: number) => i * 100)
           .attr('opacity', 1);
       });
     }

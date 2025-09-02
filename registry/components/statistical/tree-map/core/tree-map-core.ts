@@ -559,7 +559,13 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
           .style('filter', 'brightness(1.1)');
 
         config.onDataHover?.(d, event);
-        this.showTooltip(event.pageX || 0, event.pageY || 0, this.formatTooltipContent(d));
+        
+        // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
+        const containerRect = this.containerElement.getBoundingClientRect();
+        const tooltipX = event.clientX - containerRect.left;
+        const tooltipY = event.clientY - containerRect.top;
+        
+        this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
       })
       .on('mouseout', (event: MouseEvent, d: TreeMapDataPoint) => {
         // 移除懸停效果

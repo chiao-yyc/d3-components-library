@@ -5,7 +5,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { TreeMapV2 as TreeMap } from '../../../registry/components/statistical/tree-map'
+import { TreeMap } from '../../../registry/components/statistical/tree-map'
 import type { HierarchyDataItem, StratifiedDataItem } from '../../../registry/components/statistical/tree-map/types'
 import { 
   DemoPageTemplate,

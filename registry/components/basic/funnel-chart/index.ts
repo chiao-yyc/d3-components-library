@@ -2,9 +2,8 @@
 import React from 'react';
 import './funnel-chart.css';
 
-// 新架構版本 (推薦使用)
-export { FunnelChartV2 as FunnelChart } from './funnel-chart-v2';
-export { FunnelChartV2 } from './funnel-chart-v2';
+// 統一架構版本 (主要導出)
+export { FunnelChart, FunnelChartV2 } from './funnel-chart';
 
 // 核心邏輯（新架構）
 export { FunnelChartCore } from './core/funnel-chart-core';

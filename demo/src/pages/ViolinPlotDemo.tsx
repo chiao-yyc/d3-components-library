@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { ViolinPlotV2 as ViolinPlot } from '@registry/components/statistical/violin-plot/violin-plot-v2'
+import { ViolinPlot } from '@registry/components/statistical/violin-plot'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -526,13 +526,12 @@ export default function ViolinPlotDemo() {
                 smoothing={smoothing}
                 violinFillOpacity={violinFillOpacity}
                 colors={colorScheme === 'custom' ? config.colors : undefined}
-                colorScheme={colorScheme}
                 animate={animate}
                 interactive={interactive}
-                onViolinClick={(data) => {
+                onDataClick={(data) => {
                   console.log('Violin clicked:', data)
                 }}
-                onViolinHover={(data) => {
+                onDataHover={(data) => {
                   console.log('Violin hovered:', data)
                 }}
               />

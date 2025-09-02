@@ -397,9 +397,10 @@ export class D3GaugeChart extends BaseChart<GaugeChartProps> {
   private updateTooltipPosition(event: MouseEvent): void {
     const tooltip = d3.select('.gauge-tooltip');
     if (!tooltip.empty()) {
+      // 使用相對於視窗的座標而非頁面座標
       tooltip
-        .style('left', (event.pageX + 10) + 'px')
-        .style('top', (event.pageY - 10) + 'px');
+        .style('left', (event.clientX + 10) + 'px')
+        .style('top', (event.clientY - 10) + 'px');
     }
   }
   

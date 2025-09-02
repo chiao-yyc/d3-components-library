@@ -432,9 +432,10 @@ export class TreeMapLabelRenderer {
           .html(content(d));
       })
       .on('mousemove', function(event) {
+        // 使用相對於視窗的座標而非頁面座標
         tooltip
-          .style('left', (event.pageX + offsetX) + 'px')
-          .style('top', (event.pageY + offsetY) + 'px');
+          .style('left', (event.clientX + offsetX) + 'px')
+          .style('top', (event.clientY + offsetY) + 'px');
       })
       .on('mouseout', function() {
         tooltip.style('visibility', 'hidden');

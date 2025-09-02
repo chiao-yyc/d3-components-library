@@ -606,9 +606,10 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
     tooltip.html(content);
 
     const mouseEvent = event as MouseEvent;
+    // 使用相對於視窗的座標而非頁面座標
     tooltip
-      .style('left', (mouseEvent.pageX + 10) + 'px')
-      .style('top', (mouseEvent.pageY - 10) + 'px');
+      .style('left', (mouseEvent.clientX + 10) + 'px')
+      .style('top', (mouseEvent.clientY - 10) + 'px');
   }
 
   private hideGaugeTooltip(): void {

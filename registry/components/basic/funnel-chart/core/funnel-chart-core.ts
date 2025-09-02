@@ -322,11 +322,13 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
           // 優先使用新的事件處理器，向下兼容舊的
           config.onDataHover?.(d.data, event);
           config.onSegmentHover?.(d.data, event); // 向下兼容
-          this.showTooltip(
-            event.pageX || 0, 
-            event.pageY || 0, 
-            this.formatTooltipContent(d.data)
-          );
+          
+          // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
+          const containerRect = this.containerElement.getBoundingClientRect();
+          const tooltipX = event.clientX - containerRect.left;
+          const tooltipY = event.clientY - containerRect.top;
+          
+          this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d.data));
         })
         .on('mouseout', (event) => {
           // 優先使用新的事件處理器，向下兼容舊的

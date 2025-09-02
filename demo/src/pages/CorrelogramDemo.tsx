@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CorrelogramV2 } from '../../../registry/components/statistical/correlogram/correlogram-v2';
+import { Correlogram } from '../../../registry/components/statistical/correlogram';
 import { 
   DemoPageTemplate,
   ModernControlPanel,
@@ -352,7 +352,7 @@ export default function CorrelogramDemo() {
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className="w-full h-96 flex items-center justify-center"
                 >
-                  <CorrelogramV2
+                  <Correlogram
                     data={correlationData.correlationMatrix ? 
                       correlationData.variables?.map((variable: string, i: number) => ({
                         variable,
@@ -506,7 +506,7 @@ const correlationData = {
   variables: ['GDP', 'Inflation', 'Employment']
 };
 
-<CorrelogramV2
+<Correlogram
   data={correlationData.variables.map((variable, i) => ({
     variable,
     correlations: correlationData.correlationMatrix[i],
@@ -546,7 +546,7 @@ const wideFormatData = [
   { "": "StockC", "StockA": -0.42, "StockB": -0.61, "StockC": 1.00 }
 ];
 
-<CorrelogramV2
+<Correlogram
   data={wideFormatData}
   dataFormat="wide"
   width={600}
