@@ -1,9 +1,20 @@
 import '@testing-library/jest-dom';
-import { expect } from 'vitest';
+import { expect, beforeEach, afterEach } from 'vitest';
 import { toHaveNoViolations } from 'jest-axe';
+import { setupDOMEnvironment, cleanupDOMEnvironment } from './test-utils';
 
 // Extend Vitest matchers with jest-dom and jest-axe
 expect.extend(toHaveNoViolations);
+
+// 全局設置 DOM 環境
+beforeEach(() => {
+  setupDOMEnvironment();
+});
+
+// 全局清理 DOM 環境
+afterEach(() => {
+  cleanupDOMEnvironment();
+});
 
 // Mock D3 selection methods for testing
 (globalThis as any).ResizeObserver = class ResizeObserver {

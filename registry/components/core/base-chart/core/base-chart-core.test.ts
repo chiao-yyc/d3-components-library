@@ -3,6 +3,7 @@
  * 測試框架無關的圖表核心邏輯
  */
 
+import { vi } from 'vitest';
 import { BaseChartCore } from './base-chart-core';
 import { 
   BaseChartCoreConfig, 
@@ -87,7 +88,7 @@ class TestChartCore extends BaseChartCore<TestChartData> {
 
 describe('BaseChartCore', () => {
   let testSetup: ReturnType<typeof setupChartTest>;
-  let mockCallbacks: jest.Mocked<ChartStateCallbacks>;
+  let mockCallbacks: ChartStateCallbacks;
   let testData: ChartData<TestChartData>[];
   let config: BaseChartCoreConfig<TestChartData>;
 
@@ -95,10 +96,10 @@ describe('BaseChartCore', () => {
     testSetup = setupChartTest();
     
     mockCallbacks = {
-      onError: jest.fn(),
-      onLoadingChange: jest.fn(),
-      onTooltipShow: jest.fn(),
-      onTooltipHide: jest.fn()
+      onError: vi.fn(),
+      onLoadingChange: vi.fn(),
+      onTooltipShow: vi.fn(),
+      onTooltipHide: vi.fn()
     };
 
     testData = TestDataGenerator.generateNumericData({ 
@@ -288,7 +289,7 @@ describe('BaseChartCore', () => {
       const chartCore = new TestChartCore(faultyConfig, mockCallbacks);
       
       // 模擬初始化錯誤 - 覆蓋 processData 方法
-      jest.spyOn(chartCore as any, 'processData').mockImplementation(() => {
+      vi.spyOn(chartCore as any, 'processData').mockImplementation(() => {
         throw new Error('Processing error');
       });
       
@@ -306,10 +307,10 @@ describe('BaseChartCore', () => {
       chartCore.initialize(testSetup.container, testSetup.svg);
       
       // 重置 mock
-      mockCallbacks.onError.mockClear();
+      (mockCallbacks.onError as any).mockClear();
       
       // 模擬更新時的錯誤
-      jest.spyOn(chartCore as any, 'renderChart').mockImplementation(() => {
+      vi.spyOn(chartCore as any, 'renderChart').mockImplementation(() => {
         throw new Error('Render error');
       });
       
