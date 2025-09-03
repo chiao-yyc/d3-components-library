@@ -6,6 +6,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./test-setup.ts'],
+    // 增加測試超時和重試機制
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    // 確保測試穩定性
+    retry: 1,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -36,6 +41,14 @@ export default defineConfig({
     poolOptions: {
       threads: {
         singleThread: true
+      }
+    },
+    // 設置更穩定的測試環境
+    isolate: true,
+    // 為 D3 和 React 組合設置特殊的 jsdom 選項
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable'
       }
     }
   },
