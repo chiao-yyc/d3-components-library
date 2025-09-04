@@ -45,6 +45,12 @@ export default function BarChartDemo() {
   const [xTickCount, setXTickCount] = useState(5)
   const [yTickCount, setYTickCount] = useState(5)
   
+  // 新增：進階軸線配置（針對 BarChart 特性優化）
+  const [beginAtZero, setBeginAtZero] = useState(true) // 柱狀圖默認從零開始
+  const [yAxisNice, setYAxisNice] = useState(true)
+  const [xAxisDomain, setXAxisDomain] = useState<'auto' | 'custom'>('auto')
+  const [customXDomain, setCustomXDomain] = useState('')
+  
   // 移除 margin 設定，使用系統預設以確保一致性
 
   const currentDataset = datasetOptions.find(d => d.value === selectedDataset)!
@@ -56,6 +62,7 @@ export default function BarChartDemo() {
     { label: '圖表模式', value: '響應式', color: '#10b981' },
     { label: '圖表尺寸', value: `比例 ${aspectRatio.toFixed(2)}:1` },
     { label: '方向', value: orientation === 'vertical' ? '垂直' : '水平' },
+    { label: 'Y軸起點', value: beginAtZero ? '從零開始' : '自動範圍', color: '#059669' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
 
@@ -193,6 +200,34 @@ export default function BarChartDemo() {
                 description="調整 Y 軸刻度標籤數量"
               />
             </ControlGroup>
+
+            {/* 新增：進階軸線配置 */}
+            <ControlGroup title="軸線行為" icon="⚖️" cols={1}>
+              <ToggleControl
+                label="Y軸從零開始"
+                checked={beginAtZero}
+                onChange={setBeginAtZero}
+                description="柱狀圖建議從零開始以正確顯示比例"
+              />
+              
+              <ToggleControl
+                label="Y軸美化刻度"
+                checked={yAxisNice}
+                onChange={setYAxisNice}
+                description="使用 D3 nice() 產生友好的 Y 軸刻度"
+              />
+              
+              <SelectControl
+                label="X軸域值類型"
+                value={xAxisDomain}
+                onChange={(value) => setXAxisDomain(value as 'auto' | 'custom')}
+                options={[
+                  { value: 'auto', label: '自動 (適用類別軸)' },
+                  { value: 'custom', label: '自定義域值' }
+                ]}
+                description="選擇 X 軸的域值計算方式"
+              />
+            </ControlGroup>
           </div>
         </ModernControlPanel>
         </div>
@@ -232,6 +267,16 @@ export default function BarChartDemo() {
               showGrid={showGrid}
               xTickCount={xTickCount}
               yTickCount={yTickCount}
+              
+              // ⚖️ 新增：統一軸線配置系統
+              beginAtZero={beginAtZero}
+              yAxis={{
+                nice: yAxisNice
+              }}
+              xAxis={{
+                domain: xAxisDomain === 'auto' ? 'auto' : undefined
+              }}
+              
               onDataClick={(data) => console.log('Clicked:', data)}
               onHover={(data) => console.log('Hovered:', data)}
             />
@@ -283,13 +328,73 @@ const data = [
       labelPosition="${labelPosition}"
       showGrid={${showGrid}}
       xTickCount={${xTickCount}}
-      yTickCount={${yTickCount}}
+      yTickCount={${yTickCount}}${!beginAtZero ? `\n      beginAtZero={${beginAtZero}}` : ''}${!yAxisNice ? `\n      yAxis={{ nice: ${yAxisNice} }}` : ''}${xAxisDomain !== 'auto' ? `\n      xAxis={{ domain: '${xAxisDomain}' }}` : ''}
       onDataClick={(data) => console.log('Clicked:', data)}
       onHover={(data) => console.log('Hovered:', data)}
     />
   )}
 </ChartContainer>`}
         />
+
+          {/* 軸線配置系統示例 */}
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">統一軸線配置系統</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-white/80 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-800 mb-2">💡 BarChart 軸線特性</h4>
+              <p className="text-gray-700 text-sm">
+                柱狀圖通常需要 Y 軸從零開始，以正確顯示數據的比例關係。X 軸多為類別軸，使用自動域值配置。
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white/80 rounded-lg p-4">
+                <h5 className="font-medium text-gray-800 mb-2">🚀 簡單模式 (90%)</h5>
+                <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<BarChart
+  beginAtZero={true}
+  data={data}
+  xKey="category"
+  yKey="value"
+/>`}
+                </div>
+              </div>
+              
+              <div className="bg-white/80 rounded-lg p-4">
+                <h5 className="font-medium text-gray-800 mb-2">⚙️ 標準模式 (8%)</h5>
+                <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<BarChart
+  yAxis={{
+    beginAtZero: true,
+    nice: true
+  }}
+  xAxis={{
+    domain: 'auto'
+  }}
+/>`}
+                </div>
+              </div>
+              
+              <div className="bg-white/80 rounded-lg p-4">
+                <h5 className="font-medium text-gray-800 mb-2">🔬 進階模式 (2%)</h5>
+                <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<BarChart
+  yAxis={{
+    domain: (values) => [
+      0, 
+      Math.max(...values) * 1.1
+    ]
+  }}
+/>`}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
           {/* 功能說明 */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
@@ -320,29 +425,29 @@ const data = [
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                  響應式設計支援
+                  統一軸線配置系統
                 </li>
               </ul>
             </div>
             
             <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800">交互特性</h4>
+              <h4 className="font-semibold text-gray-800">軸線配置</h4>
               <ul className="space-y-2 text-gray-700">
                 <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  智能工具提示顯示
+                  <div className="w-2 h-2 bg-green-500 rounded-full" />
+                  Y軸自動從零開始
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                  點擊和懸停事件回調
+                  智能刻度美化 (nice)
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-                  自定義邊距和佈局
+                  X軸類別域值自動配置
                 </li>
                 <li className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-pink-500 rounded-full" />
-                  自動容器尺寸適應
+                  可自定義域值計算函數
                 </li>
               </ul>
             </div>

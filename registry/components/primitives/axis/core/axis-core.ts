@@ -10,6 +10,7 @@ export interface AxisCoreConfig {
   orientation: 'top' | 'right' | 'bottom' | 'left';
   tickCount?: number;
   tickSize?: number;
+  tickSizeOuter?: number;
   tickFormat?: (domainValue: any, index: number) => string;
   tickValues?: any[];
   showTicks?: boolean;
@@ -27,7 +28,7 @@ export class AxisCore {
   }
 
   private createAxisGenerator(): d3.Axis<any> {
-    const { scale, orientation, tickCount, tickSize, tickFormat, tickValues } = this.config;
+    const { scale, orientation, tickCount, tickSize, tickSizeOuter, tickFormat, tickValues } = this.config;
     
     let axis: d3.Axis<any>;
     
@@ -53,8 +54,8 @@ export class AxisCore {
     if (tickFormat) axis.tickFormat(tickFormat);
     if (tickValues) axis.tickValues(tickValues);
     
-    // 🔧 修復軸線間隙問題 - 移除外側刻度延伸
-    axis.tickSizeOuter(0);
+    // 🔧 可配置的外側刻度延伸 - 默認值 6 讓軸線相交
+    axis.tickSizeOuter(tickSizeOuter !== undefined ? tickSizeOuter : 6);
 
     return axis;
   }

@@ -106,6 +106,17 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     super(config, callbacks);
   }
 
+  public getChartType(): string {
+    return 'scatter-plot';
+  }
+
+  protected getChartAxisDefaults() {
+    return {
+      xAxis: { includeOrigin: false, nice: true },
+      yAxis: { includeOrigin: false, nice: true }
+    };
+  }
+
   protected processData(): ChartData<ScatterPlotData>[] {
     const config = this.config as ScatterPlotCoreConfig;
     
@@ -246,6 +257,8 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   private createXScale(values: (number | Date)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
     
+    const config = this.config as ScatterPlotCoreConfig;
+    
     // 使用 BaseChartCore 的通用智能邊距方法
     const maxRadius = this.calculateMaxPointRadius();
     const [rangeStart, rangeEnd] = this.getSmartScaleRange(this.chartWidth, maxRadius, 'points', false);
@@ -257,22 +270,54 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         .range([rangeStart, rangeEnd]);
     }
     
-    // 數值類型
-    return d3.scaleLinear()
-      .domain(d3.extent(values as number[]) as [number, number])
+    // 數值類型 - 使用統一的域值計算系統
+    const numericValues = values as number[];
+    const domain = this.calculateAxisDomain(
+      numericValues,
+      config.xAxis,
+      { includeOrigin: config.includeOrigin, beginAtZero: config.beginAtZero }
+    );
+    
+    const scale = d3.scaleLinear()
+      .domain(domain)
       .range([rangeStart, rangeEnd]);
+    
+    // 應用 nice() 如果配置啟用
+    const axisConfig = config.xAxis || {};
+    if (axisConfig.nice !== false) {
+      scale.nice();
+    }
+    
+    return scale;
   }
 
   private createYScale(values: number[]): d3.ScaleLinear<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
     
+    const config = this.config as ScatterPlotCoreConfig;
+    
     // 使用 BaseChartCore 的通用智能邊距方法
     const maxRadius = this.calculateMaxPointRadius();
     const [rangeStart, rangeEnd] = this.getSmartScaleRange(this.chartHeight, maxRadius, 'points', true);
     
-    return d3.scaleLinear()
-      .domain(d3.extent(values) as [number, number])
+    // 使用統一的域值計算系統
+    const domain = this.calculateAxisDomain(
+      values,
+      config.yAxis,
+      { includeOrigin: config.includeOrigin, beginAtZero: config.beginAtZero }
+    );
+    
+    const scale = d3.scaleLinear()
+      .domain(domain)
       .range([rangeStart, rangeEnd]);
+    
+    // 應用 nice() 如果配置啟用
+    const axisConfig = config.yAxis || {};
+    if (axisConfig.nice !== false) {
+      scale.nice();
+    }
+    
+    return scale;
   }
 
   protected renderChart(): void {
@@ -282,7 +327,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     }
     
     // 始終重新計算圖表尺寸（修復位置！）
-    const margin = this.config.margin || { top: 20, right: 20, bottom: 60, left: 60 };
+    const margin = this.config.margin || { top: 20, right: 30, bottom: 40, left: 40 };
     const width = (this.config.width || 600);
     const height = (this.config.height || 400);
     this.chartWidth = width - margin.left - margin.right;
@@ -329,7 +374,15 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         label: config.xAxisLabel,
         tickCount: config.xTickCount,
         tickFormat: config.xTickFormat,
-        showGrid: config.showGrid
+        tickSizeOuter: config.axisConfig?.tickSizeOuter,
+        showGrid: config.showGrid,
+        // 軸線相交配置
+        axisIntersection: config.axisConfig?.intersection ? {
+          enabled: true,
+          xScale,
+          yScale,
+          intersectionPoint: config.axisConfig?.intersectionPoint
+        } : undefined
       });
     }
     
@@ -338,7 +391,15 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         label: config.yAxisLabel,
         tickCount: config.yTickCount,
         tickFormat: config.yTickFormat,
-        showGrid: config.showGrid
+        tickSizeOuter: config.axisConfig?.tickSizeOuter,
+        showGrid: config.showGrid,
+        // 軸線相交配置
+        axisIntersection: config.axisConfig?.intersection ? {
+          enabled: true,
+          xScale,
+          yScale,
+          intersectionPoint: config.axisConfig?.intersectionPoint
+        } : undefined
       });
     }
 
