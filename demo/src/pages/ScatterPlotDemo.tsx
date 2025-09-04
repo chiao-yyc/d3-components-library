@@ -443,6 +443,16 @@ export default function ScatterPlotDemo() {
               interactive={interactive}
               showTooltip={showTooltip}
               colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
+              
+              // 🔧 軸線系統配置
+              showGrid={showGrid}
+              showXAxis={true}
+              showYAxis={true}
+              xTickCount={xTickCount}
+              yTickCount={yTickCount}
+              xAxisLabel="X Axis"
+              yAxisLabel="Y Axis"
+              
               onDataClick={(data) => console.log('Clicked:', data)}
               onDataHover={(data) => console.log('Hovered:', data)}
               onError={(error) => console.error('ScatterPlot Error:', error)}
@@ -450,11 +460,6 @@ export default function ScatterPlotDemo() {
               // 基本交互功能
               enableBrushZoom={enableBrushZoom}
               enableCrosshair={enableCrosshair}
-              
-              // 新增：統一軸線系統配置
-              showGrid={showGrid}
-              xTickCount={xTickCount}
-              yTickCount={yTickCount}
             />
           </motion.div>
           

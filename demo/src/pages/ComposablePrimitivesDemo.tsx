@@ -2,10 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { ChartContainer } from '@/components/ui/ChartContainer'
 import { DemoPageTemplate } from '@/components/ui/DemoPageTemplate'
 import { ModernControlPanel } from '@/components/ui/ModernControlPanel'
-import { ChartCanvas } from '@/registry/components/primitives/canvas'
-import { Bar } from '@/registry/components/primitives/shapes/bar'
-import { Line } from '@/registry/components/primitives/shapes/line'
-import { Scatter } from '@/registry/components/primitives/shapes/scatter'
+import { MultiSeriesComboChartV2, ComboSeries as ComboSeriesV2 } from '@/registry/components/composite'
 import { AlignmentStrategy } from '@/registry/components/primitives/utils/positioning'
 import * as d3 from 'd3'
 
@@ -36,140 +33,128 @@ export default function ComposablePrimitivesDemo() {
 
   const colors = colorThemes[theme]
 
-  // 創建 scales - 使用動態寬高
-  const createScales = (width: number, height: number) => {
-    const margin = { top: 20, right: 80, bottom: 60, left: 80 }
-    const innerWidth = width - margin.left - margin.right
-    const innerHeight = height - margin.top - margin.bottom
+  // 根據用戶選擇動態生成系列配置
+  const generateSeries = useMemo((): ComboSeriesV2[] => {
+    const series: ComboSeriesV2[] = []
     
-    const xScale = d3.scaleBand()
-      .domain(sampleData.map(d => d.x))
-      .range([0, innerWidth])
-      .padding(0.1)
+    if (showBars) {
+      series.push({
+        name: '銷售額',
+        type: 'bar',
+        yKey: 'y',
+        yAxis: 'left',
+        color: colors.bar,
+        visible: true
+      })
+    }
     
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(sampleData, d => Math.max(d.y, d.trend, d.points)) || 5000])
-      .range([innerHeight, 0])
-      .nice()
+    if (showLine) {
+      series.push({
+        name: '趨勢線', 
+        type: 'line',
+        yKey: 'trend',
+        yAxis: 'left',
+        color: colors.line,
+        visible: true
+      })
+    }
     
-    return { xScale, yScale, margin, innerWidth, innerHeight }
-  }
+    if (showScatter) {
+      series.push({
+        name: '資料點',
+        type: 'scatter', 
+        yKey: 'points',
+        yAxis: 'right',
+        color: colors.scatter,
+        visible: true
+      })
+    }
+    
+    return series
+  }, [showBars, showLine, showScatter, colors])
 
   // 動態程式碼範例 - 反映當前選擇的組件和設定
   const codeExample = `
-// 完全組合式圖表構建 - 響應式 Primitives 組合
-import React from 'react'
-import { ChartCanvas } from '@/registry/components/primitives/canvas'
+// 使用 MultiSeriesComboChartV2 實現可組合圖表
+import React, { useMemo } from 'react'
+import { MultiSeriesComboChartV2, ComboSeries } from '@/registry/components/composite'
 import { ChartContainer } from '@/components/ui/ChartContainer'
-import { ${[showBars && 'Bar', showLine && 'Line', showScatter && 'Scatter'].filter(Boolean).join(', ')} } from '@/registry/components/primitives/shapes'
-import * as d3 from 'd3'
 
 const sampleData = [
   { x: 'Jan', y: 4000, trend: 4200, points: 3800 },
   { x: 'Feb', y: 3000, trend: 3100, points: 2900 },
+  { x: 'Mar', y: 2000, trend: 2300, points: 2100 },
   // ... more data
 ]
 
+const colorThemes = {
+  ${theme}: { bar: '${colors.bar}', line: '${colors.line}', scatter: '${colors.scatter}' }
+}
+
 function ComposableChart() {
-  // 創建響應式 scales
-  const createScales = (width, height) => {
-    const margin = { top: 20, right: 80, bottom: 60, left: 80 }
-    const innerWidth = width - margin.left - margin.right
-    const innerHeight = height - margin.top - margin.bottom
+  // 動態生成系列配置
+  const generateSeries = useMemo((): ComboSeries[] => {
+    const series: ComboSeries[] = []
     
-    const xScale = d3.scaleBand()
-      .domain(sampleData.map(d => d.x))
-      .range([0, innerWidth])
-      .padding(0.1)
+    ${showBars ? `// 條形圖系列
+    series.push({
+      name: '銷售額',
+      type: 'bar',
+      yKey: 'y',
+      yAxis: 'left',
+      color: '${colors.bar}',
+      visible: true
+    })` : ''}
     
-    const yScale = d3.scaleLinear()
-      .domain([0, d3.max(sampleData, d => Math.max(d.y, d.trend, d.points))])
-      .range([innerHeight, 0])
-      .nice()
+    ${showLine ? `// 線圖系列  
+    series.push({
+      name: '趨勢線',
+      type: 'line', 
+      yKey: 'trend',
+      yAxis: 'left',
+      color: '${colors.line}',
+      visible: true
+    })` : ''}
     
-    return { xScale, yScale, margin, innerWidth, innerHeight }
-  }
+    ${showScatter ? `// 散點圖系列
+    series.push({
+      name: '資料點',
+      type: 'scatter',
+      yKey: 'points', 
+      yAxis: 'right',
+      color: '${colors.scatter}',
+      visible: true
+    })` : ''}
+    
+    return series
+  }, [])
 
   return (
     <ChartContainer responsive={true} aspectRatio={16/9}>
-      {({ width, height }) => {
-        const { xScale, yScale, margin, innerWidth, innerHeight } = createScales(width, height)
-        
-        return (
-          <ChartCanvas width={width} height={height} margin={margin}>
-            <svg width={width} height={height}>
-              <g transform={\`translate(\${margin.left}, \${margin.top})\`}>
-          {/* 手動軸線渲染 */}
-          <g transform={\`translate(0, \${innerHeight})\`}>
-            {xScale.domain().map(tick => (
-              <g key={tick}>
-                <line x1={xScale(tick) + xScale.bandwidth() / 2} 
-                      x2={xScale(tick) + xScale.bandwidth() / 2} 
-                      y1={0} y2={5} stroke="#666" />
-                <text x={xScale(tick) + xScale.bandwidth() / 2} 
-                      y={20} textAnchor="middle" fontSize={12}>{tick}</text>
-              </g>
-            ))}
-            <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="#666" />
-          </g>
-          
-          <g>
-            {yScale.ticks(5).map(tick => (
-              <g key={tick}>
-                <line x1={-5} x2={0} y1={yScale(tick)} y2={yScale(tick)} stroke="#666" />
-                <text x={-10} y={yScale(tick) + 4} textAnchor="end" fontSize={12}>{tick}</text>
-                <line x1={0} x2={innerWidth} y1={yScale(tick)} y2={yScale(tick)} 
-                      stroke="#e5e7eb" strokeDasharray="2,2" />
-              </g>
-            ))}
-            <line x1={0} x2={0} y1={0} y2={innerHeight} stroke="#666" />
-          </g>
-
-          {/* 當前啟用的組件 - 主題: ${theme} 對齊: ${alignment} */}
-          ${showBars ? `
-          {/* 條形圖 - 銷售額 */}
-          <Bar 
-            data={sampleData.map(d => ({ x: d.x, y: d.y }))}
-            xScale={xScale}
-            yScale={yScale}
-            alignment="${alignment}"
-            barWidthRatio={${barWidthRatio}}
-            color="${colors.bar}"
-            animate={${animate}}
-            animationDuration={600}
-          />` : ''}
-          ${showLine ? `
-          {/* 線圖 - 趨勢線 */}
-          <Line 
-            data={sampleData.map(d => ({ x: d.x, y: d.trend }))}
-            xScale={xScale}
-            yScale={yScale}
-            pointAlignment="${alignment}"
-            color="${colors.line}"
-            strokeWidth={3}
-            showPoints={true}
-            pointRadius={4}
-            animate={${animate}}
-            animationDuration={800}
-          />` : ''}
-          ${showScatter ? `
-          {/* 散點圖 - 資料點 */}
-          <Scatter 
-            data={sampleData.map(d => ({ x: d.x, y: d.points }))}
-            xScale={xScale}
-            yScale={yScale}
-            pointAlignment="${alignment}"
-            color="${colors.scatter}"
-            radius={6}
-            opacity={0.8}
-            animate={${animate}}
-            animationDuration={1000}
-          />` : ''}
-              </g>
-            </svg>
-          </ChartCanvas>
-        )
-      }}
+      {({ width, height }) => (
+        <MultiSeriesComboChartV2
+          data={sampleData}
+          series={generateSeries}
+          xAccessor="x"
+          width={width}
+          height={height}
+          leftAxisConfig={{
+            label: '銷售額 / 趨勢',
+            tickCount: 6
+          }}
+          rightAxisConfig={{
+            label: '資料點', 
+            tickCount: 6
+          }}
+          animate={${animate}}
+          interactive={true}
+          barWidth={${barWidthRatio}}
+          colors={['${colors.bar}', '${colors.line}', '${colors.scatter}']}
+          onDataClick={(data, event) => {
+            console.log('點擊了數據點:', data)
+          }}
+        />
+      )}
     </ChartContainer>
   )
 }`
@@ -234,9 +219,9 @@ function ComposableChart() {
 
   return (
     <DemoPageTemplate
-      title="可組合元件演示"
-      description="使用 Primitives 組件系統構建完全自定義的圖表，展示高度組合式架構"
-      tags={['primitives', 'composable', 'flexible', 'modular']}
+      title="可組合圖表系統"
+      description="使用 MultiSeriesComboChart 動態組合不同圖表類型，展示現代化的組合式架構"
+      tags={['combo', 'composable', 'series', 'modular']}
       codeExample={codeExample}
     >
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -260,105 +245,30 @@ function ComposableChart() {
               responsive={true}
               aspectRatio={16/9}
             >
-              {({ width, height }) => {
-                const { xScale, yScale, margin, innerWidth, innerHeight } = createScales(width, height)
-                
-                return (
-                  <ChartCanvas 
-                    width={width} 
-                    height={height} 
-                    margin={margin}
-                  >
-                    <svg width={width} height={height}>
-                      <g transform={`translate(${margin.left}, ${margin.top})`}>
-                        {/* 軸線 */}
-                        <g transform={`translate(0, ${innerHeight})`}>
-                          {xScale.domain().map((tick: any) => {
-                            const x = xScale(tick)! + xScale.bandwidth()! / 2
-                            return (
-                              <g key={tick}>
-                                <line x1={x} x2={x} y1={0} y2={5} stroke="#666" />
-                                <text x={x} y={20} textAnchor="middle" fontSize={12} fill="#666">
-                                  {tick}
-                                </text>
-                              </g>
-                            )
-                          })}
-                          <line x1={0} x2={innerWidth} y1={0} y2={0} stroke="#666" />
-                        </g>
-                        
-                        <g>
-                          {yScale.ticks(5).map((tick: any) => {
-                            const y = yScale(tick)
-                            return (
-                              <g key={tick}>
-                                <line x1={-5} x2={0} y1={y} y2={y} stroke="#666" />
-                                <text x={-10} y={y + 4} textAnchor="end" fontSize={12} fill="#666">
-                                  {tick}
-                                </text>
-                                <line 
-                                  x1={0} 
-                                  x2={innerWidth} 
-                                  y1={y} 
-                                  y2={y} 
-                                  stroke="#e5e7eb" 
-                                  strokeDasharray="2,2" 
-                                />
-                              </g>
-                            )
-                          })}
-                          <line x1={0} x2={0} y1={0} y2={innerHeight} stroke="#666" />
-                        </g>
-
-                        {/* 條形圖 - 銷售額 */}
-                        {showBars && (
-                          <Bar 
-                            data={sampleData.map(d => ({ x: d.x, y: d.y }))}
-                            xScale={xScale}
-                            yScale={yScale}
-                            alignment={alignment}
-                            barWidthRatio={barWidthRatio}
-                            color={colors.bar}
-                            animate={animate}
-                            animationDuration={600}
-                          />
-                        )}
-                        
-                        {/* 線圖 - 趨勢 */}
-                        {showLine && (
-                          <Line 
-                            data={sampleData.map(d => ({ x: d.x, y: d.trend }))}
-                            xScale={xScale}
-                            yScale={yScale}
-                            pointAlignment={alignment}
-                            color={colors.line}
-                            strokeWidth={3}
-                            showPoints={true}
-                            pointRadius={4}
-                            animate={animate}
-                            animationDuration={800}
-                          />
-                        )}
-                        
-                        {/* 散點圖 - 資料點 */}
-                        {showScatter && (
-                          <Scatter 
-                            data={sampleData.map(d => ({ x: d.x, y: d.points }))}
-                            xScale={xScale}
-                            yScale={yScale}
-                            pointAlignment={alignment}
-                            color={colors.scatter}
-                            radius={6}
-                            opacity={0.8}
-                            animate={animate}
-                            animationDuration={1000}
-                          />
-                        )}
-                      </g>
-                    </svg>
-                  </ChartCanvas>
-                )
-              }}
+              {({ width, height }) => (
+                <MultiSeriesComboChartV2
+                  data={sampleData}
+                  series={generateSeries}
+                  xAccessor="x"
+                  width={width}
+                  height={height}
+                  leftAxisConfig={{
+                    label: '銷售額 / 趨勢',
+                    tickCount: 6
+                  }}
+                  rightAxisConfig={{
+                    label: '資料點',
+                    tickCount: 6
+                  }}
+                  animate={animate}
+                  interactive={true}
+                  barWidth={barWidthRatio}
+                  colors={[colors.bar, colors.line, colors.scatter]}
+                  onDataClick={(data, event) => {
+                    console.log('點擊了數據點:', data)
+                  }}
+                />
+              )}
             </ChartContainer>
           </div>
         </div>
@@ -403,9 +313,9 @@ function ComposableChart() {
               <div>
                 <p><strong>啟用組件:</strong></p>
                 <ul className="ml-4 space-y-1 list-disc">
-                  {showBars && <li><code>&lt;Bar /&gt;</code> - 條形圖組件，顏色: {colors.bar}</li>}
-                  {showLine && <li><code>&lt;Line /&gt;</code> - 線圖組件，顏色: {colors.line}</li>}
-                  {showScatter && <li><code>&lt;Scatter /&gt;</code> - 散點圖組件，顏色: {colors.scatter}</li>}
+                  {showBars && <li><code>type: 'bar'</code> - 條形圖系列，顏色: {colors.bar}</li>}
+                  {showLine && <li><code>type: 'line'</code> - 線圖系列，顏色: {colors.line}</li>}
+                  {showScatter && <li><code>type: 'scatter'</code> - 散點圖系列，顏色: {colors.scatter}</li>}
                 </ul>
               </div>
               <div>
@@ -419,7 +329,7 @@ function ComposableChart() {
               </div>
             </div>
             <p className="mt-2 font-medium">
-              💡 優勢：每個組件獨立渲染，可任意組合，完全控制渲染順序和樣式
+              💡 優勢：透過系列配置實現組合式圖表，統一軸線系統，高效渲染
             </p>
           </div>
         </div>

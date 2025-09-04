@@ -293,22 +293,8 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
       return;
     }
     
-    // 創建或更新 chartGroup
-    if (!this.chartGroup) {
-      const svg = d3.select(this.svgElement!);
-      
-      // 清除現有內容
-      svg.selectAll('*').remove();
-      
-      // 創建圖表區域
-      this.chartGroup = svg
-        .append('g')
-        .attr('class', 'scatter-plot-chart')
-        .attr('transform', `translate(${margin.left},${margin.top})`) as unknown as D3Selection;
-    } else if (this.chartGroup) {
-      // 如果 chartGroup 已存在，只清理其內容，不重新創建
-      this.chartGroup.selectAll('*').remove();
-    }
+    // 創建或更新 chartGroup（使用 BaseChartCore 的統一方法）
+    this.chartGroup = this.createSVGContainer() as unknown as D3Selection;
 
     const config = this.config as ScatterPlotCoreConfig;
     
@@ -327,9 +313,6 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
     if (!this.chartGroup) {
       return;
     }
-
-    // 清除之前的內容
-    this.chartGroup.selectAll('*').remove();
 
     // 創建散點組
     this.scatterGroup = this.chartGroup

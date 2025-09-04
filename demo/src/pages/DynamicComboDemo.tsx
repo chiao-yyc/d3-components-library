@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
-import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 import { 
   DemoPageTemplate,
   ContentSection,
@@ -78,13 +77,13 @@ const DynamicComboDemo: React.FC = () => {
   })
 
   // 根據選擇的系列生成圖表配置
-  const currentSeries = useMemo((): ComboChartSeries[] => {
+  const currentSeries = useMemo((): ComboSeries[] => {
     return Array.from(activeSeries)
       .map(seriesId => seriesTemplates.find(t => t.id === seriesId))
       .filter(Boolean)
       .map(template => ({
         type: template!.type,
-        dataKey: template!.dataKey,
+        yKey: template!.dataKey,
         name: template!.name,
         yAxis: template!.yAxis,
         color: template!.color,
@@ -376,24 +375,22 @@ const DynamicComboDemo: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <EnhancedComboChart
+                  <MultiSeriesComboChartV2
                     data={sampleData}
                     series={currentSeries}
-                    xKey="month"
+                    xAccessor="month"
                     width={width}
                     height={height}
                     margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-                    leftAxis={{
+                    leftAxisConfig={{
                       label: chartSettings.leftAxisLabel,
-                      gridlines: chartSettings.showGridlines,
+                      tickCount: 5
                     }}
-                    rightAxis={{
+                    rightAxisConfig={{
                       label: chartSettings.rightAxisLabel,
-                      gridlines: false,
+                      tickCount: 5
                     }}
-                    xAxis={{
-                      label: '月份',
-                    }}
+                    showGrid={chartSettings.showGridlines}
                     animate={chartSettings.animate}
                     className="dynamic-combo-chart"
                   />
@@ -429,7 +426,7 @@ const DynamicComboDemo: React.FC = () => {
           title="使用範例"
           language="tsx"
           code={`import React, { useState } from 'react'
-import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 
 const DynamicComboDemo: React.FC = () => {
   const [selectedChartTypes, setSelectedChartTypes] = useState<Set<string>>(new Set(['bar', 'line']))
@@ -443,14 +440,14 @@ const DynamicComboDemo: React.FC = () => {
   const availableSeries = {
     bar: {
       type: 'bar' as const,
-      dataKey: 'sales',
+      yKey: 'sales',
       name: '銷售額',
       yAxis: 'left' as const,
       color: '#3b82f6'
     },
     line: {
       type: 'line' as const,
-      dataKey: 'growth',
+      yKey: 'growth',
       name: '成長率',
       yAxis: 'right' as const,
       color: '#ef4444',
@@ -458,19 +455,20 @@ const DynamicComboDemo: React.FC = () => {
     }
   }
 
-  const series: ComboChartSeries[] = Array.from(selectedChartTypes)
+  const series: ComboSeries[] = Array.from(selectedChartTypes)
     .map(type => availableSeries[type as keyof typeof availableSeries])
     .filter(Boolean)
 
   return (
-    <EnhancedComboChart
+    <MultiSeriesComboChartV2
       data={data}
       series={series}
-      xKey="month"
+      xAccessor="month"
       width={800}
       height={500}
-      leftAxis={{ label: "銷售額/利潤", gridlines: true }}
-      rightAxis={{ label: "成長率 (%)", gridlines: false }}
+      leftAxisConfig={{ label: "銷售額/利潤", tickCount: 5 }}
+      rightAxisConfig={{ label: "成長率 (%)", tickCount: 5 }}
+      showGrid={true}
       animate={true}
       interactive={true}
     />

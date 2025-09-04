@@ -67,13 +67,25 @@ function Layout({ children }: LayoutProps) {
     {
       title: '🔧 組合式架構',
       tier: 2,
-      description: '靈活的組件組合',
+      description: '靈活的圖表組合系統',
       items: [
         { path: '/simple-components', name: '簡化組件模式', icon: '🚀' },
-        { path: '/composable-primitives', name: '完全組合模式', icon: '🧩' },
-        { path: '/combo-chart', name: '組合圖表展示', icon: '⚡' },
-        { path: '/enhanced-combo-chart', name: '增強組合圖表', icon: '🔧' },
-        { path: '/area-line-combo', name: '面積線條組合', icon: '🌊' }
+        { path: '/combo-chart', name: '基礎組合圖表', icon: '⚡' },
+        { path: '/enhanced-combo-chart', name: '商業分析組合', icon: '💼' },
+        { path: '/area-line-combo', name: '趨勢分析組合', icon: '🌊' },
+        { path: '/scatter-regression-combo', name: '統計分析組合', icon: '📊' },
+        { path: '/composable-primitives', name: '架構展示組合', icon: '🧩' }
+      ]
+    },
+    {
+      title: '🎯 專業應用場景',
+      tier: 2,
+      description: '特定領域的圖表組合',
+      items: [
+        { path: '/advanced-combo', name: '進階組合展示', icon: '🚀' },
+        { path: '/special-analysis', name: '特殊分析組合', icon: '🔬' },
+        { path: '/financial-combo', name: '金融圖表組合', icon: '💰' },
+        { path: '/dynamic-combo', name: '動態配置組合', icon: '⚙️' }
       ]
     },
     {
@@ -97,8 +109,7 @@ function Layout({ children }: LayoutProps) {
         { path: '/data-processor-test', name: '數據處理測試', icon: '🔬' },
         { path: '/performance-test', name: '性能測試', icon: '⚡' },
         { path: '/virtual-scrolling', name: '虛擬滾動', icon: '🚀' },
-        { path: '/combo-debug', name: 'Combo 圖表除錯', icon: '🔧' },
-        { path: '/layer-debug', name: '圖層調試', icon: '📚' }
+        { path: '/combo-debug-tools', name: '組合圖表調試工具', icon: '🔧' }
       ]
     },
     {

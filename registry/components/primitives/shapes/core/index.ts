@@ -6,5 +6,15 @@
  * 包含 Bar、Line、Area、Scatter 等基礎圖形的接口和常數
  */
 
-// 圖形組件類型定義
+// 框架無關的核心實現
+export * from './bar-core';
+export * from './line-core';
+export * from './area-core';
+export * from './scatter-core';
+export * from './shape-composer';
+
+// 統一的現代類型定義 (推薦使用)
+export * from './unified-types';
+
+// 向下兼容的舊類型定義 (逐步廢棄)
 export * from './types';

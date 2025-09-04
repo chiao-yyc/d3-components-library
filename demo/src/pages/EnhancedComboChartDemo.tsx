@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 
-// 導入真正的增強版 ComboChart
-import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '../../../registry/components/composite'
+// 導入統一的 ComboChart (Primitives架構)
+import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 import { 
   DemoPageTemplate,
   ModernControlPanel,
@@ -50,10 +50,10 @@ export const EnhancedComboChartDemo: React.FC = () => {
 
   // 銷售分析數據和配置
   const salesData = useMemo(() => generateSalesData(), [])
-  const salesSeries: ComboChartSeries[] = [
+  const salesSeries: ComboSeries[] = [
     {
       type: 'bar',
-      dataKey: 'revenue',
+      yKey: 'revenue',
       name: '營收',
       yAxis: 'left',
       color: '#3b82f6',
@@ -61,7 +61,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
     },
     {
       type: 'bar', 
-      dataKey: 'profit',
+      yKey: 'profit',
       name: '利潤',
       yAxis: 'left',
       color: '#10b981',
@@ -69,7 +69,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'growthRate',
+      yKey: 'growthRate',
       name: '成長率',
       yAxis: 'right',
       color: '#ef4444',
@@ -82,10 +82,10 @@ export const EnhancedComboChartDemo: React.FC = () => {
 
   // 績效分析數據和配置  
   const performanceData = useMemo(() => generatePerformanceData(), [])
-  const performanceSeries: ComboChartSeries[] = [
+  const performanceSeries: ComboSeries[] = [
     {
       type: 'bar',
-      dataKey: 'budget',
+      yKey: 'budget',
       name: '預算',
       yAxis: 'left',
       color: '#6b7280',
@@ -93,7 +93,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
     },
     {
       type: 'bar',
-      dataKey: 'actual', 
+      yKey: 'actual', 
       name: '實際',
       yAxis: 'left',
       color: '#3b82f6',
@@ -101,7 +101,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'efficiency',
+      yKey: 'efficiency',
       name: '效率',
       yAxis: 'right',
       color: '#f59e0b',
@@ -111,7 +111,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'satisfaction',
+      yKey: 'satisfaction',
       name: '滿意度',
       yAxis: 'right', 
       color: '#8b5cf6',
@@ -125,12 +125,12 @@ export const EnhancedComboChartDemo: React.FC = () => {
   const currentSeries = activeScenario === 'sales' ? salesSeries : performanceSeries
   const currentXKey = activeScenario === 'sales' ? 'month' : 'quarter'
 
-  const handleSeriesClick = (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => {
+  const handleSeriesClick = (series: ComboSeries, dataPoint: any, event: React.MouseEvent) => {
     console.log('Series clicked:', series.name, dataPoint)
     alert(`點擊了 ${series.name} 系列`)
   }
 
-  const handleSeriesHover = (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => {
+  const handleSeriesHover = (series: ComboSeries, dataPoint: any, event: React.MouseEvent) => {
     console.log('Series hovered:', series.name, dataPoint)
   }
 
@@ -299,23 +299,21 @@ export const EnhancedComboChartDemo: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <EnhancedComboChart
+                  <MultiSeriesComboChartV2
                     data={currentData}
                     series={visibleSeries}
-                    xKey={currentXKey}
+                    xAccessor={currentXKey}
                     width={width}
                     height={height}
-                    leftAxis={{
+                    leftAxisConfig={{
                       label: activeScenario === 'sales' ? '金額 (萬元)' : '預算 vs 實際 (萬元)',
-                      gridlines: true
+                      tickCount: 5
                     }}
-                    rightAxis={{
+                    rightAxisConfig={{
                       label: activeScenario === 'sales' ? '成長率 (%)' : '績效指標 (%)',
-                      gridlines: false
+                      tickCount: 5
                     }}
-                    xAxis={{
-                      label: activeScenario === 'sales' ? '月份' : '季度'
-                    }}
+                    showGrid={true}
                     animate={animate}
                     interactive={interactive}
                     onSeriesClick={handleSeriesClick}
@@ -342,7 +340,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
           <CodeExample
             title="EnhancedComboChart 進階使用範例"
             description="展示如何使用增強版組合圖表的多種配置選項和互動功能"
-            code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+            code={`import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 
 const data = [
   { month: 'Jan', revenue: 500000, profit: 80000, growthRate: 12.5 },
@@ -350,7 +348,7 @@ const data = [
   // ...更多數據
 ]
 
-const series: ComboChartSeries[] = [
+const series: ComboSeries[] = [
   { 
     type: 'bar', 
     dataKey: 'revenue', 
@@ -379,7 +377,7 @@ const series: ComboChartSeries[] = [
   }
 ]
 
-<EnhancedComboChart
+<MultiSeriesComboChartV2
   data={data}
   series={series}
   xKey="month"
@@ -393,9 +391,7 @@ const series: ComboChartSeries[] = [
     label: '成長率 (%)', 
     gridlines: false 
   }}
-  xAxis={{ 
-    label: '月份' 
-  }}
+  showGrid={true}
   animate={true}
   interactive={true}
   onSeriesClick={(series, dataPoint, event) => {

@@ -341,53 +341,6 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       .nice();
   }
 
-  protected renderChart(): void {
-    if (!this.chartGroup || this.areaProcessedData.length === 0) return;
-
-    const config = this.config as AreaChartCoreConfig;
-    const { xScale, yScale } = this.processData();
-
-    // 清除之前的內容
-    this.chartGroup.selectAll('*').remove();
-
-    // 創建區域組
-    this.areaGroup = this.chartGroup
-      .append('g')
-      .attr('class', 'area-chart-group');
-
-    // 渲染區域
-    this.renderAreas(xScale, yScale);
-
-    // 渲染點
-    if (config.showPoints) {
-      this.renderPoints(xScale, yScale);
-    }
-
-    // 渲染軸線
-    // 使用 BaseChartCore 的統一軸線系統
-    if (config.showXAxis !== false) {
-      this.renderXAxis(xScale, {
-        label: config.xAxisLabel,
-        tickCount: config.xTickCount,
-        tickFormat: config.xTickFormat,
-        showGrid: config.showGrid
-      });
-    }
-    
-    if (config.showYAxis !== false) {
-      this.renderYAxis(yScale, {
-        label: config.yAxisLabel,
-        tickCount: config.yTickCount,
-        tickFormat: config.yTickFormat,
-        showGrid: config.showGrid
-      });
-    }
-
-    // 網格現在由 BaseChartCore 的統一軸線系統處理
-
-    // 設置交互功能
-    this.setupInteractions(xScale, yScale);
-  }
 
   private renderAreas(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,

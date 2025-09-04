@@ -43,6 +43,10 @@ const ResponsiveChartDemo = lazy(() => import('./pages/ResponsiveChartDemo'))
 const ResponsiveTestDemo = lazy(() => import('./pages/ResponsiveTestDemo'))
 const PerformanceTestDemo = lazy(() => import('./pages/PerformanceTestDemo'))
 const VirtualScrollingDemo = lazy(() => import('./pages/VirtualScrollingDemo'))
+const AdvancedComboDemo = lazy(() => import('./pages/AdvancedComboDemo'))
+const SpecialAnalysisDemo = lazy(() => import('./pages/SpecialAnalysisDemo'))
+const ComboDebugToolsDemo = lazy(() => import('./pages/ComboDebugToolsDemo'))
+const FinancialComboDemo = lazy(() => import('./pages/FinancialComboDemo'))
 
 function App() {
   return (
@@ -69,22 +73,29 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/data-mapper" element={<DataMapperDemo />} />
           <Route path="/simple-components" element={<SimpleComponentsDemo />} />
+          {/* 🎯 Phase 1: 核心組合圖表頁面 (主導航) */}
           <Route path="/combo-chart" element={<ComboChartDemo />} />
           <Route path="/enhanced-combo-chart" element={<EnhancedComboChartDemo />} />
           <Route path="/area-line-combo" element={<AreaLineComboDemo />} />
           <Route path="/scatter-regression-combo" element={<ScatterRegressionComboDemo />} />
-          <Route path="/triple-combo" element={<TripleComboDemo />} />
-          {/* 隱藏路由：保留功能但不在主導航中顯示 */}
-          <Route path="/multi-bar-line-combo" element={<MultiBarLineComboDemo />} />
-          <Route path="/stacked-area-line-combo" element={<StackedAreaLineComboDemo />} />
-          <Route path="/waterfall-line-combo" element={<WaterfallLineComboDemo />} />
-          <Route path="/area-scatter-combo" element={<AreaScatterComboDemo />} />
-          <Route path="/dynamic-combo" element={<DynamicComboDemo />} />
-          <Route path="/data-processor-test" element={<DataProcessorTestDemo />} />
           <Route path="/composable-primitives" element={<ComposablePrimitivesDemo />} />
+          {/* 🎯 Phase 2: 專題組合頁面 (隱藏路由) */}
+          <Route path="/advanced-combo" element={<AdvancedComboDemo />} />
+          <Route path="/special-analysis" element={<SpecialAnalysisDemo />} />
+          <Route path="/financial-combo" element={<FinancialComboDemo />} />
+          <Route path="/dynamic-combo" element={<DynamicComboDemo />} />
+          <Route path="/combo-debug-tools" element={<ComboDebugToolsDemo />} />
+          
+          {/* 兼容性路由：保留舊路徑以避免斷連 */}
+          <Route path="/triple-combo" element={<AdvancedComboDemo />} />
+          <Route path="/multi-bar-line-combo" element={<AdvancedComboDemo />} />
+          <Route path="/stacked-area-line-combo" element={<AdvancedComboDemo />} />
+          <Route path="/waterfall-line-combo" element={<SpecialAnalysisDemo />} />
+          <Route path="/area-scatter-combo" element={<SpecialAnalysisDemo />} />
+          <Route path="/combo-debug" element={<ComboDebugToolsDemo />} />
+          <Route path="/layer-debug" element={<ComboDebugToolsDemo />} />
+          <Route path="/data-processor-test" element={<DataProcessorTestDemo />} />
           <Route path="/alignment-test" element={<AlignmentTestDemo />} />
-          <Route path="/combo-debug" element={<ComboChartDebugDemo />} />
-          <Route path="/layer-debug" element={<LayerOrderDebugDemo />} />
           <Route path="/responsive-chart" element={<ResponsiveChartDemo />} />
           <Route path="/responsive-test" element={<ResponsiveTestDemo />} />
           <Route path="/performance-test" element={<PerformanceTestDemo />} />

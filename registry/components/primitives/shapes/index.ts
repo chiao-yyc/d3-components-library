@@ -10,6 +10,9 @@ export { Scatter } from './scatter';
 export { RegressionLine } from './regression-line';
 export { Waterfall } from './waterfall';
 
+// 組合器系統
+export { ShapeComposer } from './shape-composer';
+
 // 向下兼容：直接導出類型定義
 export * from './core/types';
 

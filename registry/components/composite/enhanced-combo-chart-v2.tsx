@@ -129,7 +129,6 @@ export const EnhancedComboChartV2: React.FC<EnhancedComboChartV2Props> = ({
             leftAxis={leftAxis}
             rightAxis={rightAxis}
             xAxis={xAxis}
-            verticalLayout={verticalLayout}
             animate={animate}
             animationDuration={animationDuration}
             interactive={interactive}

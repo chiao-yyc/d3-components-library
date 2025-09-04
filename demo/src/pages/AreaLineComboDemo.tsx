@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { EnhancedComboChart, type EnhancedComboData, type ComboChartSeries } from '../../../registry/components/composite'
+import { AreaLineComboChartV2 } from '../../../registry/components/composite'
+import type { MultiSeriesComboChartV2Props, ComboSeriesV2 } from '../../../registry/components/composite'
 import {
   DemoPageTemplate,
   ModernControlPanel,
@@ -73,10 +74,10 @@ const AreaLineComboDemo: React.FC = () => {
 
   // 系統資源監控數據和配置
   const resourceData = useMemo(() => generateResourceData(), [])
-  const resourceSeries: ComboChartSeries[] = [
+  const resourceSeries: ComboSeries[] = [
     {
       type: 'area',
-      dataKey: 'cpuUsage',
+      yKey: 'cpuUsage',
       name: 'CPU 使用率',
       yAxis: 'left',
       color: '#3b82f6',
@@ -85,7 +86,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'area',
-      dataKey: 'memoryUsage', 
+      yKey: 'memoryUsage', 
       name: '記憶體使用率',
       yAxis: 'left',
       color: '#10b981',
@@ -94,7 +95,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'activeConnections',
+      yKey: 'activeConnections',
       name: '活躍連接數',
       yAxis: 'right',
       color: '#ef4444',
@@ -107,10 +108,10 @@ const AreaLineComboDemo: React.FC = () => {
 
   // 銷售漏斗數據和配置
   const salesData = useMemo(() => generateSalesFunnelData(), [])
-  const salesSeries: ComboChartSeries[] = [
+  const salesSeries: ComboSeries[] = [
     {
       type: 'area',
-      dataKey: 'count',
+      yKey: 'count',
       name: '用戶數量',
       yAxis: 'left',
       color: '#6366f1',
@@ -126,7 +127,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'conversionRate',
+      yKey: 'conversionRate',
       name: '轉換率',
       yAxis: 'right',
       color: '#f59e0b',
@@ -137,7 +138,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'revenue',
+      yKey: 'revenue',
       name: '收入',
       yAxis: 'right',
       color: '#ef4444',
@@ -149,10 +150,10 @@ const AreaLineComboDemo: React.FC = () => {
 
   // 股票數據和配置
   const stockData = useMemo(() => generateStockData(), [])
-  const stockSeries: ComboChartSeries[] = [
+  const stockSeries: ComboSeries[] = [
     {
       type: 'area',
-      dataKey: 'volume',
+      yKey: 'volume',
       name: '成交量',
       yAxis: 'right',
       color: '#94a3b8',
@@ -161,7 +162,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'price',
+      yKey: 'price',
       name: '股價',
       yAxis: 'left',
       color: '#059669',
@@ -172,7 +173,7 @@ const AreaLineComboDemo: React.FC = () => {
     },
     {
       type: 'line',
-      dataKey: 'movingAverage',
+      yKey: 'movingAverage',
       name: '移動平均',
       yAxis: 'left',
       color: '#dc2626',
@@ -200,12 +201,12 @@ const AreaLineComboDemo: React.FC = () => {
     ? 'stage' 
     : 'day'
 
-  const handleSeriesClick = (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => {
+  const handleSeriesClick = (series: ComboSeries, dataPoint: any, event: React.MouseEvent) => {
     console.log('Series clicked:', series.name, dataPoint)
     alert(`點擊了 ${series.name} 系列`)
   }
 
-  const handleSeriesHover = (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => {
+  const handleSeriesHover = (series: ComboSeries, dataPoint: any, event: React.MouseEvent) => {
     console.log('Series hovered:', series.name, dataPoint)
   }
 
@@ -426,43 +427,56 @@ const AreaLineComboDemo: React.FC = () => {
             responsive={true}
             aspectRatio={16 / 9}
           >
-            {({ width, height }) => (
-              <EnhancedComboChart
-                data={currentData}
-                series={visibleSeries}
-                xKey={currentXKey}
-                width={width}
-                height={height}
-                leftAxis={{
-                  label: activeScenario === 'resources' 
-                    ? '使用率 (%)' 
-                    : activeScenario === 'sales' 
-                    ? '用戶數量' 
-                    : '股價',
-                  gridlines: true
-                }}
-                rightAxis={{
-                  label: activeScenario === 'resources' 
-                    ? '連接數' 
-                    : activeScenario === 'sales' 
-                    ? '轉換率 (%) / 收入' 
-                    : '成交量',
-                  gridlines: false
-                }}
-                xAxis={{
-                  label: activeScenario === 'resources' 
-                    ? '時間' 
-                    : activeScenario === 'sales' 
-                    ? '銷售階段' 
-                    : '日期',
-                  gridlines: true
-                }}
-                animate={animate}
-                interactive={interactive}
-                onSeriesClick={handleSeriesClick}
-                onSeriesHover={handleSeriesHover}
-              />
-            )}
+            {({ width, height }) => {
+              // 分離 area 和 line series
+              const areaSeries = visibleSeries.filter(s => s.type === 'area')
+              const lineSeries = visibleSeries.filter(s => s.type === 'line')
+              
+              return (
+                <AreaLineComboChartV2
+                  data={currentData}
+                  areaSeries={areaSeries.map(s => ({
+                    name: s.name,
+                    yKey: s.yKey,
+                    yAxis: s.yAxis,
+                    color: s.color,
+                    areaOpacity: (s as any).areaOpacity || 0.4,
+                    curve: (s as any).curve || 'monotone'
+                  }))}
+                  lineSeries={lineSeries.map(s => ({
+                    name: s.name,
+                    yKey: s.yKey,
+                    yAxis: s.yAxis,
+                    color: s.color,
+                    strokeWidth: (s as any).strokeWidth || 2,
+                    showPoints: (s as any).showPoints || false,
+                    pointRadius: (s as any).pointRadius || 3,
+                    curve: (s as any).curve || 'monotone'
+                  }))}
+                  xAccessor={currentXKey}
+                  width={width}
+                  height={height}
+                  leftAxisConfig={{
+                    label: activeScenario === 'resources' 
+                      ? '使用率 (%)' 
+                      : activeScenario === 'sales' 
+                      ? '用戶數量' 
+                      : '股價'
+                  }}
+                  rightAxisConfig={{
+                    label: activeScenario === 'resources' 
+                      ? '連接數' 
+                      : activeScenario === 'sales' 
+                      ? '轉換率 (%) / 收入' 
+                      : '成交量'
+                  }}
+                  animate={animate}
+                  interactive={interactive}
+                  onDataClick={handleSeriesClick as any}
+                  onDataHover={handleSeriesHover as any}
+                />
+              )
+            }}
           </ChartContainer>
 
           {/* Data Table */}
@@ -476,7 +490,7 @@ const AreaLineComboDemo: React.FC = () => {
                 render: (value: any) => <span className="font-medium text-gray-900">{value}</span>
               },
               ...currentSeries.map(series => ({
-                key: series.dataKey,
+                key: series.yKey,
                 label: series.name,
                 render: (value: any) => (
                   <span className="text-gray-600">
