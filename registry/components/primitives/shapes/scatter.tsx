@@ -1,230 +1,70 @@
-import React, { useEffect, useRef } from 'react'
-import * as d3 from 'd3'
-import { calculateAlignedPosition, AlignmentStrategy } from '../utils'
+/**
+ * Scatter - 使用統一架構的散點圖形狀組件
+ * 核心邏輯在 ScatterCore 中實現，React 只負責包裝
+ */
 
-export interface ScatterShapeData {
-  x: any
-  y: any
-  size?: number
-  color?: string
-  group?: string
-  [key: string]: any
+import React from 'react';
+import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base-chart/react-chart-wrapper';
+import { ScatterCore, ScatterCoreConfig, ScatterCoreData } from './core/scatter-core';
+
+// 擴展 React props 接口
+export interface ScatterProps extends ReactChartWrapperProps, ScatterCoreConfig {
+  // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 
-export interface ScatterProps {
-  data: ScatterShapeData[]
-  xScale: any
-  yScale: any
-  radius?: number
-  sizeScale?: any
-  colorScale?: any
-  className?: string
-  animate?: boolean
-  animationDuration?: number
-  opacity?: number
-  strokeWidth?: number
-  strokeColor?: string
-  pointAlignment?: AlignmentStrategy
-  onDataClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
-  onDataHover?: (dataPoint: ScatterShapeData | null, event: React.MouseEvent) => void
+// 重新導出數據類型以保持向下兼容
+export type ScatterShapeData = ScatterCoreData;
+
+// 創建 Scatter 組件
+const ScatterComponent = createReactChartWrapper(ScatterCore);
+
+// 導出最終組件
+export const Scatter = React.forwardRef<ScatterCore, ScatterProps>((props, ref) => {
+  return <ScatterComponent ref={ref} {...props} />;
+});
+
+Scatter.displayName = 'Scatter';
+
+// 默認配置 (使用函數形式以避免 HMR 問題)
+const getDefaultScatterProps = (): Partial<ScatterProps> => ({
+  width: 600,
+  height: 400,
+  margin: { top: 20, right: 20, bottom: 40, left: 40 },
   
-  /** @deprecated 請使用 onDataClick 替代 */
-  onPointClick?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
-  /** @deprecated 請使用 onDataHover 替代 */
-  onPointMouseEnter?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
-  /** @deprecated 請使用 onDataHover 替代 */
-  onPointMouseLeave?: (dataPoint: ScatterShapeData, event: React.MouseEvent) => void
-}
+  // 視覺配置默認值
+  color: '#3b82f6',
+  opacity: 0.7,
+  
+  // 點配置默認值
+  radius: 4,
+  minPointSize: 2,
+  maxPointSize: 20,
+  
+  // 描邊配置默認值
+  strokeWidth: 1,
+  strokeColor: '#ffffff',
+  
+  // 佈局配置默認值
+  alignment: 'center',
+  
+  // 動畫配置默認值
+  animate: true,
+  animationDuration: 300,
+  animationEasing: 'ease-in-out',
+  animationDelay: 0,
+  entranceAnimation: 'scale',
+  
+  // 交互配置默認值
+  interactive: true,
+  hoverEffect: true,
+  hoverRadius: 6,
+  
+  // 趨勢線配置默認值
+  showTrendline: false,
+  trendlineColor: '#666666',
+  trendlineWidth: 2,
+  trendlineType: 'linear'
+});
 
-export const Scatter: React.FC<ScatterProps> = ({
-  data,
-  xScale,
-  yScale,
-  radius = 4,
-  sizeScale,
-  colorScale,
-  className = '',
-  animate = true,
-  animationDuration = 300,
-  opacity = 0.7,
-  strokeWidth = 1,
-  strokeColor = 'white',
-  pointAlignment = 'center',
-  onDataClick,
-  onDataHover,
-  onPointClick,
-  onPointMouseEnter,
-  onPointMouseLeave
-}) => {
-  const scatterRef = useRef<SVGGElement>(null)
-
-  useEffect(() => {
-    if (!scatterRef.current || !data || !xScale || !yScale) return
-
-    const selection = d3.select(scatterRef.current)
-
-    // 綁定數據並創建圓點
-    const circles = selection
-      .selectAll<SVGCircleElement, ScatterShapeData>('.scatter-point')
-      .data(data, (d, i) => `${d.x}-${d.y}-${i}`)
-
-    circles
-      .join(
-        enter => {
-          const enterCircles = enter
-            .append('circle')
-            .attr('class', `scatter-point ${className}`)
-            .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
-            .attr('cy', d => yScale(d.y))
-            .attr('r', d => {
-              if (sizeScale && d.size !== undefined) {
-                return sizeScale(d.size)
-              }
-              return radius
-            })
-            .attr('fill', d => {
-              if (colorScale && d.color !== undefined) {
-                return colorScale(d.color)
-              }
-              if (colorScale && d.group !== undefined) {
-                return colorScale(d.group)
-              }
-              return '#3b82f6' // 默認藍色
-            })
-            .attr('stroke', strokeColor)
-            .attr('stroke-width', strokeWidth)
-            .attr('opacity', animate ? 0 : opacity)
-
-          if (animate) {
-            enterCircles
-              .transition()
-              .delay((d, i) => i * 10)
-              .duration(animationDuration)
-              .attr('opacity', opacity)
-          }
-
-          // 添加事件處理
-          if (onDataClick || onPointClick || onDataHover || onPointMouseEnter || onPointMouseLeave) {
-            enterCircles
-              .style('cursor', 'pointer')
-              .on('click', function(event, d) {
-                if (onDataClick) {
-                  onDataClick(d, event)
-                } else if (onPointClick) {
-                  onPointClick(d, event)
-                }
-              })
-              .on('mouseenter', function(event, d) {
-                if (onDataHover) {
-                  onDataHover(d, event)
-                } else if (onPointMouseEnter) {
-                  onPointMouseEnter(d, event)
-                }
-                // 鼠標懸停效果
-                d3.select(this)
-                  .transition()
-                  .duration(150)
-                  .attr('r', function() {
-                    const currentR = Number(d3.select(this).attr('r'))
-                    return currentR * 1.2
-                  })
-                  .attr('opacity', 1)
-              })
-              .on('mouseleave', function(event, d) {
-                if (onDataHover) {
-                  onDataHover(null, event)
-                } else if (onPointMouseLeave) {
-                  onPointMouseLeave(d, event)
-                }
-                // 恢復原始大小
-                d3.select(this)
-                  .transition()
-                  .duration(150)
-                  .attr('r', () => {
-                    if (sizeScale && d.size !== undefined) {
-                      return sizeScale(d.size)
-                    }
-                    return radius
-                  })
-                  .attr('opacity', opacity)
-              })
-          }
-
-          return enterCircles
-        },
-        update => {
-          const updateCircles = update
-            .attr('cx', d => calculateAlignedPosition(d.x, xScale, pointAlignment))
-            .attr('cy', d => yScale(d.y))
-            .attr('fill', d => {
-              if (colorScale && d.color !== undefined) {
-                return colorScale(d.color)
-              }
-              if (colorScale && d.group !== undefined) {
-                return colorScale(d.group)
-              }
-              return '#3b82f6'
-            })
-
-          if (animate) {
-            updateCircles
-              .transition()
-              .duration(animationDuration)
-              .attr('r', d => {
-                if (sizeScale && d.size !== undefined) {
-                  return sizeScale(d.size)
-                }
-                return radius
-              })
-              .attr('opacity', opacity)
-          } else {
-            updateCircles
-              .attr('r', d => {
-                if (sizeScale && d.size !== undefined) {
-                  return sizeScale(d.size)
-                }
-                return radius
-              })
-              .attr('opacity', opacity)
-          }
-
-          return updateCircles
-        },
-        exit => exit
-          .call(exit => animate ?
-            exit
-              .transition()
-              .duration(animationDuration)
-              .attr('opacity', 0)
-              .attr('r', 0)
-              .remove()
-            :
-            exit.remove()
-          )
-      )
-
-  }, [
-    data,
-    xScale,
-    yScale,
-    radius,
-    sizeScale,
-    colorScale,
-    className,
-    animate,
-    animationDuration,
-    opacity,
-    strokeWidth,
-    strokeColor,
-    pointAlignment,
-    onDataClick,
-    onDataHover,
-    onPointClick,
-    onPointMouseEnter,
-    onPointMouseLeave
-  ])
-
-  return (
-    <g ref={scatterRef} className={`scatter ${className}`} />
-  )
-}
+// 導出默認配置
+Scatter.defaultProps = getDefaultScatterProps();

@@ -52,6 +52,9 @@ export class AxisCore {
     if (tickSize) axis.tickSize(tickSize);
     if (tickFormat) axis.tickFormat(tickFormat);
     if (tickValues) axis.tickValues(tickValues);
+    
+    // 🔧 修復軸線間隙問題 - 移除外側刻度延伸
+    axis.tickSizeOuter(0);
 
     return axis;
   }

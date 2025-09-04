@@ -45,6 +45,8 @@ const getDefaultScatterPlotProps = (): Partial<ScatterPlotProps> => ({
   showXAxis: true,
   showYAxis: true,
   showGrid: false,
+  xTickCount: 5,
+  yTickCount: 5,
   
   // 特殊功能默認值
   showTrendline: false,

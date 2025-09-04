@@ -1,191 +1,45 @@
-import React, { useEffect, useRef } from 'react'
-import * as d3 from 'd3'
-import { calculateAlignedPosition, AlignmentStrategy } from '../utils'
+/**
+ * Area - 使用統一架構的面積圖形狀組件
+ * 核心邏輯在 AreaCore 中實現，React 只負責包裝
+ */
 
-export interface AreaShapeData {
-  x: any
-  y: any
-  y0?: any
-  [key: string]: any
+import React from 'react';
+import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base-chart/react-chart-wrapper';
+import { AreaCore, AreaCoreConfig, AreaCoreData } from './core/area-core';
+
+// 擴展 React props 接口
+export interface AreaProps extends ReactChartWrapperProps, AreaCoreConfig {
+  // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 
-export interface AreaProps {
-  data: AreaShapeData[]
-  xScale: any
-  yScale: any
-  color?: string
-  opacity?: number
-  curve?: d3.CurveFactory
-  className?: string
-  animate?: boolean
-  animationDuration?: number
-  baseline?: number | ((d: AreaShapeData) => number)
-  alignment?: AlignmentStrategy
-  gradient?: {
-    id: string
-    stops: { offset: string; color: string; opacity?: number }[]
-  }
-  onDataClick?: (event: React.MouseEvent) => void
+// 重新導出數據類型以保持向下兼容
+export type AreaShapeData = AreaCoreData;
+
+// 創建 Area 組件
+const AreaComponent = createReactChartWrapper(AreaCore);
+
+// 導出最終組件
+export const Area = React.forwardRef<AreaCore, AreaProps>((props, ref) => {
+  return <AreaComponent ref={ref} {...props} />;
+});
+
+Area.displayName = 'Area';
+
+// 默認配置
+const getDefaultAreaProps = (): Partial<AreaProps> => ({
+  width: 600,
+  height: 400,
+  margin: { top: 20, right: 20, bottom: 40, left: 40 },
   
-  /** @deprecated 請使用 onDataClick 替代 */
-  onAreaClick?: (event: React.MouseEvent) => void
-}
+  color: '#3b82f6',
+  opacity: 0.7,
+  baseline: 0,
+  showLine: false,
+  lineWidth: 2,
+  animate: true,
+  animationDuration: 300,
+  interactive: true,
+  hoverEffect: true
+});
 
-export const Area: React.FC<AreaProps> = ({
-  data,
-  xScale,
-  yScale,
-  color = '#3b82f6',
-  opacity = 0.6,
-  curve = d3.curveLinear,
-  className = '',
-  animate = true,
-  animationDuration = 300,
-  baseline = 0,
-  alignment = 'center',
-  gradient,
-  onDataClick,
-  onAreaClick
-}) => {
-  const areaRef = useRef<SVGGElement>(null)
-
-  useEffect(() => {
-    if (!areaRef.current || !data || !xScale || !yScale) return
-
-    const selection = d3.select(areaRef.current)
-
-    const areaGenerator = d3.area<AreaShapeData>()
-      .x(d => calculateAlignedPosition(d.x, xScale, alignment))
-      .y1(d => yScale(d.y))
-      .y0(d => {
-        if (typeof baseline === 'function') {
-          const baselineValue = baseline(d)
-          return baselineValue != null ? yScale(baselineValue) : yScale(0)
-        }
-        return d.y0 !== undefined ? yScale(d.y0) : yScale(baseline)
-      })
-      .curve(curve)
-
-    const validData = data.filter(d => {
-      if (d.x == null || d.y == null) return false
-      
-      // 如果使用動態 baseline，也需要驗證 baseline 值
-      if (typeof baseline === 'function') {
-        const baselineValue = baseline(d)
-        return baselineValue != null && !isNaN(baselineValue) && !isNaN(d.y)
-      }
-      
-      return !isNaN(d.y)
-    })
-
-    if (gradient) {
-      let defs = selection.select('defs')
-      if (defs.empty()) {
-        defs = selection.append('defs')
-      }
-
-      const gradientDef = defs
-        .selectAll(`#${gradient.id}`)
-        .data([gradient])
-
-      gradientDef
-        .join('linearGradient')
-        .attr('id', gradient.id)
-        .attr('gradientUnits', 'userSpaceOnUse')
-        .attr('x1', 0)
-        .attr('y1', yScale.range()[0])
-        .attr('x2', 0)
-        .attr('y2', yScale.range()[1])
-        .selectAll('stop')
-        .data(gradient.stops)
-        .join('stop')
-        .attr('offset', d => d.offset)
-        .attr('stop-color', d => d.color)
-        .attr('stop-opacity', d => d.opacity || 1)
-    }
-
-    const areaPath = selection
-      .selectAll('.area-path')
-      .data([validData])
-
-    areaPath
-      .join(
-        enter => {
-          const path = enter
-            .append('path')
-            .attr('class', `area-path ${className}`)
-            .attr('fill', gradient ? `url(#${gradient.id})` : color)
-            .attr('opacity', opacity)
-            .attr('d', areaGenerator)
-
-          if (animate) {
-            path
-              .attr('opacity', 0)
-              .transition()
-              .duration(animationDuration)
-              .attr('opacity', opacity)
-          }
-
-          return path
-        },
-        update => {
-          if (animate) {
-            update
-              .transition()
-              .duration(animationDuration)
-              .attr('d', areaGenerator)
-              .attr('fill', gradient ? `url(#${gradient.id})` : color)
-              .attr('opacity', opacity)
-          } else {
-            update
-              .attr('d', areaGenerator)
-              .attr('fill', gradient ? `url(#${gradient.id})` : color)
-              .attr('opacity', opacity)
-          }
-          return update
-        },
-        exit => exit
-          .call(exit => animate ?
-            exit
-              .transition()
-              .duration(animationDuration)
-              .attr('opacity', 0)
-              .remove()
-            :
-            exit.remove()
-          )
-      )
-
-    if (onDataClick || onAreaClick) {
-      selection.selectAll('.area-path')
-        .style('cursor', 'pointer')
-        .on('click', function(event) {
-          if (onDataClick) {
-            onDataClick(event)
-          } else if (onAreaClick) {
-            onAreaClick(event)
-          }
-        })
-    }
-
-  }, [
-    data,
-    xScale,
-    yScale,
-    color,
-    opacity,
-    curve,
-    className,
-    animate,
-    animationDuration,
-    baseline,
-    alignment,
-    gradient,
-    onDataClick,
-    onAreaClick
-  ])
-
-  return (
-    <g ref={areaRef} className={`area ${className}`} />
-  )
-}
+Area.defaultProps = getDefaultAreaProps();

@@ -31,6 +31,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
   protected containerElement: HTMLElement | null = null;
   protected svgElement: SVGSVGElement | null = null;
   protected processedData: ChartData<TData>[] | null = null;
+  protected scales: Record<string, any> = {};
 
   constructor(config: BaseChartCoreConfig<TData>, callbacks: ChartStateCallbacks = {}) {
     this.config = config;
@@ -64,7 +65,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
       console.log('🔧 BaseChartCore calling processData');
       this.processedData = this.processData();
       console.log('🔧 BaseChartCore calling createScales');
-      this.createScales();
+      this.scales = this.createScales();
       console.log('🔧 BaseChartCore calling renderChart');
       this.renderChart();
       this.setLoading(false);
@@ -93,7 +94,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
         console.log('🔧 BaseChartCore updateConfig calling processData');
         this.processedData = this.processData();
         console.log('🔧 BaseChartCore updateConfig calling createScales');
-        this.createScales();
+        this.scales = this.createScales();
         console.log('🔧 BaseChartCore updateConfig calling renderChart');
         this.renderChart();
         this.setLoading(false);
@@ -211,12 +212,6 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
       gridConfig?: GridConfig;
     } = {}
   ): void {
-    console.log('🔧 renderStandardAxis called:', { 
-      orientation, 
-      className: options.className, 
-      svgElement: !!this.svgElement,
-      scaleDomain: scale.domain()
-    });
     if (!this.svgElement) return;
     
     const { 
@@ -248,16 +243,9 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     const svgSelection = d3.select(this.svgElement);
     let chartArea = svgSelection.select('.chart-area') as d3.Selection<SVGGElement, unknown, null, undefined>;
     
-    console.log('🔧 Chart area lookup:', { 
-      chartAreaFound: !chartArea.empty(),
-      chartType: this.getChartType(),
-      svgChildren: svgSelection.selectAll('g').size()
-    });
-    
     // 如果沒有找到 .chart-area，嘗試找圖表特定的類名
     if (chartArea.empty()) {
       chartArea = svgSelection.select(`g.${this.getChartType()}-chart`) as d3.Selection<SVGGElement, unknown, null, undefined>;
-      console.log('🔧 Fallback to chart-specific class:', !chartArea.empty());
     }
     
     // 如果仍然沒有找到，創建一個臨時的群組
@@ -267,7 +255,6 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
         .append('g')
         .attr('class', 'chart-area')
         .attr('transform', `translate(${margin.left},${margin.top})`) as d3.Selection<SVGGElement, unknown, null, undefined>;
-      console.log('🔧 Created temporary chart area');
     }
     
     const axisGroup = chartArea
@@ -413,5 +400,9 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
 
   public getProcessedData(): ChartData<TData>[] | null {
     return this.processedData ? [...this.processedData] : null;
+  }
+
+  public getScales(): Record<string, any> {
+    return { ...this.scales };
   }
 }

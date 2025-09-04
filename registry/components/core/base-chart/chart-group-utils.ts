@@ -131,12 +131,12 @@ export function createGroupHighlightManager(
     container.selectAll('[data-group]')
       .transition()
       .duration(transitionDuration)
-      .style('opacity', (d: any) => {
-        const itemGroup = d3.select(d3.event?.target || container.node()).attr('data-group')
+      .style('opacity', function(d: any) {
+        const itemGroup = d3.select(this).attr('data-group')
         return itemGroup === group ? 1 : 0.3
       })
-      .attr('r', (d: any) => {
-        const itemGroup = d3.select(d3.event?.target || container.node()).attr('data-group')
+      .attr('r', function(d: any) {
+        const itemGroup = d3.select(this).attr('data-group')
         return itemGroup === group ? 7 : 3
       })
   }

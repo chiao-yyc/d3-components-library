@@ -97,13 +97,13 @@ export function addAxisLabel(
       x = -offset;
       y = chartHeight / 2;
       textAnchor = 'middle';
-      transform = 'rotate(-90)';
+      transform = `rotate(-90, ${-offset}, ${chartHeight / 2})`;
       break;
     case 'right':
       x = offset;
       y = chartHeight / 2;
       textAnchor = 'middle';
-      transform = 'rotate(90)';
+      transform = `rotate(90, ${offset}, ${chartHeight / 2})`;
       break;
   }
 

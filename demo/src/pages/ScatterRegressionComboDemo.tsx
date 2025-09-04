@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
-import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 import {
   DemoPageTemplate,
   ModernControlPanel,
@@ -77,10 +76,10 @@ const ScatterRegressionComboDemo: React.FC = () => {
   const [showRSquared, setShowRSquared] = useState(true)
 
   // 銷售業績場景配置
-  const salesSeries: ComboChartSeries[] = [
+  const salesSeries: ComboSeries[] = [
     { 
       type: 'scatter', 
-      dataKey: 'revenue', 
+      yKey: 'revenue', 
       name: '廣告投入vs銷售額', 
       yAxis: 'left', 
       color: '#3b82f6',
@@ -97,7 +96,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
     },
     { 
       type: 'line', 
-      dataKey: 'satisfaction', 
+      yKey: 'satisfaction', 
       name: '客戶滿意度', 
       yAxis: 'right', 
       color: '#10b981', 
@@ -106,7 +105,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
     },
     { 
       type: 'line', 
-      dataKey: 'competitorPrice', 
+      yKey: 'competitorPrice', 
       name: '競爭對手價格', 
       yAxis: 'right', 
       color: '#f59e0b', 
@@ -116,10 +115,10 @@ const ScatterRegressionComboDemo: React.FC = () => {
   ]
 
   // 產品性能場景配置
-  const productSeries: ComboChartSeries[] = [
+  const productSeries: ComboSeries[] = [
     { 
       type: 'scatter', 
-      dataKey: 'performance', 
+      yKey: 'performance', 
       name: '價格vs性能', 
       yAxis: 'left', 
       color: '#8b5cf6',
@@ -137,7 +136,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
     },
     { 
       type: 'line', 
-      dataKey: 'userRating', 
+      yKey: 'userRating', 
       name: '用戶評分', 
       yAxis: 'right', 
       color: '#f59e0b', 
@@ -147,10 +146,10 @@ const ScatterRegressionComboDemo: React.FC = () => {
   ]
 
   // 股票分析場景配置
-  const stockSeries: ComboChartSeries[] = [
+  const stockSeries: ComboSeries[] = [
     { 
       type: 'scatter', 
-      dataKey: 'return', 
+      yKey: 'return', 
       name: '風險vs收益', 
       yAxis: 'left', 
       color: '#ef4444',
@@ -168,7 +167,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
     },
     { 
       type: 'line', 
-      dataKey: 'dividendYield', 
+      yKey: 'dividendYield', 
       name: '股息率', 
       yAxis: 'right', 
       color: '#10b981', 
@@ -198,7 +197,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
 
     // 如果有選擇的系列，只顯示選擇的系列
     if (activeSeriesIds.size > 0) {
-      return baseSeries.filter(s => activeSeriesIds.has(s.dataKey))
+      return baseSeries.filter(s => activeSeriesIds.has(s.yKey))
     }
     return baseSeries
   }
@@ -245,12 +244,12 @@ const ScatterRegressionComboDemo: React.FC = () => {
     }
   }
 
-  const toggleSeries = (dataKey: string) => {
+  const toggleSeries = (yKey: string) => {
     const newActiveIds = new Set(activeSeriesIds)
-    if (newActiveIds.has(dataKey)) {
-      newActiveIds.delete(dataKey)
+    if (newActiveIds.has(yKey)) {
+      newActiveIds.delete(yKey)
     } else {
-      newActiveIds.add(dataKey)
+      newActiveIds.add(yKey)
     }
     setActiveSeriesIds(newActiveIds)
   }
@@ -402,16 +401,16 @@ const ScatterRegressionComboDemo: React.FC = () => {
                   {(activeScenario === 'sales' ? salesSeries : 
                     activeScenario === 'product' ? productSeries : stockSeries).map((series) => (
                     <motion.button
-                      key={series.dataKey}
-                      onClick={() => toggleSeries(series.dataKey)}
+                      key={series.yKey}
+                      onClick={() => toggleSeries(series.yKey)}
                       whileHover={{ x: 2 }}
                       className={`w-full p-2 rounded-lg text-xs transition-all duration-200 text-left ${
-                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.yKey)
                           ? 'bg-white border-2 shadow-sm'
                           : 'bg-gray-100 border border-gray-300 opacity-60'
                       }`}
                       style={{
-                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.yKey) 
                           ? series.color 
                           : undefined
                       }}
@@ -451,10 +450,10 @@ const ScatterRegressionComboDemo: React.FC = () => {
               aspectRatio={16 / 9}
             >
               {({ width, height }) => (
-                <EnhancedComboChart
+                <MultiSeriesComboChartV2
                   data={getCurrentData()}
                   series={currentSeries}
-                  xKey={getCurrentXKey()}
+                  xAccessor={getCurrentXKey()}
                   width={width}
                   height={height}
                   margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
@@ -466,9 +465,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
                     label: config.rightAxis.label,
                     gridlines: false,
                   }}
-                  xAxis={{
-                    label: config.xAxis.label,
-                  }}
+                  showGrid={true}
                   animate={true}
                   className="scatter-regression-combo"
                 />
@@ -623,7 +620,7 @@ const ScatterRegressionComboDemo: React.FC = () => {
             <CodeExample
               title="散點 + 回歸線組合圖表使用範例"
               description="展示如何使用 scatter 系列結合回歸分析，支援氣泡大小與回歸線顯示"
-              code={`import { EnhancedComboChart, type ComboChartSeries } from '../../../registry/components/composite'
+              code={`import { MultiSeriesComboChartV2, type ComboSeries } from '../../../registry/components/composite'
 
 const data = [
   { 
@@ -643,10 +640,10 @@ const data = [
   // ...更多數據
 ]
 
-const series: ComboChartSeries[] = [
+const series: ComboSeries[] = [
   {
     type: 'scatter',
-    dataKey: 'revenue',
+    yKey: 'revenue',
     name: '廣告投入vs銷售額',
     yAxis: 'left',
     color: '#3b82f6',
@@ -664,7 +661,7 @@ const series: ComboChartSeries[] = [
   },
   {
     type: 'line',
-    dataKey: 'satisfaction',
+    yKey: 'satisfaction',
     name: '客戶滿意度',
     yAxis: 'right',
     color: '#10b981',
@@ -675,7 +672,7 @@ const series: ComboChartSeries[] = [
   }
 ]
 
-<EnhancedComboChart
+<MultiSeriesComboChartV2
   data={data}
   series={series}
   xKey="month"
@@ -689,9 +686,7 @@ const series: ComboChartSeries[] = [
     label: '滿意度 (分)',
     gridlines: false
   }}
-  xAxis={{
-    label: '時間周期'
-  }}
+  showGrid={true}
   animate={true}
   interactive={true}
   margin={{ top: 20, right: 80, bottom: 60, left: 100 }}

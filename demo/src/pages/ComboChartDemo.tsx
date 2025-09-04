@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
-import type { ComboChartSeries } from '../../../registry/components/composite/types'
+import { MultiSeriesComboChartV2 } from '../../../registry/components/composite'
+import type { ComboSeries } from '../../../registry/components/composite'
 import {
   DemoPageTemplate,
   ModernControlPanel,
@@ -49,24 +49,24 @@ const ComboChartDemo: React.FC = () => {
   const [activeSeriesIds, setActiveSeriesIds] = useState<Set<string>>(new Set())
 
   // 銷售場景配置
-  const salesSeries: ComboChartSeries[] = [
-    { type: 'bar', dataKey: 'sales', name: '銷售額', yAxis: 'left', color: '#3b82f6' },
-    { type: 'line', dataKey: 'growth', name: '成長率', yAxis: 'right', color: '#ef4444', strokeWidth: 3 },
-    { type: 'line', dataKey: 'conversion', name: '轉換率', yAxis: 'right', color: '#10b981', strokeWidth: 2 }
+  const salesSeries: ComboSeries[] = [
+    { type: 'bar', yKey: 'sales', name: '銷售額', yAxis: 'left', color: '#3b82f6' },
+    { type: 'line', yKey: 'growth', name: '成長率', yAxis: 'right', color: '#ef4444', strokeWidth: 3 },
+    { type: 'line', yKey: 'conversion', name: '轉換率', yAxis: 'right', color: '#10b981', strokeWidth: 2 }
   ]
 
   // 營收場景配置
-  const revenueSeries: ComboChartSeries[] = [
-    { type: 'bar', dataKey: 'revenue', name: '營收', yAxis: 'left', color: '#059669' },
-    { type: 'line', dataKey: 'profitMargin', name: '利潤率', yAxis: 'right', color: '#dc2626', strokeWidth: 3 },
-    { type: 'line', dataKey: 'roi', name: 'ROI', yAxis: 'right', color: '#f59e0b', strokeWidth: 2 }
+  const revenueSeries: ComboSeries[] = [
+    { type: 'bar', yKey: 'revenue', name: '營收', yAxis: 'left', color: '#059669' },
+    { type: 'line', yKey: 'profitMargin', name: '利潤率', yAxis: 'right', color: '#dc2626', strokeWidth: 3 },
+    { type: 'line', yKey: 'roi', name: 'ROI', yAxis: 'right', color: '#f59e0b', strokeWidth: 2 }
   ]
 
   // 流量場景配置
-  const trafficSeries: ComboChartSeries[] = [
-    { type: 'bar', dataKey: 'visitors', name: '訪客數', yAxis: 'left', color: '#7c3aed' },
-    { type: 'line', dataKey: 'conversion', name: '轉換率', yAxis: 'right', color: '#f59e0b', strokeWidth: 3 },
-    { type: 'line', dataKey: 'satisfaction', name: '滿意度', yAxis: 'right', color: '#10b981', strokeWidth: 2 }
+  const trafficSeries: ComboSeries[] = [
+    { type: 'bar', yKey: 'visitors', name: '訪客數', yAxis: 'left', color: '#7c3aed' },
+    { type: 'line', yKey: 'conversion', name: '轉換率', yAxis: 'right', color: '#f59e0b', strokeWidth: 3 },
+    { type: 'line', yKey: 'satisfaction', name: '滿意度', yAxis: 'right', color: '#10b981', strokeWidth: 2 }
   ]
 
   const getCurrentData = () => {
@@ -89,7 +89,7 @@ const ComboChartDemo: React.FC = () => {
     })()
 
     if (activeSeriesIds.size > 0) {
-      return baseSeries.filter(s => activeSeriesIds.has(s.dataKey))
+      return baseSeries.filter(s => activeSeriesIds.has(s.yKey))
     }
     return baseSeries
   }
@@ -136,12 +136,12 @@ const ComboChartDemo: React.FC = () => {
     }
   }
 
-  const toggleSeries = (dataKey: string) => {
+  const toggleSeries = (yKey: string) => {
     const newActiveIds = new Set(activeSeriesIds)
-    if (newActiveIds.has(dataKey)) {
-      newActiveIds.delete(dataKey)
+    if (newActiveIds.has(yKey)) {
+      newActiveIds.delete(yKey)
     } else {
-      newActiveIds.add(dataKey)
+      newActiveIds.add(yKey)
     }
     setActiveSeriesIds(newActiveIds)
   }
@@ -154,7 +154,7 @@ const ComboChartDemo: React.FC = () => {
   const currentSeries = getCurrentSeries()
 
   // 程式碼範例
-  const codeExample = `import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
+  const codeExample = `import { MultiSeriesComboChartV2 } from '../../../registry/components/composite'
 import type { ComboChartSeries } from '../../../registry/components/composite/types'
 
 const data = [
@@ -163,17 +163,17 @@ const data = [
   // ...更多資料
 ]
 
-const series: ComboChartSeries[] = [
+const series: ComboSeries[] = [
   { 
     type: 'bar', 
-    dataKey: 'sales', 
+    yKey: 'sales', 
     name: '銷售額', 
     yAxis: 'left', 
     color: '#3b82f6' 
   },
   { 
     type: 'line', 
-    dataKey: 'growth', 
+    yKey: 'growth', 
     name: '成長率', 
     yAxis: 'right', 
     color: '#ef4444', 
@@ -181,15 +181,15 @@ const series: ComboChartSeries[] = [
   }
 ]
 
-<EnhancedComboChart
+<MultiSeriesComboChartV2
   data={data}
   series={series}
-  xKey="month"
+  xAccessor="month"
   width={800}
   height={500}
-  leftAxis={{ label: '銷售額 (萬元)', gridlines: true }}
-  rightAxis={{ label: '成長率 (%)' }}
-  xAxis={{ label: '月份' }}
+  leftAxisConfig={{ label: '銷售額 (萬元)', tickCount: 5 }}
+  rightAxisConfig={{ label: '成長率 (%)' }}
+  showGrid={true}
   animate={true}
 />`
 
@@ -278,7 +278,7 @@ const series: ComboChartSeries[] = [
                     activeScenario === 'revenue' ? revenueSeries : trafficSeries).map((series) => (
                     <motion.button
                       key={series.dataKey}
-                      onClick={() => toggleSeries(series.dataKey)}
+                      onClick={() => toggleSeries(series.yKey)}
                       whileHover={{ x: 2 }}
                       className={`w-full p-2 rounded-lg text-xs transition-all duration-200 text-left ${
                         activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
@@ -326,24 +326,22 @@ const series: ComboChartSeries[] = [
               aspectRatio={16 / 9}
             >
               {({ width, height }) => (
-                <EnhancedComboChart
+                <MultiSeriesComboChartV2
                   data={getCurrentData()}
                   series={currentSeries}
-                  xKey={getCurrentXKey()}
+                  xAccessor={getCurrentXKey()}
                   width={width}
                   height={height}
                   margin={{ top: 20, right: 80, bottom: 60, left: 80 }}
-                  leftAxis={{
+                  leftAxisConfig={{
                     label: config.leftAxis.label,
-                    gridlines: true,
+                    tickCount: 5
                   }}
-                  rightAxis={{
+                  rightAxisConfig={{
                     label: config.rightAxis.label,
-                    gridlines: false,
+                    tickCount: 5
                   }}
-                  xAxis={{
-                    label: config.xAxis.label,
-                  }}
+                  showGrid={true}
                   animate={true}
                   className="combo-chart-demo"
                 />
@@ -358,8 +356,8 @@ const series: ComboChartSeries[] = [
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <CodeExample
-              title="EnhancedComboChart 使用範例"
-              description="展示如何使用 registry 的 EnhancedComboChart 組件創建 Bar + Line 組合圖表"
+              title="MultiSeriesComboChartV2 使用範例"
+              description="展示如何使用 registry 的 MultiSeriesComboChartV2 組件創建 Bar + Line 組合圖表"
               code={codeExample}
               language="typescript"
             />
