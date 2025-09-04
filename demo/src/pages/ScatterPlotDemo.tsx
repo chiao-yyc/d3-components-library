@@ -27,9 +27,10 @@ const generateCorrelationData = (points: number = 50, correlation: number = 0.7)
   const data = []
   
   for (let i = 0; i < points; i++) {
-    const x = Math.random() * 100
+    // 🔍 修改數據範圍讓軸線配置效果更明顯
+    const x = Math.random() * 80 + 10  // 10-90 (遠離原點)
     const noise = (Math.random() - 0.5) * 30
-    const y = x * correlation + noise + 20
+    const y = x * correlation + noise + 30  // 約 30-120 (遠離零點)
     const size = Math.random() * 50 + 10
     const category = ['A', 'B', 'C'][Math.floor(Math.random() * 3)]
     const species = ['setosa', 'versicolor', 'virginica'][Math.floor(Math.random() * 3)]
@@ -115,6 +116,18 @@ export default function ScatterPlotDemo() {
   const [xTickCount, setXTickCount] = useState(5)
   const [yTickCount, setYTickCount] = useState(5)
   
+  // 新增：進階軸線配置
+  const [includeOrigin, setIncludeOrigin] = useState(false)
+  const [beginAtZero, setBeginAtZero] = useState(false)
+  const [xAxisNice, setXAxisNice] = useState(true)
+  const [yAxisNice, setYAxisNice] = useState(true)
+  const [xAxisPadding, setXAxisPadding] = useState(0.05)
+  const [yAxisPadding, setYAxisPadding] = useState(0.05)
+  
+  // 新增：軸線外觀配置
+  const [axisIntersection, setAxisIntersection] = useState(true)
+  const [tickSizeOuter, setTickSizeOuter] = useState(6)
+  
   // 交互功能
   const [enableBrushZoom, setEnableBrushZoom] = useState(false)
   const [brushDirection, setBrushDirection] = useState<'x' | 'y' | 'xy'>('xy')
@@ -167,6 +180,7 @@ export default function ScatterPlotDemo() {
     { label: '數據點數', value: currentData.length },
     { label: '圖表尺寸', value: '800 x 400', color: '#6b7280' },
     { label: '點大小', value: radius },
+    { label: '軸線配置', value: includeOrigin ? '包含原點' : beginAtZero ? '從零開始' : '自動範圍', color: '#059669' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' }
   ]
 
@@ -295,6 +309,80 @@ export default function ScatterPlotDemo() {
                 step={1}
                 onChange={setYTickCount}
                 suffix="個"
+              />
+            </ControlGroup>
+
+            {/* 新增：進階軸線配置 */}
+            <ControlGroup title="進階軸線" icon="⚖️" cols={1}>
+              <ToggleControl
+                label="包含原點"
+                checked={includeOrigin}
+                onChange={setIncludeOrigin}
+                description="軸線範圍包含 (0,0) 點"
+              />
+              
+              <ToggleControl
+                label="從零開始"
+                checked={beginAtZero}
+                onChange={setBeginAtZero}
+                description="數值軸從零開始"
+              />
+              
+              <ToggleControl
+                label="X軸美化刻度"
+                checked={xAxisNice}
+                onChange={setXAxisNice}
+                description="使用 D3 nice() 產生友好刻度"
+              />
+              
+              <ToggleControl
+                label="Y軸美化刻度"
+                checked={yAxisNice}
+                onChange={setYAxisNice}
+                description="使用 D3 nice() 產生友好刻度"
+              />
+              
+              <RangeSlider
+                label="X軸邊距"
+                value={xAxisPadding}
+                min={0}
+                max={0.2}
+                step={0.01}
+                onChange={setXAxisPadding}
+                suffix="%"
+                description="預留空間避免數據點貼邊"
+              />
+              
+              <RangeSlider
+                label="Y軸邊距"
+                value={yAxisPadding}
+                min={0}
+                max={0.2}
+                step={0.01}
+                onChange={setYAxisPadding}
+                suffix="%"
+                description="預留空間避免數據點貼邊"
+              />
+            </ControlGroup>
+
+            {/* 新增：軸線外觀 */}
+            <ControlGroup title="軸線外觀" icon="📐" cols={1}>
+              <ToggleControl
+                label="軸線相交"
+                checked={axisIntersection}
+                onChange={setAxisIntersection}
+                description="X軸與Y軸在原點形成完整L型相交"
+              />
+              
+              <RangeSlider
+                label="軸線延伸長度"
+                value={tickSizeOuter}
+                min={0}
+                max={10}
+                step={1}
+                onChange={setTickSizeOuter}
+                suffix="px"
+                description="調整軸線在數據範圍外的延伸長度"
               />
             </ControlGroup>
 
@@ -444,7 +532,7 @@ export default function ScatterPlotDemo() {
               showTooltip={showTooltip}
               colors={selectedDataset === 'iris' ? ['#440154ff', '#21908dff', '#fde725ff'] : ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']}
               
-              // 🔧 軸線系統配置
+              // 🔧 基本軸線系統配置
               showGrid={showGrid}
               showXAxis={true}
               showYAxis={true}
@@ -452,6 +540,25 @@ export default function ScatterPlotDemo() {
               yTickCount={yTickCount}
               xAxisLabel="X Axis"
               yAxisLabel="Y Axis"
+              
+              // ⚖️ 新增：統一軸線配置系統
+              includeOrigin={includeOrigin}
+              beginAtZero={beginAtZero}
+              xAxis={{
+                nice: xAxisNice,
+                padding: xAxisPadding > 0 ? xAxisPadding : undefined
+              }}
+              yAxis={{
+                nice: yAxisNice,
+                padding: yAxisPadding > 0 ? yAxisPadding : undefined
+              }}
+              
+              // 📐 新增：軸線外觀配置  
+              axisConfig={{
+                intersection: false, // 暫時停用複雜的相交邏輯
+                tickSizeOuter: axisIntersection ? tickSizeOuter : 0,
+                dynamicMargin: false
+              }}
               
               onDataClick={(data) => console.log('Clicked:', data)}
               onDataHover={(data) => console.log('Hovered:', data)}
@@ -500,7 +607,7 @@ const data = [
     animate={${animate}}
     interactive={${interactive}}
     showTooltip={${showTooltip}}
-    showTrendline={${showTrendline}}${showGrid ? `\n    showGrid={${showGrid}}` : ''}${xTickCount !== 5 ? `\n    xTickCount={${xTickCount}}` : ''}${yTickCount !== 5 ? `\n    yTickCount={${yTickCount}}` : ''}${enableBrushZoom ? `\n    enableBrushZoom={${enableBrushZoom}}\n    brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n    enableCrosshair={${enableCrosshair}}` : ''}
+    showTrendline={${showTrendline}}${showGrid ? `\n    showGrid={${showGrid}}` : ''}${xTickCount !== 5 ? `\n    xTickCount={${xTickCount}}` : ''}${yTickCount !== 5 ? `\n    yTickCount={${yTickCount}}` : ''}${includeOrigin ? `\n    includeOrigin={${includeOrigin}}` : ''}${beginAtZero ? `\n    beginAtZero={${beginAtZero}}` : ''}${(!xAxisNice || !yAxisNice || xAxisPadding > 0.05 || yAxisPadding > 0.05) ? `\n    xAxis={{ nice: ${xAxisNice}${xAxisPadding > 0.05 ? `, padding: ${xAxisPadding}` : ''} }}\n    yAxis={{ nice: ${yAxisNice}${yAxisPadding > 0.05 ? `, padding: ${yAxisPadding}` : ''} }}` : ''}${enableBrushZoom ? `\n    enableBrushZoom={${enableBrushZoom}}\n    brushZoomConfig={{ direction: '${brushDirection}' }}` : ''}${enableCrosshair ? `\n    enableCrosshair={${enableCrosshair}}` : ''}
     onDataClick={(data) => console.log('Clicked:', data)}
     onDataHover={(data) => console.log('Hovered:', data)}
   />
@@ -561,6 +668,90 @@ const data = [
                 </li>
               </ul>
             </div>
+          </div>
+        </div>
+      </ContentSection>
+
+      {/* 軸線配置示例 */}
+      <ContentSection title="軸線配置示例" delay={0.5}>
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full" />
+            <h3 className="text-xl font-semibold text-gray-800">統一軸線配置系統</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-emerald-800">Level 1: 簡單模式 (90% 用戶)</h4>
+              <p className="text-sm text-emerald-700 mb-3">使用快捷配置，適用於大多數常見需求</p>
+              <CodeExample
+                language="tsx"
+                code={`// 散點圖包含原點
+<ScatterPlot includeOrigin={true} />
+
+// 從零開始顯示  
+<ScatterPlot beginAtZero={true} />
+
+// 組合使用
+<ScatterPlot 
+  includeOrigin={true}
+  beginAtZero={false}
+/>`}
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold text-emerald-800">Level 2: 標準模式 (8% 用戶)</h4>
+              <p className="text-sm text-emerald-700 mb-3">X 和 Y 軸需要不同配置時</p>
+              <CodeExample
+                language="tsx"
+                code={`// X 軸自動，Y 軸包含原點
+<ScatterPlot 
+  xAxis={{ domain: 'auto' }}
+  yAxis={{ includeOrigin: true }}
+/>
+
+// 調整軸線邊距和刻度
+<ScatterPlot
+  xAxis={{ padding: 0.1, nice: true }}
+  yAxis={{ padding: 0.05, nice: false }}
+/>`}
+              />
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold text-emerald-800">Level 3: 進階模式 (2% 用戶)</h4>
+              <p className="text-sm text-emerald-700 mb-3">完全自定義域值範圍</p>
+              <CodeExample
+                language="tsx"
+                code={`// 固定範圍
+<ScatterPlot 
+  xAxis={{ domain: [0, 100] }}
+  yAxis={{ domain: [-50, 50] }}
+/>
+
+// 自定義邏輯
+<ScatterPlot
+  yAxis={{
+    domain: (data) => {
+      const values = data.map(d => d.y);
+      const extent = d3.extent(values);
+      return [extent[0] * 0.9, extent[1] * 1.1];
+    }
+  }}
+/>`}
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6 p-4 bg-emerald-100 rounded-lg">
+            <h4 className="font-semibold text-emerald-800 mb-2">最佳實踐提示</h4>
+            <ul className="text-sm text-emerald-700 space-y-1">
+              <li>• <strong>散點圖</strong>：通常不需要 beginAtZero，重點在數據相關性</li>
+              <li>• <strong>包含原點</strong>：當需要觀察數據相對於 (0,0) 的分布時使用</li>
+              <li>• <strong>邊距設置</strong>：防止數據點貼邊，改善視覺效果</li>
+              <li>• <strong>nice 刻度</strong>：使用 D3 的 nice() 產生更友好的刻度值</li>
+            </ul>
           </div>
         </div>
       </ContentSection>

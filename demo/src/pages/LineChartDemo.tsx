@@ -95,6 +95,16 @@ export default function LineChartDemo() {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 })
   const [tooltipContent, setTooltipContent] = useState('')
   
+  // 新增：統一軸線配置系統
+  const [includeOrigin, setIncludeOrigin] = useState(false)
+  const [beginAtZero, setBeginAtZero] = useState(false)
+  const [xAxisNice, setXAxisNice] = useState(true)
+  const [yAxisNice, setYAxisNice] = useState(true)
+  const [xAxisPadding, setXAxisPadding] = useState(0.02)
+  const [yAxisPadding, setYAxisPadding] = useState(0.02)
+  const [xAxisDomain, setXAxisDomain] = useState<'auto' | 'custom'>('auto')
+  const [yAxisDomain, setYAxisDomain] = useState<'auto' | 'custom'>('auto')
+  
   // 邊距設定
 
   // 交互回調函數
@@ -128,6 +138,8 @@ export default function LineChartDemo() {
     { label: '數據點數', value: currentData.length },
     { label: '圖表尺寸', value: `${chartWidth} × ${chartHeight}` },
     { label: '曲線類型', value: curve },
+    { label: '包含原點', value: includeOrigin ? '是' : '否', color: includeOrigin ? '#10b981' : '#6b7280' },
+    { label: '從零開始', value: beginAtZero ? '是' : '否', color: beginAtZero ? '#10b981' : '#6b7280' },
     { label: '動畫', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' },
     { label: 'Tooltip', value: enableTooltip ? '開啟' : '關閉', color: enableTooltip ? '#10b981' : '#6b7280' }
   ]
@@ -299,6 +311,59 @@ export default function LineChartDemo() {
               />
             </ControlGroup>
 
+            {/* 軸線配置 */}
+            <ControlGroup title="軸線配置" icon="⚖️" cols={1}>
+              <ToggleControl
+                label="包含原點"
+                checked={includeOrigin}
+                onChange={setIncludeOrigin}
+                description="確保軸線範圍包含 (0,0) 點"
+              />
+              
+              <ToggleControl
+                label="從零開始"
+                checked={beginAtZero}
+                onChange={setBeginAtZero}
+                description="Y 軸從零開始（適用於正值數據）"
+              />
+              
+              <ToggleControl
+                label="X軸美化刻度"
+                checked={xAxisNice}
+                onChange={setXAxisNice}
+                description="使用 D3 nice() 產生友好的 X 軸刻度"
+              />
+              
+              <ToggleControl
+                label="Y軸美化刻度"
+                checked={yAxisNice}
+                onChange={setYAxisNice}
+                description="使用 D3 nice() 產生友好的 Y 軸刻度"
+              />
+              
+              <RangeSlider
+                label="X軸邊距"
+                value={xAxisPadding}
+                onChange={setXAxisPadding}
+                min={0}
+                max={0.2}
+                step={0.01}
+                description="X 軸域值邊距百分比"
+                formatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
+              
+              <RangeSlider
+                label="Y軸邊距"
+                value={yAxisPadding}
+                onChange={setYAxisPadding}
+                min={0}
+                max={0.2}
+                step={0.01}
+                description="Y 軸域值邊距百分比"
+                formatter={(value) => `${(value * 100).toFixed(0)}%`}
+              />
+            </ControlGroup>
+
             {/* Tooltip 配置 */}
             <ControlGroup title="Tooltip 配置" icon="💬" cols={2}>
               <ToggleControl
@@ -424,6 +489,20 @@ export default function LineChartDemo() {
                     onDataClick={(data) => console.log('Clicked:', data)}
                     onHover={(data) => console.log('Hovered:', data)}
                     
+                    // ⚖️ 新增：統一軸線配置系統
+                    includeOrigin={includeOrigin}
+                    beginAtZero={beginAtZero}
+                    xAxis={{
+                      nice: xAxisNice,
+                      padding: xAxisPadding > 0 ? xAxisPadding : undefined,
+                      domain: xAxisDomain === 'auto' ? 'auto' : undefined
+                    }}
+                    yAxis={{
+                      nice: yAxisNice,
+                      padding: yAxisPadding > 0 ? yAxisPadding : undefined,
+                      domain: yAxisDomain === 'auto' ? 'auto' : undefined
+                    }}
+                    
                     // 交互功能
                     enableBrushZoom={enableBrushZoom}
                     onZoom={handleZoom}
@@ -507,6 +586,69 @@ const data = [
 />`}
           />
 
+          {/* 軸線配置系統示例 */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-8 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full" />
+              <h3 className="text-xl font-semibold text-gray-800">統一軸線配置系統</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">💡 LineChart 軸線特性</h4>
+                <p className="text-gray-700 text-sm">
+                  折線圖通常不需要從零開始，可以根據數據範圍自動調整。支援時間序列和數值軸的靈活配置。
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white/80 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-800 mb-2">🚀 簡單模式 (90%)</h5>
+                  <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<LineChart
+  includeOrigin={false}
+  data={data}
+  xKey="date"
+  yKey="value"
+/>`}
+                  </div>
+                </div>
+                
+                <div className="bg-white/80 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-800 mb-2">⚙️ 標準模式 (8%)</h5>
+                  <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<LineChart
+  xAxis={{
+    nice: true,
+    padding: 0.02
+  }}
+  yAxis={{
+    nice: true,
+    padding: 0.05
+  }}
+/>`}
+                  </div>
+                </div>
+                
+                <div className="bg-white/80 rounded-lg p-4">
+                  <h5 className="font-medium text-gray-800 mb-2">🔬 進階模式 (2%)</h5>
+                  <div className="text-xs font-mono bg-gray-100 p-2 rounded">
+{`<LineChart
+  xAxis={{
+    domain: (values) => 
+      d3.extent(values)
+  }}
+  yAxis={{
+    domain: 'auto',
+    nice: true
+  }}
+/>`}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 功能說明 */}
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100">
             <div className="flex items-center gap-3 mb-4">
@@ -532,7 +674,7 @@ const data = [
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                    靈活的樣式和尺寸配置
+                    統一軸線配置系統
                   </li>
                 </ul>
               </div>

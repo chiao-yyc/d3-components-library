@@ -4,6 +4,7 @@
  */
 
 import * as d3 from 'd3';
+import type { AxisConfig } from '../../axis-config';
 
 // === 基礎數據型別 ===
 
@@ -51,6 +52,36 @@ export interface BaseChartCoreConfig<TData = BaseChartData> {
     points?: number;                 // 點元素額外邊距
     lines?: number;                  // 線元素額外邊距
     bars?: number;                   // 條形元素額外邊距
+  };
+  
+  // === 統一軸線配置系統 ===
+  
+  /** X 軸配置 */
+  xAxis?: AxisConfig;
+  
+  /** Y 軸配置 */
+  yAxis?: AxisConfig;
+  
+  // === 快捷配置（語法糖，向下兼容）===
+  
+  /** 快捷配置：是否包含原點 (同時影響 X 和 Y 軸) */
+  includeOrigin?: boolean;
+  
+  /** 快捷配置：是否從零開始 (同時影響 X 和 Y 軸) */
+  beginAtZero?: boolean;
+  
+  // === 軸線外觀配置 ===
+  
+  /** 軸線相交配置 */
+  axisConfig?: {
+    /** 是否啟用軸線相交 */
+    intersection?: boolean;
+    /** 軸線相交點 (數據座標) */
+    intersectionPoint?: [number, number];
+    /** 軸線延伸長度 */
+    tickSizeOuter?: number;
+    /** 是否使用動態邊距 */
+    dynamicMargin?: boolean;
   };
   
   // 分組功能
