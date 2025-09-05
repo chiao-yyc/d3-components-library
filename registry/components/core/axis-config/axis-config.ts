@@ -15,7 +15,7 @@ export interface AxisConfig {
   beginAtZero?: boolean;
   
   /** 域值控制 */
-  domain?: 'auto' | [number, number] | ((data: any[]) => [number, number]);
+  domain?: 'auto' | [number, number] | ((data: unknown[]) => [number, number]);
   
   /** 是否使用 D3 nice() 產生友好的刻度值 */
   nice?: boolean;

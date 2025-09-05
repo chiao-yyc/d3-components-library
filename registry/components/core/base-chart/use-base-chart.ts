@@ -7,10 +7,10 @@ import { useRef, useEffect, useMemo, useState } from 'react';
 import { BaseChartCore } from './core/base-chart-core';
 import type { BaseChartCoreConfig, ChartStateCallbacks } from './core';
 
-export interface UseBaseChartOptions<TData = any> extends BaseChartCoreConfig<TData> {
+export interface UseBaseChartOptions<TData = unknown> extends BaseChartCoreConfig<TData> {
   onError?: (error: Error) => void;
   onLoadingChange?: (isLoading: boolean) => void;
-  onTooltipShow?: (x: number, y: number, content: any) => void;
+  onTooltipShow?: (x: number, y: number, content: unknown) => void;
   onTooltipHide?: () => void;
 }
 

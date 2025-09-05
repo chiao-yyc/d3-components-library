@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 
 export interface GroupDataItem {
-  [key: string]: any
+  [key: string]: unknown
   group?: string
 }
 
@@ -11,7 +11,7 @@ export interface GroupConfig {
   defaultColors?: string[]
 }
 
-export interface GroupProcessorResult<T = any> {
+export interface GroupProcessorResult<T = unknown> {
   groups: string[]
   groupedData: Map<string, T[]>
   colorScale: d3.ScaleOrdinal<string, string>
