@@ -47,6 +47,11 @@ const ComboChartDemo: React.FC = () => {
 
   const [activeScenario, setActiveScenario] = useState<'sales' | 'revenue' | 'traffic'>('sales')
   const [activeSeriesIds, setActiveSeriesIds] = useState<Set<string>>(new Set())
+  
+  // 對齊測試功能
+  const [alignment, setAlignment] = useState<'start' | 'center' | 'end'>('center')
+  const [barWidthRatio, setBarWidthRatio] = useState(0.8)
+  const [showAlignmentGuides, setShowAlignmentGuides] = useState(false)
 
   // 銷售場景配置
   const salesSeries: ComboSeries[] = [
@@ -196,7 +201,7 @@ const series: ComboSeries[] = [
   return (
     <DemoPageTemplate
       title="組合圖表演示 📊"
-      description="展示 Bar + Line 的基本組合圖表，支援雙軸配置與系列控制，適用於不同量綱數據的對比分析。"
+      description="展示 Bar + Line 的基本組合圖表，支援雙軸配置、系列控制與對齊測試功能，適用於不同量綱數據的對比分析。包含對齊策略測試，確保組合圖表中各元素的視覺一致性。"
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
@@ -256,6 +261,54 @@ const series: ComboSeries[] = [
                       <div className="text-xs opacity-70">{scenario.desc}</div>
                     </motion.button>
                   ))}
+                </div>
+              </div>
+
+              {/* 對齊測試控制 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-500">🎯</span>
+                  <h3 className="text-sm font-semibold text-gray-700">對齊測試</h3>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 mb-2 block">對齊策略</label>
+                    <select
+                      value={alignment}
+                      onChange={(e) => setAlignment(e.target.value as any)}
+                      className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="start">左對齊 (Start)</option>
+                      <option value="center">中心對齊 (Center)</option>
+                      <option value="end">右對齊 (End)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-600 mb-2 block">
+                      條形寬度比例 ({(barWidthRatio * 100).toFixed(0)}%)
+                    </label>
+                    <input
+                      type="range"
+                      min="0.2"
+                      max="1.0"
+                      step="0.1"
+                      value={barWidthRatio}
+                      onChange={(e) => setBarWidthRatio(parseFloat(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="showAlignmentGuides"
+                      checked={showAlignmentGuides}
+                      onChange={(e) => setShowAlignmentGuides(e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <label htmlFor="showAlignmentGuides" className="text-xs text-gray-600">
+                      顯示對齊輔助線
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -320,8 +373,8 @@ const series: ComboSeries[] = [
             transition={{ duration: 0.5 }}
           >
             <ChartContainer 
-              title={config.title}
-              subtitle={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點`}
+              title={`${config.title} ${showAlignmentGuides ? '(顯示對齊輔助線)' : ''}`}
+              subtitle={`${currentSeries.length} 個系列 | ${getCurrentData().length} 個資料點 | 對齊策略: ${alignment === 'start' ? '左對齊' : alignment === 'center' ? '中心對齊' : '右對齊'}`}
               responsive={true}
               aspectRatio={16 / 9}
             >
@@ -341,6 +394,9 @@ const series: ComboSeries[] = [
                     label: config.rightAxis.label,
                     tickCount: 5
                   }}
+                  barWidth={barWidthRatio}
+                  alignment={alignment}
+                  showAlignmentGuides={showAlignmentGuides}
                   showGrid={true}
                   animate={true}
                   className="combo-chart-demo"

@@ -107,8 +107,14 @@
 # 代碼檢查
 npm run lint
 
-# 類型檢查
+# 類型檢查 
 npm run typecheck
+
+# Demo 頁面合規性檢查
+npm run check:compliance
+
+# 完整合規性檢查 (ESLint + TypeScript + 架構檢查)
+npm run check:full
 
 # 建構專案
 npm run build
@@ -116,6 +122,36 @@ npm run build
 # 運行測試
 npm run test
 ```
+
+## 🛡️ 自動化合規性系統
+
+### **ESLint 自訂規則**
+已建立專門針對 Demo 頁面的 ESLint 規則：
+
+- **demo-compliance/require-demo-page-template** (ERROR)
+  - 強制所有 Demo 頁面使用 DemoPageTemplate
+  - 豁免頁面：Home.tsx, Gallery.tsx, ChartsShowcase.tsx
+
+- **demo-compliance/require-standard-grid-layout** (WARNING)  
+  - 建議使用標準網格佈局：`grid grid-cols-1 lg:grid-cols-4 gap-8`
+
+### **合規性檢查器**
+```bash
+# 執行完整頁面掃描
+npm run check:compliance
+
+# 當前合規性狀態
+✅ 全面合規: 40/43 頁面 (93.0%)
+⚠️  部分合規: 1/43 頁面 (2.3%)  
+❌ 不合規: 2/43 頁面 (4.7%)
+🎯 總體合規分數: 96.9%
+```
+
+### **Git Hooks 整合**
+自動化 pre-commit 檢查：
+- ESLint 合規性驗證
+- 缺少 DemoPageTemplate 的頁面警告  
+- 非標準網格佈局提醒
 
 ## 📊 架構優化完成進展
 

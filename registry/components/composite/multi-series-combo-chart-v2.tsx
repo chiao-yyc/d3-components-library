@@ -7,6 +7,11 @@ import React, { useMemo, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { ChartCanvas, useChartCanvas } from '../primitives/canvas/chart-canvas';
 import { XAxis, YAxis, DualAxis } from '../primitives/axis';
+import { 
+  AlignmentStrategy, 
+  calculateAlignedPosition, 
+  calculateBarPosition 
+} from '../primitives/utils/core/positioning';
 
 // 系列配置接口
 export interface ComboSeries {
@@ -58,6 +63,10 @@ export interface MultiSeriesComboChartV2Props {
   animate?: boolean;
   interactive?: boolean;
   
+  // 對齊配置
+  alignment?: AlignmentStrategy;
+  showAlignmentGuides?: boolean;
+  
   // 事件處理
   onDataClick?: (data: any, event: Event) => void;
   onDataHover?: (data: any, event: Event) => void;
@@ -90,6 +99,10 @@ export const defaultMultiSeriesComboChartV2Props: Partial<MultiSeriesComboChartV
   barWidth: 0.6,
   animate: true,
   interactive: true,
+  
+  // 對齊默認配置
+  alignment: 'center',
+  showAlignmentGuides: false,
 };
 
 // 圖形渲染組件
@@ -103,11 +116,12 @@ const SeriesRenderer: React.FC<{
   colors: string[];
   barWidth: number;
   animate: boolean;
+  alignment: AlignmentStrategy;
   onDataClick?: (data: any, event: Event) => void;
   onDataHover?: (data: any, event: Event) => void;
 }> = ({ 
   series, data, xAccessor, xScale, leftYScale, rightYScale, 
-  colors, barWidth, animate, onDataClick, onDataHover 
+  colors, barWidth, animate, alignment, onDataClick, onDataHover 
 }) => {
   const groupRef = useRef<SVGGElement>(null);
   
@@ -127,7 +141,7 @@ const SeriesRenderer: React.FC<{
       const yScale = s.yAxis === 'left' ? leftYScale : rightYScale;
       
       const area = d3.area<any>()
-        .x(d => xScale(d[xAccessor])! + xScale.bandwidth() / 2)
+        .x(d => calculateAlignedPosition(d[xAccessor], xScale, alignment))
         .y0(yScale(0))
         .y1(d => yScale(Number(d[s.yKey]) || 0))
         .curve(d3.curveMonotoneX);
@@ -154,7 +168,10 @@ const SeriesRenderer: React.FC<{
         .enter()
         .append('rect')
         .attr('class', `bar-series bar-${s.name}`)
-        .attr('x', d => xScale(d[xAccessor])! + xScale.bandwidth() / 2 + barOffset - barWidthAdjusted / 2)
+        .attr('x', d => {
+          const alignedPosition = calculateAlignedPosition(d[xAccessor], xScale, alignment);
+          return alignedPosition + barOffset - barWidthAdjusted / 2;
+        })
         .attr('width', barWidthAdjusted)
         .attr('fill', color)
         .attr('opacity', s.opacity || 0.8);
@@ -200,7 +217,7 @@ const SeriesRenderer: React.FC<{
       const yScale = s.yAxis === 'left' ? leftYScale : rightYScale;
       
       const line = d3.line<any>()
-        .x(d => xScale(d[xAccessor])! + xScale.bandwidth() / 2)
+        .x(d => calculateAlignedPosition(d[xAccessor], xScale, alignment))
         .y(d => yScale(Number(d[s.yKey]) || 0))
         .curve(d3.curveMonotoneX);
       
@@ -229,7 +246,7 @@ const SeriesRenderer: React.FC<{
         .enter()
         .append('circle')
         .attr('class', `line-points line-points-${s.name}`)
-        .attr('cx', d => xScale(d[xAccessor])! + xScale.bandwidth() / 2)
+        .attr('cx', d => calculateAlignedPosition(d[xAccessor], xScale, alignment))
         .attr('cy', d => yScale(Number(d[s.yKey]) || 0))
         .attr('r', s.pointRadius || 3)
         .attr('fill', color)
@@ -249,7 +266,7 @@ const SeriesRenderer: React.FC<{
         .enter()
         .append('circle')
         .attr('class', `scatter-series scatter-${s.name}`)
-        .attr('cx', d => xScale(d[xAccessor])! + xScale.bandwidth() / 2)
+        .attr('cx', d => calculateAlignedPosition(d[xAccessor], xScale, alignment))
         .attr('cy', d => yScale(Number(d[s.yKey]) || 0))
         .attr('fill', color)
         .attr('opacity', s.opacity || 0.7)
@@ -275,9 +292,42 @@ const SeriesRenderer: React.FC<{
       }
     });
     
-  }, [series, data, xAccessor, xScale, leftYScale, rightYScale, colors, barWidth, animate, onDataClick, onDataHover]);
+  }, [series, data, xAccessor, xScale, leftYScale, rightYScale, colors, barWidth, animate, alignment, onDataClick, onDataHover]);
   
   return <g ref={groupRef} className="series-renderer" />;
+};
+
+// 對齊輔助線組件
+const AlignmentGuides: React.FC<{
+  data: any[];
+  xAccessor: string;
+  xScale: any;
+  alignment: AlignmentStrategy;
+  height: number;
+}> = ({ data, xAccessor, xScale, alignment, height }) => {
+  if (!xScale.bandwidth) return null;
+  
+  return (
+    <g className="alignment-guides">
+      {data.map((item, index) => {
+        const alignedPosition = calculateAlignedPosition(item[xAccessor], xScale, alignment);
+        return (
+          <line
+            key={`guide-${index}`}
+            x1={alignedPosition}
+            x2={alignedPosition}
+            y1={0}
+            y2={height}
+            stroke="#ff0000"
+            strokeWidth={1}
+            strokeDasharray="3,3"
+            opacity={0.7}
+            pointerEvents="none"
+          />
+        );
+      })}
+    </g>
+  );
 };
 
 // 主組件
@@ -298,6 +348,8 @@ export const MultiSeriesComboChartV2: React.FC<MultiSeriesComboChartV2Props> = (
     barWidth = 0.6,
     animate = true,
     interactive = true,
+    alignment = 'center',
+    showAlignmentGuides = false,
     onDataClick,
     onDataHover,
     className = ''
@@ -401,9 +453,21 @@ export const MultiSeriesComboChartV2: React.FC<MultiSeriesComboChartV2Props> = (
           colors={colors}
           barWidth={barWidth}
           animate={animate}
+          alignment={alignment}
           onDataClick={onDataClick}
           onDataHover={onDataHover}
         />
+
+        {/* 對齊輔助線 */}
+        {showAlignmentGuides && (
+          <AlignmentGuides
+            data={data}
+            xAccessor={xAccessor}
+            xScale={scales.xScale}
+            alignment={alignment}
+            height={height - finalMargin.top - finalMargin.bottom}
+          />
+        )}
 
         {/* X 軸 */}
         {showXAxis && (

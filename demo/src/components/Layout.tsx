@@ -31,7 +31,8 @@ function Layout({ children }: LayoutProps) {
       description: '新手入門必看',
       items: [
         { path: '/', name: '專案概覽', icon: '🏠' },
-        { path: '/gallery', name: '組件庫總覽', icon: '🎨' },
+        { path: '/charts-showcase', name: '圖表總覽館', icon: '🏛️' },
+        { path: '/gallery', name: '圖表實驗室', icon: '🧪' },
       ]
     },
     
@@ -94,8 +95,7 @@ function Layout({ children }: LayoutProps) {
       description: '適配各種螢幕',
       items: [
         { path: '/responsive-chart', name: '響應式圖表', icon: '📱' },
-        { path: '/responsive-test', name: '容器測試', icon: '🧪' },
-        { path: '/alignment-test', name: '對齊策略', icon: '🎯' }
+        { path: '/responsive-test', name: '容器測試', icon: '🧪' }
       ]
     },
 

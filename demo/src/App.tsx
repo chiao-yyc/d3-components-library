@@ -22,6 +22,7 @@ const TreeMapDemo = lazy(() => import('./pages/TreeMapDemo'))
 const CandlestickDemo = lazy(() => import('./pages/CandlestickDemo'))
 const ModularTestDemo = lazy(() => import('./pages/ModularTestDemo'))
 const Gallery = lazy(() => import('./pages/Gallery'))
+const ChartsShowcase = lazy(() => import('./pages/ChartsShowcase'))
 const DataMapperDemo = lazy(() => import('./pages/DataMapperDemo'))
 const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
 const ComboChartDemo = lazy(() => import('./pages/ComboChartDemo'))
@@ -36,7 +37,6 @@ const TripleComboDemo = lazy(() => import('./pages/TripleComboDemo'))
 const DynamicComboDemo = lazy(() => import('./pages/DynamicComboDemo'))
 const DataProcessorTestDemo = lazy(() => import('./pages/DataProcessorTestDemo'))
 const ComposablePrimitivesDemo = lazy(() => import('./pages/ComposablePrimitivesDemo'))
-const AlignmentTestDemo = lazy(() => import('./pages/AlignmentTestDemo'))
 const ComboChartDebugDemo = lazy(() => import('./pages/ComboChartDebugDemo'))
 const LayerOrderDebugDemo = lazy(() => import('./pages/LayerOrderDebugDemo'))
 const ResponsiveChartDemo = lazy(() => import('./pages/ResponsiveChartDemo'))
@@ -71,6 +71,7 @@ function App() {
           <Route path="/candlestick" element={<CandlestickDemo />} />
           <Route path="/modular-test" element={<ModularTestDemo />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/charts-showcase" element={<ChartsShowcase />} />
           <Route path="/data-mapper" element={<DataMapperDemo />} />
           <Route path="/simple-components" element={<SimpleComponentsDemo />} />
           {/* 🎯 Phase 1: 核心組合圖表頁面 (主導航) */}
@@ -95,7 +96,6 @@ function App() {
           <Route path="/combo-debug" element={<ComboDebugToolsDemo />} />
           <Route path="/layer-debug" element={<ComboDebugToolsDemo />} />
           <Route path="/data-processor-test" element={<DataProcessorTestDemo />} />
-          <Route path="/alignment-test" element={<AlignmentTestDemo />} />
           <Route path="/responsive-chart" element={<ResponsiveChartDemo />} />
           <Route path="/responsive-test" element={<ResponsiveTestDemo />} />
           <Route path="/performance-test" element={<PerformanceTestDemo />} />

@@ -19,7 +19,8 @@
     "demo:type-check": "cd demo && npm run type-check",
     "install:all": "npm install && cd cli && npm install && cd ../demo && npm install",
     "clean": "rm -rf cli/dist demo/dist node_modules cli/node_modules demo/node_modules",
-    "release": "npm run build && cd cli && npm publish"
+    "release": "npm run build && cd cli && npm publish",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.35.1",

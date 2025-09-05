@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
-import { ModernControlPanel } from '../components/ui/ModernControlPanel'
+import { ModernControlPanel, StatusDisplay } from '../components/ui/ModernControlPanel'
 import { DemoPageTemplate } from '../components/ui/DemoPageTemplate'
 import { CodeExample } from '../components/ui/CodeExample'
 import { CHART_LAYER_ORDER, getChartGroup, type ChartType } from '../../../registry/components/primitives/layouts/chart-layer-constants'
@@ -138,7 +138,7 @@ ${series.map(s => `    { type: '${s.type}', dataKey: '${s.dataKey}', name: '${s.
       title="圖層順序調試工具"
       description="視覺化圖表圖層順序系統，調試和驗證 combo 圖表的正確渲染順序"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* 圖表展示 */}
           <div className="bg-white p-6 rounded-lg border border-gray-200">
@@ -170,6 +170,13 @@ ${series.map(s => `    { type: '${s.type}', dataKey: '${s.dataKey}', name: '${s.
                 }}
               />
             </div>
+            
+            <StatusDisplay items={[
+              { label: '選擇圖表數', value: selectedChartTypes.length, color: '#3b82f6' },
+              { label: '自動排序', value: autoReorder ? '開啟' : '關閉', color: autoReorder ? '#10b981' : '#6b7280' },
+              { label: '圖層資訊', value: showLayerInfo ? '顯示' : '隱藏', color: showLayerInfo ? '#10b981' : '#6b7280' },
+              { label: '總圖層數', value: layerOrderInfo.length, color: '#8b5cf6' }
+            ]} />
           </div>
 
           {/* 圖層順序資訊 */}

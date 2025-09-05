@@ -3,11 +3,11 @@ import { DataType, SuggestedMapping, ChartSuggestion } from '@registry/types'
 export interface DataTypeInfo {
   type: 'number' | 'string' | 'date' | 'boolean'
   confidence: number
-  samples: any[]
+  samples: unknown[]
   nullCount: number
 }
 
-export function detectColumnType(values: any[]): DataTypeInfo {
+export function detectColumnType(values: unknown[]): DataTypeInfo {
   const nonNullValues = values.filter(v => v != null)
   const nullCount = values.length - nonNullValues.length
   
@@ -76,11 +76,11 @@ export function detectColumnType(values: any[]): DataTypeInfo {
   }
 }
 
-export function detectDataType(values: any[]): DataType {
+export function detectDataType(values: unknown[]): DataType {
   return detectColumnType(values).type
 }
 
-export function suggestMapping(data: any[]): SuggestedMapping[] {
+export function suggestMapping(data: Record<string, unknown>[]): SuggestedMapping[] {
   if (!data.length) return []
   
   const suggestions: SuggestedMapping[] = []
@@ -121,7 +121,7 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
     }
     
     // 創建基本映射配置
-    const mapping: any = {}
+    const mapping: Record<string, unknown> = {}
     mapping[suggested] = field
     
     suggestions.push({

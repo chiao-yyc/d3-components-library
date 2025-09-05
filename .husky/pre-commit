@@ -1,0 +1,15 @@
+# Demo Architecture Compliance Check
+echo "🔍 Checking demo page compliance..."
+
+# Change to demo directory and run compliance checks
+cd demo
+
+# Run ESLint with custom demo compliance rules
+echo "📋 Running ESLint compliance checks..."
+npm run lint:compliance
+
+# Run our custom compliance checker
+echo "📊 Verifying page architecture patterns..."
+npm run check:compliance
+
+echo "✅ Demo compliance check completed"
