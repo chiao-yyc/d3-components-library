@@ -4,7 +4,7 @@ import chalk from 'chalk'
 import ora from 'ora'
 import { fetchComponentConfig, downloadComponentFiles } from '../utils/registry'
 import { validateProject, getProjectConfig } from '../utils/project'
-import { ComponentConfig, UpdateOptions } from '../types'
+import { UpdateOptions } from '../types'
 
 export async function updateCommand(componentName?: string, options: UpdateOptions = {}) {
   try {

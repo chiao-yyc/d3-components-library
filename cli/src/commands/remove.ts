@@ -2,7 +2,7 @@ import fs from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
 import ora from 'ora'
-import { validateProject, getProjectConfig, updateProjectConfig } from '../utils/project'
+import { validateProject, getProjectConfig } from '../utils/project'
 import { RemoveOptions } from '../types'
 
 export async function removeCommand(componentName: string, options: RemoveOptions = {}) {
