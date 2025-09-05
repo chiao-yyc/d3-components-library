@@ -37,13 +37,12 @@ export const DataTable: React.FC<DataTableProps> = ({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [currentPage, setCurrentPage] = useState(0)
 
-  // Early return if no data or columns
-  if (!data || !columns) {
-    return null
-  }
-
   // 排序邏輯
   const sortedData = React.useMemo(() => {
+    // Handle empty data case within useMemo
+    if (!data || !columns) {
+      return []
+    }
     if (!sortColumn) return data
 
     return [...data].sort((a, b) => {
@@ -92,6 +91,11 @@ export const DataTable: React.FC<DataTableProps> = ({
     }
     
     return String(value || '-')
+  }
+
+  // Early return if no data or columns (after all hooks)
+  if (!data || !columns) {
+    return null
   }
 
   return (

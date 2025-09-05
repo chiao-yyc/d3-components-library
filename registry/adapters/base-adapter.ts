@@ -1,6 +1,10 @@
 import { DataAdapter, ValidationResult, SuggestedMapping, ChartDataPoint, DataMapping } from '../types'
 import { detectColumnType, suggestMapping } from '../utils/data-detector'
 
+// 定義常數避免 magic numbers
+const DEFAULT_SAMPLE_SIZE = 10
+const SMALL_NUMBER_THRESHOLD = 0.1
+
 /**
  * 基礎資料適配器抽象類別
  * 提供通用的資料處理功能
@@ -32,7 +36,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
     
     // 檢查所有行是否有相同的欄位結構
     let inconsistentRows = 0
-    for (let i = 1; i < Math.min(data.length, 10); i++) {
+    for (let i = 1; i < Math.min(data.length, DEFAULT_SAMPLE_SIZE); i++) {
       const currentKeys = Object.keys(data[i] || {})
       const missingKeys = firstRowKeys.filter(key => !currentKeys.includes(key))
       const extraKeys = currentKeys.filter(key => !firstRowKeys.includes(key))
@@ -49,7 +53,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
     
     // 根據不一致的行數調整信心度
     if (inconsistentRows > 0) {
-      confidence = Math.max(0.1, 1 - (inconsistentRows / Math.min(data.length, 10)))
+      confidence = Math.max(SMALL_NUMBER_THRESHOLD, 1 - (inconsistentRows / Math.min(data.length, DEFAULT_SAMPLE_SIZE)))
     }
     
     return { isValid: errors.length === 0, errors, warnings, confidence }
@@ -62,7 +66,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
   /**
    * 解析欄位路徑（支援巢狀物件）
    */
-  protected resolveFieldPath(obj: any, path: string | ((d: any) => any) | undefined): any {
+  protected resolveFieldPath<T = unknown>(obj: Record<string, unknown>, path: string | ((d: Record<string, unknown>) => T) | undefined): T | null {
     if (path === undefined) return undefined
     
     if (typeof path === 'function') {
@@ -88,7 +92,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
   /**
    * 清理和轉換數值
    */
-  protected cleanNumber(value: any): number {
+  protected cleanNumber(value: unknown): number {
     if (typeof value === 'number') return value
     if (typeof value === 'string') {
       // 移除逗號、貨幣符號等
@@ -102,7 +106,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
   /**
    * 清理和轉換日期
    */
-  protected cleanDate(value: any): Date | null {
+  protected cleanDate(value: unknown): Date | null {
     if (value instanceof Date) return value
     if (typeof value === 'string' || typeof value === 'number') {
       const date = new Date(value)
@@ -114,7 +118,7 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
   /**
    * 通用的值清理方法
    */
-  protected cleanValue(value: any): any {
+  protected cleanValue(value: unknown): string | number | Date | null {
     if (value == null) return null
     
     if (typeof value === 'string') {
@@ -144,13 +148,13 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
     
     // 回退到簡單的欄位分析
     const firstRow = data[0]
-    const fields = Object.keys(firstRow as Record<string, any>)
+    const fields = Object.keys(firstRow as Record<string, unknown>)
     
     let xField = fields[0]
     let yField = fields[1]
     
     for (const field of fields) {
-      const values = data.slice(0, 10).map(d => (d as any)[field])
+      const values = data.slice(0, DEFAULT_SAMPLE_SIZE).map(d => (d as Record<string, unknown>)[field])
       const typeInfo = detectColumnType(values)
       
       if (typeInfo.type === 'string' && !xField) {

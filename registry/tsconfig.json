@@ -28,6 +28,8 @@
   },
   "include": [
     "components/**/*",
+    "adapters/**/*",
+    "utils/**/*",
     "scripts/**/*",
     "types/**/*",
     "**/*.test.ts",

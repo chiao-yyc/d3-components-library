@@ -1,15 +1,74 @@
-# Demo Architecture Compliance Check
-echo "🔍 Checking demo page compliance..."
+#!/bin/sh
+# D3 Components 分層 ESLint 策略
+echo "🎯 D3 Components 品質檢查開始..."
 
-# Change to demo directory and run compliance checks
-cd demo
+# 檢查異動檔案類型並執行對應檢查策略
+REGISTRY_CHANGED=$(git diff --cached --name-only | grep "^registry/" | wc -l)
+CLI_CHANGED=$(git diff --cached --name-only | grep "^cli/" | wc -l)
+DEMO_CHANGED=$(git diff --cached --name-only | grep "^demo/" | wc -l)
 
-# Run ESLint with custom demo compliance rules
-echo "📋 Running ESLint compliance checks..."
-npm run lint:compliance
+# Registry 異動 - 嚴格檢查 🔴
+if [ $REGISTRY_CHANGED -gt 0 ]; then
+  echo "🔴 Registry 異動偵測 ($REGISTRY_CHANGED 檔案)，執行嚴格品質檢查..."
+  cd registry
+  
+  echo "   📝 TypeScript 嚴格型別檢查..."
+  npm run type-check
+  if [ $? -ne 0 ]; then
+    echo "   ❌ Registry TypeScript 檢查失敗"
+    exit 1
+  fi
+  
+  echo "   🔍 ESLint 嚴格規則檢查..."
+  npm run lint:strict
+  if [ $? -ne 0 ]; then
+    echo "   ❌ Registry 必須通過所有 ESLint 嚴格檢查"
+    exit 1
+  fi
+  
+  echo "   ✅ Registry 品質檢查通過"
+  cd ..
+fi
 
-# Run our custom compliance checker
-echo "📊 Verifying page architecture patterns..."
-npm run check:compliance
+# CLI 異動 - 中等檢查 🟡
+if [ $CLI_CHANGED -gt 0 ]; then
+  echo "🟡 CLI 異動偵測 ($CLI_CHANGED 檔案)，執行基本品質檢查..."
+  cd cli
+  
+  echo "   🔍 基本 ESLint 檢查..."
+  npm run lint
+  if [ $? -ne 0 ]; then
+    echo "   ❌ CLI 基本檢查失敗"
+    exit 1
+  fi
+  
+  echo "   ✅ CLI 品質檢查通過"
+  cd ..
+fi
 
-echo "✅ Demo compliance check completed"
+# Demo 異動 - 架構合規性檢查 🟢
+if [ $DEMO_CHANGED -gt 0 ]; then
+  echo "🟢 Demo 異動偵測 ($DEMO_CHANGED 檔案)，執行架構合規性檢查..."
+  cd demo
+  
+  echo "   🏗️  架構合規性檢查..."
+  npm run lint:architecture
+  if [ $? -ne 0 ]; then
+    echo "   ❌ Demo 架構合規性檢查失敗"
+    exit 1
+  fi
+  
+  echo "   📊 頁面模式驗證..."
+  npm run check:compliance
+  # 注意：這裡不強制退出，僅作為提醒
+  
+  echo "   ✅ Demo 架構檢查完成"
+  cd ..
+fi
+
+# 如果沒有任何異動
+if [ $REGISTRY_CHANGED -eq 0 ] && [ $CLI_CHANGED -eq 0 ] && [ $DEMO_CHANGED -eq 0 ]; then
+  echo "ℹ️  沒有偵測到 registry、cli 或 demo 的檔案異動"
+fi
+
+echo "🎉 所有品質檢查完成！"
