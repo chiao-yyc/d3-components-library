@@ -9,8 +9,8 @@ export type ScaleType = 'linear' | 'log' | 'sqrt' | 'time' | 'ordinal' | 'band' 
 
 export interface ScaleCoreConfig {
   type: ScaleType;
-  domain: any[];
-  range: any[];
+  domain: unknown[];
+  range: unknown[];
   nice?: boolean;
   clamp?: boolean;
   padding?: number;

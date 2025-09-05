@@ -18,9 +18,9 @@ export interface PieChartProps extends BaseChartProps {
   labelKey?: string;
   valueKey?: string;
   colorKey?: string;
-  labelAccessor?: (d: any) => string;
-  valueAccessor?: (d: any) => number;
-  colorAccessor?: (d: any) => string;
+  labelAccessor?: (d: unknown) => string;
+  valueAccessor?: (d: unknown) => number;
+  colorAccessor?: (d: unknown) => string;
   mapping?: DataMapping;
 
   // Pie 特定樣式

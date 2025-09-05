@@ -73,9 +73,9 @@ export interface AreaChartPropsLegacy {
   xKey?: string;
   yKey?: string;
   categoryKey?: string;
-  xAccessor?: (d: any) => any;
-  yAccessor?: (d: any) => any;
-  categoryAccessor?: (d: any) => any;
+  xAccessor?: (d: unknown) => unknown;
+  yAccessor?: (d: unknown) => unknown;
+  categoryAccessor?: (d: unknown) => unknown;
 }
 
 // 兼容性包裝器

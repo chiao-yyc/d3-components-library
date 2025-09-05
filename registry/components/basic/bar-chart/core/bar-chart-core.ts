@@ -8,7 +8,8 @@ import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 import type { BaseChartCoreConfig, ChartStateCallbacks } from '../../../core/types';
-import type { ProcessedDataPoint, BarChartConfig } from '../core/types';
+import type { ProcessedDataPoint } from '../core/types';
+import type { DataMapping } from '../../../core/data-processor/types';
 
 // 擴展基礎配置以支援 BarChart 特有屬性
 export interface BarChartCoreConfig extends BaseChartCoreConfig {
@@ -23,11 +24,11 @@ export interface BarChartCoreConfig extends BaseChartCoreConfig {
   // 統一軸線系統配置
   xTickCount?: number;
   yTickCount?: number;
-  xTickFormat?: (domainValue: any, index: number) => string;
-  yTickFormat?: (domainValue: any, index: number) => string;
+  xTickFormat?: (domainValue: unknown, index: number) => string;
+  yTickFormat?: (domainValue: unknown, index: number) => string;
   showLabels?: boolean;
   labelPosition?: 'top' | 'center' | 'bottom';
-  labelFormat?: (value: any) => string;
+  labelFormat?: (value: unknown) => string;
   barOpacity?: number;
   strokeWidth?: number;
   strokeColor?: string;
@@ -36,18 +37,18 @@ export interface BarChartCoreConfig extends BaseChartCoreConfig {
   onHover?: (data: ProcessedDataPoint | null) => void;
   
   // 數據映射
-  mapping?: any; // 從 DataMapping 導入
+  mapping?: DataMapping; // 從 DataMapping 導入
   xKey?: string;
   yKey?: string;
-  xAccessor?: (d: any) => any;
-  yAccessor?: (d: any) => any;
+  xAccessor?: (d: unknown) => unknown;
+  yAccessor?: (d: unknown) => unknown;
 }
 
 /**
  * BarChart 的核心實現類
  * 繼承 BaseChartCore，實現長條圖的特定邏輯
  */
-export class BarChartCore extends BaseChartCore<any> {
+export class BarChartCore extends BaseChartCore<unknown> {
   private processedData: ProcessedDataPoint[] = [];
   private scales: {
     xScale?: d3.ScaleBand<string> | d3.ScaleLinear<number, number>;
@@ -86,7 +87,7 @@ export class BarChartCore extends BaseChartCore<any> {
     return this.processedData;
   }
 
-  protected createScales(): Record<string, any> {
+  protected createScales(): Record<string, d3.ScaleBand<string> | d3.ScaleLinear<number, number>> {
     const config = this.config as BarChartCoreConfig;
     const { orientation = 'vertical', colors } = config;
     const { chartWidth, chartHeight } = this.getChartDimensions();
@@ -202,7 +203,7 @@ export class BarChartCore extends BaseChartCore<any> {
   /**
    * 添加互動事件
    */
-  private addInteractionEvents(selection: d3.Selection<any, ProcessedDataPoint, any, any>): void {
+  private addInteractionEvents(selection: d3.Selection<SVGRectElement, ProcessedDataPoint, SVGGElement, unknown>): void;
     const config = this.config as BarChartCoreConfig;
     const { interactive, onDataClick, onHover } = config;
 

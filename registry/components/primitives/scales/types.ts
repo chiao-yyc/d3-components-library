@@ -2,8 +2,8 @@ export type ScaleType = 'linear' | 'band' | 'time' | 'ordinal' | 'log' | 'sqrt' 
 
 export interface ScaleConfig {
   type: ScaleType
-  domain?: any[]
-  range?: any[]
+  domain?: unknown[]
+  range?: unknown[]
   padding?: number
   paddingInner?: number
   paddingOuter?: number

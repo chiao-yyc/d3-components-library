@@ -8,19 +8,19 @@ export interface Margin {
 }
 
 export interface DataMapping {
-  x: string | ((d: any) => any);
-  y: string | ((d: any) => any);
-  series?: string | ((d: any) => any);
+  x: string | ((d: unknown) => unknown);
+  y: string | ((d: unknown) => unknown);
+  series?: string | ((d: unknown) => unknown);
 }
 
 export interface ProcessedDataPoint {
-  x: any;
+  x: unknown;
   y: number;
-  originalData: any;
+  originalData: unknown;
 }
 
 export interface LineChartConfig {
-  data: any[];
+  data: unknown[];
 
   // 數據映射配置 (推薦)
   mapping?: DataMapping;
@@ -35,9 +35,9 @@ export interface LineChartConfig {
   
   // 向下兼容的廢棄屬性 - Accessor-based 模式
   /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
-  xAccessor?: (d: any) => any;
+  xAccessor?: (d: unknown) => unknown;
   /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
-  yAccessor?: (d: any) => any;
+  yAccessor?: (d: unknown) => unknown;
 
   // Dimensions
   width?: number;
@@ -65,6 +65,6 @@ export interface LineChartConfig {
   tooltipFormat?: (data: ProcessedDataPoint) => string;
 
   // Events
-  onDataClick?: (data: any) => void;
-  onHover?: (data: any) => void;
+  onDataClick?: (data: unknown) => void;
+  onHover?: (data: unknown) => void;
 }

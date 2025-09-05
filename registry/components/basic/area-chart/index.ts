@@ -3,7 +3,6 @@
  * 遵循標準三層架構模式
  */
 
-import React from 'react';
 import './area-chart.css';
 
 // 主要組件 (統一架構)

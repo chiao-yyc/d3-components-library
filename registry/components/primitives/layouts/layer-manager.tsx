@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react'
-import { ChartType, getChartZIndex, getChartLayerOrder } from './chart-layer-constants'
+import { ChartType, getChartZIndex } from './chart-layer-constants'
 
 export interface ChartLayer {
   id: string

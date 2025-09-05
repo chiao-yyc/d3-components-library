@@ -74,8 +74,8 @@ export interface AreaChartCoreConfig extends BaseChartCoreConfig {
   // 新增：統一軸線系統配置
   xTickCount?: number;
   yTickCount?: number;
-  xTickFormat?: (domainValue: any, index: number) => string;
-  yTickFormat?: (domainValue: any, index: number) => string;
+  xTickFormat?: (domainValue: unknown, index: number) => string;
+  yTickFormat?: (domainValue: unknown, index: number) => string;
   
   // 特殊功能
   enableBrushZoom?: boolean;
@@ -106,8 +106,8 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private chartHeight: number = 0;
   
   // 交互控制器
-  private brushZoomController: any = null;
-  private crosshairController: any = null;
+  private brushZoomController: { destroy: () => void } | null = null;
+  private crosshairController: { destroy: () => void } | null = null;
   
   // Tooltip 相關
   private tooltipOverlay: D3Selection | null = null;
