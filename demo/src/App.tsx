@@ -23,6 +23,7 @@ const CandlestickDemo = lazy(() => import('./pages/CandlestickDemo'))
 const ModularTestDemo = lazy(() => import('./pages/ModularTestDemo'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const ChartsShowcase = lazy(() => import('./pages/ChartsShowcase'))
+const InstallationGuide = lazy(() => import('./pages/InstallationGuide'))
 const DataMapperDemo = lazy(() => import('./pages/DataMapperDemo'))
 const SimpleComponentsDemo = lazy(() => import('./pages/SimpleComponentsDemo'))
 const ComboChartDemo = lazy(() => import('./pages/ComboChartDemo'))
@@ -54,6 +55,7 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/installation" element={<InstallationGuide />} />
           <Route path="/bar-chart" element={<BarChartDemo />} />
           <Route path="/bar-chart-v2" element={<BarChartDemoV2 />} />
           <Route path="/line-chart" element={<LineChartDemo />} />

@@ -15,14 +15,14 @@ function Home() {
 
         {/* 主要導航卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link to="/installation" className="block p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm border border-green-200 hover:shadow-lg hover:-translate-y-1 transition-all">
+            <h3 className="text-lg font-semibold text-green-900 mb-2">⚙️ 快速安裝</h3>
+            <p className="text-green-700">5 分鐘完成設置，互動式安裝嚮導幫你搞定一切。</p>
+          </Link>
+
           <Link to="/gallery" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">🎨 組件庫總覽</h3>
             <p className="text-gray-600">瀏覽所有可用的圖表組件，快速預覽效果。</p>
-          </Link>
-
-          <Link to="/simple-components" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">🚀 核心架構</h3>
-            <p className="text-gray-600">漸進式複雜度設計：簡化組件到完全組合。</p>
           </Link>
 
           <Link to="/combo-chart" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">

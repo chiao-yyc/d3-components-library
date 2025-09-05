@@ -203,7 +203,7 @@ export class BarChartCore extends BaseChartCore<unknown> {
   /**
    * 添加互動事件
    */
-  private addInteractionEvents(selection: d3.Selection<SVGRectElement, ProcessedDataPoint, SVGGElement, unknown>): void;
+  private addInteractionEvents(selection: d3.Selection<SVGRectElement, ProcessedDataPoint, SVGGElement, unknown>): void {
     const config = this.config as BarChartCoreConfig;
     const { interactive, onDataClick, onHover } = config;
 

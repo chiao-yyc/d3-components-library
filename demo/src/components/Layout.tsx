@@ -31,6 +31,7 @@ function Layout({ children }: LayoutProps) {
       description: '新手入門必看',
       items: [
         { path: '/', name: '專案概覽', icon: '🏠' },
+        { path: '/installation', name: '安裝指南', icon: '⚙️' },
         { path: '/charts-showcase', name: '圖表總覽館', icon: '🏛️' },
         { path: '/gallery', name: '圖表實驗室', icon: '🧪' },
       ]
