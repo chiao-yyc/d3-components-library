@@ -1,3 +1,6 @@
+import { useState, useEffect } from 'react'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { BarChart } from '@registry/components/basic/bar-chart'
 import { LineChart } from '@registry/components/basic/line-chart'
 import { ScatterPlot } from '@registry/components/statistical/scatter-plot'
@@ -7,6 +10,19 @@ import { Heatmap } from '@registry/components/basic/heatmap'
 import { FunnelChart } from '@registry/components/basic/funnel-chart'
 import { ExactFunnelChart } from '@registry/components/basic/exact-funnel-chart'
 import { basicBarData } from '../data/sample-data'
+import { 
+  DemoPageTemplate,
+  ModernControlPanel,
+  ControlGroup,
+  SelectControl,
+  ToggleControl,
+  ChartContainer,
+  StatusDisplay,
+  DataTable,
+  CodeExample,
+  type DataTableColumn
+} from '../components/ui'
+import { CogIcon, RectangleGroupIcon, ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline'
 
 // 生成範例資料
 const timeSeriesData = [
@@ -84,587 +100,568 @@ const observableFunnelData = [
 ]
 
 function Gallery() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  // 從 URL 參數初始化狀態
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'all')
+  const [selectedChart, setSelectedChart] = useState<string>(searchParams.get('chart') || 'bar-basic')
+  const [animate, setAnimate] = useState(searchParams.get('animate') !== 'false')
+  const [interactive, setInteractive] = useState(searchParams.get('interactive') !== 'false')
+  const [showGrid, setShowGrid] = useState(searchParams.get('grid') === 'true')
+  const [isFromShowcase, setIsFromShowcase] = useState(searchParams.get('from') === 'showcase')
+
+  // 圖表分類定義
+  const categories = [
+    { value: 'all', label: '全部圖表' },
+    { value: 'basic', label: '基礎圖表' },
+    { value: 'statistical', label: '統計圖表' },
+    { value: 'special', label: '特殊圖表' }
+  ]
+
+  // 圖表選項定義
+  const chartOptions = [
+    { value: 'bar-basic', label: '基本長條圖', category: 'basic' },
+    { value: 'bar-colorful', label: '多色長條圖', category: 'basic' },
+    { value: 'line-basic', label: '基本折線圖', category: 'basic' },
+    { value: 'line-area', label: '區域填充圖', category: 'basic' },
+    { value: 'scatter-basic', label: '基本散點圖', category: 'statistical' },
+    { value: 'scatter-category', label: '分類散點圖', category: 'statistical' },
+    { value: 'pie-basic', label: '基本圓餅圖', category: 'basic' },
+    { value: 'pie-donut', label: '甜甜圈圖', category: 'basic' },
+    { value: 'area-multi', label: '多系列區域圖', category: 'basic' },
+    { value: 'area-stacked', label: '堆疊區域圖', category: 'basic' },
+    { value: 'heatmap-basic', label: '基本熱力圖', category: 'special' },
+    { value: 'heatmap-rounded', label: '圓角熱力圖', category: 'special' },
+    { value: 'funnel-basic', label: '基本漏斗圖', category: 'special' },
+    { value: 'funnel-conversion', label: '轉換率漏斗圖', category: 'special' }
+  ]
+
+  // URL 參數同步 effect
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (selectedCategory !== 'all') params.set('category', selectedCategory)
+    if (selectedChart !== 'bar-basic') params.set('chart', selectedChart)
+    if (!animate) params.set('animate', 'false')
+    if (!interactive) params.set('interactive', 'false')
+    if (showGrid) params.set('grid', 'true')
+    
+    setSearchParams(params, { replace: true })
+  }, [selectedCategory, selectedChart, animate, interactive, showGrid, setSearchParams])
+
+  // 處理狀態變更的包裝函數
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value)
+    // 如果新類別不包含當前選中的圖表，自動選擇該類別的第一個圖表
+    const newFilteredOptions = value === 'all' ? chartOptions : chartOptions.filter(chart => chart.category === value)
+    if (!newFilteredOptions.find(chart => chart.value === selectedChart)) {
+      setSelectedChart(newFilteredOptions[0]?.value || 'bar-basic')
+    }
+  }
+
+  // 過濾圖表選項
+  const filteredChartOptions = selectedCategory === 'all' 
+    ? chartOptions 
+    : chartOptions.filter(chart => chart.category === selectedCategory)
+
+  // 當前選中的圖表信息
+  const currentChart = chartOptions.find(chart => chart.value === selectedChart)
+
+  // 狀態顯示數據
+  // 快捷鍵支援
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFromShowcase) {
+        navigate('/charts-showcase')
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [navigate, isFromShowcase])
+
+  const statusItems = [
+    { label: '當前圖表', value: currentChart?.label || '未選擇' },
+    { label: '圖表類別', value: currentChart?.category || '未知', color: '#3b82f6' },
+    { label: '總圖表數', value: filteredChartOptions.length, color: '#10b981' },
+    { label: '動畫效果', value: animate ? '開啟' : '關閉', color: animate ? '#10b981' : '#6b7280' },
+    { label: '交互功能', value: interactive ? '開啟' : '關閉', color: interactive ? '#10b981' : '#6b7280' }
+  ]
+
   return (
-    <div className="px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            組件庫
-          </h1>
-          <p className="text-gray-600">
-            瀏覽所有可用的 D3 組件，包含7種圖表類型
-          </p>
+    <DemoPageTemplate
+      title="組件庫總覽"
+      description="瀏覽所有可用的 D3 組件，包含基礎、統計和特殊圖表類型，支持即時配置和預覽"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* 控制面板 - 左側 1/4 */}
+        <div className="lg:col-span-1">
+          <ModernControlPanel 
+            title="圖表瀏覽器" 
+            icon={<CogIcon className="w-5 h-5" />}
+          >
+            <div className="space-y-8">
+              {/* 分類篩選 */}
+              <ControlGroup title="圖表分類" icon="🗂️" cols={1}>
+                <SelectControl
+                  label="分類篩選"
+                  value={selectedCategory}
+                  onChange={setSelectedCategory}
+                  options={categories}
+                />
+              </ControlGroup>
+
+              {/* 圖表選擇 */}
+              <ControlGroup title="圖表選擇" icon="📊" cols={1}>
+                <SelectControl
+                  label="選擇圖表"
+                  value={selectedChart}
+                  onChange={setSelectedChart}
+                  options={filteredChartOptions}
+                />
+              </ControlGroup>
+
+              {/* 全局設置 */}
+              <ControlGroup title="全局設置" icon="⚙️" cols={1}>
+                <ToggleControl
+                  label="動畫效果"
+                  checked={animate}
+                  onChange={setAnimate}
+                  description="所有圖表的動畫效果"
+                />
+                
+                <ToggleControl
+                  label="交互功能"
+                  checked={interactive}
+                  onChange={setInteractive}
+                  description="懸停和點擊交互"
+                />
+                
+                <ToggleControl
+                  label="顯示網格"
+                  checked={showGrid}
+                  onChange={setShowGrid}
+                  description="圖表背景網格"
+                />
+              </ControlGroup>
+            </div>
+          </ModernControlPanel>
         </div>
 
-        <div className="space-y-12">
-          {/* 長條圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              長條圖組件 (Bar Chart)
-            </h2>
+        {/* 主要內容區域 - 右側 3/4 */}
+        <div className="lg:col-span-3 space-y-8">
+          {/* 當前圖表展示 */}
+          <ChartContainer
+            title={`${currentChart?.label || '圖表預覽'}`}
+            subtitle="即時配置效果預覽"
+            actions={
+              <div className="flex items-center gap-2">
+                <RectangleGroupIcon className="w-5 h-5 text-blue-500" />
+                <span className="text-sm text-gray-600">{currentChart?.category || '未知類別'}</span>
+              </div>
+            }
+          >
+            <motion.div
+              key={selectedChart}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center"
+            >
+              {renderSelectedChart(selectedChart, { animate, interactive, showGrid })}
+            </motion.div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  基本長條圖
-                </h3>
-                <div className="flex justify-center">
-                  <BarChart
-                    data={basicBarData}
-                    xKey="category"
-                    yKey="value"
-                    width={350}
-                    height={200}
-                    colors={['#3b82f6']}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>簡單的長條圖，適合展示分類資料</p>
-                </div>
-              </div>
+            <StatusDisplay items={statusItems} />
+          </ChartContainer>
 
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  多色長條圖
-                </h3>
-                <div className="flex justify-center">
-                  <BarChart
-                    data={basicBarData}
-                    xKey="category"
-                    yKey="value"
-                    width={350}
-                    height={200}
-                    colors={['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e']}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>每根長條使用不同顏色的彩虹配色</p>
-                </div>
-              </div>
+          {/* 圖表數據表 */}
+          <DataTable
+            title="當前圖表數據"
+            data={getCurrentChartData(selectedChart)}
+            columns={getCurrentChartColumns(selectedChart)}
+            maxRows={6}
+            showIndex
+          />
+
+          {/* 代碼範例 */}
+          <CodeExample
+            title="使用範例"
+            language="tsx"
+            code={generateCurrentCode(selectedChart, { animate, interactive, showGrid })}
+          />
+
+          {/* 組件特性說明 */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full" />
+              <h3 className="text-xl font-semibold text-gray-800">組件庫特點</h3>
             </div>
-          </section>
-
-          {/* 折線圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              折線圖組件 (Line Chart)
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  基本時間序列
-                </h3>
-                <div className="flex justify-center">
-                  <LineChart
-                    data={timeSeriesData}
-                    xKey="date"
-                    yKey="value"
-                    width={350}
-                    height={200}
-                    colors={['#3b82f6']}
-                    curve="monotone"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>時間序列資料的基本折線圖</p>
-                </div>
-              </div>
-
-              
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  區域填充圖
-                </h3>
-                <div className="flex justify-center">
-                  <LineChart
-                    data={timeSeriesData}
-                    xKey="date"
-                    yKey="value"
-                    width={350}
-                    height={200}
-                    colors={['#10b981']}
-                    curve="cardinal"
-                    showArea={true}
-                    areaOpacity={0.3}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>帶有區域填充的平滑曲線圖</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 散點圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              散點圖組件 (Scatter Plot)
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本散點圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  基本散點圖
-                </h3>
-                <div className="flex justify-center">
-                  <ScatterPlot
-                    data={scatterData}
-                    xKey="x"
-                    yKey="y"
-                    width={350}
-                    height={200}
-                    colors={['#3b82f6']}
-                    radius={6}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>基本的散點圖，展示兩個變數的關係</p>
-                </div>
-              </div>
-
-              {/* 分類散點圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  分類散點圖
-                </h3>
-                <div className="flex justify-center">
-                  <ScatterPlot
-                    data={scatterData}
-                    xKey="x"
-                    yKey="y"
-                    colorKey="category"
-                    width={350}
-                    height={200}
-                    colors={['#3b82f6', '#ef4444', '#10b981']}
-                    radius={7}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>使用顏色區分不同類別的散點圖</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 圓餅圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              圓餅圖組件 (Pie Chart)
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本圓餅圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  基本圓餅圖
-                </h3>
-                <div className="flex justify-center">
-                  <PieChart
-                    data={pieData}
-                    mapping={{ label: 'category', value: 'value' }}
-                    width={350}
-                    height={250}
-                    showLegend={true}
-                    legendPosition="bottom"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>基本的圓餅圖，展示資料比例</p>
-                </div>
-              </div>
-
-              {/* 甜甜圈圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  甜甜圈圖
-                </h3>
-                <div className="flex justify-center">
-                  <PieChart
-                    data={pieData}
-                    mapping={{ label: 'category', value: 'value', color: 'region' }}
-                    width={350}
-                    height={250}
-                    innerRadius={60}
-                    showLegend={true}
-                    legendPosition="bottom"
-                    showCenterText={true}
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>中空的甜甜圈樣式，帶有中心文字</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 區域圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              區域圖組件 (Area Chart)
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本區域圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  多系列區域圖
-                </h3>
-                <div className="flex justify-center">
-                  <AreaChart
-                    data={areaData}
-                    mapping={{ x: 'month', y: 'users', category: 'device' }}
-                    width={350}
-                    height={200}
-                    stackMode="none"
-                    gradient={true}
-                    showLegend={true}
-                    legendPosition="top"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>多系列的區域圖，展示不同類別趨勢</p>
-                </div>
-              </div>
-
-              {/* 堆疊區域圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  堆疊區域圖
-                </h3>
-                <div className="flex justify-center">
-                  <AreaChart
-                    data={areaData}
-                    mapping={{ x: 'month', y: 'users', category: 'device' }}
-                    width={350}
-                    height={200}
-                    stackMode="stack"
-                    gradient={true}
-                    showLegend={true}
-                    legendPosition="top"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>累積堆疊的區域圖，展示總量變化</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 熱力圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              熱力圖組件 (Heatmap)
-            </h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* 基本熱力圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  基本熱力圖
-                </h3>
-                <div className="flex justify-center">
-                  <Heatmap
-                    data={heatmapData}
-                    mapping={{ x: 'x', y: 'y', value: 'value' }}
-                    width={300}
-                    height={200}
-                    colorScheme="blues"
-                    showLegend={true}
-                    legendPosition="right"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>基本的熱力圖，展示矩陣資料</p>
-                </div>
-              </div>
-
-              {/* 圓角熱力圖 */}
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  圓角熱力圖
-                </h3>
-                <div className="flex justify-center">
-                  <Heatmap
-                    data={heatmapData}
-                    mapping={{ x: 'x', y: 'y', value: 'value' }}
-                    width={300}
-                    height={200}
-                    colorScheme="reds"
-                    cellRadius={4}
-                    showValues={true}
-                    showLegend={true}
-                    legendPosition="right"
-                  />
-                </div>
-                <div className="mt-4 text-sm text-gray-600">
-                  <p>圓角格子和數值顯示的熱力圖</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 漏斗圖組件 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              漏斗圖組件 (Funnel Chart)
-            </h2>
-            
-            {/* 傳統漏斗圖 */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                傳統漏斗圖 (Traditional Funnel Chart)
-              </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* 基本漏斗圖 */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    基本漏斗圖
-                  </h4>
-                  <div className="flex justify-center">
-                    <FunnelChart
-                      data={funnelData}
-                      labelKey="step"
-                      valueKey="users"
-                      width={350}
-                      height={300}
-                      colors={['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554']}
-                      showLabels={true}
-                      showValues={true}
-                      showPercentages={true}
-                      labelPosition="side"
-                    />
-                  </div>
-                  <div className="mt-4 text-sm text-gray-600">
-                    <p>基本的漏斗圖，展示轉換流程</p>
-                  </div>
-                </div>
-
-                {/* 帶轉換率漏斗圖 */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    轉換率漏斗圖
-                  </h4>
-                  <div className="flex justify-center">
-                    <FunnelChart
-                      data={funnelData}
-                      labelKey="step"
-                      valueKey="users"
-                      width={350}
-                      height={300}
-                      colors={['#10b981', '#059669', '#047857', '#065f46', '#064e3b']}
-                      showLabels={true}
-                      showValues={true}
-                      showConversionRates={true}
-                      labelPosition="side"
-                      colorScheme="greens"
-                    />
-                  </div>
-                  <div className="mt-4 text-sm text-gray-600">
-                    <p>顯示各階段轉換率的漏斗圖</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Observable 風格漏斗圖 */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Observable 風格漏斗圖 (Observable Style Funnel Chart)
-              </h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* 深色主題 Observable 漏斗圖 */}
-                <div className="bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-700">
-                  <h4 className="text-lg font-semibold text-white mb-4">
-                    深色主題漏斗圖
-                  </h4>
-                  <div className="flex justify-center">
-                    <ExactFunnelChart
-                      data={observableFunnelData}
-                      width={350}
-                      height={300}
-                      background="#2a2a2a"
-                      gradient1="#FF6B6B"
-                      gradient2="#4ECDC4"
-                      values="#ffffff"
-                      labels="#cccccc"
-                      percentages="#888888"
-                      showValues={true}
-                      showLabels={true}
-                      showPercentages={true}
-                    />
-                  </div>
-                  <div className="mt-4 text-sm text-gray-300">
-                    <p>Observable 風格的平滑曲線漏斗圖，適合深色主題</p>
-                  </div>
-                </div>
-
-                {/* 淺色主題 Observable 漏斗圖 */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                    淺色主題漏斗圖
-                  </h4>
-                  <div className="flex justify-center">
-                    <ExactFunnelChart
-                      data={observableFunnelData}
-                      width={350}
-                      height={300}
-                      background="#ffffff"
-                      gradient1="#3b82f6"
-                      gradient2="#10b981"
-                      values="#1f2937"
-                      labels="#374151"
-                      percentages="#6b7280"
-                      showValues={true}
-                      showLabels={true}
-                      showPercentages={true}
-                    />
-                  </div>
-                  <div className="mt-4 text-sm text-gray-600">
-                    <p>適合淺色主題的 Observable 風格漏斗圖</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 組件特性 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              組件特性
-            </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  📱 響應式設計
-                </h3>
-                <p className="text-gray-600">
-                  支援自訂寬度和高度，適應不同螢幕尺寸
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">📱 響應式設計</h4>
+                <p className="text-sm text-gray-600">支援自訂寬度和高度，適應不同螢幕尺寸</p>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  🖱️ 互動功能
-                </h3>
-                <p className="text-gray-600">
-                  內建 hover 效果、工具提示和點擊事件
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">🖱️ 互動功能</h4>
+                <p className="text-sm text-gray-600">內建 hover 效果、工具提示和點擊事件</p>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  🎨 自訂配色
-                </h3>
-                <p className="text-gray-600">
-                  支援多種顏色主題和自訂配色方案
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">🎨 自訂配色</h4>
+                <p className="text-sm text-gray-600">支援多種顏色主題和自訂配色方案</p>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  ⚡ 動畫效果
-                </h3>
-                <p className="text-gray-600">
-                  平滑的進場動畫和過渡效果
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">⚡ 動畫效果</h4>
+                <p className="text-sm text-gray-600">平滑的進場動畫和過渡效果</p>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  🔧 高度可配置
-                </h3>
-                <p className="text-gray-600">
-                  豐富的配置選項，滿足各種業務需求
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">🔧 高度可配置</h4>
+                <p className="text-sm text-gray-600">豐富的配置選項，滿足各種業務需求</p>
               </div>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  📘 TypeScript 支援
-                </h3>
-                <p className="text-gray-600">
-                  完整的 TypeScript 類型定義和智能提示
-                </p>
+              <div className="bg-white/80 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-800 mb-2">📘 TypeScript</h4>
+                <p className="text-sm text-gray-600">完整的類型定義和智能提示</p>
               </div>
             </div>
-          </section>
-
-          {/* 統計資訊 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              組件庫統計
-            </h2>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-blue-600">7</div>
-                  <div className="text-sm text-gray-600">圖表組件</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600">20+</div>
-                  <div className="text-sm text-gray-600">配置選項</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-purple-600">100%</div>
-                  <div className="text-sm text-gray-600">TypeScript</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-red-600">D3.js</div>
-                  <div className="text-sm text-gray-600">強力引擎</div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* 使用說明 */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              快速開始
-            </h2>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                基本用法範例
-              </h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <pre className="text-sm text-gray-800 overflow-x-auto">
-{`import { BarChart } from '@registry/components/basic/bar-chart'
-
-const data = [
-  { category: 'A', value: 30 },
-  { category: 'B', value: 80 },
-  { category: 'C', value: 45 },
-]
-
-function MyComponent() {
-  return (
-    <BarChart
-      data={data}
-      xKey="category"
-      yKey="value"
-      width={600}
-      height={400}
-      colors={['#3b82f6']}
-      animate={true}
-      interactive={true}
-    />
-  )
-}`}
-                </pre>
-              </div>
-            </div>
-          </section>
+          </div>
         </div>
       </div>
-    </div>
+    </DemoPageTemplate>
   )
+}
+
+// 渲染選中的圖表
+function renderSelectedChart(chartId: string, options: { animate: boolean; interactive: boolean; showGrid: boolean }) {
+  const { animate, interactive, showGrid } = options
+  const commonProps = {
+    width: 500,
+    height: 300,
+    animate,
+    interactive,
+    showGrid
+  }
+
+  switch (chartId) {
+    case 'bar-basic':
+      return (
+        <BarChart
+          data={basicBarData}
+          xKey="category"
+          yKey="value"
+          colors={['#3b82f6']}
+          {...commonProps}
+        />
+      )
+    
+    case 'bar-colorful':
+      return (
+        <BarChart
+          data={basicBarData}
+          xKey="category"
+          yKey="value"
+          colors={['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e']}
+          {...commonProps}
+        />
+      )
+    
+    case 'line-basic':
+      return (
+        <LineChart
+          data={timeSeriesData}
+          xKey="date"
+          yKey="value"
+          colors={['#3b82f6']}
+          curve="monotone"
+          {...commonProps}
+        />
+      )
+    
+    case 'line-area':
+      return (
+        <LineChart
+          data={timeSeriesData}
+          xKey="date"
+          yKey="value"
+          colors={['#10b981']}
+          curve="cardinal"
+          showArea={true}
+          areaOpacity={0.3}
+          {...commonProps}
+        />
+      )
+    
+    case 'scatter-basic':
+      return (
+        <ScatterPlot
+          data={scatterData}
+          xKey="x"
+          yKey="y"
+          colors={['#3b82f6']}
+          radius={6}
+          {...commonProps}
+        />
+      )
+    
+    case 'scatter-category':
+      return (
+        <ScatterPlot
+          data={scatterData}
+          xKey="x"
+          yKey="y"
+          colorKey="category"
+          colors={['#3b82f6', '#ef4444', '#10b981']}
+          radius={7}
+          {...commonProps}
+        />
+      )
+    
+    case 'pie-basic':
+      return (
+        <PieChart
+          data={pieData}
+          mapping={{ label: 'category', value: 'value' }}
+          showLegend={true}
+          legendPosition="bottom"
+          {...commonProps}
+        />
+      )
+    
+    case 'pie-donut':
+      return (
+        <PieChart
+          data={pieData}
+          mapping={{ label: 'category', value: 'value', color: 'region' }}
+          innerRadius={60}
+          showLegend={true}
+          legendPosition="bottom"
+          showCenterText={true}
+          {...commonProps}
+        />
+      )
+    
+    case 'area-multi':
+      return (
+        <AreaChart
+          data={areaData}
+          mapping={{ x: 'month', y: 'users', category: 'device' }}
+          stackMode="none"
+          gradient={true}
+          showLegend={true}
+          legendPosition="top"
+          {...commonProps}
+        />
+      )
+    
+    case 'area-stacked':
+      return (
+        <AreaChart
+          data={areaData}
+          mapping={{ x: 'month', y: 'users', category: 'device' }}
+          stackMode="stack"
+          gradient={true}
+          showLegend={true}
+          legendPosition="top"
+          {...commonProps}
+        />
+      )
+    
+    case 'heatmap-basic':
+      return (
+        <Heatmap
+          data={heatmapData}
+          mapping={{ x: 'x', y: 'y', value: 'value' }}
+          colorScheme="blues"
+          showLegend={true}
+          legendPosition="right"
+          {...commonProps}
+        />
+      )
+    
+    case 'heatmap-rounded':
+      return (
+        <Heatmap
+          data={heatmapData}
+          mapping={{ x: 'x', y: 'y', value: 'value' }}
+          colorScheme="reds"
+          cellRadius={4}
+          showValues={true}
+          showLegend={true}
+          legendPosition="right"
+          {...commonProps}
+        />
+      )
+    
+    case 'funnel-basic':
+      return (
+        <FunnelChart
+          data={funnelData}
+          labelKey="step"
+          valueKey="users"
+          colors={['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554']}
+          showLabels={true}
+          showValues={true}
+          showPercentages={true}
+          labelPosition="side"
+          {...commonProps}
+        />
+      )
+    
+    case 'funnel-conversion':
+      return (
+        <FunnelChart
+          data={funnelData}
+          labelKey="step"
+          valueKey="users"
+          colors={['#10b981', '#059669', '#047857', '#065f46', '#064e3b']}
+          showLabels={true}
+          showValues={true}
+          showConversionRates={true}
+          labelPosition="side"
+          colorScheme="greens"
+          {...commonProps}
+        />
+      )
+    
+    default:
+      return <div className="text-gray-500">請選擇一個圖表</div>
+  }
+}
+
+// 獲取當前圖表數據
+function getCurrentChartData(chartId: string) {
+  switch (chartId) {
+    case 'bar-basic':
+    case 'bar-colorful':
+      return basicBarData.slice(0, 5)
+    case 'line-basic':
+    case 'line-area':
+      return timeSeriesData.slice(0, 5)
+    case 'scatter-basic':
+    case 'scatter-category':
+      return scatterData.slice(0, 5)
+    case 'pie-basic':
+    case 'pie-donut':
+      return pieData
+    case 'area-multi':
+    case 'area-stacked':
+      return areaData.slice(0, 6)
+    case 'heatmap-basic':
+    case 'heatmap-rounded':
+      return heatmapData.slice(0, 8)
+    case 'funnel-basic':
+    case 'funnel-conversion':
+      return funnelData
+    default:
+      return []
+  }
+}
+
+// 獲取當前圖表列定義
+function getCurrentChartColumns(chartId: string): DataTableColumn[] {
+  switch (chartId) {
+    case 'bar-basic':
+    case 'bar-colorful':
+      return [
+        { key: 'category', title: '類別', sortable: true },
+        { key: 'value', title: '數值', sortable: true, align: 'right' }
+      ]
+    case 'line-basic':
+    case 'line-area':
+      return [
+        { key: 'date', title: '日期', sortable: true },
+        { key: 'value', title: '數值', sortable: true, align: 'right' }
+      ]
+    case 'scatter-basic':
+    case 'scatter-category':
+      return [
+        { key: 'x', title: 'X 軸', sortable: true, align: 'right' },
+        { key: 'y', title: 'Y 軸', sortable: true, align: 'right' },
+        ...(chartId === 'scatter-category' ? [{ key: 'category', title: '分類', sortable: true }] : [])
+      ]
+    case 'pie-basic':
+    case 'pie-donut':
+      return [
+        { key: 'category', title: '類別', sortable: true },
+        { key: 'value', title: '數值', sortable: true, align: 'right' },
+        { key: 'region', title: '區域', sortable: true }
+      ]
+    case 'area-multi':
+    case 'area-stacked':
+      return [
+        { key: 'month', title: '月份', sortable: true },
+        { key: 'users', title: '用戶數', sortable: true, align: 'right' },
+        { key: 'device', title: '設備', sortable: true }
+      ]
+    case 'heatmap-basic':
+    case 'heatmap-rounded':
+      return [
+        { key: 'x', title: 'X 軸', sortable: true },
+        { key: 'y', title: 'Y 軸', sortable: true },
+        { key: 'value', title: '數值', sortable: true, align: 'right' }
+      ]
+    case 'funnel-basic':
+    case 'funnel-conversion':
+      return [
+        { key: 'step', title: '階段', sortable: false },
+        { key: 'users', title: '用戶數', sortable: true, align: 'right', formatter: (value) => value.toLocaleString() }
+      ]
+    default:
+      return []
+  }
+}
+
+// 生成當前代碼範例
+function generateCurrentCode(chartId: string, options: { animate: boolean; interactive: boolean; showGrid: boolean }): string {
+  const { animate, interactive, showGrid } = options
+  
+  const getDataName = (chartId: string) => {
+    if (chartId.startsWith('bar-')) return 'basicBarData'
+    if (chartId.startsWith('line-')) return 'timeSeriesData'
+    if (chartId.startsWith('scatter-')) return 'scatterData'
+    if (chartId.startsWith('pie-')) return 'pieData'
+    if (chartId.startsWith('area-')) return 'areaData'
+    if (chartId.startsWith('heatmap-')) return 'heatmapData'
+    if (chartId.startsWith('funnel-')) return 'funnelData'
+    return 'data'
+  }
+
+  const componentMapping = {
+    'bar-basic': 'BarChart',
+    'bar-colorful': 'BarChart',
+    'line-basic': 'LineChart',
+    'line-area': 'LineChart',
+    'scatter-basic': 'ScatterPlot',
+    'scatter-category': 'ScatterPlot',
+    'pie-basic': 'PieChart',
+    'pie-donut': 'PieChart',
+    'area-multi': 'AreaChart',
+    'area-stacked': 'AreaChart',
+    'heatmap-basic': 'Heatmap',
+    'heatmap-rounded': 'Heatmap',
+    'funnel-basic': 'FunnelChart',
+    'funnel-conversion': 'FunnelChart'
+  }
+
+  const componentName = componentMapping[chartId as keyof typeof componentMapping] || 'Chart'
+  const dataName = getDataName(chartId)
+
+  return `import { ${componentName} } from '@registry/components'
+
+const ${dataName} = [
+  // 您的數據...
+]
+
+<${componentName}
+  data={${dataName}}
+  width={500}
+  height={300}${animate ? `\n  animate={${animate}}` : ''}${interactive ? `\n  interactive={${interactive}}` : ''}${showGrid ? `\n  showGrid={${showGrid}}` : ''}
+  // 其他特定配置...
+/>`
 }
 
 export default Gallery
