@@ -42,7 +42,7 @@ export interface PieSegment {
   path: string;
   centroid: [number, number];
   labelPosition: [number, number];
-  arc: d3.Arc<any, d3.DefaultArcObject>;
+  arc: d3.Arc<unknown, d3.DefaultArcObject>;
 }
 
 // 標籤配置
@@ -150,7 +150,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
   protected processData(): { 
     pie: d3.Pie<any, ProcessedPieDataPoint>;
-    arc: d3.Arc<any, d3.DefaultArcObject>;
+    arc: d3.Arc<unknown, d3.DefaultArcObject>;
     data: ProcessedPieDataPoint[] 
   } {
     const config = this.config as PieChartCoreConfig;

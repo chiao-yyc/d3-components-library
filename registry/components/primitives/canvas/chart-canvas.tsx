@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, useContext, useRef, useState } from 'react'
 import * as d3 from 'd3'
 
 export interface ChartDimensions {

@@ -6,13 +6,13 @@
 import * as d3 from 'd3';
 
 export interface AxisCoreConfig {
-  scale: d3.AxisScale<any>;
+  scale: d3.AxisScale<unknown>;
   orientation: 'top' | 'right' | 'bottom' | 'left';
   tickCount?: number;
   tickSize?: number;
   tickSizeOuter?: number;
-  tickFormat?: (domainValue: any, index: number) => string;
-  tickValues?: any[];
+  tickFormat?: (domainValue: unknown, index: number) => string;
+  tickValues?: unknown[];
   showTicks?: boolean;
   showTickLabels?: boolean;
   showDomain?: boolean;
@@ -20,7 +20,7 @@ export interface AxisCoreConfig {
 
 export class AxisCore {
   private config: AxisCoreConfig;
-  private axisGenerator: d3.Axis<any>;
+  private axisGenerator: d3.Axis<d3.AxisDomain>;
 
   constructor(config: AxisCoreConfig) {
     this.config = config;

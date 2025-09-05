@@ -38,7 +38,7 @@ export type { PieChartProps as LegacyPieChartProps, LegendItem } from './types';
 // export type { PieChartConfig as D3PieChartConfig } from './core';
 
 // 快捷變體組件（已整合到主檔案）
-export const DonutChartLegacy = React.forwardRef<any, any>((props, ref) => {
+export const DonutChartLegacy = React.forwardRef<unknown, unknown>((props, ref) => {
   return React.createElement(DonutChart, { ref, ...props });
 });
 DonutChartLegacy.displayName = 'DonutChartLegacy';

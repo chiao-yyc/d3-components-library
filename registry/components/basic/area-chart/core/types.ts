@@ -33,11 +33,11 @@ export interface AreaChartProps extends BaseChartProps {
   
   // 向下兼容的廢棄屬性 - Accessor-based 模式
   /** @deprecated 請使用 mapping.x 替代。將在 v1.0.0 版本中移除。 */
-  xAccessor?: (d: any) => Date | number | string;
+  xAccessor?: (d: unknown) => Date | number | string;
   /** @deprecated 請使用 mapping.y 替代。將在 v1.0.0 版本中移除。 */
-  yAccessor?: (d: any) => number;
+  yAccessor?: (d: unknown) => number;
   /** @deprecated 請使用 mapping.category 替代。將在 v1.0.0 版本中移除。 */
-  categoryAccessor?: (d: any) => string;
+  categoryAccessor?: (d: unknown) => string;
   
   // Area 特定樣式
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
@@ -54,8 +54,8 @@ export interface AreaChartProps extends BaseChartProps {
   // Axis
   showXAxis?: boolean;
   showYAxis?: boolean;
-  xAxisFormat?: (d: any) => string;
-  yAxisFormat?: (d: any) => string;
+  xAxisFormat?: (d: unknown) => string;
+  yAxisFormat?: (d: unknown) => string;
   
   // Legend
   showLegend?: boolean;
@@ -76,7 +76,7 @@ export interface AreaChartProps extends BaseChartProps {
   // 筆刷縮放功能
   enableBrushZoom?: boolean;
   brushZoomConfig?: Partial<BrushZoomConfig>;
-  onZoom?: (domain: [any, any]) => void;
+  onZoom?: (domain: [unknown, unknown]) => void;
   onZoomReset?: () => void;
   
   // 十字游標功能
@@ -89,5 +89,5 @@ export interface AreaChartProps extends BaseChartProps {
   glowColor?: string;
   
   // 數據查找配置
-  dataAccessor?: (d: any) => any; // 用於十字游標的數據查找
+  dataAccessor?: (d: unknown) => unknown; // 用於十字游標的數據查找
 }

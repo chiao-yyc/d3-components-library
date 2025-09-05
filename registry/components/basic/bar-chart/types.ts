@@ -15,8 +15,8 @@ export interface BarChartProps extends BaseChartProps {
   // BarChart specific properties
   xKey?: string;
   yKey?: string;
-  xAccessor?: (d: any) => any;
-  yAccessor?: (d: any) => any;
+  xAccessor?: (d: unknown) => unknown;
+  yAccessor?: (d: unknown) => unknown;
   mapping?: DataMapping;
   orientation?: 'vertical' | 'horizontal';
   colors?: string[];
@@ -24,14 +24,14 @@ export interface BarChartProps extends BaseChartProps {
   // Labels
   showLabels?: boolean;
   labelPosition?: 'top' | 'center' | 'bottom';
-  labelFormat?: (value: any) => string;
+  labelFormat?: (value: unknown) => string;
   
   // Axis configuration (unified axis system)
   showGrid?: boolean;
   xTickCount?: number;
   yTickCount?: number;
-  xTickFormat?: (domainValue: any, index: number) => string;
-  yTickFormat?: (domainValue: any, index: number) => string;
+  xTickFormat?: (domainValue: unknown, index: number) => string;
+  yTickFormat?: (domainValue: unknown, index: number) => string;
   xAxisLabel?: string;
   yAxisLabel?: string;
   
@@ -39,6 +39,6 @@ export interface BarChartProps extends BaseChartProps {
   tooltipFormat?: (data: ProcessedDataPoint) => string;
   
   // Events
-  onDataClick?: (data: any) => void;
-  onHover?: (data: any) => void;
+  onDataClick?: (data: unknown) => void;
+  onHover?: (data: unknown) => void;
 }

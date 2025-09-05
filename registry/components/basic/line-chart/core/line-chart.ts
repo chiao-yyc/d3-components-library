@@ -1,7 +1,7 @@
 
 import * as d3 from 'd3';
 import { LineChartProps, ProcessedDataPoint } from './types';
-import { BaseChart, BaseChartProps } from '../../../core/base-chart/base-chart';
+import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
 import { createChartClipPath } from '../../../core/base-chart/visual-effects';

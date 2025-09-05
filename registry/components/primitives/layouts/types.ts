@@ -7,7 +7,7 @@ export interface ChartLayer {
   clipPath?: string
   transform?: string
   className?: string
-  data?: any[]
+  data?: unknown[]
   component: React.ReactNode
 }
 
@@ -35,7 +35,7 @@ export interface UseChartLayerOptions {
   clipPath?: string
   transform?: string
   className?: string
-  data?: any[]
+  data?: unknown[]
 }
 
 export interface AutoLayerOptions extends UseChartLayerOptions {

@@ -5,15 +5,20 @@ import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
 import { ProcessedDataPoint } from '../../../core/data-processor/types';
-import { createChartClipPath, createStandardDropShadow, createStandardGlow } from '../../../core/base-chart/visual-effects';
+import { createChartClipPath, createStandardGlow } from '../../../core/base-chart/visual-effects';
 import { BrushZoomController, CrosshairController, createBrushZoom, createCrosshair } from '../../../core/base-chart/interaction-utils';
 
 export class D3AreaChart extends BaseChart<AreaChartProps> {
   private processedData: ProcessedAreaDataPoint[] = [];
   private seriesData: AreaSeriesData[] = [];
-  private stackedData: any[] = [];
-  private colorScale: any;
-  private scales: any = {};
+  private stackedData: d3.Series<Record<string, number>, string>[] = [];
+  private colorScale: ReturnType<typeof createColorScale>;
+  private scales: {
+    xScale?: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>;
+    yScale?: d3.ScaleLinear<number, number>;
+    chartWidth: number;
+    chartHeight: number;
+  } = { chartWidth: 0, chartHeight: 0 };
   
   // 交互控制器
   private brushZoomController: BrushZoomController | null = null;

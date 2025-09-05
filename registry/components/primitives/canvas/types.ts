@@ -18,9 +18,9 @@ export interface ChartCanvasContextValue {
   svgRef: React.RefObject<SVGSVGElement>
   dimensions: ChartDimensions
   contentArea: ContentArea
-  scales: Map<string, any>
-  registerScale: (name: string, scale: any) => void
-  getScale: (name: string) => any
+  scales: Map<string, unknown>
+  registerScale: (name: string, scale: unknown) => void
+  getScale: (name: string) => unknown
 }
 
 export interface ChartCanvasProps {

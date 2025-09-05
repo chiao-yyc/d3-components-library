@@ -1,13 +1,18 @@
 
 import * as d3 from 'd3';
 import { BarChartProps, ProcessedDataPoint } from '../types';
-import { BaseChart, BaseChartProps } from '../../../core/base-chart/base-chart';
+import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 
 export class D3BarChart extends BaseChart<BarChartProps> {
   private processedData: ProcessedDataPoint[] = [];
-  private scales: any = {};
+  private scales: {
+    xScale?: d3.ScaleBand<string> | d3.ScaleLinear<number, number>;
+    yScale?: d3.ScaleLinear<number, number> | d3.ScaleBand<string>;
+    chartWidth: number;
+    chartHeight: number;
+  } = { chartWidth: 0, chartHeight: 0 };
   private colorScale!: ColorScale; // Add colorScale property
 
   constructor(props: BarChartProps) {
@@ -15,7 +20,7 @@ export class D3BarChart extends BaseChart<BarChartProps> {
       responsive: props.responsive,
       width: props.width,
       height: props.height,
-      containerWidth: (props as any).containerWidth
+      containerWidth: (props as { containerWidth?: number }).containerWidth
     })
     super(props); // Call super with container and config
 

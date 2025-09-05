@@ -13,8 +13,8 @@ export type ScaleType = 'linear' | 'band' | 'time' | 'ordinal' | 'log' | 'sqrt' 
 
 export interface ScaleConfig {
   type: ScaleType
-  domain?: any[]
-  range?: any[]
+  domain?: unknown[]
+  range?: unknown[]
   padding?: number
   paddingInner?: number
   paddingOuter?: number
@@ -24,7 +24,7 @@ export interface ScaleConfig {
 
 export interface ScaleRegistration {
   name: string
-  scale: any
+  scale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> | d3.ScaleOrdinal<string, unknown> | d3.ScaleLogarithmic<number, number> | d3.ScalePower<number, number>
   config: ScaleConfig
   axis?: 'x' | 'y' | 'y2'
 }
