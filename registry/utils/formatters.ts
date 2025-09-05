@@ -3,6 +3,10 @@
  * 提供統一的日期、價格、成交量、百分比等格式化功能
  */
 
+// 數值格式化常數
+const ONE_HUNDRED_MILLION = 1e8 // 一億
+const TEN_THOUSAND = 1e4 // 一萬
+
 /**
  * 日期格式化選項
  */
@@ -186,18 +190,18 @@ export class VolumeFormatter {
     let unit = ''
 
     if (opts.units === 'auto') {
-      if (volume >= 1e8) {
-        value = volume / 1e8
+      if (volume >= ONE_HUNDRED_MILLION) {
+        value = volume / ONE_HUNDRED_MILLION
         unit = '億'
-      } else if (volume >= 1e4) {
-        value = volume / 1e4
+      } else if (volume >= TEN_THOUSAND) {
+        value = volume / TEN_THOUSAND
         unit = '萬'
       }
     } else if (opts.units === '萬') {
-      value = volume / 1e4
+      value = volume / TEN_THOUSAND
       unit = '萬'
     } else if (opts.units === '億') {
-      value = volume / 1e8
+      value = volume / ONE_HUNDRED_MILLION
       unit = '億'
     }
 

@@ -4,7 +4,7 @@
  */
 
 export interface SingleValueAnalysis {
-  value: any
+  value: unknown
   detectedType: 'number' | 'string' | 'date' | 'boolean'
   confidence: number
   format?: string
@@ -49,9 +49,8 @@ const BOOLEAN_PATTERNS = [
 /**
  * 分析單一值的可能類型
  */
-export function analyzeSingleValue(value: any): SingleValueAnalysis {
+export function analyzeSingleValue(value: unknown): SingleValueAnalysis {
   const originalValue = value
-  const suggestions: string[] = []
   let reasoning = ''
 
   // 如果是 null 或 undefined

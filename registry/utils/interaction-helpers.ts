@@ -9,7 +9,7 @@
  * @param delay 節流延遲時間 (毫秒)
  * @returns 節流後的函式
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -41,7 +41,7 @@ export function throttle<T extends (...args: any[]) => any>(
  * @param delay 防抖延遲時間 (毫秒)
  * @returns 防抖後的函式
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -102,7 +102,7 @@ export function isTouchDevice(): boolean {
   return (
     'ontouchstart' in window ||
     navigator.maxTouchPoints > 0 ||
-    // @ts-ignore
+    // @ts-expect-error - Legacy API compatibility
     navigator.msMaxTouchPoints > 0
   )
 }

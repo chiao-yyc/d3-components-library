@@ -1,9 +1,12 @@
 import { DataType, SuggestedMapping, ChartSuggestion, FieldSuggestion } from '../types/index'
 
+// 常數定義避免 magic numbers
+const MAX_SAMPLE_SIZE = 5
+
 export interface DataTypeInfo {
   type: 'number' | 'string' | 'date' | 'boolean'
   confidence: number
-  samples: any[]
+  samples: unknown[]
   nullCount: number
   subType?: string // 例如: 'integer', 'decimal', 'currency', 'percentage', 'iso-date', 'timestamp'
   format?: string  // 例如: 'YYYY-MM-DD', '$#,##0.00', '#.##%'
@@ -58,7 +61,7 @@ const NUMBER_PATTERNS = [
   { pattern: /^-?\d+\.?\d*[eE][+-]?\d+$/, format: 'Scientific notation', subType: 'scientific' }
 ]
 
-export function detectColumnType(values: any[]): DataTypeInfo {
+export function detectColumnType(values: unknown[]): DataTypeInfo {
   const nonNullValues = values.filter(v => v != null)
   const nullCount = values.length - nonNullValues.length
   
@@ -72,7 +75,7 @@ export function detectColumnType(values: any[]): DataTypeInfo {
   }
   
   // 取樣本資料
-  const samples = nonNullValues.slice(0, Math.min(5, nonNullValues.length))
+  const samples = nonNullValues.slice(0, Math.min(MAX_SAMPLE_SIZE, nonNullValues.length))
   
   // 增強的型別檢測
   const numberInfo = detectNumberType(nonNullValues)
