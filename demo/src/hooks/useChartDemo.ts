@@ -62,7 +62,7 @@ export function useChartDemo<T = any>(
       ...prev, 
       margin: { ...prev.margin!, ...margin }
     }))
-  }, [])
+  }, [config.margin])
 
   const toggleFeature = useCallback((feature: keyof ChartDemoConfig) => {
     setConfig(prev => ({

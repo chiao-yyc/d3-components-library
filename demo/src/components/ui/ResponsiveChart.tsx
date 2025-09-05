@@ -214,7 +214,7 @@ export const useResponsiveChart = (
         clearTimeout(resizeTimeoutRef.current)
       }
     }
-  }, [calculateDimensions, debouncedResize])
+  }, [calculateDimensions, debouncedResize, containerRef])
 
   return dimensions
 }

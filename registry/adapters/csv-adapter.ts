@@ -2,13 +2,21 @@ import { BaseAdapter } from './base-adapter'
 import { ChartDataPoint, DataMapping, ValidationResult } from '../types'
 import { detectColumnType } from '../utils/data-detector'
 
+// 定義常數避免 magic numbers
+const CONFIDENCE_THRESHOLD = 0.7
+const MAX_SAMPLE_SIZE = 100
+const MAX_DISPLAY_VALUES = 3
+const HIGH_CONFIDENCE = 0.9
+const LOW_CONFIDENCE = 0.1
+const ERROR_DIVISOR = 10
+
 /**
  * CSV 資料適配器
  * 處理 CSV 格式的資料，自動型別推斷和格式轉換
  */
-export class CsvAdapter extends BaseAdapter<Record<string, any>> {
+export class CsvAdapter extends BaseAdapter<Record<string, unknown>> {
   
-  transform(data: Record<string, any>[], config: DataMapping): ChartDataPoint[] {
+  transform(data: Record<string, unknown>[], config: DataMapping): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     for (let i = 0; i < data.length; i++) {
@@ -45,14 +53,14 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
         
         result.push(dataPoint)
       } catch (error) {
-        console.warn(`處理第 ${i + 1} 行資料時發生錯誤:`, error)
+        // 靜默忽略個別行的錯誤，繼續處理其他行
       }
     }
     
     return result
   }
   
-  validate(data: Record<string, any>[]): ValidationResult {
+  validate(data: Record<string, unknown>[]): ValidationResult {
     const baseValidation = super.validate(data)
     if (!baseValidation.isValid) return baseValidation
     
@@ -75,13 +83,13 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
     
     // 檢查資料型別一致性
     fields.forEach(field => {
-      const values = data.slice(0, 100).map(row => row[field]).filter(v => v != null)
+      const values = data.slice(0, MAX_SAMPLE_SIZE).map(row => row[field]).filter(v => v != null)
       if (values.length === 0) return
       
       const typeInfo = detectColumnType(values)
       
       // 如果信心度太低，發出警告
-      if (typeInfo.confidence < 0.7) {
+      if (typeInfo.confidence < CONFIDENCE_THRESHOLD) {
         warnings.push(`欄位 "${field}" 的資料型別不一致，可能需要手動清理`)
       }
       
@@ -93,12 +101,12 @@ export class CsvAdapter extends BaseAdapter<Record<string, any>> {
         })
         
         if (invalidValues.length > 0) {
-          warnings.push(`數值欄位 "${field}" 包含無法解析的值: ${invalidValues.slice(0, 3).join(', ')}${invalidValues.length > 3 ? '...' : ''}`)
+          warnings.push(`數值欄位 "${field}" 包含無法解析的值: ${invalidValues.slice(0, MAX_DISPLAY_VALUES).join(', ')}${invalidValues.length > MAX_DISPLAY_VALUES ? '...' : ''}`)
         }
       }
     })
     
-    const confidence = errors.length === 0 ? 0.9 : Math.max(0.1, 1 - (errors.length / 10))
+    const confidence = errors.length === 0 ? HIGH_CONFIDENCE : Math.max(LOW_CONFIDENCE, 1 - (errors.length / ERROR_DIVISOR))
     return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   

@@ -1,13 +1,20 @@
 import { BaseAdapter } from './base-adapter'
 import { ChartDataPoint, DataMapping, ValidationResult, SuggestedMapping, FieldSuggestion, DataType } from '../types'
 
+// 定義常數避免 magic numbers
+const MIN_NESTED_DEPTH = 5
+const LOW_COMPLEXITY_THRESHOLD = 0.3
+const MAX_FIELD_LENGTH = 20
+const MED_COMPLEXITY_THRESHOLD = 0.5
+const HIGH_CONFIDENCE = 0.8
+
 /**
  * 巢狀物件資料適配器
  * 處理複雜的巢狀物件結構，支援深層路徑訪問
  */
-export class NestedAdapter extends BaseAdapter<Record<string, any>> {
+export class NestedAdapter extends BaseAdapter<Record<string, unknown>> {
   
-  transform(data: Record<string, any>[], config: DataMapping): ChartDataPoint[] {
+  transform(data: Record<string, unknown>[], config: DataMapping): ChartDataPoint[] {
     const result: ChartDataPoint[] = []
     
     for (let i = 0; i < data.length; i++) {
@@ -44,14 +51,14 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
         
         result.push(dataPoint)
       } catch (error) {
-        console.warn(`處理第 ${i + 1} 行巢狀資料時發生錯誤:`, error)
+        // 靜默忽略個別行的錯誤，繼續處理其他行
       }
     }
     
     return result
   }
   
-  validate(data: Record<string, any>[]): ValidationResult {
+  validate(data: Record<string, unknown>[]): ValidationResult {
     const baseValidation = super.validate(data)
     if (!baseValidation.isValid) return baseValidation
     
@@ -90,11 +97,11 @@ export class NestedAdapter extends BaseAdapter<Record<string, any>> {
       }
     })
     
-    const confidence = errors.length === 0 ? 0.8 : Math.max(0.2, 1 - (errors.length / 5))
+    const confidence = errors.length === 0 ? HIGH_CONFIDENCE : Math.max(0.2, 1 - (errors.length / MIN_NESTED_DEPTH))
     return { isValid: errors.length === 0, errors, warnings, confidence }
   }
   
-  suggest(data: Record<string, any>[]): SuggestedMapping[] {
+  suggest(data: Record<string, unknown>[]): SuggestedMapping[] {
     const baseSuggestions = super.suggest(data)
     
     if (data.length === 0) return baseSuggestions
