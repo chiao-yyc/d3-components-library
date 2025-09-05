@@ -1,0 +1,154 @@
+{
+  "D3 Chart Component": {
+    "prefix": "d3chart",
+    "body": [
+      "export interface ${1:Chart}Props extends BaseChartProps {",
+      "  // Data accessors",
+      "  xAccessor?: (d: unknown) => unknown;",
+      "  yAccessor?: (d: unknown) => number;",
+      "  ",
+      "  // Events",
+      "  onDataClick?: (data: unknown, event: MouseEvent) => void;",
+      "  onDataHover?: (data: unknown | null, event: MouseEvent) => void;",
+      "}",
+      "",
+      "export const ${1:Chart} = React.forwardRef<${1:Chart}Core, ${1:Chart}Props>(",
+      "  (props, ref) => {",
+      "    const finalProps = {",
+      "      ...default${1:Chart}Props,",
+      "      ...props",
+      "    };",
+      "    return <${1:Chart}Component ref={ref} {...finalProps} />;",
+      "  }",
+      ");",
+      "",
+      "${1:Chart}.displayName = '${1:Chart}';"
+    ],
+    "description": "Create a new D3 chart component"
+  },
+  
+  "D3 Chart Core Class": {
+    "prefix": "d3core",
+    "body": [
+      "export class ${1:Chart}Core extends BaseChartCore<unknown> {",
+      "  private processedData: ProcessedDataPoint[] = [];",
+      "  private scales: {",
+      "    xScale?: D3Scale;",
+      "    yScale?: D3Scale;",
+      "  } = {};",
+      "  ",
+      "  public getChartType(): string {",
+      "    return '${2:chart-type}';",
+      "  }",
+      "  ",
+      "  protected processData(): ProcessedDataPoint[] {",
+      "    const processor = new DataProcessor({",
+      "      mapping: this.config.mapping,",
+      "      autoDetect: true",
+      "    });",
+      "    ",
+      "    const result = processor.process(this.config.data);",
+      "    this.processedData = result.data as ProcessedDataPoint[];",
+      "    return this.processedData;",
+      "  }",
+      "  ",
+      "  protected createScales(): Record<string, D3Scale> {",
+      "    const { chartWidth, chartHeight } = this.getChartDimensions();",
+      "    ",
+      "    // Create scales",
+      "    ${0}",
+      "    ",
+      "    return this.scales;",
+      "  }",
+      "  ",
+      "  protected renderChart(): void {",
+      "    const container = this.createSVGContainer();",
+      "    ",
+      "    // Render logic",
+      "    ${0}",
+      "  }",
+      "}"
+    ],
+    "description": "Create a D3 chart core class"
+  },
+  
+  "Type Guard Function": {
+    "prefix": "typeguard",
+    "body": [
+      "function is${1:Type}(value: unknown): value is ${2:Type} {",
+      "  return (",
+      "    typeof value === 'object' &&",
+      "    value !== null &&",
+      "    '${3:property}' in value",
+      "  );",
+      "}"
+    ],
+    "description": "Create a TypeScript type guard"
+  },
+  
+  "Data Accessor": {
+    "prefix": "accessor",
+    "body": [
+      "${1:x}Accessor?: (d: unknown) => ${2:unknown};"
+    ],
+    "description": "Create a data accessor property"
+  },
+  
+  "Chart Test": {
+    "prefix": "charttest",
+    "body": [
+      "describe('${1:Chart}', () => {",
+      "  const mockData = [",
+      "    { x: 'A', y: 10 },",
+      "    { x: 'B', y: 20 },",
+      "    { x: 'C', y: 15 }",
+      "  ];",
+      "  ",
+      "  it('should render without errors', () => {",
+      "    render(<${1:Chart} data={mockData} />);",
+      "    expect(screen.getByTestId('${2:chart}')).toBeInTheDocument();",
+      "  });",
+      "  ",
+      "  it('should handle click events', async () => {",
+      "    const handleClick = vi.fn();",
+      "    render(<${1:Chart} data={mockData} onDataClick={handleClick} />);",
+      "    ",
+      "    const element = screen.getByTestId('${2:chart}-0');",
+      "    await userEvent.click(element);",
+      "    ",
+      "    expect(handleClick).toHaveBeenCalled();",
+      "  });",
+      "});"
+    ],
+    "description": "Create a chart component test"
+  },
+  
+  "Process Data Pattern": {
+    "prefix": "processdata",
+    "body": [
+      "const processor = new DataProcessor({",
+      "  mapping: {",
+      "    x: '${1:xField}',",
+      "    y: '${2:yField}'",
+      "  },",
+      "  autoDetect: true",
+      "});",
+      "",
+      "const result = processor.process(${3:data});",
+      "if (result.errors.length > 0) {",
+      "  console.error('Data processing errors:', result.errors);",
+      "}"
+    ],
+    "description": "Use DataProcessor to process data"
+  },
+  
+  "D3 Scale Creation": {
+    "prefix": "d3scale",
+    "body": [
+      "const ${1:x}Scale = d3.scale${2|Linear,Band,Time,Ordinal|}()",
+      "  .domain(${3:domain})",
+      "  .range([${4:0}, ${5:width}]);"
+    ],
+    "description": "Create a D3 scale"
+  }
+}

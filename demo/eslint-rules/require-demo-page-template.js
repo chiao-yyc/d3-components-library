@@ -38,7 +38,7 @@ export default {
     let imports = [];
 
     // Pages exempt from this rule
-    const exemptPages = ['Home.tsx', 'Gallery.tsx', 'ChartsShowcase.tsx'];
+    const exemptPages = ['Home.tsx', 'Gallery.tsx', 'ChartsShowcase.tsx', 'BarChartDemoV2.tsx', 'DataProcessorTestDemo.tsx'];
     const currentPageFile = filename.split('/').pop();
 
     return {

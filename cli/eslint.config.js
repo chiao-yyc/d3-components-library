@@ -26,11 +26,11 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
+      ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': 'error',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off', // CLI 工具允許使用 any
       'prefer-const': 'error',
       'no-var': 'error',
-      ...tseslint.configs.recommended.rules,
     },
   },
 ];
