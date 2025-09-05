@@ -14,8 +14,8 @@ export type { ColorScale, ColorSchemeConfig, ColorSchemeType, ColorFormat, Color
 
 // D3 色彩比例尺實現
 class D3ColorScale implements ColorScale {
-  private scale: any
-  private _domain: any[]
+  private scale: d3.ScaleOrdinal<string, string> | d3.ScaleSequential<string>
+  private _domain: unknown[]
   private _range: string[]
   private config: ColorSchemeConfig
 

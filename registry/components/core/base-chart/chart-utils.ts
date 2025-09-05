@@ -2,10 +2,10 @@ import * as d3 from 'd3';
 
 // 軸線配置介面
 export interface AxisConfig {
-  scale: any;
+  scale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> | d3.ScaleOrdinal<string, unknown>;
   orientation: 'top' | 'bottom' | 'left' | 'right';
   label?: string;
-  format?: (d: any) => string;
+  format?: (d: unknown) => string;
   rotation?: number;
   fontSize?: string;
   fontColor?: string;
@@ -18,7 +18,7 @@ export interface AxisConfig {
 
 // 網格線配置介面
 export interface GridConfig {
-  scale: any;
+  scale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>;
   orientation: 'horizontal' | 'vertical';
   tickCount?: number;
   strokeColor?: string;

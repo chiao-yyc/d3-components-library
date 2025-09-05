@@ -14,11 +14,11 @@ export interface HighlightAnimationConfig extends AnimationConfig {
 }
 
 export interface TransitionManager {
-  animate: (selection: d3.Selection<any, any, any, any>, config?: AnimationConfig) => d3.Transition<any, any, any, any>
-  highlightElements: (selection: d3.Selection<any, any, any, any>, predicate: (d: any) => boolean, config?: HighlightAnimationConfig) => void
-  resetHighlight: (selection: d3.Selection<any, any, any, any>, config?: AnimationConfig) => void
-  fadeIn: (selection: d3.Selection<any, any, any, any>, config?: AnimationConfig) => void
-  fadeOut: (selection: d3.Selection<any, any, any, any>, config?: AnimationConfig) => void
+  animate: (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, config?: AnimationConfig) => d3.Transition<d3.BaseType, unknown, d3.BaseType, unknown>
+  highlightElements: (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, predicate: (d: unknown) => boolean, config?: HighlightAnimationConfig) => void
+  resetHighlight: (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, config?: AnimationConfig) => void
+  fadeIn: (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, config?: AnimationConfig) => void
+  fadeOut: (selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, config?: AnimationConfig) => void
 }
 
 export function createTransitionManager(defaultConfig: AnimationConfig = {}): TransitionManager {
@@ -29,9 +29,9 @@ export function createTransitionManager(defaultConfig: AnimationConfig = {}): Tr
   } = defaultConfig
 
   const animate = (
-    selection: d3.Selection<any, any, any, any>, 
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>, 
     config: AnimationConfig = {}
-  ): d3.Transition<any, any, any, any> => {
+  ): d3.Transition<d3.BaseType, unknown, d3.BaseType, unknown> => {
     const {
       duration = defaultDuration,
       delay = defaultDelay,
@@ -46,8 +46,8 @@ export function createTransitionManager(defaultConfig: AnimationConfig = {}): Tr
   }
 
   const highlightElements = (
-    selection: d3.Selection<any, any, any, any>,
-    predicate: (d: any) => boolean,
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>,
+    predicate: (d: unknown) => boolean,
     config: HighlightAnimationConfig = {}
   ): void => {
     const {
@@ -61,8 +61,8 @@ export function createTransitionManager(defaultConfig: AnimationConfig = {}): Tr
     const transition = animate(selection, animationConfig)
 
     transition
-      .style('opacity', (d: any) => predicate(d) ? highlightOpacity : dimOpacity)
-      .attr('transform', function(d: any) {
+      .style('opacity', (d: unknown) => predicate(d) ? highlightOpacity : dimOpacity)
+      .attr('transform', function(d: unknown) {
         const currentTransform = d3.select(this).attr('transform') || ''
         const scale = predicate(d) ? highlightScale : normalScale
         
@@ -76,7 +76,7 @@ export function createTransitionManager(defaultConfig: AnimationConfig = {}): Tr
   }
 
   const resetHighlight = (
-    selection: d3.Selection<any, any, any, any>,
+    selection: d3.Selection<d3.BaseType, unknown, d3.BaseType, unknown>,
     config: AnimationConfig = {}
   ): void => {
     const transition = animate(selection, config)

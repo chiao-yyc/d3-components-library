@@ -12,7 +12,7 @@ export interface BrushZoomConfig {
   extent?: [[number, number], [number, number]];
   brushColor?: string;
   brushOpacity?: number;
-  onZoom?: (domain: [any, any]) => void;
+  onZoom?: (domain: [unknown, unknown]) => void;
   onReset?: () => void;
 }
 
@@ -53,7 +53,7 @@ export interface CrosshairConfig {
   textOffset?: { x: number; y: number };
   textColor?: string;
   textSize?: string;
-  formatText?: (data: any) => string;
+  formatText?: (data: unknown) => string;
 }
 
 /**
