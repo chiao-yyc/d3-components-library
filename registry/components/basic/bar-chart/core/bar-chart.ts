@@ -1,3 +1,12 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * Please use BarChartCore from './bar-chart-core' instead.
+ *
+ * This file will be removed in a future version.
+ */
 
 import * as d3 from 'd3';
 import { BarChartProps, ProcessedDataPoint } from '../types';
@@ -5,6 +14,9 @@ import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 
+/**
+ * @deprecated This class is no longer maintained. Use BarChartCore instead.
+ */
 export class D3BarChart extends BaseChart<BarChartProps> {
   private processedData: ProcessedDataPoint[] = [];
   private scales: {

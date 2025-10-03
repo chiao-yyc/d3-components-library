@@ -8,19 +8,23 @@ import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 import type { BaseChartCoreConfig, ChartStateCallbacks } from '../../../core/types';
-import type { ProcessedDataPoint } from '../core/types';
 import type { DataMapping } from '../../../core/data-processor/types';
 
+export interface BarChartData {
+  [key: string]: string | number | Date | boolean | null | undefined;
+}
+
 // 擴展基礎配置以支援 BarChart 特有屬性
-export interface BarChartCoreConfig extends BaseChartCoreConfig {
+export interface BarChartCoreConfig extends BaseChartCoreConfig<BarChartData> {
   // BarChart 特有配置
   orientation?: 'vertical' | 'horizontal';
   colors?: string[];
   showXAxis?: boolean;
   showYAxis?: boolean;
+  showGrid?: boolean;
   xAxisLabel?: string;
   yAxisLabel?: string;
-  
+
   // 統一軸線系統配置
   xTickCount?: number;
   yTickCount?: number;
@@ -32,10 +36,10 @@ export interface BarChartCoreConfig extends BaseChartCoreConfig {
   barOpacity?: number;
   strokeWidth?: number;
   strokeColor?: string;
-  tooltipFormat?: (data: ProcessedDataPoint) => string;
-  onDataClick?: (data: ProcessedDataPoint) => void;
-  onHover?: (data: ProcessedDataPoint | null) => void;
-  
+  tooltipFormat?: (data: import('../../../core/types').ChartData<BarChartData>) => string;
+  onDataClick?: (data: import('../../../core/types').ChartData<BarChartData>) => void;
+  onHover?: (data: import('../../../core/types').ChartData<BarChartData> | null) => void;
+
   // 數據映射
   mapping?: DataMapping; // 從 DataMapping 導入
   xKey?: string;
@@ -48,13 +52,12 @@ export interface BarChartCoreConfig extends BaseChartCoreConfig {
  * BarChart 的核心實現類
  * 繼承 BaseChartCore，實現長條圖的特定邏輯
  */
-export class BarChartCore extends BaseChartCore<unknown> {
-  private processedData: ProcessedDataPoint[] = [];
-  private scales: {
+export class BarChartCore extends BaseChartCore<BarChartData> {
+  protected scales: {
     xScale?: d3.ScaleBand<string> | d3.ScaleLinear<number, number>;
     yScale?: d3.ScaleLinear<number, number> | d3.ScaleBand<string>;
   } = {};
-  private colorScale?: ColorScale;
+  protected colorScale?: ColorScale;
 
   constructor(config: BarChartCoreConfig, callbacks: ChartStateCallbacks = {}) {
     super(config, callbacks);
@@ -64,10 +67,10 @@ export class BarChartCore extends BaseChartCore<unknown> {
     return 'bar';
   }
 
-  protected processData(): ProcessedDataPoint[] {
+  protected processData(): import('../../../core/types').ChartData<BarChartData>[] {
     const config = this.config as BarChartCoreConfig;
     const { data, mapping, xKey, yKey, xAccessor, yAccessor } = config;
-    
+
     // 使用統一的數據處理器
     const processor = new DataProcessor({
       mapping: mapping,
@@ -77,20 +80,23 @@ export class BarChartCore extends BaseChartCore<unknown> {
     });
 
     const result = processor.process(data);
-    
+
     if (result.errors.length > 0) {
       this.handleError(new Error(result.errors.join(', ')));
       return [];
     }
 
-    this.processedData = result.data as ProcessedDataPoint[];
-    return this.processedData;
+    return result.data as import('../../../core/types').ChartData<BarChartData>[];
   }
 
   protected createScales(): Record<string, d3.ScaleBand<string> | d3.ScaleLinear<number, number>> {
     const config = this.config as BarChartCoreConfig;
     const { orientation = 'vertical', colors } = config;
     const { chartWidth, chartHeight } = this.getChartDimensions();
+
+    if (!this.processedData || this.processedData.length === 0) {
+      return {};
+    }
 
     let xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>;
     let yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>;
@@ -102,14 +108,16 @@ export class BarChartCore extends BaseChartCore<unknown> {
         .range([0, chartWidth])
         .padding(0.1);
 
-      const yMax = d3.max(this.processedData, d => d.y) || 0;
+      const yValues = this.processedData.map(d => Number(d.y)).filter(v => !isNaN(v));
+      const yMax = d3.max(yValues) || 0;
       yScale = d3.scaleLinear()
         .domain([0, yMax])
         .range([chartHeight, 0])
         .nice();
     } else {
       // 水平長條圖：X軸為數值，Y軸為類別
-      const xMax = d3.max(this.processedData, d => d.y) || 0;
+      const xValues = this.processedData.map(d => Number(d.y)).filter(v => !isNaN(v));
+      const xMax = d3.max(xValues) || 0;
       xScale = d3.scaleLinear()
         .domain([0, xMax])
         .range([0, chartWidth])
@@ -122,14 +130,15 @@ export class BarChartCore extends BaseChartCore<unknown> {
     }
 
     // 創建顏色比例尺
-    this.colorScale = createColorScale(colors || ['#3b82f6'], 'ordinal');
+    const dataLength = this.processedData.length;
+    this.colorScale = createColorScale(colors || ['#3b82f6'], [0, Math.max(0, dataLength - 1)]);
 
     this.scales = { xScale, yScale };
     return this.scales;
   }
 
   protected renderChart(): void {
-    if (!this.svgElement || !this.processedData.length) return;
+    if (!this.svgElement || !this.processedData || this.processedData.length === 0) return;
 
     const config = this.config as BarChartCoreConfig;
     const { orientation = 'vertical', animate = true, animationDuration = 750 } = config;
@@ -145,7 +154,7 @@ export class BarChartCore extends BaseChartCore<unknown> {
       .join('rect')
       .attr('class', 'bar')
       .attr('data-testid', (_, i) => `bar-${i}`)
-      .attr('fill', (d, i) => this.colorScale?.getColor(i) || '#3b82f6')
+      .attr('fill', (_d, i) => this.colorScale?.getColor(i) || '#3b82f6')
       .attr('stroke', 'none');
 
     if (orientation === 'vertical') {
@@ -164,12 +173,12 @@ export class BarChartCore extends BaseChartCore<unknown> {
         bars.transition()
           .duration(animationDuration)
           .ease(d3.easeBackOut)
-          .attr('y', d => yLinearScale(d.y))
-          .attr('height', d => yLinearScale(0) - yLinearScale(d.y));
+          .attr('y', d => yLinearScale(Number(d.y)))
+          .attr('height', d => yLinearScale(0) - yLinearScale(Number(d.y)));
       } else {
         bars
-          .attr('y', d => yLinearScale(d.y))
-          .attr('height', d => yLinearScale(0) - yLinearScale(d.y));
+          .attr('y', d => yLinearScale(Number(d.y)))
+          .attr('height', d => yLinearScale(0) - yLinearScale(Number(d.y)));
       }
     } else {
       // 水平長條圖
@@ -187,9 +196,9 @@ export class BarChartCore extends BaseChartCore<unknown> {
         bars.transition()
           .duration(animationDuration)
           .ease(d3.easeBackOut)
-          .attr('width', d => xLinearScale(d.y));
+          .attr('width', d => xLinearScale(Number(d.y)));
       } else {
-        bars.attr('width', d => xLinearScale(d.y));
+        bars.attr('width', d => xLinearScale(Number(d.y)));
       }
     }
 
@@ -203,7 +212,7 @@ export class BarChartCore extends BaseChartCore<unknown> {
   /**
    * 添加互動事件
    */
-  private addInteractionEvents(selection: d3.Selection<SVGRectElement, ProcessedDataPoint, SVGGElement, unknown>): void {
+  private addInteractionEvents(selection: d3.Selection<d3.BaseType | SVGRectElement, import('../../../core/types').ChartData<BarChartData>, SVGGElement, unknown>): void {
     const config = this.config as BarChartCoreConfig;
     const { interactive, onDataClick, onHover } = config;
 
@@ -220,7 +229,7 @@ export class BarChartCore extends BaseChartCore<unknown> {
         this.hideTooltip();
         onHover?.(null);
       })
-      .on('click', (event, d) => {
+      .on('click', (_event, d) => {
         onDataClick?.(d);
       })
       .style('cursor', 'pointer');
@@ -229,7 +238,7 @@ export class BarChartCore extends BaseChartCore<unknown> {
   /**
    * 渲染軸線 - 使用 BaseChartCore 的統一軸線系統
    */
-  private renderAxes(container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
+  private renderAxes(_container: d3.Selection<SVGGElement, unknown, null, undefined>): void {
     const config = this.config as BarChartCoreConfig;
     const { showXAxis = true, showYAxis = true } = config;
     const { xScale, yScale } = this.scales;
@@ -272,8 +281,8 @@ export class BarChartCore extends BaseChartCore<unknown> {
   /**
    * 公開 API - 獲取處理後的數據
    */
-  public getProcessedData(): ProcessedDataPoint[] {
-    return [...this.processedData];
+  public getProcessedData(): import('../../../core/types').ChartData<BarChartData>[] {
+    return this.processedData ? [...this.processedData] : [];
   }
 
   /**
