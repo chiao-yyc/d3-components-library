@@ -1,8 +1,9 @@
 // Pure TypeScript types for the core pie chart logic
 import { BaseChartProps } from '../../../core/base-chart/base-chart';
-import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+import { ProcessedDataPoint as CoreProcessedDataPoint, DataMapping } from '../../../core/data-processor/types';
 
-export type { Margin, DataMapping } from '../../../core/base-chart/types';
+export type { Margin } from '../../../core/base-chart/types';
+export type { DataMapping } from '../../../core/data-processor/types';
 
 export interface ProcessedPieDataPoint extends CoreProcessedDataPoint {
   label: string;

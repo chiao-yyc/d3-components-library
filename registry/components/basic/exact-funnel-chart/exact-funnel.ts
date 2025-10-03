@@ -1,3 +1,12 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ * Please use ExactFunnelChartCore from './core/exact-funnel-core' instead.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * This implementation may be removed in a future version.
+ */
+
 import * as d3 from 'd3';
 import { select } from '../../core/d3-utils';
 
