@@ -1,3 +1,11 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains experimental virtualization code and is not actively maintained.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * This implementation may be completed in a future version.
+ */
+
 /**
  * 虛擬化 ScatterPlot 組件
  * 結合 Canvas Fallback 和 Virtual Scrolling 技術

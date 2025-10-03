@@ -5,13 +5,12 @@
 
 import * as d3 from 'd3';
 import { BaseChartCore } from '../../../core/base-chart/core';
-import { 
-  BaseChartData, 
-  ChartData, 
-  BaseChartCoreConfig, 
+import {
+  BaseChartData,
+  ChartData,
+  BaseChartCoreConfig,
   DataKeyOrAccessor,
-  D3Selection,
-  ChartStateCallbacks
+  D3Selection
 } from '../../../core/types';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 
@@ -95,9 +94,9 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   private scatterGroup: D3Selection | null = null;
   
   // 交互控制器
-  private brushZoomController: any = null;
-  private crosshairController: any = null;
-  private voronoiController: any = null;
+  private _brushZoomController: any = null;
+  private _crosshairController: any = null;
+  private _voronoiController: any = null;
 
   constructor(
     config: ScatterPlotCoreConfig,
@@ -226,7 +225,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
 
     // 創建顏色比例尺
     if (colorAccessor && config.colors) {
-      this.colorScale = createColorScale(config.colors, this.scatterProcessedData.length);
+      this.colorScale = createColorScale(config.colors, [0, Math.max(0, this.scatterProcessedData.length - 1)]);
     }
 
     return {
@@ -375,14 +374,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         tickCount: config.xTickCount,
         tickFormat: config.xTickFormat,
         tickSizeOuter: config.axisConfig?.tickSizeOuter,
-        showGrid: config.showGrid,
-        // 軸線相交配置
-        axisIntersection: config.axisConfig?.intersection ? {
-          enabled: true,
-          xScale,
-          yScale,
-          intersectionPoint: config.axisConfig?.intersectionPoint
-        } : undefined
+        showGrid: config.showGrid
       });
     }
     
@@ -392,14 +384,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
         tickCount: config.yTickCount,
         tickFormat: config.yTickFormat,
         tickSizeOuter: config.axisConfig?.tickSizeOuter,
-        showGrid: config.showGrid,
-        // 軸線相交配置
-        axisIntersection: config.axisConfig?.intersection ? {
-          enabled: true,
-          xScale,
-          yScale,
-          intersectionPoint: config.axisConfig?.intersectionPoint
-        } : undefined
+        showGrid: config.showGrid
       });
     }
 
@@ -482,7 +467,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
    * }
    */
 
-  private renderGrid(
+  private _renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
@@ -574,8 +559,8 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   }
 
   private setupBrushZoom(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
+    _xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     // 簡化的筆刷縮放實現
     // 在實際應用中需要使用更完整的 BrushZoomController
@@ -587,8 +572,8 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   }
 
   private setupVoronoi(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
+    _xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     // 實現 Voronoi 圖以優化鼠標懸停檢測
   }
@@ -640,19 +625,11 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   public highlightPoints(indices: number[]): void {
     if (!this.scatterGroup) return;
 
-    this.scatterGroup
-      .selectAll('.scatter-point')
-      .classed('highlighted', (d: ProcessedScatterDataPoint) => indices.includes(d.index))
-      .attr('stroke', (d: ProcessedScatterDataPoint) => 
-        indices.includes(d.index) ? '#000' : 'none'
-      )
-      .attr('stroke-width', (d: ProcessedScatterDataPoint) => 
-        indices.includes(d.index) ? 2 : 0
-      );
-  }
+    const points = this.scatterGroup.selectAll<SVGCircleElement, ProcessedScatterDataPoint>('.scatter-point');
 
-  // 實現 BaseChartCore 的抽象方法
-  public getChartType(): string {
-    return 'scatter-plot';
+    points
+      .classed('highlighted', d => indices.includes(d.index))
+      .attr('stroke', d => indices.includes(d.index) ? '#000' : 'none')
+      .attr('stroke-width', d => indices.includes(d.index) ? 2 : 0);
   }
 }

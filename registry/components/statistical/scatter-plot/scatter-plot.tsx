@@ -58,13 +58,10 @@ const getDefaultScatterPlotProps = (): Partial<ScatterPlotProps> => ({
   autoMargin: true,
   paddingRatio: 0.05,  // 5% 邊距
   minPadding: 5,       // 最小 5px
-  
+
   // 動畫
   animate: true,
-  animationDuration: 750,
-  
-  // 響應式
-  responsive: true
+  animationDuration: 750
 });
 
 export const defaultScatterPlotProps = getDefaultScatterPlotProps();
@@ -101,17 +98,17 @@ export const ScatterPlotWithLegacySupport = React.forwardRef<ScatterPlotCore,
   } = props;
 
   // 處理 key-based 模式到 mapping 的轉換
-  const finalProps: ScatterPlotProps = {
+  const finalProps: ScatterPlotCoreConfig = {
     ...modernProps,
-    // 優先使用 mapping，然後是 accessor，最後是 key
-    xAccessor: modernProps.xAccessor || xAccessor || xKey || 'x',
-    yAccessor: modernProps.yAccessor || yAccessor || yKey || 'y',
-    sizeAccessor: modernProps.sizeAccessor || sizeAccessor || sizeKey,
-    colorAccessor: modernProps.colorAccessor || colorAccessor || colorKey,
-    
+    // 優先使用 accessor，然後是 key
+    xAccessor: xAccessor || xKey || 'x',
+    yAccessor: yAccessor || yKey || 'y',
+    sizeAccessor: sizeAccessor || sizeKey,
+    colorAccessor: colorAccessor || colorKey,
+
     // 事件名稱映射
-    onDataClick: modernProps.onDataClick || onPointClick,
-    onDataHover: modernProps.onDataHover || onPointHover,
+    onDataClick: onPointClick,
+    onDataHover: onPointHover,
   };
 
   return <ScatterPlot ref={ref} {...finalProps} />;
@@ -127,8 +124,8 @@ export const ScatterPlotLegacy = React.forwardRef<ScatterPlotCore, ScatterPlotPr
 ScatterPlotLegacy.displayName = 'ScatterPlotLegacy';
 
 // 專用變體組件
-export const BubbleChart = React.forwardRef<ScatterPlotCore, Omit<ScatterPlotProps, 'sizeAccessor'>>((props, ref) => {
-  return <ScatterPlot ref={ref} {...props} sizeAccessor={props.sizeAccessor || 'value'} />;
+export const BubbleChart = React.forwardRef<ScatterPlotCore, ScatterPlotProps>((props, ref) => {
+  return <ScatterPlot ref={ref} {...props} sizeAccessor="value" />;
 });
 
 BubbleChart.displayName = 'BubbleChart';

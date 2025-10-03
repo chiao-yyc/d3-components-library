@@ -12,9 +12,6 @@ export * from './line-chart';
 // 區域圖
 export * from './area-chart';
 
-// 散點圖
-export * from './scatter-plot';
-
 // 漏斗圖 - 傳統版本
 export * from './funnel-chart';
 
