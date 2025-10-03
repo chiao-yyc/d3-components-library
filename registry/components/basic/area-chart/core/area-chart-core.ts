@@ -25,7 +25,7 @@ export interface AreaChartData extends BaseChartData {
 
 // 處理後的數據點
 export interface ProcessedAreaDataPoint {
-  x: number | Date;
+  x: number | Date | string;
   y: number;
   category?: string | number;
   originalData: ChartData<AreaChartData>;
@@ -85,7 +85,7 @@ export interface AreaChartCoreConfig extends BaseChartCoreConfig {
   // Tooltip 進階配置
   tooltipMode?: 'point' | 'vertical-line' | 'area';
   showCrosshair?: boolean;
-  tooltipFormat?: (data: ProcessedAreaDataPoint[], x: number | Date, category?: string) => string;
+  tooltipFormat?: (data: ProcessedAreaDataPoint[], x: number | Date | string, category?: string) => string;
   
   // 事件處理
   onDataClick?: (data: ProcessedAreaDataPoint, event: Event) => void;
@@ -159,23 +159,31 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     // 處理數據點 - 使用與 ScatterPlotCore 相同的模式
     this.areaProcessedData = data.map((item, index) => {
       // 處理 X 值
-      let x: number | Date;
+      let x: number | Date | string;
       let rawXValue: any;
       if (typeof xAccessor === 'function') {
         rawXValue = xAccessor(item, index, data);
-        x = typeof rawXValue === 'string' ? this.parseDate(rawXValue) : rawXValue;
+        // 嘗試智能解析字符串
+        if (typeof rawXValue === 'string') {
+          const parsedDate = new Date(rawXValue);
+          x = !isNaN(parsedDate.getTime()) ? parsedDate : rawXValue;
+        } else {
+          x = rawXValue;
+        }
       } else if (typeof xAccessor === 'string' || typeof xAccessor === 'number') {
         rawXValue = item[xAccessor];
-        x = item[xAccessor] as number | Date;
-        // Convert string dates to Date objects with better parsing
+        x = item[xAccessor] as number | Date | string;
+        // 嘗試智能解析字符串為日期
         if (typeof x === 'string') {
-          x = this.parseDate(x);
+          const parsedDate = new Date(x);
+          x = !isNaN(parsedDate.getTime()) ? parsedDate : x;
         }
       } else {
         rawXValue = item.x;
-        x = item.x as number | Date;
+        x = item.x as number | Date | string;
         if (typeof x === 'string') {
-          x = this.parseDate(x);
+          const parsedDate = new Date(x);
+          x = !isNaN(parsedDate.getTime()) ? parsedDate : x;
         }
       }
 
@@ -307,16 +315,25 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     return this.areaProcessedData.map(d => d.y);
   }
 
-  private createXScale(values: (number | Date)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> {
+  private createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
-    
+
     // 檢查是否為日期類型
     if (values[0] instanceof Date) {
       return d3.scaleTime()
         .domain(d3.extent(values) as [Date, Date])
         .range([0, this.chartWidth]);
     }
-    
+
+    // 檢查是否為字符串類型
+    if (typeof values[0] === 'string') {
+      const uniqueCategories = Array.from(new Set(values as string[]));
+      return d3.scaleBand()
+        .domain(uniqueCategories)
+        .range([0, this.chartWidth])
+        .padding(0.1);
+    }
+
     // 數值類型
     return d3.scaleLinear()
       .domain(d3.extent(values as number[]) as [number, number])
@@ -343,7 +360,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
 
   private renderAreas(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.areaGroup) return;
@@ -359,7 +376,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private renderRegularAreas(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>,
     curve: any
   ): void {
@@ -367,16 +384,26 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
     const config = this.config as AreaChartCoreConfig;
 
+    // 創建 x 位置計算函數，處理不同類型的 scale
+    const getXPosition = (d: ProcessedAreaDataPoint): number => {
+      const xPos = xScale(d.x as any);
+      // 如果是 scaleBand，返回中心位置
+      if (xPos !== undefined && 'bandwidth' in xScale) {
+        return xPos + (xScale.bandwidth() / 2);
+      }
+      return xPos || 0;
+    };
+
     // 創建區域生成器
     const area = d3.area<ProcessedAreaDataPoint>()
-      .x(d => xScale(d.x as any) || 0)
+      .x(getXPosition)
       .y0(yScale(0))
       .y1(d => yScale(d.y))
       .curve(curve);
 
     // 創建線條生成器
     const line = d3.line<ProcessedAreaDataPoint>()
-      .x(d => xScale(d.x as any) || 0)
+      .x(getXPosition)
       .y(d => yScale(d.y))
       .curve(curve);
 
@@ -411,7 +438,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private renderStackedAreas(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>,
     curve: any
   ): void {
@@ -419,17 +446,33 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
     const config = this.config as AreaChartCoreConfig;
 
+    // 創建 x 位置計算函數，處理不同類型的 scale
+    const getXPosition = (d: StackedDataPoint): number => {
+      const xPos = xScale(d.x as any);
+      // 如果是 scaleBand，返回中心位置
+      if (xPos !== undefined && 'bandwidth' in xScale) {
+        return xPos + (xScale.bandwidth() / 2);
+      }
+      return xPos || 0;
+    };
+
     // 按類別分組堆疊數據
     const stackedGroups = d3.group(this.stackedData, d => d.category || 'default');
 
     stackedGroups.forEach((stackedPoints, category) => {
-      const sortedPoints = stackedPoints.sort((a, b) => (a.x as number) - (b.x as number));
+      const sortedPoints = stackedPoints.sort((a, b) => {
+        // 處理不同類型的 x 值排序
+        if (typeof a.x === 'string' && typeof b.x === 'string') {
+          return a.x.localeCompare(b.x);
+        }
+        return (a.x as number) - (b.x as number);
+      });
       const seriesIndex = this.seriesData.findIndex(s => s.category === category);
       const color = this.seriesData[seriesIndex]?.color || '#3b82f6';
 
       // 創建堆疊區域生成器
       const area = d3.area<StackedDataPoint>()
-        .x(d => xScale(d.x as any) || 0)
+        .x(getXPosition)
         .y0(d => yScale(d.y0 || 0))
         .y1(d => yScale(d.y1 || d.y))
         .curve(curve);
@@ -447,7 +490,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private renderPoints(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.areaGroup) return;
@@ -455,13 +498,23 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     const config = this.config as AreaChartCoreConfig;
     const pointRadius = config.pointRadius || 3;
 
+    // 創建 x 位置計算函數
+    const getXPosition = (d: ProcessedAreaDataPoint): number => {
+      const xPos = xScale(d.x as any);
+      // 如果是 scaleBand，返回中心位置
+      if (xPos !== undefined && 'bandwidth' in xScale) {
+        return xPos + (xScale.bandwidth() / 2);
+      }
+      return xPos || 0;
+    };
+
     this.seriesData.forEach((series, seriesIndex) => {
       const points = this.areaGroup!
         .selectAll<SVGCircleElement, ProcessedAreaDataPoint>(`.points-series-${seriesIndex}`)
         .data(series.data)
         .join('circle')
         .attr('class', `points-series-${seriesIndex}`)
-        .attr('cx', d => xScale(d.x as any) || 0)
+        .attr('cx', getXPosition)
         .attr('cy', d => yScale(d.y))
         .attr('r', pointRadius)
         .attr('fill', series.color)
@@ -537,7 +590,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private setupInteractions(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     const config = this.config as AreaChartCoreConfig;
@@ -559,7 +612,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private setupBrushZoom(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     console.log('Setting up brush zoom for AreaChart');
@@ -574,7 +627,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   // ===============================
 
   private setupTooltipInteraction(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.areaGroup) return;
@@ -619,7 +672,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
   private handleAreaMouseMove(
     event: MouseEvent,
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.containerElement || !this.areaGroup) return;
@@ -628,7 +681,17 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     const [mouseX] = d3.pointer(event, this.areaGroup.node());
 
     // 將鼠標 X 座標轉換為數據 X 值
-    const xValue = xScale.invert(mouseX);
+    let xValue: number | Date | string;
+    if ('invert' in xScale) {
+      // scaleLinear 或 scaleTime 有 invert 方法
+      xValue = xScale.invert(mouseX);
+    } else {
+      // scaleBand 需要特殊處理
+      const domain = xScale.domain();
+      const step = xScale.step();
+      const index = Math.floor(mouseX / step);
+      xValue = domain[Math.max(0, Math.min(index, domain.length - 1))] || domain[0];
+    }
 
     // 尋找該 X 位置最近的數據點
     const nearestPoints = this.findDataPointsAtX(xValue);
@@ -666,7 +729,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     this.callbacks.onTooltipHide?.();
   }
 
-  private findDataPointsAtX(targetX: number | Date): ProcessedAreaDataPoint[] {
+  private findDataPointsAtX(targetX: number | Date | string): ProcessedAreaDataPoint[] {
     const results: ProcessedAreaDataPoint[] = [];
 
     // 對於每個系列，找到最接近 targetX 的數據點
@@ -677,9 +740,20 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       let minDistance = Infinity;
 
       series.data.forEach(point => {
-        const distance = typeof targetX === 'number'
-          ? Math.abs((point.x as number) - (targetX as number))
-          : Math.abs((point.x as Date).getTime() - (targetX as Date).getTime());
+        let distance: number;
+
+        if (typeof targetX === 'string' && typeof point.x === 'string') {
+          // 字符串類型：精確匹配
+          distance = targetX === point.x ? 0 : Infinity;
+        } else if (typeof targetX === 'number' && typeof point.x === 'number') {
+          // 數值類型：計算差值
+          distance = Math.abs(point.x - targetX);
+        } else if (targetX instanceof Date && point.x instanceof Date) {
+          // 日期類型：計算時間差
+          distance = Math.abs(point.x.getTime() - targetX.getTime());
+        } else {
+          distance = Infinity;
+        }
 
         if (distance < minDistance) {
           minDistance = distance;
@@ -695,7 +769,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     return results;
   }
 
-  private formatAreaTooltipContent(points: ProcessedAreaDataPoint[], xValue: number | Date): string {
+  private formatAreaTooltipContent(points: ProcessedAreaDataPoint[], xValue: number | Date | string): string {
     const config = this.config as AreaChartCoreConfig;
 
     // 如果有自定義格式化函數，使用它
@@ -704,9 +778,9 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     }
 
     // 默認格式化
-    const xLabel = typeof xValue === 'number' 
+    const xLabel = typeof xValue === 'number'
       ? xValue.toFixed(2)
-      : xValue instanceof Date 
+      : xValue instanceof Date
         ? xValue.toLocaleDateString()
         : String(xValue);
 
@@ -787,21 +861,31 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       };
     }
 
-    // Check if X values are dates or numbers
+    // Check if X values are dates, strings, or numbers
     const firstXValue = this.areaProcessedData[0]?.x;
     const isDateData = firstXValue instanceof Date;
-    
+    const isStringData = typeof firstXValue === 'string';
+
     // 確定 X 軸的域值範圍
-    let xDomain: [any, any];
+    let xDomain: any;
     let xScale: any;
-    
+
     if (isDateData) {
+      // 時間類型 - 使用 scaleTime
       const xExtent = d3.extent(this.areaProcessedData, d => d.x as Date);
       xDomain = xExtent[0] !== undefined && xExtent[1] !== undefined ? xExtent : [new Date(), new Date()];
       xScale = d3.scaleTime()
         .domain(xDomain)
         .range([0, this.chartWidth]);
+    } else if (isStringData) {
+      // 類別類型 - 使用 scaleBand
+      const uniqueCategories = Array.from(new Set(this.areaProcessedData.map(d => d.x as string)));
+      xScale = d3.scaleBand()
+        .domain(uniqueCategories)
+        .range([0, this.chartWidth])
+        .padding(0.1);
     } else {
+      // 數值類型 - 使用 scaleLinear
       const xExtent = d3.extent(this.areaProcessedData, d => d.x as number);
       xDomain = xExtent[0] !== undefined && xExtent[1] !== undefined ? xExtent : [0, 1];
       xScale = d3.scaleLinear()
