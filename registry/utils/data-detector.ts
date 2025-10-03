@@ -320,7 +320,7 @@ export function suggestMapping(data: any[]): SuggestedMapping[] {
     const props = chartSuggestion.suggestedProps
     
     // 基本映射
-    let mapping: any = {}
+    const mapping: any = {}
     
     if (props.xKey) {
       mapping.x = props.xKey

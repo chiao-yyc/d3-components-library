@@ -53,7 +53,7 @@ export const defaultAreaChartProps: Partial<AreaChartProps> = {
   
   // 面積圖樣式默認值
   colors: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
-  opacity: 0.6,
+  fillOpacity: 0.6,
   strokeWidth: 2,
   
   // 動畫默認值
@@ -91,11 +91,11 @@ export const AreaChartLegacy = React.forwardRef<AreaChartCore,
 
   const finalProps: AreaChartProps = {
     ...modernProps,
-    
+
     // 數據存取器映射
-    xAccessor: modernProps.xAccessor || xAccessor || xKey || 'x',
-    yAccessor: modernProps.yAccessor || yAccessor || yKey || 'y',
-    categoryAccessor: modernProps.categoryAccessor || categoryAccessor || categoryKey,
+    xAccessor: xAccessor || xKey || 'x',
+    yAccessor: yAccessor || yKey || 'y',
+    categoryAccessor: categoryAccessor || categoryKey,
   };
 
   return <AreaChart ref={ref} {...finalProps} />;

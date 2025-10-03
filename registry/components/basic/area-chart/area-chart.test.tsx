@@ -9,14 +9,14 @@ import { generateTimeSeriesData, getDefaultChartProps } from '../../../test-util
 // Mock data for testing
 const mockData = generateTimeSeriesData(4, new Date('2023-01-01'));
 
-const defaultProps: AreaChartProps = {
-  width: 400,
-  height: 300,
+const defaultProps = {
   data: mockData,
-  xAccessor: 'date',
-  yAccessor: 'value',
+  mapping: {
+    x: 'date',
+    y: 'value',
+  },
   ...getDefaultChartProps()
-};
+} as AreaChartProps;
 
 describe('AreaChart', () => {
   // Test 1: Basic Rendering
@@ -60,11 +60,11 @@ describe('AreaChart', () => {
     it('should handle accessor function changes', async () => {
       const { rerender } = render(<AreaChart {...defaultProps} />);
       
-      // Change accessor functions
+      // Change mapping
       rerender(
         <AreaChart
           {...defaultProps}
-          yAccessor="value"
+          mapping={{ x: 'date', y: 'value' }}
         />
       );
       

@@ -51,7 +51,7 @@ const BOOLEAN_PATTERNS = [
  */
 export function analyzeSingleValue(value: unknown): SingleValueAnalysis {
   const originalValue = value
-  let reasoning = ''
+  const reasoning = ''
 
   // 如果是 null 或 undefined
   if (value == null) {
@@ -109,7 +109,7 @@ export function analyzeSingleValue(value: unknown): SingleValueAnalysis {
 function analyzeNumberValue(originalValue: any, value: number): SingleValueAnalysis {
   const suggestions: string[] = []
   let reasoning = ''
-  let subType = Number.isInteger(value) ? 'integer' : 'decimal'
+  const subType = Number.isInteger(value) ? 'integer' : 'decimal'
 
   if (isNaN(value)) {
     return {

@@ -47,7 +47,7 @@ export const ResponsiveChartContainer: React.FC<ResponsiveChartContainerProps> =
     const availableWidth = containerRect.width - paddingLeft - paddingRight - borderLeft - borderRight
     const availableHeight = containerRect.height - paddingTop - paddingBottom - borderTop - borderBottom
     
-    let width = Math.max(minWidth, Math.min(maxWidth, availableWidth))
+    const width = Math.max(minWidth, Math.min(maxWidth, availableWidth))
     let height: number
 
     if (aspect) {

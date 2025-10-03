@@ -293,7 +293,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
     
     // 根據實際位置計算圖例座標
     let legendX: number, legendY: number;
-    let isVertical = actualPosition === 'left' || actualPosition === 'right';
+    const isVertical = actualPosition === 'left' || actualPosition === 'right';
     
     switch (actualPosition) {
       case 'top':

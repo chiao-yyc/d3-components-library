@@ -52,7 +52,7 @@ export class CsvAdapter extends BaseAdapter<Record<string, unknown>> {
         })
         
         result.push(dataPoint)
-      } catch (error) {
+      } catch {
         // 靜默忽略個別行的錯誤，繼續處理其他行
       }
     }

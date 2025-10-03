@@ -344,7 +344,7 @@ export function calculateDomain(data: any[], accessor: (d: any) => any): [any, a
  * 使用新的 d3.group API 實現
  */
 export function nest() {
-  let keys: ((d: any) => string)[] = [];
+  const keys: ((d: any) => string)[] = [];
   let rollupFunction: ((values: any[]) => any) | null = null;
 
   const nest = {

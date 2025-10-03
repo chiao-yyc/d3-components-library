@@ -491,7 +491,7 @@ export class D3ScatterPlot extends BaseChart<ScatterPlotProps> {
       this.resetZoom(scales, onZoomReset);
     } else {
       
-      let newDomain: { x?: [any, any]; y?: [any, any] } = {};
+      const newDomain: { x?: [any, any]; y?: [any, any] } = {};
       
       if (direction === 'x') {
         const [x0, x1] = selection;

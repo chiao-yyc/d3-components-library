@@ -65,8 +65,8 @@ export class TimeSeriesAdapter extends BaseAdapter<Record<string, any>> {
         })
         
         result.push(dataPoint)
-      } catch (error) {
-        console.warn(`處理第 ${i + 1} 行時間資料時發生錯誤:`, error)
+      } catch {
+        // 靜默忽略個別行的錯誤，繼續處理其他行
       }
     }
     

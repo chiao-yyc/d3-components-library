@@ -6,7 +6,9 @@ import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/inter
 import type { Margin, DataMapping } from '../../../core/base-chart/types';
 
 export interface ProcessedAreaDataPoint extends CoreProcessedDataPoint {
-  category?: string;
+  x: number | Date | string;  // Override to be more specific
+  y: number;  // Override to be more specific
+  category?: string | number;
   y0?: number;
   y1?: number;
 }
@@ -41,7 +43,7 @@ export interface AreaChartProps extends BaseChartProps {
   
   // Area 特定樣式
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
-  stackMode?: 'none' | 'stack' | 'percent';
+  stackMode?: 'none' | 'normal' | 'percent';
   fillOpacity?: number;
   strokeWidth?: number;
   colors?: string[];
@@ -65,7 +67,7 @@ export interface AreaChartProps extends BaseChartProps {
   interactive?: boolean;
   
   // Tooltip
-  tooltipFormat?: (d: ProcessedAreaDataPoint, series?: string) => string;
+  tooltipFormat?: (data: ProcessedAreaDataPoint[], x: number | Date | string, category?: string) => string;
   
   // Events
   onDataClick?: (d: ProcessedAreaDataPoint, series?: string) => void;

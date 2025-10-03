@@ -23,7 +23,7 @@ export interface SimpleAreaChartProps {
   height?: number;
   margin?: { top: number; right: number; bottom: number; left: number };
   colors?: string[];
-  stackMode?: 'none' | 'stack' | 'percent';
+  stackMode?: 'none' | 'normal' | 'percent';
   curve?: 'linear' | 'monotone' | 'step';
   showLine?: boolean;
   lineWidth?: number;
