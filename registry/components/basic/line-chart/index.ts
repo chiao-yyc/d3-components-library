@@ -18,13 +18,12 @@ export type { LineChartProps } from './line-chart';
 
 // 核心系統導出
 export { LineChartCore } from './core/line-chart-core';
-export type { 
+export type {
   LineChartCoreConfig,
   LineChartData,
   ProcessedLineDataPoint,
-  LineSeries,
-  PointMarkerConfig,
-  CurveType
+  LineSeriesData,
+  PointMarkerConfig
 } from './core/line-chart-core';
 
 // 向下兼容：舊版類型定義

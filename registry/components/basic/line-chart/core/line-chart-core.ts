@@ -5,12 +5,11 @@
 
 import * as d3 from 'd3';
 import { BaseChartCore } from '../../../core/base-chart/core';
-import { 
-  BaseChartData, 
-  ChartData, 
-  BaseChartCoreConfig, 
+import {
+  BaseChartData,
+  ChartData,
+  BaseChartCoreConfig,
   DataKeyOrAccessor,
-  D3Selection,
   ChartStateCallbacks
 } from '../../../core/types';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
@@ -117,23 +116,23 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   protected processedData: ChartData<LineChartData>[] = [];
   private internalProcessedData: ProcessedLineDataPoint[] = [];
   private seriesData: LineSeriesData[] = [];
-  private colorScale: ColorScale | null = null;
+  private _colorScale: ColorScale | null = null;
   private lineGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private pointsGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private clipPathId: string;
-  
+
   // 添加缺失的屬性（與其他 Core 類別一致）
   private chartWidth: number = 0;
   private chartHeight: number = 0;
-  private chartGroup: D3Selection | null = null;
-  
+  private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
+
   // 交互控制器
-  private brushZoomController: any = null;
-  private crosshairController: any = null;
-  
+  private _brushZoomController: any = null;
+  private _crosshairController: any = null;
+
   // Tooltip 相關
-  private tooltipOverlay: D3Selection | null = null;
-  private crosshairGroup: D3Selection | null = null;
+  private tooltipOverlay: d3.Selection<SVGRectElement, unknown, null, undefined> | null = null;
+  private crosshairGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
 
   constructor(
     config: LineChartCoreConfig,
@@ -267,7 +266,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
 
     // 創建顏色比例尺
     if (config.colors) {
-      this.colorScale = createColorScale(config.colors, this.seriesData.length);
+      this._colorScale = createColorScale(config.colors, [0, Math.max(0, this.seriesData.length - 1)]);
     }
   }
 
@@ -569,7 +568,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
    * }
    */
 
-  private renderGrid(
+  private _renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
@@ -618,8 +617,8 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   }
 
   private setupBrushZoom(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
+    _xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     console.log('Setting up brush zoom for LineChart');
   }
@@ -689,7 +688,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   private handleLineMouseMove(
     event: MouseEvent,
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.containerElement || !this.tooltipOverlay) return;
 
@@ -746,7 +745,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
 
   private findDataPointsAtX(xValue: number | Date): ProcessedLineDataPoint[] {
     const config = this.config as LineChartCoreConfig;
-    const isTimeScale = xValue instanceof Date || typeof xValue === 'object';
+    const _isTimeScale = xValue instanceof Date || typeof xValue === 'object';
     
     // 根據 tooltip 模式決定查找邏輯
     switch (config.tooltipMode) {

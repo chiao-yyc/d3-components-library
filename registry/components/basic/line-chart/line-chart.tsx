@@ -92,13 +92,10 @@ export const defaultLineChartProps: Partial<LineChartProps> = {
   enableDropShadow: false,
   enableGlowEffect: false,
   clipPath: true,
-  
+
   // 動畫
   animate: true,
-  animationDuration: 750,
-  
-  // 響應式
-  responsive: true
+  animationDuration: 750
 };
 
 // 向下兼容：舊版 props 支援
@@ -131,23 +128,25 @@ export const LineChartLegacy = React.forwardRef<LineChartCore,
     ...modernProps
   } = props;
 
-  const finalProps: LineChartProps = {
+  const finalProps: LineChartCoreConfig = {
     ...modernProps,
-    xAccessor: modernProps.xAccessor || xAccessor || xKey || 'x',
-    yAccessor: modernProps.yAccessor || yAccessor || yKey || 'y',
-    categoryAccessor: modernProps.categoryAccessor || categoryAccessor || categoryKey,
-    curve: modernProps.curve || interpolation || 'linear',
-    strokeWidth: modernProps.strokeWidth || lineWidth || 2,
-    showPoints: modernProps.showPoints !== undefined ? modernProps.showPoints : (showMarkers !== undefined ? showMarkers : false),
+    xAccessor: xAccessor || xKey || 'x',
+    yAccessor: yAccessor || yKey || 'y',
+    categoryAccessor: categoryAccessor || categoryKey,
+    curve: (interpolation as any) || modernProps.curve || 'linear',
+    strokeWidth: lineWidth || modernProps.strokeWidth || 2,
+    showPoints: showMarkers !== undefined ? showMarkers : modernProps.showPoints,
     pointMarker: {
-      ...defaultLineChartProps.pointMarker,
-      ...modernProps.pointMarker,
-      radius: modernProps.pointMarker?.radius || markerRadius || 3
+      enabled: true,
+      radius: markerRadius || 3,
+      fillOpacity: 1,
+      strokeWidth: 1,
+      ...modernProps.pointMarker
     },
-    onDataClick: modernProps.onDataClick || onPointClick,
-    onDataHover: modernProps.onDataHover || onPointHover,
-    onLineClick: modernProps.onLineClick || onLineClick,
-    onLineHover: modernProps.onLineHover || onLineHover,
+    onDataClick: onPointClick,
+    onDataHover: onPointHover,
+    onLineClick: onLineClick,
+    onLineHover: onLineHover,
   };
 
   return <LineChart ref={ref} {...finalProps} />;
