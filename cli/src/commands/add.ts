@@ -2,9 +2,13 @@ import fs from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
 import ora from 'ora'
-import { fetchComponentConfig, downloadComponentFiles } from '../utils/registry'
+import {
+  fetchComponentConfig,
+  downloadComponentWithDependencies
+} from '../utils/registry'
 import { validateProject, updateProjectConfig } from '../utils/project'
 import { ComponentConfig, AddOptions } from '../types'
+import { getDependencyTree, formatDependencyTree } from '../utils/dependency-resolver'
 
 export async function addCommand(componentName: string, options: AddOptions) {
   try {
@@ -30,36 +34,49 @@ export async function addCommand(componentName: string, options: AddOptions) {
     
     // 4. 選擇變體
     const variant = await selectVariant(component, options.variant)
-    
-    // 5. 檢查依賴
+
+    // 5. 分析依賴樹
+    spinner.text = '分析組件依賴...'
+    spinner.start()
+    const dependencyTree = await getDependencyTree(componentName)
+    const hasDepend = dependencyTree.length > 1
+    spinner.succeed(`依賴分析完成${hasDepend ? ` (${dependencyTree.length} 個組件)` : ''}`)
+
+    // 6. 顯示依賴樹
+    if (hasDepend) {
+      console.log(chalk.blue('\n📦 將安裝以下組件:'))
+      console.log(chalk.gray(formatDependencyTree(dependencyTree)))
+      console.log()
+    }
+
+    // 7. 檢查依賴
     await checkDependencies(component.dependencies)
-    
-    // 6. 確認目標目錄
-    const targetDir = path.resolve(options.dir || './src/components/ui', componentName)
-    
-    // 7. 預覽模式
+
+    // 8. 確認基礎目標目錄
+    const baseTargetDir = path.resolve(options.dir || './src/components')
+
+    // 9. 預覽模式
     if (options.dryRun) {
       console.log(chalk.yellow('🔍 預覽模式 - 不會實際建立檔案'))
-      previewChanges(component, variant, targetDir)
+      previewChanges(component, variant, baseTargetDir, dependencyTree)
       return
     }
-    
-    // 8. 檢查目標目錄是否已存在
-    if (await fs.pathExists(targetDir)) {
-      console.log(chalk.yellow(`目錄 ${targetDir} 已存在，將會覆蓋`))
-    }
-    
-    // 9. 下載並安裝組件
-    spinner.text = '下載組件檔案...'
+
+    // 10. 下載並安裝組件及依賴
+    spinner.text = '下載組件及依賴...'
     spinner.start()
-    const copiedFiles = await downloadComponentFiles(componentName, variant, targetDir)
-    spinner.succeed(`組件檔案下載完成 (${copiedFiles.length} 個檔案)`)
-    
-    // 10. 更新專案配置
+    const result = await downloadComponentWithDependencies(
+      componentName,
+      variant,
+      baseTargetDir
+    )
+    spinner.succeed(`組件安裝完成 (${result.files.length} 個檔案)`)
+
+    // 11. 更新專案配置
     await updateProjectConfig(component, variant)
-    
-    // 11. 顯示成功訊息和使用說明
-    showSuccessMessage(component, targetDir, copiedFiles)
+
+    // 12. 顯示成功訊息和使用說明
+    showSuccessMessage(component, result)
     
   } catch (error) {
     const errorSpinner = ora().start()
@@ -123,21 +140,23 @@ async function checkDependencies(deps: string[]) {
 function previewChanges(
   component: ComponentConfig,
   variant: string,
-  targetDir: string
+  baseTargetDir: string,
+  dependencyTree: any[]
 ) {
   console.log(chalk.blue('\n📋 預覽變更:'))
   console.log(`組件: ${component.name}`)
   console.log(`變體: ${variant}`)
-  console.log(`目標目錄: ${targetDir}`)
-  console.log('\n將會建立的檔案:')
-  
-  component.files.forEach(fileName => {
-    const filePath = path.join(targetDir, fileName)
-    console.log(chalk.green(`  + ${filePath}`))
-  })
-  
+  console.log(`基礎目錄: ${baseTargetDir}`)
+
+  if (dependencyTree.length > 1) {
+    console.log('\n將會安裝的組件:')
+    dependencyTree.forEach(dep => {
+      console.log(chalk.green(`  + ${dep.path}`))
+    })
+  }
+
   if (component.dependencies.length > 0) {
-    console.log('\n需要的依賴:')
+    console.log('\n需要的 npm 依賴:')
     component.dependencies.forEach(dep => {
       console.log(chalk.yellow(`  • ${dep}`))
     })
@@ -145,34 +164,38 @@ function previewChanges(
 }
 
 function showSuccessMessage(
-  component: ComponentConfig, 
-  targetDir: string,
-  copiedFiles: string[]
+  component: ComponentConfig,
+  result: { files: string[]; dependencies: string[] }
 ) {
   console.log(chalk.green('\n✅ 組件添加成功!'))
   console.log()
-  console.log(chalk.blue('📁 已複製的檔案:'))
-  copiedFiles.forEach(file => {
-    const relativePath = path.relative(process.cwd(), file)
-    console.log(chalk.gray(`  ${relativePath}`))
-  })
-  
+
+  // 顯示安裝的組件
+  if (result.dependencies.length > 1) {
+    console.log(chalk.blue('📦 已安裝的組件:'))
+    result.dependencies.forEach(dep => {
+      console.log(chalk.gray(`  ✓ ${dep}`))
+    })
+    console.log()
+  }
+
+  console.log(chalk.blue(`📁 已複製 ${result.files.length} 個檔案`))
+
   console.log()
   console.log(chalk.blue('📖 使用方式:'))
-  
+
   // 如果有範例，顯示第一個範例
   if (component.examples && component.examples.length > 0) {
     console.log(chalk.gray(component.examples[0].code))
   } else {
     // 生成基本導入範例
-    const componentClassName = component.name.split('-').map(word => 
+    const componentClassName = component.name.split('-').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join('')
-    
-    const relativePath = path.relative('./src', targetDir)
-    console.log(chalk.gray(`import { ${componentClassName} } from './${relativePath}'`))
+
+    console.log(chalk.gray(`import { ${componentClassName} } from '@/components/ui/${component.name}'`))
   }
-  
+
   console.log()
   console.log(chalk.green('🎉 現在可以開始使用組件了！'))
 }
