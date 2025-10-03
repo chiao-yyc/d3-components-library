@@ -1,11 +1,11 @@
 
-import { HTMLAttributes } from 'react';
-import { BaseChartProps } from '../../../../core/base-chart/base-chart'; // 導入 BaseChartProps
-import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../../core/data-processor/types'; // 導入 DataProcessor 的 ProcessedDataPoint
-import { BrushZoomConfig, CrosshairConfig } from '../../../../core/base-chart/interaction-utils'; // 導入交互配置類型
+import { BaseChartProps } from '../../core/base-chart/base-chart';
+import { ProcessedDataPoint as CoreProcessedDataPoint, DataMapping } from '../../core/data-processor/types';
+import { BrushZoomConfig, CrosshairConfig } from '../../core/base-chart/interaction-utils';
 
-// 重新導出 BaseChart 的相關類型
-export type { Margin, DataMapping } from '../../../../core/base-chart/types';
+// 重新導出相關類型
+export type { Margin } from '../../core/base-chart/types';
+export type { DataMapping } from '../../core/data-processor/types';
 
 // 更新 ProcessedDataPoint 以符合 DataProcessor 的輸出
 export interface ProcessedDataPoint extends CoreProcessedDataPoint {
@@ -13,7 +13,7 @@ export interface ProcessedDataPoint extends CoreProcessedDataPoint {
 }
 
 // LineChartProps 繼承 BaseChartProps
-export interface LineChartProps extends BaseChartProps, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+export interface LineChartProps extends BaseChartProps {
   // LineChart 特有的屬性
   xKey?: string;
   yKey?: string;

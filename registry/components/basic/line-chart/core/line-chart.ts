@@ -1,3 +1,12 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * Please use LineChartCore from './line-chart-core' instead.
+ *
+ * This file will be removed in a future version.
+ */
 
 import * as d3 from 'd3';
 import { LineChartProps, ProcessedDataPoint } from './types';
@@ -6,6 +15,9 @@ import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
 import { createChartClipPath } from '../../../core/base-chart/visual-effects';
 
+/**
+ * @deprecated This class is no longer maintained. Use LineChartCore instead.
+ */
 export class D3LineChart extends BaseChart<LineChartProps> {
   private processedData: ProcessedDataPoint[] = [];
   private scales: any = {};
