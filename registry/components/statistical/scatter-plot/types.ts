@@ -1,12 +1,10 @@
-import { HTMLAttributes, ReactNode } from 'react';
 import { ScatterPlotProps as CoreScatterPlotProps, ProcessedScatterDataPoint as CoreProcessedScatterDataPoint } from './core/types';
 
-export type { Margin, DataMapping, ProcessedScatterDataPoint } from './core/types';
+export type { ProcessedScatterDataPoint } from './core/types';
 
-export interface ScatterPlotProps extends CoreScatterPlotProps, Omit<HTMLAttributes<HTMLDivElement>, 'onHover'> {
+export interface ScatterPlotProps extends CoreScatterPlotProps {
   className?: string;
   style?: React.CSSProperties;
-  tooltipFormat?: (d: CoreProcessedScatterDataPoint) => ReactNode;
 }
 
 // 保持向下兼容

@@ -1,9 +1,7 @@
 // Pure TypeScript types for the core scatter plot logic
 import { BaseChartProps } from '../../../core/base-chart/base-chart';
-import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+import { ProcessedDataPoint as CoreProcessedDataPoint, DataMapping } from '../../../core/data-processor/types';
 import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/interaction-utils';
-
-import type { Margin, DataMapping } from '../../../core/base-chart/types';
 
 export interface ProcessedScatterDataPoint extends CoreProcessedDataPoint {
   size?: number;
