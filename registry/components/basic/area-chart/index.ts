@@ -17,13 +17,13 @@ export type { AreaChartProps } from './area-chart';
 
 // 核心系統導出
 export { AreaChartCore } from './core/area-chart-core';
-export type { 
+export type {
   AreaChartCoreConfig,
   AreaChartData,
-  ProcessedAreaDataPoint,
-  AreaSeries,
-  StackMode
+  AreaSeriesData,
+  StackedDataPoint
 } from './core/area-chart-core';
+export type { ProcessedAreaDataPoint } from './core/types';
 
 // 向下兼容：舊版類型定義
 export type { AreaChartProps as LegacyAreaChartProps, SimpleAreaChartData, SimpleAreaChartProps } from './types';

@@ -1,9 +1,12 @@
 // Pure TypeScript types for the core area chart logic
 import { BaseChartProps } from '../../../core/base-chart/base-chart';
-import { ProcessedDataPoint as CoreProcessedDataPoint } from '../../../core/data-processor/types';
+import { ProcessedDataPoint as CoreProcessedDataPoint, DataMapping } from '../../../core/data-processor/types';
 import { BrushZoomConfig, CrosshairConfig } from '../../../core/base-chart/interaction-utils';
 
-import type { Margin, DataMapping } from '../../../core/base-chart/types';
+import type { Margin } from '../../../core/base-chart/types';
+
+// Re-export commonly used types
+export type { Margin, DataMapping };
 
 export interface ProcessedAreaDataPoint extends CoreProcessedDataPoint {
   x: number | Date | string;  // Override to be more specific
@@ -11,12 +14,6 @@ export interface ProcessedAreaDataPoint extends CoreProcessedDataPoint {
   category?: string | number;
   y0?: number;
   y1?: number;
-}
-
-export interface AreaSeriesData {
-  key: string;
-  values: ProcessedAreaDataPoint[];
-  color?: string;
 }
 
 export interface AreaChartProps extends BaseChartProps {
@@ -70,8 +67,8 @@ export interface AreaChartProps extends BaseChartProps {
   tooltipFormat?: (data: ProcessedAreaDataPoint[], x: number | Date | string, category?: string) => string;
   
   // Events
-  onDataClick?: (d: ProcessedAreaDataPoint, series?: string) => void;
-  onDataHover?: (d: ProcessedAreaDataPoint | null, series?: string) => void;
+  onDataClick?: (data: ProcessedAreaDataPoint, event?: Event) => void;
+  onDataHover?: (data: ProcessedAreaDataPoint | null, event?: Event) => void;
   
   // === 交互功能相關 props ===
   

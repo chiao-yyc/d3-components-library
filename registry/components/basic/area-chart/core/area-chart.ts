@@ -1,6 +1,7 @@
 
 import * as d3 from 'd3';
-import { AreaChartProps, ProcessedAreaDataPoint, AreaSeriesData } from './types';
+import { AreaChartProps, ProcessedAreaDataPoint } from './types';
+import { AreaSeriesData } from './area-chart-core';
 import { BaseChart } from '../../../core/base-chart/base-chart';
 import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
