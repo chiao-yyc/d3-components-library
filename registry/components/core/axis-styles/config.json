@@ -1,0 +1,15 @@
+{
+  "name": "axis-styles",
+  "description": "軸線樣式系統，提供統一的軸線外觀和標籤配置",
+  "version": "1.0.0",
+  "tags": ["core", "axis", "styles", "labels"],
+  "category": "core",
+  "files": ["axis-styles.ts", "index.ts"],
+  "dependencies": ["d3"],
+  "features": [
+    "標準軸線樣式應用",
+    "軸線標籤配置",
+    "網格線渲染",
+    "樣式自訂"
+  ]
+}

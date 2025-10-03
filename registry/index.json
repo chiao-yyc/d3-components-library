@@ -5,6 +5,7 @@
   "components": [
     {
       "name": "bar-chart",
+      "path": "basic/bar-chart",
       "description": "可客製化的長條圖組件，支援互動和動畫",
       "version": "1.0.0",
       "tags": ["chart", "bar", "basic"],
@@ -19,6 +20,7 @@
     },
     {
       "name": "line-chart",
+      "path": "basic/line-chart",
       "description": "時間序列折線圖組件，支援多系列資料和動畫",
       "version": "1.0.0",
       "tags": ["chart", "line", "time-series"],
@@ -33,6 +35,7 @@
     },
     {
       "name": "scatter-plot",
+      "path": "statistical/scatter-plot",
       "description": "散點圖組件，支援大小和顏色映射、趨勢線",
       "version": "1.0.0",
       "tags": ["chart", "scatter", "correlation", "statistical"],
@@ -47,6 +50,7 @@
     },
     {
       "name": "pie-chart",
+      "path": "basic/pie-chart",
       "description": "可客製化的圓餅圖組件，支援甜甜圈模式、動畫和互動功能",
       "version": "1.0.0",
       "tags": ["chart", "pie", "donut", "proportion"],
@@ -61,6 +65,7 @@
     },
     {
       "name": "area-chart",
+      "path": "basic/area-chart",
       "description": "可客製化的區域圖組件，支援堆疊模式、多系列資料和動畫效果",
       "version": "1.0.0",
       "tags": ["chart", "area", "time-series", "stacked"],
@@ -75,6 +80,7 @@
     },
     {
       "name": "heatmap",
+      "path": "basic/heatmap",
       "description": "可客製化的熱力圖組件，適用於矩陣資料視覺化和相關性分析",
       "version": "1.0.0",
       "tags": ["chart", "heatmap", "matrix", "correlation"],
@@ -89,6 +95,7 @@
     },
     {
       "name": "correlogram",
+      "path": "statistical/correlogram",
       "description": "相關性矩陣視覺化圖表，顯示變數間的相關性係數，支援上下三角顯示模式",
       "version": "1.0.0",
       "tags": ["chart", "correlogram", "correlation", "matrix", "statistical"],
@@ -103,6 +110,7 @@
     },
     {
       "name": "candlestick-chart",
+      "path": "financial/candlestick-chart",
       "description": "專業級股市 K線圖（蠟燭圖）組件，支援 OHLC 數據、成交量、技術分析功能",
       "version": "1.0.0",
       "tags": ["chart", "candlestick", "k-line", "ohlc", "stock", "financial", "trading"],
@@ -117,6 +125,7 @@
     },
     {
       "name": "chart-canvas",
+      "path": "primitives/canvas",
       "description": "統一的圖表容器組件，提供 SVG 畫布、維度管理和比例尺註冊功能",
       "version": "1.0.0",
       "tags": ["primitives", "canvas", "container", "svg"],
@@ -131,6 +140,7 @@
     },
     {
       "name": "scale-manager",
+      "path": "primitives/scales",
       "description": "比例尺管理系統，提供統一的比例尺創建、註冊和協調功能",
       "version": "1.0.0",
       "tags": ["primitives", "scales", "manager", "coordination"],
@@ -145,6 +155,7 @@
     },
     {
       "name": "layer-manager",
+      "path": "primitives/layouts",
       "description": "圖層管理系統，提供圖層順序控制、可見性管理和自動渲染功能",
       "version": "1.0.0",
       "tags": ["primitives", "layers", "manager", "layout"],
@@ -159,6 +170,7 @@
     },
     {
       "name": "axis",
+      "path": "primitives/axis",
       "description": "獨立的軸線組件，支援 X 軸、Y 軸和雙軸配置",
       "version": "1.0.0",
       "tags": ["primitives", "axis", "scales", "ticks", "labels"],
@@ -173,6 +185,7 @@
     },
     {
       "name": "shapes",
+      "path": "primitives/shapes",
       "description": "原子級圖形元素組件，包含 Bar、Line、Area 等基礎圖形",
       "version": "1.0.0",
       "tags": ["primitives", "shapes", "bar", "line", "area"],
@@ -187,6 +200,7 @@
     },
     {
       "name": "combo-chart",
+      "path": "composite",
       "description": "組合圖表組件，展示模組化組件系統的應用範例，支援 Bar + Line 組合",
       "version": "1.0.0",
       "tags": ["composite", "combo", "bar", "line", "dual-axis"],

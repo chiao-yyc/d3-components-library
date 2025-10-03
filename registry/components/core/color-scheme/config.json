@@ -5,7 +5,15 @@
   "type": "core",
   "tags": ["core", "color", "palette", "scheme", "scale"],
   "dependencies": ["d3"],
-  "files": ["color-manager.ts", "color-palettes.ts", "use-color-scheme.ts", "types.ts", "index.ts"],
+  "files": [
+    "color-manager.ts",
+    "color-palettes.ts",
+    "use-color-scheme.ts",
+    "types.ts",
+    "index.ts",
+    "core/color-core.ts",
+    "core/index.ts"
+  ],
   "exports": {
     "ChartColorManager": "色彩管理器主類",
     "colorManager": "色彩管理器單例實例",
