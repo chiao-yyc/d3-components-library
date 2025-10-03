@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { EnhancedComboChart } from '../../../registry/components/composite/enhanced-combo-chart'
-import { ModernControlPanel, StatusDisplay } from '../components/ui/ModernControlPanel'
+import { ModernControlPanel } from '../components/ui/ModernControlPanel'
+import { StatusDisplay } from '../components/ui/ChartContainer'
 import { DemoPageTemplate } from '../components/ui/DemoPageTemplate'
 import { CodeExample } from '../components/ui/CodeExample'
 import { CHART_LAYER_ORDER, getChartGroup, type ChartType } from '../../../registry/components/primitives/layouts/chart-layer-constants'
