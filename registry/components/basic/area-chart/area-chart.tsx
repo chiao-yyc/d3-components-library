@@ -59,10 +59,7 @@ export const defaultAreaChartProps: Partial<AreaChartProps> = {
   // 動畫默認值
   animate: true,
   animationDuration: 750,
-  
-  // 響應式
-  responsive: true,
-  
+
   // 交互
   interactive: true,
   enableTooltip: true,

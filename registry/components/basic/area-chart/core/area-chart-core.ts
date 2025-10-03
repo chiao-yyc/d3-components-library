@@ -45,7 +45,7 @@ export interface AreaChartCoreConfig extends BaseChartCoreConfig {
   categoryAccessor?: DataKeyOrAccessor<AreaChartData, string | number>;
   
   // 區域圖專用配置
-  stackMode?: 'none' | 'normal' | 'percent';
+  stackMode?: 'none' | 'normal' | 'percent' | 'streamgraph';
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
   fillOpacity?: number;
   strokeWidth?: number;
@@ -247,11 +247,11 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
     // 創建顏色比例尺
     if (config.colors) {
-      this.colorScale = createColorScale(config.colors, this.seriesData.length);
+      this.colorScale = createColorScale(config.colors, [0, this.seriesData.length - 1]);
     }
   }
 
-  private processStackedData(stackMode: 'normal' | 'percent'): void {
+  private processStackedData(stackMode: 'normal' | 'percent' | 'streamgraph'): void {
     if (this.seriesData.length <= 1) {
       this.stackedData = [...this.areaProcessedData] as StackedDataPoint[];
       return;
