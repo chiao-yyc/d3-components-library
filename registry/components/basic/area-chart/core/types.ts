@@ -43,7 +43,7 @@ export interface AreaChartProps extends BaseChartProps {
   
   // Area 特定樣式
   curve?: 'linear' | 'monotone' | 'cardinal' | 'basis' | 'step';
-  stackMode?: 'none' | 'normal' | 'percent';
+  stackMode?: 'none' | 'normal' | 'percent' | 'streamgraph';
   fillOpacity?: number;
   strokeWidth?: number;
   colors?: string[];
