@@ -10,11 +10,10 @@ import { BarChartCore, BarChartCoreConfig } from './core/bar-chart-core';
 // 擴展 React props 接口，包含向下兼容的 key-based props
 export interface BarChartProps extends ReactChartWrapperProps, BarChartCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
-  
+
   // 向下兼容的 key-based 屬性
   xKey?: string;
   yKey?: string;
-  categoryKey?: string;
 }
 
 // 創建 BarChart 組件
@@ -24,18 +23,17 @@ const BarChartComponent = createReactChartWrapper(BarChartCore);
 export const BarChart = React.forwardRef<BarChartCore, BarChartProps>((props, ref) => {
   // 處理向下兼容的 key-based props
   const {
-    xKey, yKey, categoryKey,
-    xAccessor, yAccessor, categoryAccessor,
+    xKey, yKey,
+    xAccessor, yAccessor,
     ...restProps
   } = props;
 
-  // 映射 key-based props 到 accessor
+  // 映射 key-based props 到 mapping 系統
   const finalProps: BarChartCoreConfig = {
     ...defaultBarChartProps,
     ...restProps,
-    xAccessor: xAccessor || xKey || 'x',
-    yAccessor: yAccessor || yKey || 'y',
-    categoryAccessor: categoryAccessor || categoryKey,
+    xAccessor: xAccessor || (xKey ? (d: unknown) => (d as Record<string, unknown>)[xKey] : undefined),
+    yAccessor: yAccessor || (yKey ? (d: unknown) => (d as Record<string, unknown>)[yKey] : undefined),
   };
 
   return <BarChartComponent ref={ref} {...finalProps} />;

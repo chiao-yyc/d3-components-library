@@ -1,4 +1,3 @@
-import { HTMLAttributes } from 'react';
 import { BaseChartProps, Margin } from '../../core/base-chart/types';
 import { DataMapping, ProcessedDataPoint as CoreProcessedDataPoint } from '../../core/data-processor/types';
 
