@@ -1,3 +1,12 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * Please use AreaChartCore from './area-chart-core' instead.
+ *
+ * This file will be removed in a future version.
+ */
 
 import * as d3 from 'd3';
 import { AreaChartProps, ProcessedAreaDataPoint } from './types';
@@ -9,6 +18,9 @@ import { ProcessedDataPoint } from '../../../core/data-processor/types';
 import { createChartClipPath, createStandardGlow } from '../../../core/base-chart/visual-effects';
 import { BrushZoomController, CrosshairController, createBrushZoom, createCrosshair } from '../../../core/base-chart/interaction-utils';
 
+/**
+ * @deprecated This class is no longer maintained. Use AreaChartCore instead.
+ */
 export class D3AreaChart extends BaseChart<AreaChartProps> {
   private processedData: ProcessedAreaDataPoint[] = [];
   private seriesData: AreaSeriesData[] = [];

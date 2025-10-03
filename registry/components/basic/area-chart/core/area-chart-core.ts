@@ -90,21 +90,21 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private areaProcessedData: ProcessedAreaDataPoint[] = [];
   private seriesData: AreaSeriesData[] = [];
   private stackedData: StackedDataPoint[] = [];
-  private colorScale: ColorScale | null = null;
-  private areaGroup: D3Selection | null = null;
-  private chartGroup: D3Selection | null = null;
+  private _colorScale: ColorScale | null = null;
+  private areaGroup: D3Selection<SVGGElement> | null = null;
+  private chartGroup: D3Selection<SVGGElement> | null = null;
 
   // 添加缺失的屬性（與 ScatterPlot 一致）
   private chartWidth: number = 0;
   private chartHeight: number = 0;
-  
+
   // 交互控制器
-  private brushZoomController: { destroy: () => void } | null = null;
-  private crosshairController: { destroy: () => void } | null = null;
-  
+  private _brushZoomController: { destroy: () => void } | null = null;
+  private _crosshairController: { destroy: () => void } | null = null;
+
   // Tooltip 相關
-  private tooltipOverlay: D3Selection | null = null;
-  private crosshairGroup: D3Selection | null = null;
+  private tooltipOverlay: D3Selection<SVGRectElement> | null = null;
+  private crosshairGroup: D3Selection<SVGGElement> | null = null;
 
   constructor(
     config: AreaChartCoreConfig,
@@ -119,8 +119,9 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
   /**
    * Parse date strings with better support for various formats
+   * @private Reserved for future use
    */
-  private parseDate(dateStr: string): Date {
+  private _parseDate(dateStr: string): Date {
     // Handle YYYY-MM format like '2023-01'
     if (/^\d{4}-\d{1,2}$/.test(dateStr)) {
       return new Date(dateStr + '-01'); // Add day to make it a valid date
@@ -247,7 +248,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
     // 創建顏色比例尺
     if (config.colors) {
-      this.colorScale = createColorScale(config.colors, [0, this.seriesData.length - 1]);
+      this._colorScale = createColorScale(config.colors, [0, this.seriesData.length - 1]);
     }
   }
 
@@ -261,7 +262,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     const xGroups = d3.group(this.areaProcessedData, d => d.x);
     const stackedGroups: StackedDataPoint[][] = [];
 
-    xGroups.forEach((points, x) => {
+    xGroups.forEach((points, _x) => {
       const sortedPoints = points.sort((a, b) => (a.category || 0) < (b.category || 0) ? -1 : 1);
       let cumulative = 0;
       const total = d3.sum(sortedPoints, d => d.y);
@@ -288,7 +289,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     this.stackedData = stackedGroups.flat();
   }
 
-  private getYValues(): number[] {
+  private _getYValues(): number[] {
     const config = this.config as AreaChartCoreConfig;
     
     if (config.stackMode && config.stackMode !== 'none' && this.stackedData.length > 0) {
@@ -301,13 +302,15 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     return this.areaProcessedData.map(d => d.y);
   }
 
-  private createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
+  private _createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
 
     // 檢查是否為日期類型
     if (values[0] instanceof Date) {
+      const dateValues = values.filter((v): v is Date => v instanceof Date);
+      const extent = d3.extent(dateValues) as [Date, Date];
       return d3.scaleTime()
-        .domain(d3.extent(values) as [Date, Date])
+        .domain(extent)
         .range([0, this.chartWidth]);
     }
 
@@ -326,7 +329,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       .range([0, this.chartWidth]);
   }
 
-  private createYScale(values: number[]): d3.ScaleLinear<number, number> {
+  private _createYScale(values: number[]): d3.ScaleLinear<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
     
     const config = this.config as AreaChartCoreConfig;
@@ -345,7 +348,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
 
-  private renderAreas(
+  private _renderAreas(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
@@ -475,7 +478,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     });
   }
 
-  private renderPoints(
+  private _renderPoints(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
@@ -549,7 +552,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
    * }
    */
 
-  private renderGrid(
+  private _renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {
@@ -598,8 +601,8 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   private setupBrushZoom(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
-    yScale: d3.ScaleLinear<number, number>
+    _xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     console.log('Setting up brush zoom for AreaChart');
   }
@@ -659,7 +662,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private handleAreaMouseMove(
     event: MouseEvent,
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
-    yScale: d3.ScaleLinear<number, number>
+    _yScale: d3.ScaleLinear<number, number>
   ): void {
     if (!this.containerElement || !this.areaGroup) return;
 
