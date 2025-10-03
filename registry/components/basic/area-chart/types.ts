@@ -1,7 +1,6 @@
 
 import { HTMLAttributes } from 'react';
-import { AreaChartProps as CoreAreaChartProps, ProcessedAreaDataPoint } from './core/types';
-import { AreaSeriesData } from './core/area-chart-core';
+import { AreaChartProps as CoreAreaChartProps } from './core/types';
 
 export type { Margin, DataMapping, ProcessedAreaDataPoint } from './core/types';
 export type { AreaSeriesData } from './core/area-chart-core';
