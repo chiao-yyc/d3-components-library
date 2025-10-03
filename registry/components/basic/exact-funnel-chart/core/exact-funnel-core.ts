@@ -278,9 +278,9 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
 
     // 使用 D3 的 area 生成器來創建漏斗形狀
     const areaGen = d3.area<ExactFunnelChartData>()
-      .x((d, i) => xScale(i))
-      .y0((d, i) => this.upperPoints[i] ? this.upperPoints[i][1] : 0)  // 上邊界，帶安全檢查
-      .y1((d, i) => this.lowerPoints[i] ? this.lowerPoints[i][1] : 0)  // 下邊界，帶安全檢查
+      .x((_d, i) => xScale(i))
+      .y0((_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] : 0)  // 上邊界，帶安全檢查
+      .y1((_d, i) => this.lowerPoints[i] ? this.lowerPoints[i][1] : 0)  // 下邊界，帶安全檢查
       .curve(d3.curveCatmullRom.alpha(0.5));
 
     const funnelPath = areaGen(this.processedDataPoints.map(d => d.originalData));
@@ -362,10 +362,10 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .enter()
       .append('line')
       .attr('class', 'tick-line')
-      .attr('x1', (d, i) => xScale(i))
-      .attr('x2', (d, i) => xScale(i))
-      .attr('y1', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 30 : 0) // tick 線開始位置
-      .attr('y2', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 5 : 0)  // tick 線結束位置
+      .attr('x1', (_d, i) => xScale(i))
+      .attr('x2', (_d, i) => xScale(i))
+      .attr('y1', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 30 : 0) // tick 線開始位置
+      .attr('y2', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 5 : 0)  // tick 線結束位置
       .attr('stroke', values)
       .attr('stroke-width', 2)
       .attr('opacity', 0.8);
@@ -376,8 +376,8 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .enter()
       .append('text')
       .attr('class', 'value-label')
-      .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 35 : 0) // 調整位置，放在 tick 線上方
+      .attr('x', (_d, i) => xScale(i))
+      .attr('y', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 35 : 0) // 調整位置，放在 tick 線上方
       .attr('text-anchor', 'middle')
       .attr('fill', values)
       .style('font-size', `${fontSize}px`)
@@ -391,8 +391,8 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .enter()
       .append('text')
       .attr('class', 'stage-label')
-      .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => (this.upperPoints[i] && this.lowerPoints[i]) ? (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2 : 0) // 放在中心，帶安全檢查
+      .attr('x', (_d, i) => xScale(i))
+      .attr('y', (_d, i) => (this.upperPoints[i] && this.lowerPoints[i]) ? (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2 : 0) // 放在中心，帶安全檢查
       .attr('text-anchor', 'middle')
       .attr('fill', labels)
       .style('font-size', `${labelFontSize}px`)
@@ -406,8 +406,8 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .enter()
       .append('text')
       .attr('class', 'percentage-label')
-      .attr('x', (d, i) => xScale(i))
-      .attr('y', (d, i) => this.lowerPoints && this.lowerPoints[i] ? this.lowerPoints[i][1] + 20 : 0) // 放在漏斗下方
+      .attr('x', (_d, i) => xScale(i))
+      .attr('y', (_d, i) => this.lowerPoints && this.lowerPoints[i] ? this.lowerPoints[i][1] + 20 : 0) // 放在漏斗下方
       .attr('text-anchor', 'middle')
       .attr('fill', percentages)
       .style('font-size', `${percentageFontSize}px`)
@@ -424,7 +424,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
         .attr('opacity', 0)
         .transition()
         .duration(animationDuration)
-        .delay((d: any, i: number) => i * 100)
+        .delay((_d: any, i: number) => i * 100)
         .attr('opacity', 0.8);
 
       // 動畫標籤
@@ -433,7 +433,7 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
           .attr('opacity', 0)
           .transition()
           .duration(animationDuration)
-          .delay((d: any, i: number) => i * 100)
+          .delay((_d: any, i: number) => i * 100)
           .attr('opacity', 1);
       });
     }

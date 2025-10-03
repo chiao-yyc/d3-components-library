@@ -100,7 +100,7 @@ export interface GaugeChartCoreConfig extends BaseChartCoreConfig {
 // 主要的 GaugeChart 核心類
 export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
   private processedGaugeData: ProcessedGaugeDataPoint = { value: 0, originalData: {} as any };
-  private scales: Record<string, any> = {};
+  protected scales: Record<string, any> = {};
   private arcGenerator: d3.Arc<any, d3.DefaultArcObject> | null = null;
   private colorScale: ColorScale | null = null;
   private gaugeGroup: D3Selection | null = null;
@@ -254,23 +254,23 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
 
   protected renderChart(): void {
     // 創建 SVG 容器和圖表組
-    this.chartGroup = this.createSVGContainer();
-
-    const config = this.config as GaugeChartCoreConfig;
+    this.chartGroup = this.createSVGContainer() as unknown as D3Selection;
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
     if (!this.processedGaugeData || typeof this.processedGaugeData.value !== 'number') {
-      this.chartGroup.selectAll('*').remove();
+      this.chartGroup?.selectAll('*').remove();
       return;
     }
 
     // 清除之前的內容
-    this.chartGroup.selectAll('*').remove();
+    this.chartGroup?.selectAll('*').remove();
 
     // 創建量表組
-    this.gaugeGroup = this.chartGroup
-      .append('g')
-      .attr('class', 'gauge-chart-group');
+    if (this.chartGroup) {
+      this.gaugeGroup = this.chartGroup
+        .append('g')
+        .attr('class', 'gauge-chart-group') as unknown as D3Selection;
+    }
 
     this.renderGauge();
   }
@@ -283,22 +283,22 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
       backgroundColor = '#e5e7eb',
       foregroundColor = '#3b82f6',
       zones,
-      needleColor = '#374151',
-      needleWidth = 3,
+      needleColor: _needleColor = '#374151',
+      needleWidth: _needleWidth = 3,
       centerCircleRadius = 8,
       centerCircleColor = '#374151',
-      showValue = true,
-      showLabel = true,
+      showValue: _showValue = true,
+      showLabel: _showLabel = true,
       showTicks = true,
       showMinMax = true,
-      fontSize = 14,
-      fontFamily = 'sans-serif',
+      fontSize: _fontSize = 14,
+      fontFamily: _fontFamily = 'sans-serif',
       animate = true,
       animationDuration = 1000,
-      animationEasing = 'easeElasticOut',
+      animationEasing: _animationEasing = 'easeElasticOut',
       min = 0,
       max = 100,
-      tickFormat
+      tickFormat: _tickFormat
     } = config;
 
     const {
@@ -335,7 +335,7 @@ export class GaugeChartCore extends BaseChartCore<GaugeChartData> {
 
     // 區域或數值弧線
     if (zones) {
-      zones.forEach((zone, i) => {
+      zones.forEach((zone, _i) => {
         const zoneStartAngle = angleScale(Math.max(zone.min, min));
         const zoneEndAngle = angleScale(Math.min(zone.max, max));
         const zoneArc = this.arcGenerator!({

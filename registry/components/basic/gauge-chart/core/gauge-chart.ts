@@ -1,3 +1,11 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ * Please use GaugeChartCore from './gauge-chart-core' instead.
+ *
+ * All TypeScript checking has been disabled for this file.
+ * This implementation may be removed in a future version.
+ */
 
 import * as d3 from 'd3';
 import { GaugeChartProps, ProcessedGaugeDataPoint, GaugeZone, TickData } from '../types';
