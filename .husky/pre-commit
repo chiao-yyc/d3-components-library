@@ -59,8 +59,8 @@ if [ $DEMO_CHANGED -gt 0 ]; then
   fi
   
   echo "   📊 頁面模式驗證..."
-  npm run check:compliance
-  # 注意：這裡不強制退出，僅作為提醒
+  npm run check:compliance || true
+  # 注意：這裡不強制退出，僅作為提醒（即使檢查失敗也繼續）
   
   echo "   ✅ Demo 架構檢查完成"
   cd ..

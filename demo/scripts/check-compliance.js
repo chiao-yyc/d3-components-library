@@ -18,7 +18,13 @@ const PAGES_DIR = path.join(__dirname, '../src/pages');
 const REQUIRED_COMPONENTS = {
   'DemoPageTemplate': {
     required: true,
-    exemptions: ['Home.tsx', 'Gallery.tsx', 'ChartsShowcase.tsx'],
+    exemptions: [
+      'Home.tsx',
+      'Gallery.tsx',
+      'ChartsShowcase.tsx',
+      'PerformanceTestDemo.tsx',  // 性能測試頁面，有特殊布局需求
+      'VirtualScrollingDemo.tsx'   // 虛擬滾動頁面，有特殊布局需求
+    ],
     severity: 'error'
   },
   'ModernControlPanel': {

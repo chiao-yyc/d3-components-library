@@ -58,12 +58,12 @@ const pieData = [
 ]
 
 const areaData = [
-  { month: '1月', desktop: 45, mobile: 32 },
-  { month: '2月', desktop: 48, mobile: 35 },
-  { month: '3月', desktop: 52, mobile: 38 },
-  { month: '4月', desktop: 49, mobile: 41 },
-  { month: '5月', desktop: 55, mobile: 44 },
-  { month: '6月', desktop: 58, mobile: 47 },
+  { month: '2024-01', desktop: 45, mobile: 32 },
+  { month: '2024-02', desktop: 48, mobile: 35 },
+  { month: '2024-03', desktop: 52, mobile: 38 },
+  { month: '2024-04', desktop: 49, mobile: 41 },
+  { month: '2024-05', desktop: 55, mobile: 44 },
+  { month: '2024-06', desktop: 58, mobile: 47 },
 ].flatMap(d => [
   { month: d.month, users: d.desktop, device: 'Desktop' },
   { month: d.month, users: d.mobile, device: 'Mobile' }
