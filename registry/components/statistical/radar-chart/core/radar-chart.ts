@@ -45,7 +45,7 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
     }
 
     // 使用 DataProcessor 預處理數據（如果需要）
-    let processedInput = data;
+    const processedInput = data;
     
     // 計算數值範圍
     let actualMaxValue = maxValue;

@@ -5,15 +5,16 @@
 
 import * as d3 from 'd3';
 import { BaseChartCore } from '../../../core/base-chart/core';
-import { 
-  BaseChartData, 
-  ChartData, 
-  BaseChartCoreConfig, 
+import {
+  BaseChartData,
+  ChartData,
+  BaseChartCoreConfig,
   DataKeyOrAccessor,
   D3Selection,
   ChartStateCallbacks
 } from '../../../core/types';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
+import { ProcessedAreaDataPoint } from './types';
 
 // AreaChart 專用數據接口
 export interface AreaChartData extends BaseChartData {
@@ -21,15 +22,6 @@ export interface AreaChartData extends BaseChartData {
   y?: number;
   category?: string | number;
   [key: string]: string | number | Date | boolean | null | undefined;
-}
-
-// 處理後的數據點
-export interface ProcessedAreaDataPoint {
-  x: number | Date | string;
-  y: number;
-  category?: string | number;
-  originalData: ChartData<AreaChartData>;
-  index: number;
 }
 
 // 區域系列數據
@@ -100,7 +92,8 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private stackedData: StackedDataPoint[] = [];
   private colorScale: ColorScale | null = null;
   private areaGroup: D3Selection | null = null;
-  
+  private chartGroup: D3Selection | null = null;
+
   // 添加缺失的屬性（與 ScatterPlot 一致）
   private chartWidth: number = 0;
   private chartHeight: number = 0;
@@ -117,13 +110,6 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     config: AreaChartCoreConfig,
     callbacks?: ChartStateCallbacks
   ) {
-    console.log('AreaChartCore constructor called with config:', {
-      dataLength: config.data?.length || 0,
-      width: config.width,
-      height: config.height,
-      xAccessor: config.xAccessor,
-      yAccessor: config.yAccessor
-    });
     super(config, callbacks);
   }
 
@@ -943,6 +929,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     // 創建主要的圖表容器
     const chartArea = this.createSVGContainer();
     this.areaGroup = chartArea;
+    this.chartGroup = chartArea;
     
     // 獲取曲線類型
     const curve = this.getCurveFunction(config.curve);

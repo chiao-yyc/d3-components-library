@@ -3,9 +3,6 @@ import { ChartDataPoint, DataMapping, ValidationResult, SuggestedMapping, FieldS
 
 // 定義常數避免 magic numbers
 const MIN_NESTED_DEPTH = 5
-const LOW_COMPLEXITY_THRESHOLD = 0.3
-const MAX_FIELD_LENGTH = 20
-const MED_COMPLEXITY_THRESHOLD = 0.5
 const HIGH_CONFIDENCE = 0.8
 
 /**
@@ -50,7 +47,7 @@ export class NestedAdapter extends BaseAdapter<Record<string, unknown>> {
         })
         
         result.push(dataPoint)
-      } catch (error) {
+      } catch {
         // 靜默忽略個別行的錯誤，繼續處理其他行
       }
     }
