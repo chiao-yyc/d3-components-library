@@ -21,7 +21,7 @@ program
   .command('add <component>')
   .description('添加組件到專案中')
   .option('-v, --variant <variant>', '選擇組件變體')
-  .option('-d, --dir <directory>', '目標目錄', './src/components/ui')
+  .option('-d, --dir <directory>', '基礎目標目錄', './src/components')
   .option('--dry-run', '預覽變更但不實際執行')
   .action(addCommand)
 
