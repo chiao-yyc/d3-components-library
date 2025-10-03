@@ -40,12 +40,12 @@ const timeSeriesData = [
 
 // 多系列資料
 const multiSeriesData = [
-  { month: '1月', desktop: 45, mobile: 32, tablet: 18 },
-  { month: '2月', desktop: 48, mobile: 35, tablet: 22 },
-  { month: '3月', desktop: 52, mobile: 38, tablet: 25 },
-  { month: '4月', desktop: 49, mobile: 41, tablet: 28 },
-  { month: '5月', desktop: 55, mobile: 44, tablet: 30 },
-  { month: '6月', desktop: 58, mobile: 47, tablet: 32 }
+  { month: '2024-01', desktop: 45, mobile: 32, tablet: 18 },
+  { month: '2024-02', desktop: 48, mobile: 35, tablet: 22 },
+  { month: '2024-03', desktop: 52, mobile: 38, tablet: 25 },
+  { month: '2024-04', desktop: 49, mobile: 41, tablet: 28 },
+  { month: '2024-05', desktop: 55, mobile: 44, tablet: 30 },
+  { month: '2024-06', desktop: 58, mobile: 47, tablet: 32 }
 ]
 
 // 產品銷售資料
