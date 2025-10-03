@@ -1,0 +1,15 @@
+{
+  "name": "types",
+  "description": "核心 TypeScript 類型定義，提供圖表組件的通用接口和類型",
+  "version": "1.0.0",
+  "tags": ["core", "types", "typescript", "definitions"],
+  "category": "core",
+  "files": ["index.ts", "core/chart-types.ts", "core/index.ts"],
+  "dependencies": [],
+  "features": [
+    "圖表數據類型定義",
+    "配置接口定義",
+    "回調函數類型",
+    "維度和布局類型"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "axis-config",
+  "description": "統一的軸線配置系統，為所有 Cartesian coordinate 圖表提供一致的軸線控制",
+  "version": "1.0.0",
+  "tags": ["core", "axis", "config", "utility"],
+  "category": "core",
+  "files": ["axis-config.ts", "index.ts"],
+  "dependencies": [],
+  "features": [
+    "統一的軸線配置接口",
+    "支援自動域值計算",
+    "支援零基準和原點控制",
+    "域值邊距和 nice 值支援"
+  ]
+}

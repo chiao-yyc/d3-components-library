@@ -12,6 +12,10 @@
     "clsx",
     "tailwind-merge"
   ],
+  "registryDependencies": [
+    "core/base-chart",
+    "core/data-processor"
+  ],
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
@@ -36,10 +40,16 @@
       "path": "./bar-chart.css"
     },
     {
-      "name": "cn.ts",
-      "type": "util",
-      "description": "CSS 類名合併工具",
-      "path": "../../utils/cn.ts"
+      "name": "core/bar-chart-core.ts",
+      "type": "core",
+      "description": "框架無關的核心邏輯",
+      "path": "./core/bar-chart-core.ts"
+    },
+    {
+      "name": "core/index.ts",
+      "type": "core",
+      "description": "核心模組匯出",
+      "path": "./core/index.ts"
     }
   ],
   "variants": [

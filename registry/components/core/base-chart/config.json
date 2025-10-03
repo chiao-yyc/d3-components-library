@@ -6,8 +6,30 @@
   "category": "core",
   "complexity": "advanced",
   "lastUpdated": "2025-07-09T12:00:00Z",
-  "files": ["base-chart.tsx", "types.ts", "index.ts"],
+  "files": [
+    "base-chart.tsx",
+    "types.ts",
+    "index.ts",
+    "react-chart-wrapper.tsx",
+    "chart-utils.ts",
+    "interaction-utils.ts",
+    "interaction-animation-utils.ts",
+    "chart-group-utils.ts",
+    "visual-effects.ts",
+    "categorical-color-utils.ts",
+    "use-base-chart.ts",
+    "create-modern-chart.tsx",
+    "core/base-chart-core.ts",
+    "core/index.ts"
+  ],
   "dependencies": ["react", "d3", "@types/d3"],
+  "registryDependencies": [
+    "core/color-scheme",
+    "core/axis-config",
+    "core/types",
+    "core/axis-styles",
+    "primitives/axis"
+  ],
   "features": [
     "統一的圖表接口",
     "自動數據驗證",

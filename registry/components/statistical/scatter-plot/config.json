@@ -12,6 +12,10 @@
     "clsx",
     "tailwind-merge"
   ],
+  "registryDependencies": [
+    "core/base-chart",
+    "core/data-processor"
+  ],
   "tags": ["chart", "scatter", "correlation", "statistical", "d3"],
   "variants": [
     "default",

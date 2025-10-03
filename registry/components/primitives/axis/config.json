@@ -16,7 +16,9 @@
     "dual-axis.tsx",
     "axis.css",
     "types.ts",
-    "index.ts"
+    "index.ts",
+    "core/axis-core.ts",
+    "core/index.ts"
   ],
   "exports": {
     "main": "./index.ts",
