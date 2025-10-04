@@ -119,7 +119,7 @@ export interface PieChartCoreConfig extends BaseChartCoreConfig {
 
 // 主要的 PieChart 核心類
 export class PieChartCore extends BaseChartCore<PieChartData> {
-  private processedData: ProcessedPieDataPoint[] = [];
+  private pieProcessedData: ProcessedPieDataPoint[] = [];
   private segments: PieSegment[] = [];
   private colorScale: ColorScale | null = null;
   private chartGroup: D3Selection | null = null;
@@ -131,7 +131,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
   constructor(
     config: PieChartCoreConfig,
-    callbacks?: ChartStateCallbacks<PieChartData>
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
   }
@@ -148,19 +148,27 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     return {};
   }
 
-  protected processData(): { 
+  protected processData(): ChartData<PieChartData>[] {
+    // Call internal method to get processed pie data
+    const result = this.processPieData();
+
+    // Return data in the expected format for base class
+    return result.data.map(d => d.originalData);
+  }
+
+  private processPieData(): {
     pie: d3.Pie<any, ProcessedPieDataPoint>;
-    arc: d3.Arc<unknown, d3.DefaultArcObject>;
-    data: ProcessedPieDataPoint[] 
+    arc: d3.Arc<any, d3.DefaultArcObject>;
+    data: ProcessedPieDataPoint[]
   } {
     const config = this.config as PieChartCoreConfig;
     const { data, labelAccessor, valueAccessor, colorAccessor } = config;
 
     if (!data || data.length === 0) {
-      this.processedData = [];
+      this.pieProcessedData = [];
       this.segments = [];
       return {
-        pie: d3.pie(),
+        pie: d3.pie<any, ProcessedPieDataPoint>(),
         arc: d3.arc(),
         data: []
       };
@@ -214,9 +222,9 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     this.applySorting(filteredData);
 
     // 計算總值和百分比
-    const totalValue = d3.sum(filteredData, d => d.value);
-    
-    this.processedData = filteredData.map(item => ({
+    const totalValue = d3.sum(filteredData, (d: any) => d.value);
+
+    this.pieProcessedData = filteredData.map(item => ({
       ...item,
       percentage: totalValue > 0 ? (item.value / totalValue) * 100 : 0,
       startAngle: 0, // 將由 d3.pie 計算
@@ -227,12 +235,14 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     this.createColorScale();
 
     // 應用顏色 - 優先使用色彩比例尺，檢查是否為有效顏色
-    this.processedData.forEach((item, index) => {
+    this.pieProcessedData.forEach((item, index) => {
+      const colorStr = String(item.color || '');
+      const validColorNames = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'brown'];
       const isValidColor = item.color && (
-        item.color.startsWith('#') || 
-        item.color.startsWith('rgb') || 
-        item.color.startsWith('hsl') ||
-        /^[a-z]+$/i.test(item.color) && ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gray', 'brown'].includes(item.color.toLowerCase())
+        colorStr.indexOf('#') === 0 ||
+        colorStr.indexOf('rgb') === 0 ||
+        colorStr.indexOf('hsl') === 0 ||
+        /^[a-z]+$/i.test(colorStr) && validColorNames.indexOf(colorStr.toLowerCase()) !== -1
       );
       
       if (!isValidColor) {
@@ -253,12 +263,12 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     this.calculateDimensions();
 
     // 創建弧形生成器
-    const arc = d3.arc<d3.PieArcDatum<ProcessedPieDataPoint>>()
+    const arc = d3.arc<any, d3.DefaultArcObject>()
       .innerRadius(config.innerRadius || 0)
       .outerRadius(config.outerRadius || this.radius)
       .cornerRadius(config.cornerRadius || 0);
 
-    return { pie, arc, data: this.processedData };
+    return { pie, arc, data: this.pieProcessedData };
   }
 
   private applySorting(data: any[]): void {
@@ -277,13 +287,13 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
   private createColorScale(): void {
     const config = this.config as PieChartCoreConfig;
-    
+
     // 使用默認顏色或配置的顏色
     const colors = config.colors || ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
     this.colorScale = createColorScale({
       type: 'custom',
       colors: colors,
-      count: this.processedData.length,
+      count: this.pieProcessedData.length,
       interpolate: false
     });
   }
@@ -313,18 +323,18 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   }
 
   protected renderChart(): void {
-    
+
     // 創建 SVG 容器和圖表群組
     if (!this.chartGroup) {
       this.chartGroup = this.createSVGContainer();
     }
-    
-    if (!this.chartGroup || this.processedData.length === 0) {
+
+    if (!this.chartGroup || this.pieProcessedData.length === 0) {
       return;
     }
 
     const config = this.config as PieChartCoreConfig;
-    const { pie, arc } = this.processData();
+    const { pie, arc } = this.processPieData();
 
     // 清除之前的內容
     this.chartGroup.selectAll('*').remove();
@@ -356,13 +366,13 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     if (!this.pieGroup) return;
 
     const config = this.config as PieChartCoreConfig;
-    const pieData = pie(this.processedData);
+    const pieData = pie(this.pieProcessedData);
 
     // 更新處理後的數據的角度信息
     pieData.forEach((d, i) => {
-      if (this.processedData[d.index]) {
-        this.processedData[d.index].startAngle = d.startAngle;
-        this.processedData[d.index].endAngle = d.endAngle;
+      if (this.pieProcessedData[d.index]) {
+        this.pieProcessedData[d.index].startAngle = d.startAngle;
+        this.pieProcessedData[d.index].endAngle = d.endAngle;
       }
     });
 
@@ -372,8 +382,8 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .join('path')
       .attr('class', 'pie-segment')
       .attr('data-testid', (d, i) => `pie-slice-${i}`) // 添加測試 ID
-      .attr('d', arc)
-      .attr('fill', d => d.data.color)
+      .attr('d', d => arc(d as any))
+      .attr('fill', (d: any) => d.data.color)
       .attr('stroke', config.strokeColor || 'white')
       .attr('stroke-width', config.strokeWidth || 1)
       .style('cursor', 'pointer');
@@ -381,31 +391,31 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     // 計算片段信息
     this.segments = pieData.map(d => ({
       data: d.data,
-      path: arc(d) || '',
-      centroid: arc.centroid(d),
+      path: arc(d as any) || '',
+      centroid: arc.centroid(d as any),
       labelPosition: this.calculateLabelPosition(d, arc),
       arc
     }));
 
     // 添加交互
     segments
-      .on('click', (event, d) => {
+      .on('click', (event, d: any) => {
         config.onSegmentClick?.(d.data, event);
       })
-      .on('mouseenter', (event, d) => {
+      .on('mouseenter', (event, d: any) => {
         // 高亮效果
         d3.select(event.target)
           .transition()
           .duration(150)
           .attr('opacity', 0.8)
           .attr('transform', () => {
-            const centroid = arc.centroid(d);
+            const centroid = arc.centroid(d as any);
             return `translate(${centroid[0] * 0.1}, ${centroid[1] * 0.1})`;
           });
-        
+
         config.onSegmentHover?.(d.data, event);
       })
-      .on('mousemove', (event, d) => {
+      .on('mousemove', (event, d: any) => {
         // Tooltip 顯示 - 使用 mousemove 來持續更新位置
         if (config.enableTooltip) {
           // 創建簡單的字符串 tooltip 內容
@@ -428,19 +438,19 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
           }
         }
       })
-      .on('mouseleave', (event, d) => {
+      .on('mouseleave', (event, d: any) => {
         // 重置效果
         d3.select(event.target)
           .transition()
           .duration(150)
           .attr('opacity', 1)
           .attr('transform', 'translate(0, 0)');
-        
+
         // 隱藏 Tooltip
         if (config.enableTooltip) {
           this.callbacks?.onTooltipHide?.();
         }
-        
+
         config.onSegmentHover?.(null, event);
       });
   }
@@ -450,7 +460,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     arc: d3.Arc<any, d3.DefaultArcObject>
   ): [number, number] {
     const config = this.config as PieChartCoreConfig;
-    const centroid = arc.centroid(d);
+    const centroid = arc.centroid(d as any);
     
     switch (config.labels?.position) {
       case 'inside':
@@ -472,14 +482,14 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
     const config = this.config as PieChartCoreConfig;
     const labelConfig = config.labels!;
-    const pieData = pie(this.processedData);
+    const pieData = pie(this.pieProcessedData);
 
     const labels = this.pieGroup
       .selectAll<SVGTextElement, d3.PieArcDatum<ProcessedPieDataPoint>>('.pie-label')
       .data(pieData)
       .join('text')
       .attr('class', 'pie-label')
-      .attr('transform', d => {
+      .attr('transform', (d: any) => {
         const pos = this.calculateLabelPosition(d, arc);
         return `translate(${pos[0]}, ${pos[1]})`;
       })
@@ -488,7 +498,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .attr('font-size', labelConfig.fontSize || 12)
       .attr('font-family', labelConfig.fontFamily || 'Arial, sans-serif')
       .attr('fill', labelConfig.color || '#333')
-      .text(d => {
+      .text((d: any) => {
         if (labelConfig.format) {
           return labelConfig.format(d.data.value, d.data.percentage, d.data.label);
         }
@@ -502,10 +512,10 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
         .data(pieData)
         .join('line')
         .attr('class', 'label-connector')
-        .attr('x1', d => arc.centroid(d)[0])
-        .attr('y1', d => arc.centroid(d)[1])
-        .attr('x2', d => this.calculateLabelPosition(d, arc)[0])
-        .attr('y2', d => this.calculateLabelPosition(d, arc)[1])
+        .attr('x1', (d: any) => arc.centroid(d as any)[0])
+        .attr('y1', (d: any) => arc.centroid(d as any)[1])
+        .attr('x2', (d: any) => this.calculateLabelPosition(d, arc)[0])
+        .attr('y2', (d: any) => this.calculateLabelPosition(d, arc)[1])
         .attr('stroke', labelConfig.connector!.color || '#999')
         .attr('stroke-width', labelConfig.connector!.strokeWidth || 1)
         .attr('opacity', 0.6);
@@ -531,19 +541,19 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     // 計算圖例位置
     let legendX = 0;
     let legendY = 0;
-    
+
     switch (legendConfig.position) {
       case 'right':
         legendX = this.centerX + this.radius + 20;
-        legendY = this.centerY - (this.processedData.length * (itemHeight + spacing)) / 2;
+        legendY = this.centerY - (this.pieProcessedData.length * (itemHeight + spacing)) / 2;
         break;
       case 'bottom':
         legendX = 20;
-        legendY = chartHeight - this.processedData.length * (itemHeight + spacing) - 10;
+        legendY = chartHeight - this.pieProcessedData.length * (itemHeight + spacing) - 10;
         break;
       case 'left':
         legendX = 20;
-        legendY = this.centerY - (this.processedData.length * (itemHeight + spacing)) / 2;
+        legendY = this.centerY - (this.pieProcessedData.length * (itemHeight + spacing)) / 2;
         break;
       case 'top':
         legendX = 20;
@@ -556,7 +566,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     // 渲染圖例項目
     const legendItems = this.legendGroup
       .selectAll('.legend-item')
-      .data(this.processedData)
+      .data(this.pieProcessedData)
       .join('g')
       .attr('class', 'legend-item')
       .attr('transform', (d, i) => `translate(0, ${i * (itemHeight + spacing)})`)
@@ -567,7 +577,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .append('rect')
       .attr('width', 12)
       .attr('height', 12)
-      .attr('fill', d => d.color)
+      .attr('fill', (d: any) => d.color)
       .attr('rx', 2);
 
     // 文字標籤
@@ -579,18 +589,18 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .attr('font-size', fontSize)
       .attr('font-family', legendConfig.fontFamily || 'Arial, sans-serif')
       .attr('fill', legendConfig.color || '#333')
-      .text(d => `${d.label} (${d.value})`);
+      .text((d: any) => `${d.label} (${d.value})`);
 
     // 圖例交互
     legendItems
-      .on('click', (event, d) => {
+      .on('click', (event, d: any) => {
         config.onLegendClick?.(d, event);
       })
-      .on('mouseenter', (event, d) => {
+      .on('mouseenter', (event, d: any) => {
         d3.select(event.currentTarget).attr('opacity', 0.7);
         config.onLegendHover?.(d, event);
       })
-      .on('mouseleave', (event, d) => {
+      .on('mouseleave', (event, d: any) => {
         d3.select(event.currentTarget).attr('opacity', 1);
         config.onLegendHover?.(null, event);
       });
@@ -624,7 +634,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
   // 公共方法：獲取當前數據
   public getCurrentData(): ProcessedPieDataPoint[] {
-    return this.processedData;
+    return this.pieProcessedData;
   }
 
   // 公共方法：獲取片段數據
@@ -641,8 +651,14 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .attr('opacity', 0.3);
 
     labels.forEach(label => {
-      const index = this.processedData.findIndex(d => d.label === label);
-      if (index !== -1) {
+      let foundIndex = -1;
+      for (let i = 0; i < this.pieProcessedData.length; i++) {
+        if (this.pieProcessedData[i].label === label) {
+          foundIndex = i;
+          break;
+        }
+      }
+      if (foundIndex !== -1) {
         this.pieGroup!
           .selectAll('.pie-segment')
           .filter((d: any) => d.data.label === label)
@@ -663,7 +679,13 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   // 公共方法：切換片段顯示
   public toggleSegment(label: string): void {
     // 這個功能需要重新計算數據，暫時用高亮代替
-    const currentData = this.processedData.find(d => d.label === label);
+    let currentData = null;
+    for (let i = 0; i < this.pieProcessedData.length; i++) {
+      if (this.pieProcessedData[i].label === label) {
+        currentData = this.pieProcessedData[i];
+        break;
+      }
+    }
     if (currentData) {
       this.highlightSegments([label]);
     }
@@ -671,11 +693,16 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
   // 公共方法：獲取總值
   public getTotalValue(): number {
-    return d3.sum(this.processedData, d => d.value);
+    return d3.sum(this.pieProcessedData, (d: any) => d.value);
   }
 
   // 公共方法：獲取指定標籤的數據
   public getDataByLabel(label: string): ProcessedPieDataPoint | undefined {
-    return this.processedData.find(d => d.label === label);
+    for (let i = 0; i < this.pieProcessedData.length; i++) {
+      if (this.pieProcessedData[i].label === label) {
+        return this.pieProcessedData[i];
+      }
+    }
+    return undefined;
   }
 }
