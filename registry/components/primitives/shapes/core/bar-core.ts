@@ -4,13 +4,12 @@
  */
 
 import * as d3 from 'd3';
-import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
-import { 
-  BaseChartCoreConfig, 
-  ChartStateCallbacks, 
-  ChartData, 
-  BaseChartData 
-} from '../../../core/base-chart/types';
+import { BaseChartCore } from '../../../core/base-chart/core';
+import {
+  BaseChartCoreConfig,
+  ChartData,
+  BaseChartData
+} from '../../../core/types';
 import { 
   calculateBarPosition, 
   AlignmentStrategy,
@@ -84,7 +83,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     }));
 
     // 檢查是否為分組數據
-    this.isGrouped = !!this.config.groupBy;
+    this.isGrouped = !!(this.config as BarCoreConfig).groupBy;
     
     if (this.isGrouped) {
       this.groupedData = this.groupData(processedData);
@@ -100,7 +99,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     }
 
     const { chartWidth, chartHeight } = this.getChartDimensions();
-    const { orientation = 'vertical' } = this.config;
+    const { orientation = 'vertical' } = this.config as BarCoreConfig;
 
     let xScale: any;
     let yScale: any;
@@ -119,7 +118,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         .range([chartHeight, 0])
         .nice();
 
-      this.barWidth = xScale.bandwidth() * (this.config.barWidthRatio || 0.8);
+      this.barWidth = xScale.bandwidth() * ((this.config as BarCoreConfig).barWidthRatio || 0.8);
     } else {
       // 水平條形圖
       yScale = d3.scaleBand()
@@ -133,7 +132,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         .range([0, chartWidth])
         .nice();
 
-      this.barWidth = yScale.bandwidth() * (this.config.barWidthRatio || 0.8);
+      this.barWidth = yScale.bandwidth() * ((this.config as BarCoreConfig).barWidthRatio || 0.8);
     }
 
     return { xScale, yScale };
@@ -149,7 +148,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     }
 
     const { xScale, yScale } = scales;
-    const { 
+    const {
       orientation = 'vertical',
       animate = true,
       animationDuration = 300,
@@ -157,7 +156,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
       strokeWidth = 0,
       strokeColor = 'none',
       cornerRadius = 0
-    } = this.config;
+    } = this.config as BarCoreConfig;
 
     // 清除舊內容
     svg.selectAll('.bar-shape').remove();
@@ -172,16 +171,16 @@ export class BarCore extends BaseChartCore<BarCoreData> {
   // === 私有方法 ===
 
   private resolveItemColor(item: BarCoreData, index: number): string {
-    const { color } = this.config;
-    
+    const { color } = this.config as BarCoreConfig;
+
     if (typeof color === 'function') {
       return color(item, index);
     }
-    
+
     if (typeof color === 'string') {
       return color;
     }
-    
+
     // 使用默認色彩
     const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
     return item.color || defaultColors[index % defaultColors.length];
@@ -189,7 +188,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
 
   private groupData(data: ChartData<BarCoreData>[]): Map<string, ChartData<BarCoreData>[]> {
     const groups = new Map<string, ChartData<BarCoreData>[]>();
-    const groupBy = this.config.groupBy!;
+    const groupBy = (this.config as BarCoreConfig).groupBy!;
 
     data.forEach(item => {
       const groupKey = item[groupBy] as string || 'default';
@@ -208,13 +207,13 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     xScale: any,
     yScale: any
   ): void {
-    const { 
+    const {
       orientation = 'vertical',
       animate = true,
       animationDuration = 300,
       opacity = 1,
       alignment = 'center'
-    } = this.config;
+    } = this.config as BarCoreConfig;
 
     const bars = svg.selectAll('.bar-shape')
       .data(data, (d: any, i: number) => d.id || i);
@@ -304,7 +303,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     const groupCount = groupKeys.length;
 
     data.forEach((d, i) => {
-      const groupKey = d[this.config.groupBy!] as string || 'default';
+      const groupKey = d[(this.config as BarCoreConfig).groupBy!] as string || 'default';
       const groupIndex = groupKeys.indexOf(groupKey);
       
       const { x, width } = calculateGroupedBarPosition(
@@ -312,8 +311,8 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         xScale,
         groupIndex,
         groupCount,
-        this.config.barWidthRatio || 0.8,
-        this.config.alignment || 'center'
+        (this.config as BarCoreConfig).barWidthRatio || 0.8,
+        (this.config as BarCoreConfig).alignment || 'center'
       );
 
       svg.append('rect')
@@ -324,7 +323,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         .attr('width', width)
         .attr('height', yScale(0) - yScale(d.y))
         .attr('fill', d.color!)
-        .attr('opacity', this.config.opacity || 1);
+        .attr('opacity', (this.config as BarCoreConfig).opacity || 1);
     });
   }
 
@@ -338,7 +337,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     const bars = svg.selectAll('.bar-shape')
       .data(data, (d: any, i: number) => d.id || i);
 
-    const { animate = true, animationDuration = 300, opacity = 1 } = this.config;
+    const { animate = true, animationDuration = 300, opacity = 1 } = this.config as BarCoreConfig;
 
     bars
       .join(
@@ -365,7 +364,8 @@ export class BarCore extends BaseChartCore<BarCoreData> {
   }
 
   private addInteractionEvents(svg: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    if (!this.config.interactive) return;
+    const config = this.config as BarCoreConfig;
+    if (!config.interactive) return;
 
     svg.selectAll('.bar-shape')
       .on('click', (event, d: BarCoreData) => {
@@ -373,13 +373,13 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.value}`);
       })
       .on('mouseenter', (event, d: BarCoreData) => {
-        if (this.config.hoverEffect) {
+        if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', 0.8);
         }
       })
       .on('mouseleave', (event, d: BarCoreData) => {
-        if (this.config.hoverEffect) {
-          d3.select(event.currentTarget).attr('opacity', this.config.opacity || 1);
+        if (config.hoverEffect) {
+          d3.select(event.currentTarget).attr('opacity', config.opacity || 1);
         }
         this.hideTooltip();
       });
@@ -400,12 +400,12 @@ export class BarCore extends BaseChartCore<BarCoreData> {
   }
 
   public updateOrientation(orientation: 'vertical' | 'horizontal'): void {
-    this.config.orientation = orientation;
+    (this.config as BarCoreConfig).orientation = orientation;
     this.render();
   }
 
   public updateBarWidthRatio(ratio: number): void {
-    this.config.barWidthRatio = Math.max(0.1, Math.min(1.0, ratio));
+    (this.config as BarCoreConfig).barWidthRatio = Math.max(0.1, Math.min(1.0, ratio));
     this.render();
   }
 }

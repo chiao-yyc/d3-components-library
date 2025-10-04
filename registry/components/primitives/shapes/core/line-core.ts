@@ -4,13 +4,12 @@
  */
 
 import * as d3 from 'd3';
-import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
-import { 
-  BaseChartCoreConfig, 
-  ChartStateCallbacks, 
-  ChartData, 
-  BaseChartData 
-} from '../../../core/base-chart/types';
+import { BaseChartCore } from '../../../core/base-chart/core';
+import {
+  BaseChartCoreConfig,
+  ChartData,
+  BaseChartData
+} from '../../../core/types';
 import { 
   calculateAlignedPosition, 
   AlignmentStrategy 
@@ -96,7 +95,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     }));
 
     // 檢查是否為分組數據
-    this.isGrouped = !!this.config.groupBy;
+    this.isGrouped = !!(this.config as LineCoreConfig).groupBy;
     
     if (this.isGrouped) {
       this.groupedData = this.groupData(processedData);
@@ -140,7 +139,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     this.lineGenerator = d3.line<ChartData<LineCoreData>>()
       .x((d: ChartData<LineCoreData>) => this.getXPosition(d, xScale))
       .y((d: ChartData<LineCoreData>) => yScale(d.y as number))
-      .curve(this.config.curve || d3.curveLinear);
+      .curve((this.config as LineCoreConfig).curve || d3.curveLinear);
 
     // 處理缺失值
     this.lineGenerator.defined((d: ChartData<LineCoreData>) => 
@@ -170,7 +169,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     }
 
     // 渲染點（如果啟用）
-    if (this.config.showPoints) {
+    if ((this.config as LineCoreConfig).showPoints) {
       this.renderPoints(svg, processedData, scales);
     }
 
@@ -181,7 +180,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
   // === 私有方法 ===
 
   private resolveItemColor(item: LineCoreData, index: number): string {
-    const { color } = this.config;
+    const { color } = this.config as LineCoreConfig;
     
     if (typeof color === 'function') {
       return color(item, index);
@@ -198,7 +197,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
 
   private groupData(data: ChartData<LineCoreData>[]): Map<string, ChartData<LineCoreData>[]> {
     const groups = new Map<string, ChartData<LineCoreData>[]>();
-    const groupBy = this.config.groupBy!;
+    const groupBy = (this.config as LineCoreConfig).groupBy!;
 
     data.forEach(item => {
       const groupKey = item[groupBy] as string || 'default';
@@ -233,7 +232,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       animationDuration = 300,
       drawAnimation = 'draw',
       lineDashArray
-    } = this.config;
+    } = this.config as LineCoreConfig;
 
     // 按 x 值排序數據
     const sortedData = [...data].sort((a, b) => {
@@ -259,8 +258,8 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       path.attr('stroke-dasharray', lineDashArray);
     }
 
-    if (this.config.gradientStroke) {
-      this.applyGradientStroke(svg, path, this.config.gradientStroke);
+    if ((this.config as LineCoreConfig).gradientStroke) {
+      this.applyGradientStroke(svg, path, (this.config as LineCoreConfig).gradientStroke!);
     }
 
     // 動畫效果
@@ -290,7 +289,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     scales: Record<string, any>
   ): void {
     const groupKeys = Array.from(this.groupedData.keys());
-    const { animate = true, animationDuration = 300, animationDelay = 0 } = this.config;
+    const { animate = true, animationDuration = 300, animationDelay = 0 } = this.config as LineCoreConfig;
 
     groupKeys.forEach((groupKey, groupIndex) => {
       const groupData = this.groupedData.get(groupKey)!;
@@ -303,8 +302,8 @@ export class LineCore extends BaseChartCore<LineCoreData> {
         .attr('data-testid', `line-group-${groupKey}`)
         .attr('fill', 'none')
         .attr('stroke', groupColor)
-        .attr('stroke-width', this.config.strokeWidth || 2)
-        .attr('opacity', this.config.opacity || 1)
+        .attr('stroke-width', (this.config as LineCoreConfig).strokeWidth || 2)
+        .attr('opacity', (this.config as LineCoreConfig).opacity || 1)
         .attr('d', this.lineGenerator);
 
       // 分組動畫：錯開執行
@@ -315,7 +314,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
           .transition()
           .delay(delay)
           .duration(animationDuration)
-          .attr('opacity', this.config.opacity || 1);
+          .attr('opacity', (this.config as LineCoreConfig).opacity || 1);
       }
 
       this.pathElements.push(path);
@@ -334,7 +333,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       pointStrokeColor = '#ffffff',
       animate = true,
       animationDuration = 300
-    } = this.config;
+    } = this.config as LineCoreConfig;
 
     const { xScale, yScale } = scales;
 
@@ -371,7 +370,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       return calculateAlignedPosition(
         d.x, 
         xScale, 
-        this.config.alignment || 'center'
+        (this.config as LineCoreConfig).alignment || 'center'
       );
     } else {
       // Linear or Time scale
@@ -381,7 +380,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
 
   private applyGradientStroke(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
-    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    path: d3.Selection<SVGPathElement, ChartData<LineCoreData>[], null, undefined>,
     gradientConfig: NonNullable<LineCoreConfig['gradientStroke']>
   ): void {
     const defs = svg.append('defs');
@@ -407,19 +406,19 @@ export class LineCore extends BaseChartCore<LineCoreData> {
   }
 
   private addInteractionEvents(svg: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    if (!this.config.interactive) return;
+    if (!(this.config as LineCoreConfig).interactive) return;
 
     // 為線條添加懸停效果
     this.pathElements.forEach(path => {
       path
         .on('mouseenter', (event) => {
-          if (this.config.hoverEffect) {
-            path.attr('stroke-width', (this.config.strokeWidth || 2) + 1);
+          if ((this.config as LineCoreConfig).hoverEffect) {
+            path.attr('stroke-width', ((this.config as LineCoreConfig).strokeWidth || 2) + 1);
           }
         })
         .on('mouseleave', (event) => {
-          if (this.config.hoverEffect) {
-            path.attr('stroke-width', this.config.strokeWidth || 2);
+          if ((this.config as LineCoreConfig).hoverEffect) {
+            path.attr('stroke-width', (this.config as LineCoreConfig).strokeWidth || 2);
           }
           this.hideTooltip();
         })
@@ -439,13 +438,13 @@ export class LineCore extends BaseChartCore<LineCoreData> {
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.y}`);
       })
       .on('mouseenter', (event, d: ChartData<LineCoreData>) => {
-        if (this.config.hoverEffect) {
-          d3.select(event.currentTarget).attr('r', (this.config.pointRadius || 4) + 2);
+        if ((this.config as LineCoreConfig).hoverEffect) {
+          d3.select(event.currentTarget).attr('r', ((this.config as LineCoreConfig).pointRadius || 4) + 2);
         }
       })
       .on('mouseleave', (event, d: ChartData<LineCoreData>) => {
-        if (this.config.hoverEffect) {
-          d3.select(event.currentTarget).attr('r', this.config.pointRadius || 4);
+        if ((this.config as LineCoreConfig).hoverEffect) {
+          d3.select(event.currentTarget).attr('r', (this.config as LineCoreConfig).pointRadius || 4);
         }
       });
   }
@@ -486,17 +485,17 @@ export class LineCore extends BaseChartCore<LineCoreData> {
   }
 
   public updateCurve(curve: d3.CurveFactory): void {
-    this.config.curve = curve;
+    (this.config as LineCoreConfig).curve = curve;
     this.render();
   }
 
   public togglePoints(show: boolean): void {
-    this.config.showPoints = show;
+    (this.config as LineCoreConfig).showPoints = show;
     this.render();
   }
 
   public updateStrokeWidth(width: number): void {
-    this.config.strokeWidth = Math.max(1, width);
+    (this.config as LineCoreConfig).strokeWidth = Math.max(1, width);
     this.render();
   }
 
