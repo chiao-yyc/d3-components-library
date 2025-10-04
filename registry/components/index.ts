@@ -11,7 +11,6 @@ export * from './basic/funnel-chart'
 export * from './statistical/scatter-plot'
 export * from './statistical/box-plot'
 export * from './statistical/violin-plot'
-export * from './statistical/radar-chart'
 export * from './statistical/tree-map'
 
 // 金融圖表
@@ -34,6 +33,18 @@ export * from './ui/chart-tooltip'
 
 // 數據映射
 export * from './data-mapper'
+
+// Resolve duplicate exports by explicitly re-exporting preferred versions
+// AxisConfig is exported from both radar-chart and other modules
+export * from './statistical/radar-chart'
+export type { AxisConfig } from './statistical/radar-chart'
+
+// LegendConfig and ChartDimensions duplicates
+export type { LegendConfig } from './basic/pie-chart'
+export type { ChartDimensions } from './core/base-chart'
+
+// DataMapping and FieldInfo duplicates
+export type { DataMapping, FieldInfo } from './core/data-processor'
 
 // 組件分類導出
 export const CHART_CATEGORIES = {

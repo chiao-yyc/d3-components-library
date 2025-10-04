@@ -14,5 +14,6 @@ export { Waterfall } from './waterfall';
 export { ShapeComposer } from './shape-composer';
 
 // 向下兼容：直接導出類型定義
-export * from './core/types';
+// Commented out to avoid duplicate exports with ./core
+// export * from './core/types';
 

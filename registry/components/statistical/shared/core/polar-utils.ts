@@ -20,7 +20,7 @@ export interface RadarAxisConfig {
   name: string;
   min: number;
   max: number;
-  scale: d3.ScaleLinear<number, number> | d3.ScaleLog<number, number>;
+  scale: d3.ScaleLinear<number, number> | d3.ScaleLogarithmic<number, number>;
   angle: number;
   position: Point;
 }

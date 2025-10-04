@@ -18,7 +18,7 @@ import {
 export {
   PieChart,
   PieChartLegacy,
-  DonutChartComponent as DonutChart,
+  DonutChart,
   PieChartWithLegend,
   HalfPieChart,
   PieChartNoLabels,
