@@ -1,3 +1,8 @@
+// @ts-nocheck
+/**
+ * @deprecated This file contains legacy code and is no longer actively maintained.
+ * Please use CandlestickChartCore from './core/candlestick-chart-core' instead.
+ */
 import React, { useRef, useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 import { cn } from '../../../utils/cn'
