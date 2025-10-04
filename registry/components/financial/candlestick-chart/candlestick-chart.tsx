@@ -39,8 +39,8 @@ export const defaultCandlestickChartProps: Partial<CandlestickChartProps> = {
 };
 
 // 重新導出類型
-export type { 
-  CandlestickChartCoreConfig, 
+export type {
+  CandlestickChartCoreConfig,
   CandlestickData,
-  ProcessedCandlestickData
+  ProcessedCandlestickDataPoint
 } from './core/candlestick-chart-core';

@@ -1,7 +1,7 @@
 /**
  * Shapes Core Module
  * 圖形元件核心模組
- * 
+ *
  * 提供框架無關的圖形組件類型定義和核心功能
  * 包含 Bar、Line、Area、Scatter 等基礎圖形的接口和常數
  */
@@ -17,4 +17,18 @@ export * from './shape-composer';
 export * from './unified-types';
 
 // 向下兼容的舊類型定義 (逐步廢棄)
-export * from './types';
+// Note: Commented out to avoid duplicate exports with unified-types
+// If needed, import specific types that don't conflict
+// export * from './types';
+
+// Explicitly re-export types from unified-types to resolve ambiguity
+export type {
+  AreaShapeData,
+  BarShapeData,
+  LineShapeData,
+  RegressionData,
+  ScatterShapeData,
+  StackedAreaData,
+  StackedAreaSeries,
+  WaterfallShapeData
+} from './unified-types';

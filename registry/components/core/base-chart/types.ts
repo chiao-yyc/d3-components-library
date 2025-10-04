@@ -11,6 +11,9 @@ export interface BaseChartDataPoint {
   [key: string]: any
 }
 
+// Re-export core types for backward compatibility
+export type { BaseChartData, ChartData } from '../types';
+
 export interface BaseChartMapping {
   x: string | ((d: any) => any)
   y: string | ((d: any) => any)
@@ -31,13 +34,8 @@ export interface BaseChartProps {
   onError?: (error: Error) => void
 }
 
-export interface ChartDimensions {
-  width: number
-  height: number
-  margin: Margin
-  chartWidth: number
-  chartHeight: number
-}
+// Re-export ChartDimensions from core types to avoid duplication
+export type { ChartDimensions } from '../types';
 
 export interface TooltipState {
   x: number

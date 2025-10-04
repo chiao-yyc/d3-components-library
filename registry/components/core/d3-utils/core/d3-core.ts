@@ -38,7 +38,7 @@ export type {
   ScaleOrdinal,
   ScalePoint,
   ScaleLogarithmic,
-  ScalePow,
+  ScalePower,
   ScaleContinuousNumeric,
   ScaleThreshold,
   ScaleQuantile,

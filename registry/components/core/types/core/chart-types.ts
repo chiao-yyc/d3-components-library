@@ -120,13 +120,13 @@ export type ScaleType = 'linear' | 'band' | 'time' | 'ordinal' | 'log' | 'sqrt' 
 /**
  * D3 比例尺聯合型別
  */
-export type D3Scale = 
+export type D3Scale =
   | d3.ScaleLinear<number, number>
   | d3.ScaleBand<string>
   | d3.ScaleTime<number, number>
   | d3.ScaleOrdinal<string, string>
   | d3.ScaleLogarithmic<number, number>
-  | d3.ScalePow<number, number>
+  | d3.ScalePower<number, number>
   | d3.ScalePoint<string>;
 
 /**
