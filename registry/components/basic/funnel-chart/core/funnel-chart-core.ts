@@ -90,7 +90,7 @@ export interface FunnelChartCoreConfig extends BaseChartCoreConfig<FunnelChartDa
 export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   private processedDataPoints: FunnelDataPoint[] = [];
   private segments: FunnelSegment[] = [];
-  private colorScale!: ReturnType<typeof scaleOrdinal>;
+  private colorScale: any;
 
   constructor(config: FunnelChartCoreConfig, callbacks = {}) {
     super(config, callbacks);
@@ -101,7 +101,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   protected processData(): ChartData<FunnelChartData>[] {
-    const config = this.config;
+    const config = this.config as FunnelChartCoreConfig;
     const { data, labelKey, valueKey } = config;
 
     if (!data?.length) {
@@ -158,7 +158,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   protected createScales(): Record<string, ReturnType<typeof scaleOrdinal>> {
-    const config = this.config;
+    const config = this.config as FunnelChartCoreConfig;
     const { colors = ['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554'] } = config;
 
     this.colorScale = scaleOrdinal<string, string>()
@@ -184,12 +184,12 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   private generateFunnelSegments(): void {
-    const config = this.config;
-    const { 
-      direction = 'top',
+    const config = this.config as FunnelChartCoreConfig;
+    const {
+      direction: _direction = 'top',
       gap = 4,
       proportionalMode = 'traditional',
-      shrinkageType = 'percentage',
+      shrinkageType: _shrinkageType = 'percentage',
       shrinkageAmount = 0.1,
       minWidth = 50
     } = config;
@@ -245,21 +245,21 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
         x,
         y,
         path,
-        color: this.colorScale(data.label),
+        color: String(this.colorScale(data.label)),
         index
       };
     });
   }
 
   private generateSegmentPath(
-    x: number, 
-    y: number, 
-    topWidth: number, 
-    bottomWidth: number, 
-    height: number, 
+    x: number,
+    y: number,
+    topWidth: number,
+    bottomWidth: number,
+    height: number,
     cornerRadius: number
   ): string {
-    const config = this.config;
+    const config = this.config as FunnelChartCoreConfig;
     const { shape = 'trapezoid' } = config;
     
     if (shape === 'rectangle') {
@@ -286,7 +286,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   private renderFunnelSegments(container: D3Selection<SVGGElement>): void {
-    const config = this.config;
+    const config = this.config as FunnelChartCoreConfig;
     const { animate = true, animationDuration = 800, interactive = true } = config;
 
     const segments = container.selectAll('.funnel-segment')
@@ -294,8 +294,8 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
       .enter()
       .append('path')
       .attr('class', 'funnel-segment')
-      .attr('d', (d: FunnelSegment) => d.path)
-      .attr('fill', (d: FunnelSegment) => d.color)
+      .attr('d', (_d: FunnelSegment) => _d.path)
+      .attr('fill', (_d: FunnelSegment) => _d.color)
       .attr('stroke', '#fff')
       .attr('stroke-width', 1)
       .style('cursor', interactive ? 'pointer' : 'default');
@@ -306,7 +306,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
         .attr('opacity', 0)
         .transition()
         .duration(animationDuration)
-        .delay((d, i) => i * (config.animationDelay || 100))
+        .delay((_d, i) => i * (config.animationDelay || 100))
         .attr('opacity', 1);
     }
 
@@ -322,13 +322,15 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
           // 優先使用新的事件處理器，向下兼容舊的
           config.onDataHover?.(d.data, event);
           config.onSegmentHover?.(d.data, event); // 向下兼容
-          
+
           // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
-          const containerRect = this.containerElement.getBoundingClientRect();
-          const tooltipX = event.clientX - containerRect.left;
-          const tooltipY = event.clientY - containerRect.top;
-          
-          this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d.data));
+          if (this.containerElement) {
+            const containerRect = this.containerElement.getBoundingClientRect();
+            const tooltipX = event.clientX - containerRect.left;
+            const tooltipY = event.clientY - containerRect.top;
+
+            this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d.data));
+          }
         })
         .on('mouseout', (event) => {
           // 優先使用新的事件處理器，向下兼容舊的
@@ -340,12 +342,12 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   private renderLabels(container: D3Selection<SVGGElement>): void {
-    const config = this.config;
-    const { 
+    const config = this.config as FunnelChartCoreConfig;
+    const {
       showLabels = true,
       showValues = true,
       showPercentages = true,
-      showConversionRates = true,
+      showConversionRates: _showConversionRates = true,
       labelPosition = 'side',
       fontSize = 12,
       fontFamily = 'sans-serif'
@@ -357,9 +359,9 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
 
     this.segments.forEach(segment => {
       const { data, x, y, topWidth, height } = segment;
-      
+
       let labelX: number, labelY: number, textAnchor: string;
-      
+
       if (labelPosition === 'side') {
         labelX = x + topWidth + 10;
         labelY = y + height / 2;
@@ -371,7 +373,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
       }
 
       // 主標籤
-      const labelText = labelGroup.append('text')
+      labelGroup.append('text')
         .attr('x', labelX)
         .attr('y', labelY)
         .attr('text-anchor', textAnchor)
@@ -415,12 +417,12 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
   }
 
   private formatTooltipContent(data: FunnelDataPoint): string {
-    const config = this.config;
-    
+    const config = this.config as FunnelChartCoreConfig;
+
     if (config.valueFormat) {
       return `${data.label}: ${config.valueFormat(data.value)}`;
     }
-    
+
     return `${data.label}: ${data.value}`;
   }
 
