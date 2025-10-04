@@ -66,17 +66,17 @@ export function renderAxis(
   
   switch (config.orientation) {
     case 'bottom':
-      axisGenerator = d3.axisBottom(config.scale);
+      axisGenerator = d3.axisBottom(config.scale as any);
       transform = `translate(0,${chartDimensions.height})`;
       break;
     case 'top':
-      axisGenerator = d3.axisTop(config.scale);
+      axisGenerator = d3.axisTop(config.scale as any);
       break;
     case 'left':
-      axisGenerator = d3.axisLeft(config.scale);
+      axisGenerator = d3.axisLeft(config.scale as any);
       break;
     case 'right':
-      axisGenerator = d3.axisRight(config.scale);
+      axisGenerator = d3.axisRight(config.scale as any);
       transform = `translate(${chartDimensions.width},0)`;
       break;
   }
@@ -131,22 +131,26 @@ export function renderGrid(
     .attr('class', `grid grid-${config.orientation}`);
   
   if (config.orientation === 'horizontal') {
+    // Type guard: check if scale has ticks method
+    const tickData = 'ticks' in config.scale ? config.scale.ticks(config.tickCount) : [];
     gridGroup.selectAll('line')
-      .data(config.scale.ticks(config.tickCount))
+      .data(tickData as any[])
       .enter().append('line')
       .attr('x1', 0)
       .attr('x2', chartDimensions.width)
-      .attr('y1', d => config.scale(d))
-      .attr('y2', d => config.scale(d))
+      .attr('y1', (d: any) => config.scale(d as any) as number)
+      .attr('y2', (d: any) => config.scale(d as any) as number)
       .attr('stroke', config.strokeColor || '#e5e7eb')
       .attr('stroke-width', config.strokeWidth || 1)
       .attr('stroke-opacity', config.strokeOpacity || 0.7);
   } else {
+    // Type guard: check if scale has ticks method
+    const tickData = 'ticks' in config.scale ? config.scale.ticks(config.tickCount) : [];
     gridGroup.selectAll('line')
-      .data(config.scale.ticks(config.tickCount))
+      .data(tickData as any[])
       .enter().append('line')
-      .attr('x1', d => config.scale(d))
-      .attr('x2', d => config.scale(d))
+      .attr('x1', (d: any) => config.scale(d as any) as number)
+      .attr('x2', (d: any) => config.scale(d as any) as number)
       .attr('y1', 0)
       .attr('y2', chartDimensions.height)
       .attr('stroke', config.strokeColor || '#e5e7eb')
@@ -166,9 +170,9 @@ export function renderGrid(
 export function applyEnterAnimation(
   selection: d3.Selection<any, any, any, any>,
   config: AnimationConfig
-): d3.Selection<any, any, any, any> {
+): d3.Selection<any, any, any, any> | d3.Transition<any, any, any, any> {
   if (!config.enabled) return selection;
-  
+
   return selection
     .attr('opacity', 0)
     .transition()
@@ -289,7 +293,7 @@ export interface LegendConfig {
 // 標籤配置介面
 export interface LabelConfig {
   show?: boolean;
-  position?: 'inside' | 'outside' | 'center';
+  position?: 'inside' | 'outside' | 'center' | 'top' | 'bottom' | 'left' | 'right';
   fontSize?: string;
   fontColor?: string;
   format?: (value: any) => string;
@@ -364,8 +368,8 @@ export function renderLegend(
 
   // 圖例符號
   legendItems.append(config.symbolType === 'square' ? 'rect' : 'circle')
-    .attr('fill', d => d.color)
-    .each(function(d, i) {
+    .attr('fill', (d: any) => d.color)
+    .each(function(d: any, i: number) {
       const element = d3.select(this);
       if (config.symbolType === 'square') {
         element
@@ -386,7 +390,7 @@ export function renderLegend(
     .style('font-size', fontSize)
     .style('fill', fontColor)
     .style('text-anchor', 'start')
-    .text(d => d.label);
+    .text((d: any) => d.label);
 
   return legendGroup;
 }
@@ -425,11 +429,11 @@ export function renderArcLabels(
   const threshold = config.threshold || 0.05; // 5% 最小顯示閾值
 
   const labels = labelGroup.selectAll('.arc-label')
-    .data(arcs.filter(d => d.data.percentage >= threshold))
+    .data(arcs.filter((d: any) => d.data.percentage >= threshold))
     .enter()
     .append('text')
     .attr('class', 'arc-label')
-    .attr('transform', d => {
+    .attr('transform', (d: any) => {
       const [x, y] = arcGenerator.centroid(d);
       return `translate(${x}, ${y})`;
     })
@@ -438,7 +442,7 @@ export function renderArcLabels(
     .style('font-size', fontSize)
     .style('fill', fontColor)
     .style('pointer-events', 'none')
-    .text(d => {
+    .text((d: any) => {
       if (config.format) {
         return config.format(d.data);
       }
@@ -480,12 +484,12 @@ export function renderBarLabels(
     .style('font-size', fontSize)
     .style('fill', fontColor)
     .style('pointer-events', 'none')
-    .text(d => config.format ? config.format(d.y) : String(d.y));
+    .text((d: any) => config.format ? config.format(d.y) : String(d.y));
 
   if (orientation === 'vertical') {
     labels
-      .attr('x', d => (xScale(String(d.x)) || 0) + xScale.bandwidth() / 2)
-      .attr('y', d => {
+      .attr('x', (d: any) => (xScale(String(d.x)) || 0) + xScale.bandwidth() / 2)
+      .attr('y', (d: any) => {
         const barY = yScale(d.y);
         switch (config.position) {
           case 'center': return barY + (yScale(0) - barY) / 2;
@@ -497,14 +501,14 @@ export function renderBarLabels(
       .attr('dominant-baseline', config.position === 'bottom' ? 'auto' : 'middle');
   } else {
     labels
-      .attr('x', d => {
+      .attr('x', (d: any) => {
         const barWidth = xScale(d.y);
         switch (config.position) {
           case 'center': return barWidth / 2;
           default: return barWidth + offset; // 'top' (right for horizontal)
         }
       })
-      .attr('y', d => (yScale(String(d.x)) || 0) + yScale.bandwidth() / 2)
+      .attr('y', (d: any) => (yScale(String(d.x)) || 0) + yScale.bandwidth() / 2)
       .attr('text-anchor', config.position === 'center' ? 'middle' : 'start')
       .attr('dominant-baseline', 'middle');
   }
@@ -539,7 +543,7 @@ export function renderPointLabels(
     .enter()
     .append('text')
     .attr('class', 'point-label')
-    .attr('x', d => {
+    .attr('x', (d: any) => {
       const baseX = xScale(d.x);
       switch (config.position) {
         case 'left': return baseX - offset;
@@ -547,7 +551,7 @@ export function renderPointLabels(
         default: return baseX; // 'top' | 'bottom'
       }
     })
-    .attr('y', d => {
+    .attr('y', (d: any) => {
       const baseY = yScale(d.y);
       switch (config.position) {
         case 'top': return baseY - offset;
@@ -555,18 +559,18 @@ export function renderPointLabels(
         default: return baseY; // 'left' | 'right'
       }
     })
-    .attr('text-anchor', 
-      config.position === 'left' ? 'end' : 
+    .attr('text-anchor',
+      config.position === 'left' ? 'end' :
       config.position === 'right' ? 'start' : 'middle'
     )
-    .attr('dominant-baseline', 
+    .attr('dominant-baseline',
       config.position === 'top' ? 'auto' :
       config.position === 'bottom' ? 'hanging' : 'middle'
     )
     .style('font-size', fontSize)
     .style('fill', fontColor)
     .style('pointer-events', 'none')
-    .text(d => config.format ? config.format(d) : `${d.x}, ${d.y}`);
+    .text((d: any) => config.format ? config.format(d) : `${d.x}, ${d.y}`);
 
   return labelGroup;
 }
@@ -583,7 +587,11 @@ export function applyArcEnterAnimation(
 ): d3.Transition<any, any, any, any> {
   if (!config.enabled) return selection.transition().duration(0);
 
-  return selection
+  const transition = selection.transition()
+    .duration(config.duration || 750)
+    .delay(config.delay || 0);
+
+  return transition
     .attrTween('d', function(d: any) {
       const interpolate = d3.interpolate(
         { startAngle: 0, endAngle: 0 },
@@ -593,12 +601,9 @@ export function applyArcEnterAnimation(
         const arc = d3.arc()
           .innerRadius(config.innerRadius || 0)
           .outerRadius(config.outerRadius || 100);
-        return arc(interpolate(t));
+        return arc(interpolate(t) as any) as string;
       };
-    })
-    .transition()
-    .duration(config.duration || 750)
-    .delay(config.delay || 0);
+    });
 }
 
 /**
