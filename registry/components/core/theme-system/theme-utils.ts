@@ -53,16 +53,16 @@ export const createChartTheme = (config: ChartThemeConfig): ThemeCore => {
   } else {
     switch (colorScheme) {
       case 'sequential':
-        chartColors = d3.schemeBlues[8] || d3.schemeBlues[d3.schemeBlues.length - 1];
+        chartColors = [...(d3.schemeBlues[8] || d3.schemeBlues[d3.schemeBlues.length - 1])];
         break;
       case 'diverging':
-        chartColors = d3.schemeRdYlBu[8] || d3.schemeRdYlBu[d3.schemeRdYlBu.length - 1];
+        chartColors = [...(d3.schemeRdYlBu[8] || d3.schemeRdYlBu[d3.schemeRdYlBu.length - 1])];
         break;
       case 'custom':
-        chartColors = customColors || d3.schemeCategory10;
+        chartColors = customColors || [...d3.schemeCategory10];
         break;
       default:
-        chartColors = d3.schemeCategory10;
+        chartColors = [...d3.schemeCategory10];
     }
   }
 
@@ -70,48 +70,178 @@ export const createChartTheme = (config: ChartThemeConfig): ThemeCore => {
     primary: {
       light: chartColors[0],
       main: chartColors[0],
-      dark: d3.color(chartColors[0])?.darker(0.5)?.toString() || chartColors[0]
+      dark: d3.color(chartColors[0])?.darker(0.5)?.toString() || chartColors[0],
+      contrastText: '#ffffff'
     },
     secondary: {
       light: chartColors[1] || chartColors[0],
       main: chartColors[1] || chartColors[0],
-      dark: d3.color(chartColors[1] || chartColors[0])?.darker(0.5)?.toString() || chartColors[0]
+      dark: d3.color(chartColors[1] || chartColors[0])?.darker(0.5)?.toString() || chartColors[0],
+      contrastText: '#ffffff'
     },
     success: {
       light: '#86efac',
       main: '#10b981',
-      dark: '#059669'
+      dark: '#059669',
+      contrastText: '#ffffff'
     },
     warning: {
       light: '#fbbf24',
       main: '#f59e0b',
-      dark: '#d97706'
+      dark: '#d97706',
+      contrastText: '#000000'
     },
     error: {
       light: '#f87171',
       main: '#ef4444',
-      dark: '#dc2626'
+      dark: '#dc2626',
+      contrastText: '#ffffff'
     },
     info: {
       light: '#67e8f9',
       main: '#06b6d4',
-      dark: '#0891b2'
+      dark: '#0891b2',
+      contrastText: '#ffffff'
     },
     background: {
       default: backgroundColor,
-      paper: isLight ? '#f8fafc' : '#0f172a'
+      paper: isLight ? '#f8fafc' : '#0f172a',
+      level1: isLight ? '#f8fafc' : '#1e293b',
+      level2: isLight ? '#f1f5f9' : '#334155'
+    },
+    surface: {
+      default: backgroundColor,
+      variant: isLight ? '#f8fafc' : '#1e293b'
     },
     text: {
       primary: primaryTextColor,
-      secondary: secondaryTextColor
+      secondary: secondaryTextColor,
+      disabled: isLight ? '#94a3b8' : '#64748b',
+      hint: isLight ? '#cbd5e1' : '#475569'
     },
-    divider: dividerColor
+    divider: dividerColor,
+    border: isLight ? '#d1d5db' : '#475569',
+    chart: {
+      series: chartColors,
+      categorical: chartColors,
+      sequential: chartColors,
+      diverging: chartColors,
+      qualitative: chartColors
+    },
+    grey: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617'
+    },
+    blue: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
+      950: '#172554'
+    },
+    green: {
+      50: '#ecfdf5',
+      100: '#d1fae5',
+      200: '#a7f3d0',
+      300: '#6ee7b7',
+      400: '#34d399',
+      500: '#10b981',
+      600: '#059669',
+      700: '#047857',
+      800: '#065f46',
+      900: '#064e3b',
+      950: '#022c22'
+    },
+    red: {
+      50: '#fef2f2',
+      100: '#fee2e2',
+      200: '#fecaca',
+      300: '#fca5a5',
+      400: '#f87171',
+      500: '#ef4444',
+      600: '#dc2626',
+      700: '#b91c1c',
+      800: '#991b1b',
+      900: '#7f1d1d',
+      950: '#450a0a'
+    },
+    yellow: {
+      50: '#fffbeb',
+      100: '#fef3c7',
+      200: '#fde68a',
+      300: '#fcd34d',
+      400: '#fbbf24',
+      500: '#f59e0b',
+      600: '#d97706',
+      700: '#b45309',
+      800: '#92400e',
+      900: '#78350f',
+      950: '#451a03'
+    },
+    purple: {
+      50: '#faf5ff',
+      100: '#f3e8ff',
+      200: '#e9d5ff',
+      300: '#d8b4fe',
+      400: '#c084fc',
+      500: '#a855f7',
+      600: '#9333ea',
+      700: '#7c3aed',
+      800: '#6b21a8',
+      900: '#581c87',
+      950: '#3b0764'
+    },
+    cyan: {
+      50: '#ecfeff',
+      100: '#cffafe',
+      200: '#a5f3fc',
+      300: '#67e8f9',
+      400: '#22d3ee',
+      500: '#06b6d4',
+      600: '#0891b2',
+      700: '#0e7490',
+      800: '#155e75',
+      900: '#164e63',
+      950: '#083344'
+    },
+    pink: {
+      50: '#fdf2f8',
+      100: '#fce7f3',
+      200: '#fbcfe8',
+      300: '#f9a8d4',
+      400: '#f472b6',
+      500: '#ec4899',
+      600: '#db2777',
+      700: '#be185d',
+      800: '#9d174d',
+      900: '#831843',
+      950: '#500724'
+    }
   };
 
   const tokens: DesignTokens = {
     colors,
     typography: {
-      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontFamily: {
+        sans: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        serif: 'Georgia, "Times New Roman", serif',
+        mono: 'SFMono-Regular, Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace'
+      },
       fontSize: {
         xs: '0.75rem',
         sm: '0.875rem',
@@ -120,41 +250,172 @@ export const createChartTheme = (config: ChartThemeConfig): ThemeCore => {
         xl: '1.25rem',
         '2xl': '1.5rem',
         '3xl': '1.875rem',
-        '4xl': '2.25rem'
+        '4xl': '2.25rem',
+        '5xl': '3rem',
+        '6xl': '3.75rem'
       },
       fontWeight: {
         light: 300,
-        normal: 400,
+        regular: 400,
         medium: 500,
         semibold: 600,
         bold: 700
       },
       lineHeight: {
-        tight: 1.25,
-        normal: 1.5,
-        relaxed: 1.625
+        tight: '1.25',
+        normal: '1.5',
+        relaxed: '1.625'
+      },
+      letterSpacing: {
+        tight: '-0.025em',
+        normal: '0',
+        wide: '0.025em'
+      },
+      variants: {
+        h1: {
+          fontSize: '48px',
+          fontWeight: 700,
+          lineHeight: '1.25',
+          letterSpacing: '-0.025em'
+        },
+        h2: {
+          fontSize: '36px',
+          fontWeight: 700,
+          lineHeight: '1.25',
+          letterSpacing: '-0.025em'
+        },
+        h3: {
+          fontSize: '30px',
+          fontWeight: 600,
+          lineHeight: '1.25',
+          letterSpacing: '0'
+        },
+        h4: {
+          fontSize: '24px',
+          fontWeight: 600,
+          lineHeight: '1.25',
+          letterSpacing: '0'
+        },
+        h5: {
+          fontSize: '20px',
+          fontWeight: 600,
+          lineHeight: '1.25',
+          letterSpacing: '0'
+        },
+        h6: {
+          fontSize: '18px',
+          fontWeight: 600,
+          lineHeight: '1.25',
+          letterSpacing: '0'
+        },
+        subtitle1: {
+          fontSize: '16px',
+          fontWeight: 500,
+          lineHeight: '1.5',
+          letterSpacing: '0'
+        },
+        subtitle2: {
+          fontSize: '14px',
+          fontWeight: 500,
+          lineHeight: '1.5',
+          letterSpacing: '0'
+        },
+        body1: {
+          fontSize: '16px',
+          fontWeight: 400,
+          lineHeight: '1.5',
+          letterSpacing: '0'
+        },
+        body2: {
+          fontSize: '14px',
+          fontWeight: 400,
+          lineHeight: '1.5',
+          letterSpacing: '0'
+        },
+        caption: {
+          fontSize: '12px',
+          fontWeight: 400,
+          lineHeight: '1.5',
+          letterSpacing: '0'
+        },
+        overline: {
+          fontSize: '12px',
+          fontWeight: 500,
+          lineHeight: '1.5',
+          letterSpacing: '0.025em',
+          textTransform: 'uppercase'
+        }
       }
     },
     spacing: {
-      xs: '0.25rem',
-      sm: '0.5rem',
-      md: '1rem',
-      lg: '1.5rem',
-      xl: '2rem',
-      '2xl': '3rem',
-      '3xl': '4rem'
+      0: '0px',
+      1: '4px',
+      2: '8px',
+      3: '12px',
+      4: '16px',
+      5: '20px',
+      6: '24px',
+      7: '28px',
+      8: '32px',
+      9: '36px',
+      10: '40px',
+      11: '44px',
+      12: '48px',
+      14: '56px',
+      16: '64px',
+      20: '80px',
+      24: '96px',
+      28: '112px',
+      32: '128px',
+      36: '144px',
+      40: '160px',
+      44: '176px',
+      48: '192px',
+      52: '208px',
+      56: '224px',
+      60: '240px',
+      64: '256px',
+      72: '288px',
+      80: '320px',
+      96: '384px'
     },
     animation: {
       duration: {
         fast: '150ms',
         normal: '300ms',
-        slow: '500ms'
+        slow: '500ms',
+        slower: '750ms',
+        slowest: '1000ms'
       },
       easing: {
-        ease: 'ease',
+        linear: 'linear',
         easeIn: 'ease-in',
         easeOut: 'ease-out',
-        easeInOut: 'ease-in-out'
+        easeInOut: 'ease-in-out',
+        bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        elastic: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      },
+      presets: {
+        fadeIn: {
+          duration: '300ms',
+          easing: 'ease-in-out',
+          keyframes: '@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }'
+        },
+        slideIn: {
+          duration: '300ms',
+          easing: 'ease-out',
+          keyframes: '@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }'
+        },
+        scaleIn: {
+          duration: '300ms',
+          easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+          keyframes: '@keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }'
+        },
+        bounce: {
+          duration: '600ms',
+          easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+          keyframes: '@keyframes bounce { 0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); } 40%, 43% { transform: translate3d(0,-30px,0); } 70% { transform: translate3d(0,-15px,0); } 90% { transform: translate3d(0,-4px,0); } }'
+        }
       }
     },
     borderRadius: {
@@ -165,18 +426,22 @@ export const createChartTheme = (config: ChartThemeConfig): ThemeCore => {
       lg: '0.5rem',
       xl: '0.75rem',
       '2xl': '1rem',
+      '3xl': '1.5rem',
       full: '9999px'
     },
     shadows: {
       none: 'none',
+      xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
       md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
       xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+      '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+      inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)'
     },
     breakpoints: {
+      xs: '0px',
       sm: '640px',
       md: '768px',
       lg: '1024px',
@@ -242,37 +507,161 @@ export const createCustomPalette = (config: CustomPaletteConfig): ColorPalette =
   }
 
   return {
-    primary: primaryColors,
-    secondary: secondaryColors,
+    primary: { ...primaryColors, contrastText: '#ffffff' },
+    secondary: { ...secondaryColors, contrastText: '#ffffff' },
     success: {
       light: '#86efac',
       main: '#10b981',
-      dark: '#059669'
+      dark: '#059669',
+      contrastText: '#ffffff'
     },
     warning: {
       light: '#fbbf24',
       main: '#f59e0b',
-      dark: '#d97706'
+      dark: '#d97706',
+      contrastText: '#000000'
     },
     error: {
       light: '#f87171',
       main: '#ef4444',
-      dark: '#dc2626'
+      dark: '#dc2626',
+      contrastText: '#ffffff'
     },
     info: {
       light: accent ? generateColorVariants(accent).light : '#67e8f9',
       main: accent || '#06b6d4',
-      dark: accent ? generateColorVariants(accent).dark : '#0891b2'
+      dark: accent ? generateColorVariants(accent).dark : '#0891b2',
+      contrastText: '#ffffff'
     },
     background: {
       default: isLight ? '#ffffff' : '#0f172a',
-      paper: isLight ? '#f8fafc' : '#1e293b'
+      paper: isLight ? '#f8fafc' : '#1e293b',
+      level1: isLight ? '#f8fafc' : '#1e293b',
+      level2: isLight ? '#f1f5f9' : '#334155'
+    },
+    surface: {
+      default: isLight ? '#ffffff' : '#0f172a',
+      variant: isLight ? '#f8fafc' : '#1e293b'
     },
     text: {
       primary: isLight ? '#1f2937' : '#f9fafb',
-      secondary: isLight ? '#6b7280' : '#9ca3af'
+      secondary: isLight ? '#6b7280' : '#9ca3af',
+      disabled: isLight ? '#94a3b8' : '#64748b',
+      hint: isLight ? '#cbd5e1' : '#475569'
     },
-    divider: isLight ? '#e5e7eb' : '#374151'
+    divider: isLight ? '#e5e7eb' : '#374151',
+    border: isLight ? '#d1d5db' : '#475569',
+    chart: {
+      series: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+      categorical: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+      sequential: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5'],
+      diverging: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5'],
+      qualitative: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628']
+    },
+    grey: {
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
+      950: '#020617'
+    },
+    blue: {
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
+      950: '#172554'
+    },
+    green: {
+      50: '#ecfdf5',
+      100: '#d1fae5',
+      200: '#a7f3d0',
+      300: '#6ee7b7',
+      400: '#34d399',
+      500: '#10b981',
+      600: '#059669',
+      700: '#047857',
+      800: '#065f46',
+      900: '#064e3b',
+      950: '#022c22'
+    },
+    red: {
+      50: '#fef2f2',
+      100: '#fee2e2',
+      200: '#fecaca',
+      300: '#fca5a5',
+      400: '#f87171',
+      500: '#ef4444',
+      600: '#dc2626',
+      700: '#b91c1c',
+      800: '#991b1b',
+      900: '#7f1d1d',
+      950: '#450a0a'
+    },
+    yellow: {
+      50: '#fffbeb',
+      100: '#fef3c7',
+      200: '#fde68a',
+      300: '#fcd34d',
+      400: '#fbbf24',
+      500: '#f59e0b',
+      600: '#d97706',
+      700: '#b45309',
+      800: '#92400e',
+      900: '#78350f',
+      950: '#451a03'
+    },
+    purple: {
+      50: '#faf5ff',
+      100: '#f3e8ff',
+      200: '#e9d5ff',
+      300: '#d8b4fe',
+      400: '#c084fc',
+      500: '#a855f7',
+      600: '#9333ea',
+      700: '#7c3aed',
+      800: '#6b21a8',
+      900: '#581c87',
+      950: '#3b0764'
+    },
+    cyan: {
+      50: '#ecfeff',
+      100: '#cffafe',
+      200: '#a5f3fc',
+      300: '#67e8f9',
+      400: '#22d3ee',
+      500: '#06b6d4',
+      600: '#0891b2',
+      700: '#0e7490',
+      800: '#155e75',
+      900: '#164e63',
+      950: '#083344'
+    },
+    pink: {
+      50: '#fdf2f8',
+      100: '#fce7f3',
+      200: '#fbcfe8',
+      300: '#f9a8d4',
+      400: '#f472b6',
+      500: '#ec4899',
+      600: '#db2777',
+      700: '#be185d',
+      800: '#9d174d',
+      900: '#831843',
+      950: '#500724'
+    }
   };
 };
 
