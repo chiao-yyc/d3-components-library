@@ -5,12 +5,20 @@
 
 import React from 'react';
 import './pie-chart.css';
+import {
+  PieChart,
+  DonutChart as DonutChartComponent,
+  PieChartWithLegend,
+  HalfPieChart,
+  PieChartNoLabels,
+  PieChartSorted
+} from './pie-chart';
 
 // 主要組件 (統一架構)
-export { 
-  PieChart, 
+export {
+  PieChart,
   PieChartLegacy,
-  DonutChart,
+  DonutChartComponent as DonutChart,
   PieChartWithLegend,
   HalfPieChart,
   PieChartNoLabels,
@@ -21,9 +29,9 @@ export type { PieChartProps } from './pie-chart';
 
 // 核心系統導出
 export { PieChartCore } from './core/pie-chart-core';
-export type { 
-  PieChartCoreConfig, 
-  PieChartData, 
+export type {
+  PieChartCoreConfig,
+  PieChartData,
   ProcessedPieDataPoint,
   PieSegment,
   LabelConfig,
@@ -33,12 +41,8 @@ export type {
 // 向下兼容：舊版類型定義
 export type { PieChartProps as LegacyPieChartProps, LegendItem } from './types';
 
-// 向下兼容：舊版核心（已棄用，將移除）
-// export { D3PieChart } from './core';
-// export type { PieChartConfig as D3PieChartConfig } from './core';
-
 // 快捷變體組件（已整合到主檔案）
 export const DonutChartLegacy = React.forwardRef<unknown, unknown>((props, ref) => {
-  return React.createElement(DonutChart, { ref, ...props });
+  return React.createElement(DonutChartComponent, { ref, ...props });
 });
 DonutChartLegacy.displayName = 'DonutChartLegacy';

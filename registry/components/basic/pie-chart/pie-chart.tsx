@@ -9,9 +9,9 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { PieChartCore, PieChartCoreConfig, LabelConfig, LegendConfig } from './core/pie-chart-core';
 
 // 擴展 React props 接口
-export interface PieChartProps extends ReactChartWrapperProps, PieChartCoreConfig {
+export interface PieChartProps extends PieChartCoreConfig, ReactChartWrapperProps {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
-  
+
   // 添加對舊版 mapping 的支援
   mapping?: {
     label?: string;
@@ -41,6 +41,16 @@ export const PieChart = React.forwardRef<PieChartCore, PieChartProps>((props, re
 });
 
 PieChart.displayName = 'PieChart';
+
+// 舊版 props 接口
+interface LegacyPieChartProps {
+  labelKey?: string;
+  valueKey?: string;
+  colorKey?: string;
+  labelAccessor?: string | ((d: any) => string);
+  valueAccessor?: string | ((d: any) => number);
+  colorAccessor?: string | ((d: any) => string);
+}
 
 // 向下兼容導出
 export const PieChartLegacy = React.forwardRef<PieChartCore, LegacyPieChartProps & PieChartProps>((props, ref) => {
@@ -128,10 +138,7 @@ export const defaultPieChartProps: Partial<PieChartProps> = {
   animationDuration: 750,
   
   // Tooltip 默認值
-  enableTooltip: true,
-  
-  // 響應式
-  responsive: true
+  enableTooltip: true
 };
 
 // 專用變體組件
