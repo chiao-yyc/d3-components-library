@@ -4,13 +4,12 @@
  */
 
 import * as d3 from 'd3';
-import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
-import { 
-  BaseChartCoreConfig, 
-  ChartStateCallbacks, 
-  ChartData, 
-  BaseChartData 
-} from '../../../core/base-chart/types';
+import { BaseChartCore } from '../../../core/base-chart/core';
+import {
+  BaseChartCoreConfig,
+  ChartData,
+  BaseChartData
+} from '../../../core/types';
 import { 
   calculateAlignedPosition, 
   AlignmentStrategy 
@@ -104,7 +103,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
     }));
 
     // 檢查是否為分組數據
-    this.isGrouped = !!this.config.groupBy;
+    this.isGrouped = !!(this.config as ScatterCoreConfig).groupBy;
     
     if (this.isGrouped) {
       this.groupedData = this.groupData(processedData);
@@ -171,7 +170,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
     svg.selectAll('.scatter-point').remove();
 
     // 渲染趨勢線（如果啟用）
-    if (this.config.showTrendline) {
+    if ((this.config as ScatterCoreConfig).showTrendline) {
       this.renderTrendline(svg, processedData, scales);
     }
 
@@ -189,7 +188,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   // === 私有方法 ===
 
   private resolveSizeValue(item: ScatterCoreData): number {
-    const { sizeAccessor, radius = 4 } = this.config;
+    const { sizeAccessor, radius = 4 } = this.config as ScatterCoreConfig;
     
     if (typeof sizeAccessor === 'function') {
       return sizeAccessor(item);
@@ -203,7 +202,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   }
 
   private resolveColorValue(item: ScatterCoreData, index: number): string {
-    const { color, colorAccessor } = this.config;
+    const { color, colorAccessor } = this.config as ScatterCoreConfig;
     
     if (typeof colorAccessor === 'function') {
       return colorAccessor(item);
@@ -231,7 +230,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   }
 
   private resolveSymbolType(item: ScatterCoreData, index: number): d3.SymbolType {
-    const { symbol = d3.symbolCircle } = this.config;
+    const { symbol = d3.symbolCircle } = this.config as ScatterCoreConfig;
     
     if (typeof symbol === 'function') {
       return symbol(item, index);
@@ -241,14 +240,14 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   }
 
   private createSizeScale(data: ChartData<ScatterCoreData>[]): d3.ScaleLinear<number, number> {
-    if (this.config.sizeScale) {
-      return this.config.sizeScale;
+    if ((this.config as ScatterCoreConfig).sizeScale) {
+      return (this.config as ScatterCoreConfig).sizeScale!;
     }
 
     const sizeValues = data.map(d => d.size || 0);
     const sizeExtent = d3.extent(sizeValues) as [number, number];
     
-    const { minPointSize = 2, maxPointSize = 20 } = this.config;
+    const { minPointSize = 2, maxPointSize = 20 } = this.config as ScatterCoreConfig;
 
     return d3.scaleLinear()
       .domain(sizeExtent)
@@ -257,8 +256,8 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   }
 
   private createColorScale(data: ChartData<ScatterCoreData>[]): d3.ScaleOrdinal<string, string> {
-    if (this.config.colorScale) {
-      return this.config.colorScale;
+    if ((this.config as ScatterCoreConfig).colorScale) {
+      return (this.config as ScatterCoreConfig).colorScale!;
     }
 
     const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
@@ -272,7 +271,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
 
   private groupData(data: ChartData<ScatterCoreData>[]): Map<string, ChartData<ScatterCoreData>[]> {
     const groups = new Map<string, ChartData<ScatterCoreData>[]>();
-    const groupBy = this.config.groupBy!;
+    const groupBy = (this.config as ScatterCoreConfig).groupBy!;
 
     data.forEach(item => {
       const groupKey = item[groupBy] as string || 'default';
@@ -299,7 +298,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
       animationDuration = 300,
       animationDelay = 0,
       entranceAnimation = 'scale'
-    } = this.config;
+    } = this.config as ScatterCoreConfig;
 
     const points = svg.selectAll('.scatter-point')
       .data(data, (d: any, i: number) => d.id || i)
@@ -330,7 +329,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
     scales: Record<string, any>
   ): void {
     const groupKeys = Array.from(this.groupedData.keys());
-    const { animate = true, animationDuration = 300, animationDelay = 100 } = this.config;
+    const { animate = true, animationDuration = 300, animationDelay = 100 } = this.config as ScatterCoreConfig;
 
     groupKeys.forEach((groupKey, groupIndex) => {
       const groupData = this.groupedData.get(groupKey)!;
@@ -349,16 +348,16 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
         })
         .attr('d', this.symbolGenerator)
         .attr('fill', groupColor)
-        .attr('stroke', this.config.strokeColor || '#ffffff')
-        .attr('stroke-width', this.config.strokeWidth || 1)
-        .attr('opacity', this.config.opacity || 1);
+        .attr('stroke', (this.config as ScatterCoreConfig).strokeColor || '#ffffff')
+        .attr('stroke-width', (this.config as ScatterCoreConfig).strokeWidth || 1)
+        .attr('opacity', (this.config as ScatterCoreConfig).opacity || 1);
 
       // 分組動畫：錯開執行
       if (animate) {
         const delay = groupIndex * animationDelay;
         this.applyEntranceAnimation(
           groupPoints, 
-          this.config.entranceAnimation || 'scale', 
+          (this.config as ScatterCoreConfig).entranceAnimation || 'scale', 
           animationDuration, 
           delay
         );
@@ -379,7 +378,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
       trendlineColor = '#666666',
       trendlineWidth = 2,
       trendlineType = 'linear'
-    } = this.config;
+    } = this.config as ScatterCoreConfig;
 
     const { xScale, yScale } = scales;
     
@@ -454,7 +453,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
           .transition()
           .delay(delay)
           .duration(duration)
-          .attr('opacity', this.config.opacity || 1);
+          .attr('opacity', (this.config as ScatterCoreConfig).opacity || 1);
         break;
       
       case 'scale':
@@ -496,16 +495,16 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
 
   private getXPosition(d: ScatterCoreData, xScale: any): number {
     if (xScale.bandwidth) {
-      return calculateAlignedPosition(d.x, xScale, this.config.alignment || 'center');
+      return calculateAlignedPosition(d.x, xScale, (this.config as ScatterCoreConfig).alignment || 'center');
     } else {
       return xScale(d.x);
     }
   }
 
   private addInteractionEvents(svg: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    if (!this.config.interactive) return;
+    if (!(this.config as ScatterCoreConfig).interactive) return;
 
-    const { hoverRadius = 6, hoverEffect = true } = this.config;
+    const { hoverRadius = 6, hoverEffect = true } = this.config as ScatterCoreConfig;
 
     svg.selectAll('.scatter-point')
       .on('click', (event, d: ScatterCoreData) => {
@@ -520,7 +519,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
             .attr('transform', (d: ScatterCoreData) => {
               const x = this.getXPosition(d, this.getScales().xScale);
               const y = this.getScales().yScale(d.y);
-              const scale = hoverRadius / (this.config.radius || 4);
+              const scale = hoverRadius / ((this.config as ScatterCoreConfig).radius || 4);
               return `translate(${x}, ${y}) scale(${scale})`;
             });
         }
@@ -573,18 +572,18 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
   }
 
   public toggleTrendline(show: boolean): void {
-    this.config.showTrendline = show;
+    (this.config as ScatterCoreConfig).showTrendline = show;
     this.render();
   }
 
   public updateSymbolType(symbol: d3.SymbolType): void {
-    this.config.symbol = symbol;
+    (this.config as ScatterCoreConfig).symbol = symbol;
     this.render();
   }
 
   public updateSizeRange(minSize: number, maxSize: number): void {
-    this.config.minPointSize = minSize;
-    this.config.maxPointSize = maxSize;
+    (this.config as ScatterCoreConfig).minPointSize = minSize;
+    (this.config as ScatterCoreConfig).maxPointSize = maxSize;
     this.render();
   }
 }

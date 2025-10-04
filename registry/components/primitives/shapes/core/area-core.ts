@@ -4,13 +4,12 @@
  */
 
 import * as d3 from 'd3';
-import { BaseChartCore } from '../../../core/base-chart/core/base-chart-core';
-import { 
-  BaseChartCoreConfig, 
-  ChartStateCallbacks, 
-  ChartData, 
-  BaseChartData 
-} from '../../../core/base-chart/types';
+import { BaseChartCore } from '../../../core/base-chart/core';
+import {
+  BaseChartCoreConfig,
+  ChartData,
+  BaseChartData
+} from '../../../core/types';
 
 // === 核心數據類型定義 ===
 
@@ -114,20 +113,20 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
 
     // 創建面積和線條生成器
     this.areaGenerator = d3.area<ChartData<AreaCoreData>>()
-      .x((d: ChartData<AreaCoreData>) => xScale(d.x))
+      .x((d: ChartData<AreaCoreData>) => xScale(d.x) as number)
       .y0((d: ChartData<AreaCoreData>) => yScale(d.y0))
       .y1((d: ChartData<AreaCoreData>) => yScale(d.y))
-      .curve(this.config.curve || d3.curveLinear)
-      .defined((d: ChartData<AreaCoreData>) => 
+      .curve((this.config as AreaCoreConfig).curve || d3.curveLinear)
+      .defined((d: ChartData<AreaCoreData>) =>
         d.x != null && d.y != null && !isNaN(d.y as number)
       );
 
-    if (this.config.showLine) {
+    if ((this.config as AreaCoreConfig).showLine) {
       this.lineGenerator = d3.line<ChartData<AreaCoreData>>()
-        .x((d: ChartData<AreaCoreData>) => xScale(d.x))
+        .x((d: ChartData<AreaCoreData>) => xScale(d.x) as number)
         .y((d: ChartData<AreaCoreData>) => yScale(d.y))
-        .curve(this.config.curve || d3.curveLinear)
-        .defined((d: ChartData<AreaCoreData>) => 
+        .curve((this.config as AreaCoreConfig).curve || d3.curveLinear)
+        .defined((d: ChartData<AreaCoreData>) =>
           d.x != null && d.y != null && !isNaN(d.y as number)
         );
     }
@@ -151,7 +150,7 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
     this.renderArea(svg, processedData);
 
     // 渲染邊線（如果啟用）
-    if (this.config.showLine) {
+    if ((this.config as AreaCoreConfig).showLine) {
       this.renderLine(svg, processedData);
     }
 
@@ -164,26 +163,26 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
   // === 私有方法 ===
 
   private resolveItemColor(item: AreaCoreData, index: number): string {
-    const { color } = this.config;
-    
+    const { color } = this.config as AreaCoreConfig;
+
     if (typeof color === 'function') {
       return color(item, index);
     }
-    
+
     if (typeof color === 'string') {
       return color;
     }
-    
+
     return item.color || '#3b82f6';
   }
 
   private resolveBaseline(item: AreaCoreData): number {
-    const { baseline = 0 } = this.config;
-    
+    const { baseline = 0 } = this.config as AreaCoreConfig;
+
     if (typeof baseline === 'function') {
       return baseline(item);
     }
-    
+
     return baseline;
   }
 
@@ -195,7 +194,7 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
       opacity = 0.7,
       animate = true,
       animationDuration = 300
-    } = this.config;
+    } = this.config as AreaCoreConfig;
 
     // 按 x 值排序數據
     const sortedData = [...data].sort((a, b) => {
@@ -216,8 +215,8 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
       .attr('d', this.areaGenerator);
 
     // 應用漸層（如果配置）
-    if (this.config.gradient) {
-      this.applyGradient(svg, areaPath, this.config.gradient);
+    if ((this.config as AreaCoreConfig).gradient) {
+      this.applyGradient(svg, areaPath, (this.config as AreaCoreConfig).gradient!);
     }
 
     // 動畫效果
@@ -239,7 +238,7 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
       lineWidth = 2,
       animate = true,
       animationDuration = 300
-    } = this.config;
+    } = this.config as AreaCoreConfig;
 
     const sortedData = [...data].sort((a, b) => {
       const aVal = a.x instanceof Date ? a.x.getTime() : a.x;
@@ -278,7 +277,7 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
 
   private applyGradient(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
-    path: d3.Selection<SVGPathElement, unknown, null, undefined>,
+    path: d3.Selection<SVGPathElement, ChartData<AreaCoreData>[], null, undefined>,
     gradientConfig: NonNullable<AreaCoreConfig['gradient']>
   ): void {
     const defs = svg.append('defs');
@@ -319,18 +318,19 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
 
   private addInteractionEvents(svg: d3.Selection<SVGGElement, unknown, null, undefined>): void {
     // 簡化的交互實現
+    const config = this.config as AreaCoreConfig;
     svg.selectAll('.area-element')
       .on('click', (event) => {
         this.showTooltip(event.pageX, event.pageY, 'Area clicked');
       })
       .on('mouseenter', (event) => {
-        if (this.config.hoverEffect) {
+        if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', 0.9);
         }
       })
       .on('mouseleave', (event) => {
-        if (this.config.hoverEffect) {
-          d3.select(event.currentTarget).attr('opacity', this.config.opacity || 0.7);
+        if (config.hoverEffect) {
+          d3.select(event.currentTarget).attr('opacity', config.opacity || 0.7);
         }
         this.hideTooltip();
       });
@@ -347,17 +347,17 @@ export class AreaCore extends BaseChartCore<AreaCoreData> {
   // === 公共 API ===
 
   public updateCurve(curve: d3.CurveFactory): void {
-    this.config.curve = curve;
+    (this.config as AreaCoreConfig).curve = curve;
     this.render();
   }
 
   public toggleLine(show: boolean): void {
-    this.config.showLine = show;
+    (this.config as AreaCoreConfig).showLine = show;
     this.render();
   }
 
   public updateBaseline(baseline: number | ((d: AreaCoreData) => number)): void {
-    this.config.baseline = baseline;
+    (this.config as AreaCoreConfig).baseline = baseline;
     this.render();
   }
 
