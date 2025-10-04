@@ -11,84 +11,336 @@ const defaultColors: ColorPalette = {
   primary: {
     light: '#93c5fd',
     main: '#3b82f6',
-    dark: '#1d4ed8'
+    dark: '#1d4ed8',
+    contrastText: '#ffffff'
   },
   secondary: {
     light: '#f87171',
     main: '#ef4444',
-    dark: '#dc2626'
+    dark: '#dc2626',
+    contrastText: '#ffffff'
   },
   success: {
     light: '#86efac',
     main: '#10b981',
-    dark: '#059669'
+    dark: '#059669',
+    contrastText: '#ffffff'
   },
   warning: {
     light: '#fbbf24',
     main: '#f59e0b',
-    dark: '#d97706'
+    dark: '#d97706',
+    contrastText: '#000000'
   },
   error: {
     light: '#f87171',
     main: '#ef4444',
-    dark: '#dc2626'
+    dark: '#dc2626',
+    contrastText: '#ffffff'
   },
   info: {
     light: '#67e8f9',
     main: '#06b6d4',
-    dark: '#0891b2'
+    dark: '#0891b2',
+    contrastText: '#ffffff'
   },
   background: {
     default: '#ffffff',
-    paper: '#f8fafc'
+    paper: '#f8fafc',
+    level1: '#f8fafc',
+    level2: '#f1f5f9'
+  },
+  surface: {
+    default: '#ffffff',
+    variant: '#f8fafc'
   },
   text: {
     primary: '#1f2937',
-    secondary: '#6b7280'
+    secondary: '#6b7280',
+    disabled: '#9ca3af',
+    hint: '#d1d5db'
   },
-  divider: '#e5e7eb'
+  divider: '#e5e7eb',
+  border: '#d1d5db',
+  chart: {
+    series: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+    categorical: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+    sequential: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5'],
+    diverging: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5'],
+    qualitative: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628']
+  },
+  grey: {
+    50: '#f8fafc',
+    100: '#f1f5f9',
+    200: '#e2e8f0',
+    300: '#cbd5e1',
+    400: '#94a3b8',
+    500: '#64748b',
+    600: '#475569',
+    700: '#334155',
+    800: '#1e293b',
+    900: '#0f172a',
+    950: '#020617'
+  },
+  blue: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+    950: '#172554'
+  },
+  green: {
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    200: '#a7f3d0',
+    300: '#6ee7b7',
+    400: '#34d399',
+    500: '#10b981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065f46',
+    900: '#064e3b',
+    950: '#022c22'
+  },
+  red: {
+    50: '#fef2f2',
+    100: '#fee2e2',
+    200: '#fecaca',
+    300: '#fca5a5',
+    400: '#f87171',
+    500: '#ef4444',
+    600: '#dc2626',
+    700: '#b91c1c',
+    800: '#991b1b',
+    900: '#7f1d1d',
+    950: '#450a0a'
+  },
+  yellow: {
+    50: '#fffbeb',
+    100: '#fef3c7',
+    200: '#fde68a',
+    300: '#fcd34d',
+    400: '#fbbf24',
+    500: '#f59e0b',
+    600: '#d97706',
+    700: '#b45309',
+    800: '#92400e',
+    900: '#78350f',
+    950: '#451a03'
+  },
+  purple: {
+    50: '#faf5ff',
+    100: '#f3e8ff',
+    200: '#e9d5ff',
+    300: '#d8b4fe',
+    400: '#c084fc',
+    500: '#a855f7',
+    600: '#9333ea',
+    700: '#7c3aed',
+    800: '#6b21a8',
+    900: '#581c87',
+    950: '#3b0764'
+  },
+  cyan: {
+    50: '#ecfeff',
+    100: '#cffafe',
+    200: '#a5f3fc',
+    300: '#67e8f9',
+    400: '#22d3ee',
+    500: '#06b6d4',
+    600: '#0891b2',
+    700: '#0e7490',
+    800: '#155e75',
+    900: '#164e63',
+    950: '#083344'
+  },
+  pink: {
+    50: '#fdf2f8',
+    100: '#fce7f3',
+    200: '#fbcfe8',
+    300: '#f9a8d4',
+    400: '#f472b6',
+    500: '#ec4899',
+    600: '#db2777',
+    700: '#be185d',
+    800: '#9d174d',
+    900: '#831843',
+    950: '#500724'
+  }
 };
 
 const darkColors: ColorPalette = {
   primary: {
     light: '#60a5fa',
     main: '#3b82f6',
-    dark: '#2563eb'
+    dark: '#2563eb',
+    contrastText: '#ffffff'
   },
   secondary: {
     light: '#fb7185',
     main: '#ef4444',
-    dark: '#dc2626'
+    dark: '#dc2626',
+    contrastText: '#ffffff'
   },
   success: {
     light: '#4ade80',
     main: '#10b981',
-    dark: '#059669'
+    dark: '#059669',
+    contrastText: '#ffffff'
   },
   warning: {
     light: '#fbbf24',
     main: '#f59e0b',
-    dark: '#d97706'
+    dark: '#d97706',
+    contrastText: '#000000'
   },
   error: {
     light: '#f87171',
     main: '#ef4444',
-    dark: '#dc2626'
+    dark: '#dc2626',
+    contrastText: '#ffffff'
   },
   info: {
     light: '#67e8f9',
     main: '#06b6d4',
-    dark: '#0891b2'
+    dark: '#0891b2',
+    contrastText: '#ffffff'
   },
   background: {
     default: '#0f172a',
-    paper: '#1e293b'
+    paper: '#1e293b',
+    level1: '#1e293b',
+    level2: '#334155'
+  },
+  surface: {
+    default: '#1e293b',
+    variant: '#334155'
   },
   text: {
     primary: '#f1f5f9',
-    secondary: '#94a3b8'
+    secondary: '#94a3b8',
+    disabled: '#64748b',
+    hint: '#475569'
   },
-  divider: '#334155'
+  divider: '#334155',
+  border: '#475569',
+  chart: {
+    series: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+    categorical: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+    sequential: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5'],
+    diverging: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5'],
+    qualitative: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628']
+  },
+  grey: {
+    50: '#f8fafc',
+    100: '#f1f5f9',
+    200: '#e2e8f0',
+    300: '#cbd5e1',
+    400: '#94a3b8',
+    500: '#64748b',
+    600: '#475569',
+    700: '#334155',
+    800: '#1e293b',
+    900: '#0f172a',
+    950: '#020617'
+  },
+  blue: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+    950: '#172554'
+  },
+  green: {
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    200: '#a7f3d0',
+    300: '#6ee7b7',
+    400: '#34d399',
+    500: '#10b981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065f46',
+    900: '#064e3b',
+    950: '#022c22'
+  },
+  red: {
+    50: '#fef2f2',
+    100: '#fee2e2',
+    200: '#fecaca',
+    300: '#fca5a5',
+    400: '#f87171',
+    500: '#ef4444',
+    600: '#dc2626',
+    700: '#b91c1c',
+    800: '#991b1b',
+    900: '#7f1d1d',
+    950: '#450a0a'
+  },
+  yellow: {
+    50: '#fffbeb',
+    100: '#fef3c7',
+    200: '#fde68a',
+    300: '#fcd34d',
+    400: '#fbbf24',
+    500: '#f59e0b',
+    600: '#d97706',
+    700: '#b45309',
+    800: '#92400e',
+    900: '#78350f',
+    950: '#451a03'
+  },
+  purple: {
+    50: '#faf5ff',
+    100: '#f3e8ff',
+    200: '#e9d5ff',
+    300: '#d8b4fe',
+    400: '#c084fc',
+    500: '#a855f7',
+    600: '#9333ea',
+    700: '#7c3aed',
+    800: '#6b21a8',
+    900: '#581c87',
+    950: '#3b0764'
+  },
+  cyan: {
+    50: '#ecfeff',
+    100: '#cffafe',
+    200: '#a5f3fc',
+    300: '#67e8f9',
+    400: '#22d3ee',
+    500: '#06b6d4',
+    600: '#0891b2',
+    700: '#0e7490',
+    800: '#155e75',
+    900: '#164e63',
+    950: '#083344'
+  },
+  pink: {
+    50: '#fdf2f8',
+    100: '#fce7f3',
+    200: '#fbcfe8',
+    300: '#f9a8d4',
+    400: '#f472b6',
+    500: '#ec4899',
+    600: '#db2777',
+    700: '#be185d',
+    800: '#9d174d',
+    900: '#831843',
+    950: '#500724'
+  }
 };
 
 // 基礎設計令牌
@@ -199,42 +451,168 @@ const corporateColors: ColorPalette = {
   primary: {
     light: '#818cf8',
     main: '#4f46e5',
-    dark: '#3730a3'
+    dark: '#3730a3',
+    contrastText: '#ffffff'
   },
   secondary: {
     light: '#a78bfa',
     main: '#8b5cf6',
-    dark: '#7c3aed'
+    dark: '#7c3aed',
+    contrastText: '#ffffff'
   },
   success: {
     light: '#34d399',
     main: '#059669',
-    dark: '#047857'
+    dark: '#047857',
+    contrastText: '#ffffff'
   },
   warning: {
     light: '#fbbf24',
     main: '#d97706',
-    dark: '#b45309'
+    dark: '#b45309',
+    contrastText: '#000000'
   },
   error: {
     light: '#f87171',
     main: '#dc2626',
-    dark: '#b91c1c'
+    dark: '#b91c1c',
+    contrastText: '#ffffff'
   },
   info: {
     light: '#38bdf8',
     main: '#0ea5e9',
-    dark: '#0284c7'
+    dark: '#0284c7',
+    contrastText: '#ffffff'
   },
   background: {
     default: '#ffffff',
-    paper: '#f9fafb'
+    paper: '#f9fafb',
+    level1: '#f9fafb',
+    level2: '#f3f4f6'
+  },
+  surface: {
+    default: '#ffffff',
+    variant: '#f9fafb'
   },
   text: {
     primary: '#111827',
-    secondary: '#4b5563'
+    secondary: '#4b5563',
+    disabled: '#9ca3af',
+    hint: '#d1d5db'
   },
-  divider: '#d1d5db'
+  divider: '#d1d5db',
+  border: '#d1d5db',
+  chart: {
+    series: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+    categorical: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+    sequential: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5'],
+    diverging: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5'],
+    qualitative: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628']
+  },
+  grey: {
+    50: '#f8fafc',
+    100: '#f1f5f9',
+    200: '#e2e8f0',
+    300: '#cbd5e1',
+    400: '#94a3b8',
+    500: '#64748b',
+    600: '#475569',
+    700: '#334155',
+    800: '#1e293b',
+    900: '#0f172a',
+    950: '#020617'
+  },
+  blue: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+    950: '#172554'
+  },
+  green: {
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    200: '#a7f3d0',
+    300: '#6ee7b7',
+    400: '#34d399',
+    500: '#10b981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065f46',
+    900: '#064e3b',
+    950: '#022c22'
+  },
+  red: {
+    50: '#fef2f2',
+    100: '#fee2e2',
+    200: '#fecaca',
+    300: '#fca5a5',
+    400: '#f87171',
+    500: '#ef4444',
+    600: '#dc2626',
+    700: '#b91c1c',
+    800: '#991b1b',
+    900: '#7f1d1d',
+    950: '#450a0a'
+  },
+  yellow: {
+    50: '#fffbeb',
+    100: '#fef3c7',
+    200: '#fde68a',
+    300: '#fcd34d',
+    400: '#fbbf24',
+    500: '#f59e0b',
+    600: '#d97706',
+    700: '#b45309',
+    800: '#92400e',
+    900: '#78350f',
+    950: '#451a03'
+  },
+  purple: {
+    50: '#faf5ff',
+    100: '#f3e8ff',
+    200: '#e9d5ff',
+    300: '#d8b4fe',
+    400: '#c084fc',
+    500: '#a855f7',
+    600: '#9333ea',
+    700: '#7c3aed',
+    800: '#6b21a8',
+    900: '#581c87',
+    950: '#3b0764'
+  },
+  cyan: {
+    50: '#ecfeff',
+    100: '#cffafe',
+    200: '#a5f3fc',
+    300: '#67e8f9',
+    400: '#22d3ee',
+    500: '#06b6d4',
+    600: '#0891b2',
+    700: '#0e7490',
+    800: '#155e75',
+    900: '#164e63',
+    950: '#083344'
+  },
+  pink: {
+    50: '#fdf2f8',
+    100: '#fce7f3',
+    200: '#fbcfe8',
+    300: '#f9a8d4',
+    400: '#f472b6',
+    500: '#ec4899',
+    600: '#db2777',
+    700: '#be185d',
+    800: '#9d174d',
+    900: '#831843',
+    950: '#500724'
+  }
 };
 
 const corporateThemeConfig: ThemeCoreConfig = {
@@ -259,42 +637,168 @@ const minimalColors: ColorPalette = {
   primary: {
     light: '#6b7280',
     main: '#374151',
-    dark: '#1f2937'
+    dark: '#1f2937',
+    contrastText: '#ffffff'
   },
   secondary: {
     light: '#9ca3af',
     main: '#6b7280',
-    dark: '#4b5563'
+    dark: '#4b5563',
+    contrastText: '#ffffff'
   },
   success: {
     light: '#86efac',
     main: '#10b981',
-    dark: '#059669'
+    dark: '#059669',
+    contrastText: '#ffffff'
   },
   warning: {
     light: '#fbbf24',
     main: '#f59e0b',
-    dark: '#d97706'
+    dark: '#d97706',
+    contrastText: '#000000'
   },
   error: {
     light: '#f87171',
     main: '#ef4444',
-    dark: '#dc2626'
+    dark: '#dc2626',
+    contrastText: '#ffffff'
   },
   info: {
     light: '#67e8f9',
     main: '#06b6d4',
-    dark: '#0891b2'
+    dark: '#0891b2',
+    contrastText: '#ffffff'
   },
   background: {
     default: '#ffffff',
-    paper: '#ffffff'
+    paper: '#ffffff',
+    level1: '#fafafa',
+    level2: '#f5f5f5'
+  },
+  surface: {
+    default: '#ffffff',
+    variant: '#fafafa'
   },
   text: {
     primary: '#111827',
-    secondary: '#6b7280'
+    secondary: '#6b7280',
+    disabled: '#9ca3af',
+    hint: '#d1d5db'
   },
-  divider: '#e5e7eb'
+  divider: '#e5e7eb',
+  border: '#d1d5db',
+  chart: {
+    series: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+    categorical: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2'],
+    sequential: ['#f7fbff', '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5'],
+    diverging: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#e6f598', '#abdda4', '#66c2a5'],
+    qualitative: ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#ffff33', '#a65628']
+  },
+  grey: {
+    50: '#f8fafc',
+    100: '#f1f5f9',
+    200: '#e2e8f0',
+    300: '#cbd5e1',
+    400: '#94a3b8',
+    500: '#64748b',
+    600: '#475569',
+    700: '#334155',
+    800: '#1e293b',
+    900: '#0f172a',
+    950: '#020617'
+  },
+  blue: {
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6',
+    600: '#2563eb',
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
+    950: '#172554'
+  },
+  green: {
+    50: '#ecfdf5',
+    100: '#d1fae5',
+    200: '#a7f3d0',
+    300: '#6ee7b7',
+    400: '#34d399',
+    500: '#10b981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065f46',
+    900: '#064e3b',
+    950: '#022c22'
+  },
+  red: {
+    50: '#fef2f2',
+    100: '#fee2e2',
+    200: '#fecaca',
+    300: '#fca5a5',
+    400: '#f87171',
+    500: '#ef4444',
+    600: '#dc2626',
+    700: '#b91c1c',
+    800: '#991b1b',
+    900: '#7f1d1d',
+    950: '#450a0a'
+  },
+  yellow: {
+    50: '#fffbeb',
+    100: '#fef3c7',
+    200: '#fde68a',
+    300: '#fcd34d',
+    400: '#fbbf24',
+    500: '#f59e0b',
+    600: '#d97706',
+    700: '#b45309',
+    800: '#92400e',
+    900: '#78350f',
+    950: '#451a03'
+  },
+  purple: {
+    50: '#faf5ff',
+    100: '#f3e8ff',
+    200: '#e9d5ff',
+    300: '#d8b4fe',
+    400: '#c084fc',
+    500: '#a855f7',
+    600: '#9333ea',
+    700: '#7c3aed',
+    800: '#6b21a8',
+    900: '#581c87',
+    950: '#3b0764'
+  },
+  cyan: {
+    50: '#ecfeff',
+    100: '#cffafe',
+    200: '#a5f3fc',
+    300: '#67e8f9',
+    400: '#22d3ee',
+    500: '#06b6d4',
+    600: '#0891b2',
+    700: '#0e7490',
+    800: '#155e75',
+    900: '#164e63',
+    950: '#083344'
+  },
+  pink: {
+    50: '#fdf2f8',
+    100: '#fce7f3',
+    200: '#fbcfe8',
+    300: '#f9a8d4',
+    400: '#f472b6',
+    500: '#ec4899',
+    600: '#db2777',
+    700: '#be185d',
+    800: '#9d174d',
+    900: '#831843',
+    950: '#500724'
+  }
 };
 
 const minimalThemeConfig: ThemeCoreConfig = {
@@ -343,9 +847,12 @@ defaultTheme.addVariant({
       ...defaultColors,
       text: {
         primary: '#000000',
-        secondary: '#333333'
+        secondary: '#333333',
+        disabled: '#666666',
+        hint: '#999999'
       },
-      divider: '#000000'
+      divider: '#000000',
+      border: '#000000'
     }
   }
 });
@@ -358,7 +865,13 @@ darkTheme.addVariant({
       ...darkColors,
       background: {
         default: '#000000',
-        paper: '#000000'
+        paper: '#000000',
+        level1: '#0a0a0a',
+        level2: '#141414'
+      },
+      surface: {
+        default: '#000000',
+        variant: '#0a0a0a'
       }
     }
   }
@@ -373,7 +886,8 @@ corporateTheme.addVariant({
       primary: {
         light: '#60a5fa',
         main: '#2563eb',
-        dark: '#1d4ed8'
+        dark: '#1d4ed8',
+        contrastText: '#ffffff'
       }
     }
   }
