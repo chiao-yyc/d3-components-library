@@ -370,7 +370,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     const pieData = pie(this.pieProcessedData);
 
     // 更新處理後的數據的角度信息
-    pieData.forEach((d, i) => {
+    pieData.forEach((d, _i) => {
       if (this.pieProcessedData[d.index]) {
         this.pieProcessedData[d.index].startAngle = d.startAngle;
         this.pieProcessedData[d.index].endAngle = d.endAngle;
@@ -382,7 +382,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .data(pieData)
       .join('path')
       .attr('class', 'pie-segment')
-      .attr('data-testid', (d, i) => `pie-slice-${i}`) // 添加測試 ID
+      .attr('data-testid', (_d, i) => `pie-slice-${i}`) // 添加測試 ID
       .attr('d', d => arc(d as any))
       .attr('fill', (d: any) => d.data.color)
       .attr('stroke', config.strokeColor || 'white')
@@ -439,7 +439,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
           }
         }
       })
-      .on('mouseleave', (event, d: any) => {
+      .on('mouseleave', (event, _d: any) => {
         // 重置效果
         d3.select(event.target)
           .transition()
@@ -485,7 +485,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     const labelConfig = config.labels!;
     const pieData = pie(this.pieProcessedData);
 
-    const labels = this.pieGroup
+    this.pieGroup
       .selectAll<SVGTextElement, d3.PieArcDatum<ProcessedPieDataPoint>>('.pie-label')
       .data(pieData)
       .join('text')
@@ -572,7 +572,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       .data(this.pieProcessedData)
       .join('g')
       .attr('class', 'legend-item')
-      .attr('transform', (d, i) => `translate(0, ${i * (itemHeight + spacing)})`)
+      .attr('transform', (_d, i) => `translate(0, ${i * (itemHeight + spacing)})`)
       .style('cursor', 'pointer');
 
     // 顏色方塊
@@ -603,7 +603,7 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
         d3.select(event.currentTarget).attr('opacity', 0.7);
         config.onLegendHover?.(d, event);
       })
-      .on('mouseleave', (event, d: any) => {
+      .on('mouseleave', (event, _d: any) => {
         d3.select(event.currentTarget).attr('opacity', 1);
         config.onLegendHover?.(null, event);
       });
@@ -615,25 +615,25 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     this.renderChart();
   }
 
-  // 創建默認 Tooltip 內容
-  private createDefaultTooltipContent(data: ProcessedPieDataPoint): TooltipContent {
-    return {
-      title: data.label,
-      items: [
-        {
-          label: 'Value',
-          value: data.value,
-          color: data.color,
-          format: (value: number) => value.toLocaleString()
-        },
-        {
-          label: 'Percentage',
-          value: data.percentage,
-          format: (value: number) => `${value.toFixed(1)}%`
-        }
-      ]
-    };
-  }
+  // 創建默認 Tooltip 內容 (暂时未使用，但保留供将来使用)
+  // private _createDefaultTooltipContent(data: ProcessedPieDataPoint): TooltipContent {
+  //   return {
+  //     title: data.label,
+  //     items: [
+  //       {
+  //         label: 'Value',
+  //         value: data.value,
+  //         color: data.color,
+  //         format: (value: number) => value.toLocaleString()
+  //       },
+  //       {
+  //         label: 'Percentage',
+  //         value: data.percentage,
+  //         format: (value: number) => `${value.toFixed(1)}%`
+  //       }
+  //     ]
+  //   };
+  // }
 
   // 公共方法：獲取當前數據
   public getCurrentData(): ProcessedPieDataPoint[] {

@@ -6,12 +6,7 @@
 import React from 'react';
 import './pie-chart.css';
 import {
-  PieChart,
   DonutChart as DonutChartComponent,
-  PieChartWithLegend,
-  HalfPieChart,
-  PieChartNoLabels,
-  PieChartSorted
 } from './pie-chart';
 
 // 主要組件 (統一架構)
