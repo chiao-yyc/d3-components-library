@@ -1,17 +1,5 @@
 import * as d3 from 'd3';
-
-// Use local interface to avoid circular dependencies
-interface TreeMapNode extends d3.HierarchyRectangularNode<any> {
-  x0: number;
-  y0: number;
-  x1: number;
-  y1: number;
-  depth: number;
-  parent: TreeMapNode | null;
-  children?: TreeMapNode[];
-  data: any;
-  value?: number;
-}
+import { TreeMapNode } from '../tree-map/types';
 
 export interface LabelRenderOptions {
   showName?: boolean;
