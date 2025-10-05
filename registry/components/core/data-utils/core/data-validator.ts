@@ -124,7 +124,7 @@ export function createSafeAccessor<T extends BaseChartData, R>(
   chartType: string = 'chart'
 ): DataAccessor<T, R> {
   if (typeof keyOrAccessor === 'function') {
-    return (datum, index, data) => {
+    return (datum: any, index: any, data: any) => {
       try {
         return keyOrAccessor(datum as T, index, data as T[]);
       } catch (error) {
@@ -135,7 +135,7 @@ export function createSafeAccessor<T extends BaseChartData, R>(
   }
 
   // 字符串或數字鍵
-  return (datum) => {
+  return (datum: any) => {
     try {
       const value = (datum as any)[keyOrAccessor];
       return value !== undefined && value !== null ? value as R : defaultValue;
@@ -161,14 +161,14 @@ export function extractFieldValues<T extends BaseChartData, R>(
   const { filterNull = true, unique = false, sort = false } = options;
   const accessor = createSafeAccessor(keyOrAccessor, null as any, 'data-extraction');
 
-  let values = data.map(accessor);
+  let values = data.map(accessor) as R[];
 
   if (filterNull) {
-    values = values.filter(v => v !== null && v !== undefined);
+    values = values.filter(v => v !== null && v !== undefined) as R[];
   }
 
   if (unique) {
-    values = Array.from(new Set(values));
+    values = Array.from(new Set(values)) as R[];
   }
 
   if (sort && values.length > 0) {
@@ -280,12 +280,12 @@ export function calculateCategoricalDomain<T extends BaseChartData>(
   } = {}
 ): string[] {
   const { sort = false, maxCategories } = options;
-  
-  const categories = extractFieldValues(data, accessor, { 
-    filterNull: true, 
-    unique: true, 
-    sort 
-  });
+
+  const categories = extractFieldValues(data, accessor, {
+    filterNull: true,
+    unique: true,
+    sort
+  }) as string[];
 
   if (maxCategories && categories.length > maxCategories) {
     console.warn(`Too many categories (${categories.length}), truncating to ${maxCategories}`);

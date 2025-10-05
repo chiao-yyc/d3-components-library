@@ -106,7 +106,8 @@ export {
 } from 'd3-axis';
 
 export type {
-  Axis
+  Axis,
+  AxisDomain
 } from 'd3-axis';
 
 // === 動畫和過渡 ===
@@ -268,32 +269,35 @@ export {
 // === 便利方法和工具函數 ===
 
 // Import D3 functions for internal use in utility functions
-import { 
-  scaleLinear as scaleLinearFn, 
-  scaleBand as scaleBandFn, 
-  scaleTime as scaleTimeFn, 
-  scaleOrdinal as scaleOrdinalFn 
+import {
+  scaleLinear as scaleLinearFn,
+  scaleBand as scaleBandFn,
+  scaleTime as scaleTimeFn,
+  scaleOrdinal as scaleOrdinalFn
 } from 'd3-scale';
-import { 
+import {
   extent as extentFn,
-  group as groupFn, 
-  rollup as rollupFn 
+  group as groupFn,
+  rollup as rollupFn
 } from 'd3-array';
 import { interpolate as interpolateFn } from 'd3-interpolate';
 import { easeCubicInOut } from 'd3-ease';
+import { select as d3Select, type Selection as D3Selection, type BaseType as D3BaseType } from 'd3-selection';
+import { type Transition as D3Transition } from 'd3-transition';
+import { type Axis as D3Axis } from 'd3-axis';
 
 /**
  * 創建安全的 D3 選擇器
  */
-export function safeSelect<T extends BaseType>(selector: string | T): Selection<T, unknown, null, undefined> {
+export function safeSelect<T extends D3BaseType>(selector: string | T): D3Selection<T, unknown, null, undefined> {
   if (typeof selector === 'string') {
     const element = document.querySelector(selector);
     if (!element) {
       throw new Error(`Element not found: ${selector}`);
     }
-    return select(element as T);
+    return d3Select(element as T) as D3Selection<T, unknown, null, undefined>;
   }
-  return select(selector);
+  return d3Select(selector) as D3Selection<T, unknown, null, undefined>;
 }
 
 /**
@@ -434,18 +438,18 @@ export function safeColorInterpolate(colorA: string, colorB: string, t: number):
 /**
  * 智能軸線配置
  */
-export function configureAxis(
-  axis: Axis<any>,
+export function configureAxis<Domain extends number | Date | { valueOf(): number }>(
+  axis: D3Axis<Domain>,
   scale: any,
   options: {
     ticks?: number;
-    tickFormat?: (d: any) => string;
+    tickFormat?: (d: Domain) => string;
     tickSize?: number;
     tickSizeInner?: number;
     tickSizeOuter?: number;
     tickPadding?: number;
   } = {}
-) {
+): D3Axis<Domain> {
   const {
     ticks = 5,
     tickFormat,
@@ -485,7 +489,7 @@ export function configureAxis(
 /**
  * 動畫優化工具
  */
-export function createOptimizedTransition(selection: Selection<any, any, any, any>, duration = 300) {
+export function createOptimizedTransition(selection: D3Selection<any, any, any, any>, duration = 300): D3Transition<any, any, any, any> {
   return selection
     .transition()
     .duration(duration)
@@ -495,12 +499,12 @@ export function createOptimizedTransition(selection: Selection<any, any, any, an
 /**
  * 資料綁定簡化工具
  */
-export function bindData<TElement extends BaseType, TData>(
-  selection: Selection<TElement, any, any, any>,
+export function bindData<TElement extends D3BaseType, TData>(
+  selection: D3Selection<TElement, any, any, any>,
   data: TData[],
   keyFunction?: (d: TData, i: number) => string
-) {
-  return keyFunction 
-    ? selection.data(data, keyFunction)
-    : selection.data(data);
+): D3Selection<TElement, TData, any, any> {
+  return keyFunction
+    ? selection.data(data, keyFunction) as D3Selection<TElement, TData, any, any>
+    : selection.data(data) as D3Selection<TElement, TData, any, any>;
 }

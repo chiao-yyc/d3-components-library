@@ -28,10 +28,10 @@ export class ColorCore {
 
     switch (type) {
       case 'category10':
-        colors = d3.schemeCategory10;
+        colors = [...d3.schemeCategory10];
         break;
       case 'set3':
-        colors = d3.schemeSet3;
+        colors = [...d3.schemeSet3];
         break;
       case 'pastel':
         colors = ['#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF'];
@@ -40,10 +40,10 @@ export class ColorCore {
         colors = ['#2C3E50', '#34495E', '#7F8C8D', '#95A5A6', '#BDC3C7'];
         break;
       case 'custom':
-        colors = customColors || d3.schemeCategory10;
+        colors = customColors || [...d3.schemeCategory10];
         break;
       default:
-        colors = d3.schemeCategory10;
+        colors = [...d3.schemeCategory10];
     }
 
     const scale = d3.scaleOrdinal<string, string>().range(colors);

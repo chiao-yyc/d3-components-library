@@ -1,9 +1,11 @@
 import * as d3 from 'd3'
 
+export type EasingFunction = (normalizedTime: number) => number
+
 export interface AnimationConfig {
   duration?: number
   delay?: number
-  ease?: d3.EasingFunction
+  ease?: EasingFunction
 }
 
 export interface HighlightAnimationConfig extends AnimationConfig {
