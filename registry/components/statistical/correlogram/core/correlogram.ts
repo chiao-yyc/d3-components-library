@@ -1,12 +1,12 @@
 import * as d3 from 'd3';
 import { BaseChart } from '../../../core/base-chart/base-chart';
-import { DataProcessor } from '../../../core/data-processor/data-processor';
-import { createColorScale } from '../../../core/color-scheme/color-manager';
-import { 
-  ProcessedCorrelogramDataPoint, 
-  CorrelogramProps, 
+// import { DataProcessor } from '../../../core/data-processor/data-processor';
+// import { createColorScale } from '../../../core/color-scheme/color-manager';
+import {
+  ProcessedCorrelogramDataPoint,
+  CorrelogramProps,
   CorrelogramScales,
-  CorrelogramMatrix 
+  // CorrelogramMatrix
 } from './types';
 
 export class D3Correlogram extends BaseChart<CorrelogramProps> {
@@ -21,17 +21,17 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
   }
 
   protected processData(): ProcessedCorrelogramDataPoint[] {
-    const { 
-      data, 
-      correlationMatrix, 
-      variables, 
-      mapping, 
-      xKey, 
-      yKey, 
-      valueKey,
-      xAccessor, 
-      yAccessor, 
-      valueAccessor,
+    const {
+      data,
+      correlationMatrix,
+      variables,
+      // mapping,
+      // xKey,
+      // yKey,
+      // valueKey,
+      // xAccessor,
+      // yAccessor,
+      // valueAccessor,
       threshold = 0
     } = this.props;
 
@@ -59,7 +59,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
   private processMatrixData(matrix: number[][], variables: string[], threshold: number): ProcessedCorrelogramDataPoint[] {
     this.variables = [...variables];
     const data: ProcessedCorrelogramDataPoint[] = [];
-    const extent = d3.extent(matrix.flat()) as [number, number];
+    // const extent = d3.extent(matrix.flat()) as [number, number];
 
 
     matrix.forEach((row, yIndex) => {
@@ -221,7 +221,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
       showUpperTriangle = true,
       showLowerTriangle = true,
       showDiagonal = true,
-      showValues = true,
+      // showValues = true,
       valueFormat,
       textColor,
       fontSize = '11px',
@@ -297,7 +297,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
           .attr('opacity', 0)
           .transition()
           .duration(animationDuration)
-          .delay((d, i) => i * 20)
+          .delay((_d, i) => i * 20)
           .attr('opacity', 1);
       }
     }
@@ -317,7 +317,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
           .attr('r', 0)
           .transition()
           .duration(animationDuration)
-          .delay((d, i) => i * 20)
+          .delay((_d, i) => i * 20)
           .attr('r', d => sizeScale(d.normalizedValue));
       }
     }
@@ -376,7 +376,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
   }
 
   private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string): void {
-    const { chartWidth, chartHeight, width: containerWidth, height: containerHeight, margin } = this.getChartDimensions();
+    const { chartWidth, chartHeight, margin } = this.getChartDimensions();
     
     // 計算實際可用空間 - 使用 margin 空間
     const rightSpaceInContainer = margin.right;
