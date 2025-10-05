@@ -388,7 +388,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
         .transition()
         .duration(animationDuration)
         .delay((_d, i) => (config.animationDelay || 0) + i * 50)
-        .attr('opacity', typeof opacity === 'function' ? opacity : opacity);
+        .attr('opacity', opacity as any);
     }
 
     // 添加縮放功能
@@ -544,10 +544,10 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
 
     nodes
       .style('cursor', 'pointer')
-      .on('click', (event: MouseEvent, d: TreeMapDataPoint) => {
+      .on('click', (event: any, d: any) => {
         config.onDataClick?.(d, event);
       })
-      .on('mouseover', (event: MouseEvent, d: TreeMapDataPoint) => {
+      .on('mouseover', (event: any, d: any) => {
         // 添加懸停效果
         d3.select(event.currentTarget as SVGGElement)
           .select('rect')
@@ -564,11 +564,11 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
           this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
         }
       })
-      .on('mouseout', (event: MouseEvent, _d: TreeMapDataPoint) => {
+      .on('mouseout', (event: any, _d: any) => {
         // 移除懸停效果
         d3.select(event.currentTarget as SVGGElement)
           .select('rect')
-          .style('filter', null);
+          .style('filter', 'none');
 
         config.onDataHover?.(null, event);
         this.hideTooltip();

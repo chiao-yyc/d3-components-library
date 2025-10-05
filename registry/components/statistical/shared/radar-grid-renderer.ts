@@ -169,7 +169,7 @@ export class RadarGridRenderer {
         .attr('stroke', stroke)
         .attr('stroke-width', strokeWidth)
         .attr('opacity', opacity)
-        .style('filter', glowEffect ? 'url(#glow)' : null);
+        .style('filter', glowEffect ? 'url(#glow)' : 'none');
     }
   }
 
@@ -205,7 +205,7 @@ export class RadarGridRenderer {
         .attr('stroke', stroke)
         .attr('stroke-width', strokeWidth)
         .attr('opacity', opacity)
-        .style('filter', glowEffect ? 'url(#glow)' : null);
+        .style('filter', glowEffect ? 'url(#glow)' : 'none');
     });
   }
 

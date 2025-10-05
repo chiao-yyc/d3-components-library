@@ -316,8 +316,8 @@ export class TreeMapRenderer {
       .attr('y', d => d.y0)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
-      .on('start', onStart)
-      .on('end', onEnd);
+      .on('start', onStart as any)
+      .on('end', onEnd as any);
   }
 
   /**

@@ -357,16 +357,16 @@ export class BarCore extends BaseChartCore<BarCoreData> {
     if (!config.interactive) return;
 
     svg.selectAll('.bar-shape')
-      .on('click', (event, d: BarCoreData) => {
+      .on('click', (event, d: any) => {
         // const _index = this.getProcessedData()!.indexOf(d);
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.value}`);
       })
-      .on('mouseenter', (event, _d: BarCoreData) => {
+      .on('mouseenter', (event, _d: any) => {
         if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', 0.8);
         }
       })
-      .on('mouseleave', (event, _d: BarCoreData) => {
+      .on('mouseleave', (event, _d: any) => {
         if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', config.opacity || 1);
         }
