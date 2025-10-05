@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { suggestFieldMapping, detectColumnType } from '../../utils/data-detector'
 import { DataMapperProps, DataMapping, FieldInfo } from './types'

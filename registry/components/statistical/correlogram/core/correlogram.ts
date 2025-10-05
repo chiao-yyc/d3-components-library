@@ -371,11 +371,11 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
 
     // 渲染圖例
     if (showLegend) {
-      this.renderLegend(g, legendPosition, legendTitle);
+      this.renderCorrelogramLegend(g, legendPosition, legendTitle);
     }
   }
 
-  private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string): void {
+  private renderCorrelogramLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string): void {
     const { chartWidth, chartHeight, margin } = this.getChartDimensions();
     
     // 計算實際可用空間 - 使用 margin 空間

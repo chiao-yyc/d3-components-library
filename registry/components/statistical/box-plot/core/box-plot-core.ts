@@ -82,7 +82,6 @@ export interface BoxPlotCoreConfig extends BaseChartCoreConfig<BoxPlotData> {
 
 // 主要的 BoxPlot 核心類
 export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
-  private processedData: ProcessedBoxPlotDataPoint[] = [];
   private colorScale: ColorScale | null = null;
   private chartGroup: D3Selection | null = null;
   private xScale: d3.ScaleBand<string> | null = null;
@@ -100,12 +99,12 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     const { data, labelAccessor, valueAccessor, valuesAccessor, statisticsMethod } = config;
 
     if (!data || data.length === 0) {
-      this.processedData = [];
+      this.processedData = [] as any;
       return [];
     }
 
     // 處理數據點 - 使用統一的數據存取模式
-    this.processedData = data.map((item, index) => {
+    const processedData: ProcessedBoxPlotDataPoint[] = data.map((item, index) => {
       // 處理 Label 值
       let label: string;
       if (typeof labelAccessor === 'function') {
@@ -117,7 +116,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
       }
 
       // 處理 Values 數組
-      let values: number[];
+      let values: number[] = [];
       if (valuesAccessor) {
         if (typeof valuesAccessor === 'function') {
           values = valuesAccessor(item, index, data) || [];
@@ -152,20 +151,23 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
       };
     });
 
+    this.processedData = processedData as any;
+
     // 創建顏色比例尺
     if (config.colors) {
       this.colorScale = createColorScale({
         type: 'custom',
         colors: config.colors,
-        domain: [0, Math.max(1, this.processedData.length - 1)]
+        domain: [0, Math.max(1, processedData.length - 1)]
       });
     }
 
-    return this.processedData;
+    return processedData as any;
   }
 
   protected createScales(): Record<string, any> {
-    if (this.processedData.length === 0) return {};
+    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+    if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as BoxPlotCoreConfig;
     const { chartWidth, chartHeight } = this.getChartDimensions();
@@ -174,13 +176,13 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
       // 水平方向：Y軸為類別，X軸為數值
       this.xScale = null; // 數值軸將在渲染時創建
       this.yScale = d3.scaleBand()
-        .domain(this.processedData.map(d => d.label))
+        .domain(processedData.map(d => d.label))
         .range([0, chartHeight])
         .padding(0.2) as any;
     } else {
       // 垂直方向（默認）：X軸為類別，Y軸為數值
       this.xScale = d3.scaleBand()
-        .domain(this.processedData.map(d => d.label))
+        .domain(processedData.map(d => d.label))
         .range([0, chartWidth])
         .padding(0.2);
       this.yScale = null; // 數值軸將在渲染時創建
@@ -197,8 +199,9 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
-    if (!this.processedData || this.processedData.length === 0) {
-      this.chartGroup.selectAll('*').remove();
+    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+    if (!processedData || processedData.length === 0) {
+      this.chartGroup?.selectAll('*').remove();
       return;
     }
 
@@ -206,7 +209,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     const { chartWidth, chartHeight } = this.getChartDimensions();
 
     // 創建數值比例尺
-    const allValues = this.processedData.flatMap(d => d.values);
+    const allValues = processedData.flatMap(d => d.values);
     const valueExtent = d3.extent(allValues) as [number, number];
     
     let xScale: any, yScale: any;
@@ -227,7 +230,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     }
 
     // 使用 BoxPlotRenderer 渲染盒鬚圖
-    this.renderBoxPlotsWithRenderer(xScale, yScale);
+    this.renderBoxPlotsWithRenderer(xScale, yScale, processedData);
 
     // 使用統一軸線系統渲染軸線
     this.renderUnifiedAxes(xScale, yScale);
@@ -235,14 +238,15 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
 
   private renderBoxPlotsWithRenderer(
     xScale: d3.ScaleBand<string> | d3.ScaleLinear<number, number>,
-    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>
+    yScale: d3.ScaleLinear<number, number> | d3.ScaleBand<string>,
+    processedData: ProcessedBoxPlotDataPoint[]
   ): void {
     if (!this.chartGroup) return;
 
     const config = this.config as BoxPlotCoreConfig;
-    
+
     // 使用 BoxPlotRenderer.renderStandalone 方法
-    BoxPlotRenderer.renderStandalone(this.chartGroup as any, this.processedData, {
+    BoxPlotRenderer.renderStandalone(this.chartGroup as any, processedData, {
       xScale,
       yScale,
       colorScale: this.colorScale,
@@ -272,20 +276,21 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     if (!this.chartGroup) return;
 
     const config = this.config as BoxPlotCoreConfig;
-    
+    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+
     // 為每個 box plot 組添加事件
     this.chartGroup.selectAll('[class*="box-plot-group-"]')
       .style('cursor', 'pointer')
       .on('click', (event, _d) => {
         const index = parseInt(event.currentTarget.className.baseVal.split('-').pop());
-        const dataPoint = this.processedData[index];
+        const dataPoint = processedData[index];
         if (dataPoint) {
           config.onDataClick?.(dataPoint, event);
         }
       })
       .on('mouseenter', (event, _d) => {
         const index = parseInt(event.currentTarget.className.baseVal.split('-').pop());
-        const dataPoint = this.processedData[index];
+        const dataPoint = processedData[index];
         if (dataPoint) {
           config.onDataHover?.(dataPoint, event);
         }
@@ -328,7 +333,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
   }
 
   // 公共方法：獲取處理後的數據
-  public getProcessedData(): ProcessedBoxPlotDataPoint[] {
-    return this.processedData;
+  public override getProcessedData(): ChartData<BoxPlotData>[] | null {
+    return this.processedData as any;
   }
 }

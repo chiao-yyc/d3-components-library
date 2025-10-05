@@ -198,7 +198,7 @@ export interface TreeMapTooltipData {
 // 動畫類型
 export interface TreeMapAnimationConfig {
   duration: number;
-  ease: d3.EasingFunction;
+  ease: (t: number) => number;
   delay?: (d: TreeMapNode, i: number) => number;
   onStart?: (d: TreeMapNode) => void;
   onEnd?: (d: TreeMapNode) => void;

@@ -55,7 +55,7 @@ export interface GradientOptions {
 export interface AnimationOptions {
   duration?: number;
   delay?: (d: TreeMapNode, i: number) => number;
-  ease?: d3.EasingFunction;
+  ease?: (t: number) => number;
   onStart?: (d: TreeMapNode) => void;
   onEnd?: (d: TreeMapNode) => void;
 }
