@@ -460,13 +460,15 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
           .style('stroke-width', '2px');
 
         config.onDataHover?.(d, event);
-        
+
         // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
-        const containerRect = this.containerElement.getBoundingClientRect();
-        const tooltipX = event.clientX - containerRect.left;
-        const tooltipY = event.clientY - containerRect.top;
-        
-        this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
+        if (this.containerElement) {
+          const containerRect = this.containerElement.getBoundingClientRect();
+          const tooltipX = event.clientX - containerRect.left;
+          const tooltipY = event.clientY - containerRect.top;
+
+          this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
+        }
       })
       .on('mouseout', (event: MouseEvent, d: HeatmapDataPoint) => {
         // 移除懸停效果

@@ -122,9 +122,9 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   private pieProcessedData: ProcessedPieDataPoint[] = [];
   private segments: PieSegment[] = [];
   private colorScale: ColorScale | null = null;
-  private chartGroup: D3Selection | null = null;
-  private pieGroup: D3Selection | null = null;
-  private legendGroup: D3Selection | null = null;
+  private chartGroup: D3Selection<SVGGElement> | null = null;
+  private pieGroup: D3Selection<SVGGElement> | null = null;
+  private legendGroup: D3Selection<SVGGElement> | null = null;
   private radius: number = 0;
   private centerX: number = 0;
   private centerY: number = 0;
@@ -228,7 +228,8 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
       ...item,
       percentage: totalValue > 0 ? (item.value / totalValue) * 100 : 0,
       startAngle: 0, // 將由 d3.pie 計算
-      endAngle: 0    // 將由 d3.pie 計算
+      endAngle: 0,   // 將由 d3.pie 計算
+      color: item.color || ''
     }));
 
     // 創建顏色比例尺
@@ -560,6 +561,8 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
         legendY = 20;
         break;
     }
+
+    if (!this.legendGroup) return;
 
     this.legendGroup.attr('transform', `translate(${legendX}, ${legendY})`);
 
