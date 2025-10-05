@@ -103,7 +103,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
 
   constructor(
     config: CorrelogramCoreConfig,
-    callbacks: ChartStateCallbacks<CorrelogramData> = {}
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
   }
@@ -125,18 +125,20 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
       if (correlationMatrix && variables) {
         console.log('📊 Processing matrix data:', { matrix: correlationMatrix.length, variables: variables.length });
         this.variables = variables;
-        this.processedData = this.processMatrixData(correlationMatrix, variables, threshold);
-        console.log('✅ Matrix processing complete:', this.processedData.length, 'data points');
-        return this.processedData;
+        const processed = this.processMatrixData(correlationMatrix, variables, threshold);
+        this.processedData = processed as any;
+        console.log('✅ Matrix processing complete:', processed.length, 'data points');
+        return processed as any;
       }
 
       // 情況 2: 提供寬格式資料
       if (data?.length) {
         if (this.isWideFormatData(data)) {
           console.log('📊 Processing wide format data:', data.length, 'rows');
-          this.processedData = this.processWideFormatData(data, threshold);
-          console.log('✅ Wide format processing complete:', this.processedData.length, 'data points');
-          return this.processedData;
+          const processed = this.processWideFormatData(data, threshold);
+          this.processedData = processed as any;
+          console.log('✅ Wide format processing complete:', processed.length, 'data points');
+          return processed as any;
         } else {
           console.warn('⚠️ Invalid data format. Expected matrix or wide format.');
           this.handleError(new Error('資料格式不正確。請使用矩陣格式 (correlationMatrix + variables) 或寬格式資料。'));
@@ -147,9 +149,10 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
       // 情況 3: 長格式資料 (x, y, value)
       if (data?.length && xAccessor && yAccessor && valueAccessor) {
         console.log('📊 Processing long format data:', data.length, 'rows');
-        this.processedData = this.processLongFormatData(data, xAccessor, yAccessor, valueAccessor, threshold);
-        console.log('✅ Long format processing complete:', this.processedData.length, 'data points');
-        return this.processedData;
+        const processed = this.processLongFormatData(data, xAccessor, yAccessor, valueAccessor, threshold);
+        this.processedData = processed as any;
+        console.log('✅ Long format processing complete:', processed.length, 'data points');
+        return processed as any;
       }
 
       console.error('❌ No valid data format provided');
@@ -341,7 +344,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
   }
 
   protected createScales(): Record<string, any> {
-    if (this.processedData.length === 0 || this.variables.length === 0) return {};
+    if (!this.processedData || this.processedData.length === 0 || this.variables.length === 0) return {};
 
     const config = this.config as CorrelogramCoreConfig;
     const { chartWidth, chartHeight } = this.getChartDimensions();
@@ -393,7 +396,8 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
       maxSize = Math.min(this.xScale.bandwidth(), this.yScale.bandwidth()) * 0.9;
     }
     
-    const maxAbsCorr = Math.max(...this.processedData.map(d => d.absCorrelation));
+    const processedData = this.processedData as unknown as ProcessedCorrelogramDataPoint[];
+    const maxAbsCorr = Math.max(...processedData.map(d => d.absCorrelation));
     this.sizeScale = d3.scaleLinear()
       .domain([0, maxAbsCorr])
       .range([minSize, maxSize]);
@@ -401,12 +405,12 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
     console.log('📐 Size scale created:', { minSize, maxSize, maxAbsCorr });
 
     // 設置處理後數據的顏色和尺寸
-    this.processedData.forEach(d => {
+    processedData.forEach(d => {
       d.color = this.colorScale!.getColor(d.correlation);
       d.size = this.sizeScale!(d.absCorrelation);
     });
 
-    console.log('🎨 First data point after styling:', this.processedData[0]);
+    console.log('🎨 First data point after styling:', processedData[0]);
 
     return {
       xScale: this.xScale,
@@ -440,11 +444,13 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
     const animate = config.animate !== false;
     const animationDuration = config.animationDuration || 1000;
 
-    console.log('🎨 Rendering correlations:', { 
-      visualType, 
-      animate, 
+    const processedData = this.processedData as unknown as ProcessedCorrelogramDataPoint[];
+
+    console.log('🎨 Rendering correlations:', {
+      visualType,
+      animate,
       duration: animationDuration,
-      dataCount: this.processedData.length,
+      dataCount: processedData.length,
       hasScales: !!this.xScale && !!this.yScale
     });
 
@@ -453,7 +459,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
       return;
     }
 
-    if (this.processedData.length === 0) {
+    if (processedData.length === 0) {
       console.warn('⚠️ No data to render');
       return;
     }
@@ -461,7 +467,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
     // 創建相關性圖形
     const correlations = chartGroup
       .selectAll('.correlation-cell')
-      .data(this.processedData)
+      .data(processedData)
       .enter()
       .append('g')
       .attr('class', 'correlation-cell')
@@ -700,7 +706,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
 
   // 公共方法：獲取處理後的數據
   public getProcessedData(): ChartData<CorrelogramData>[] {
-    return this.processedData;
+    return this.processedData as unknown as ProcessedCorrelogramDataPoint[];
   }
 
   // 公共方法：獲取變數列表
