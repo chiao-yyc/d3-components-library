@@ -211,7 +211,7 @@ export function VirtualGrid<T = any>({
   itemHeight,
   itemWidth,
   height,
-  _width: __width,
+  width: _width,
   columns,
   renderItem,
   className = '',

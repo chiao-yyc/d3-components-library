@@ -622,7 +622,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
     const x = -(node.x0 * scale - (chartWidth - nodeWidth * scale) / 2);
     const y = -(node.y0 * scale - (chartHeight - nodeHeight * scale) / 2);
 
-    const svg = d3.select(this.container).select('svg');
+    const svg = d3.select(this.containerElement).select('svg');
     svg.transition()
       .duration(750)
       .call(
@@ -634,7 +634,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
   public resetZoom(): void {
     if (!this.zoom) return;
 
-    const svg = d3.select(this.container).select('svg');
+    const svg = d3.select(this.containerElement).select('svg');
     svg.transition()
       .duration(750)
       .call(this.zoom.transform, d3.zoomIdentity);
