@@ -20,7 +20,7 @@ const BarComponent = createReactChartWrapper(BarCore);
 
 // 導出最終組件
 export const Bar = React.forwardRef<BarCore, BarProps>((props, ref) => {
-  return <BarComponent ref={ref} {...props} />;
+  return <BarComponent ref={ref as any} {...props} />;
 });
 
 Bar.displayName = 'Bar';

@@ -17,7 +17,7 @@ const CandlestickChartComponent = createReactChartWrapper(CandlestickChartCore);
 
 // 導出最終組件
 export const CandlestickChart = React.forwardRef<CandlestickChartCore, CandlestickChartProps>((props, ref) => {
-  return <CandlestickChartComponent ref={ref} {...props} />;
+  return <CandlestickChartComponent ref={ref as any} {...props} />;
 });
 
 CandlestickChart.displayName = 'CandlestickChart';

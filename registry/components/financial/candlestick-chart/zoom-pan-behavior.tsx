@@ -22,7 +22,7 @@ export interface ZoomPanBehaviorProps {
 
 export const ZoomPanBehavior: React.FC<ZoomPanBehaviorProps> = ({
   width,
-  height, 
+  height,
   margin,
   xScale,
   yScale,
@@ -35,11 +35,10 @@ export const ZoomPanBehavior: React.FC<ZoomPanBehaviorProps> = ({
   scaleExtent = [0.5, 10],
   translateExtent,
   constrainToData = true,
-  resetOnDoubleClick = true,
-  wheelStep = 0.1
+  resetOnDoubleClick = true
 }) => {
   const zoomRef = useRef<SVGRectElement>(null)
-  const zoomBehaviorRef = useRef<d3.ZoomBehavior<Element, unknown>>()
+  const zoomBehaviorRef = useRef<d3.ZoomBehavior<SVGRectElement, unknown>>()
   const originalXScaleRef = useRef(xScale.copy())
   const originalYScaleRef = useRef(yScale.copy())
 
@@ -186,72 +185,9 @@ export const ZoomPanBehavior: React.FC<ZoomPanBehaviorProps> = ({
     originalYScaleRef.current = yScale.copy()
   }, [xScale, yScale])
 
-  // 程式化縮放控制方法
-  const zoomTo = useCallback((scaleK: number, center?: [number, number]) => {
-    const element = zoomRef.current
-    const zoom = zoomBehaviorRef.current
-    if (!element || !zoom) return
-
-    const selection = d3.select(element)
-    
-    if (center) {
-      selection
-        .transition()
-        .duration(300)
-        .call(zoom.scaleTo, scaleK, center)
-    } else {
-      selection
-        .transition()
-        .duration(300)
-        .call(zoom.scaleTo, scaleK)
-    }
-  }, [])
-
-  const zoomIn = useCallback(() => {
-    const element = zoomRef.current
-    const zoom = zoomBehaviorRef.current
-    if (!element || !zoom) return
-
-    d3.select(element)
-      .transition()
-      .duration(200)
-      .call(zoom.scaleBy, 1 + wheelStep)
-  }, [wheelStep])
-
-  const zoomOut = useCallback(() => {
-    const element = zoomRef.current
-    const zoom = zoomBehaviorRef.current
-    if (!element || !zoom) return
-
-    d3.select(element)
-      .transition()
-      .duration(200)
-      .call(zoom.scaleBy, 1 - wheelStep)
-  }, [wheelStep])
-
-  const resetZoom = useCallback(() => {
-    const element = zoomRef.current
-    const zoom = zoomBehaviorRef.current
-    if (!element || !zoom) return
-
-    d3.select(element)
-      .transition()
-      .duration(300)
-      .call(zoom.transform, d3.zoomIdentity)
-  }, [])
-
-  // 暴露控制方法給父組件
-  React.useImperativeHandle(
-    React.useRef(),
-    () => ({
-      zoomTo,
-      zoomIn,
-      zoomOut,
-      resetZoom,
-      getCurrentTransform: () => d3.zoomTransform(zoomRef.current!)
-    }),
-    [zoomTo, zoomIn, zoomOut, resetZoom]
-  )
+  // Note: Programmatic zoom control methods removed as they were unused
+  // If you need to expose zoom controls, add a ref prop to ZoomPanBehaviorProps
+  // and implement useImperativeHandle with methods like zoomTo, zoomIn, zoomOut, resetZoom
 
   if (!enabled) return null
 
@@ -288,15 +224,6 @@ export const ZoomPanBehavior: React.FC<ZoomPanBehaviorProps> = ({
       )}
     </g>
   )
-}
-
-// 導出控制接口
-export interface ZoomPanControls {
-  zoomTo: (scaleK: number, center?: [number, number]) => void
-  zoomIn: () => void
-  zoomOut: () => void  
-  resetZoom: () => void
-  getCurrentTransform: () => d3.ZoomTransform
 }
 
 export default ZoomPanBehavior

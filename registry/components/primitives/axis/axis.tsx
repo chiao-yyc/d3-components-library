@@ -49,16 +49,16 @@ export const Axis: React.FC<AxisProps> = ({
 
     switch (orientation) {
       case 'top':
-        axisGenerator = d3.axisTop(scale)
+        axisGenerator = d3.axisTop(scale as any)
         break
       case 'bottom':
-        axisGenerator = d3.axisBottom(scale)
+        axisGenerator = d3.axisBottom(scale as any)
         break
       case 'left':
-        axisGenerator = d3.axisLeft(scale)
+        axisGenerator = d3.axisLeft(scale as any)
         break
       case 'right':
-        axisGenerator = d3.axisRight(scale)
+        axisGenerator = d3.axisRight(scale as any)
         break
     }
 
@@ -117,23 +117,25 @@ export const Axis: React.FC<AxisProps> = ({
         const gridGroup = selection.append('g').attr('class', `grid-lines ${gridlinesClassName}`)
         
         if (orientation === 'bottom' || orientation === 'top') {
+          const tickData = 'ticks' in scale && typeof scale.ticks === 'function' ? scale.ticks() : scale.domain()
           gridGroup
             .selectAll('line')
-            .data(scale.ticks ? scale.ticks() : scale.domain())
+            .data(tickData as any)
             .join('line')
-            .attr('x1', (d: any) => scale(d))
-            .attr('x2', (d: any) => scale(d))
+            .attr('x1', (d: any) => scale(d) as number)
+            .attr('x2', (d: any) => scale(d) as number)
             .attr('y1', 0)
             .attr('y2', orientation === 'bottom' ? -contentArea.height : contentArea.height)
         } else {
+          const tickData = 'ticks' in scale && typeof scale.ticks === 'function' ? scale.ticks() : scale.domain()
           gridGroup
             .selectAll('line')
-            .data(scale.ticks ? scale.ticks() : scale.domain())
+            .data(tickData as any)
             .join('line')
             .attr('x1', 0)
             .attr('x2', orientation === 'left' ? contentArea.width : -contentArea.width)
-            .attr('y1', (d: any) => scale(d))
-            .attr('y2', (d: any) => scale(d))
+            .attr('y1', (d: any) => scale(d) as number)
+            .attr('y2', (d: any) => scale(d) as number)
         }
       }
     }
