@@ -9,7 +9,7 @@ import { HeatmapCore, HeatmapCoreConfig } from './core/heatmap-core';
 import './heatmap.css';
 
 // 擴展 React props 接口
-export interface HeatmapProps extends ReactChartWrapperProps, HeatmapCoreConfig {
+export interface HeatmapProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, HeatmapCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
   
   // 添加對舊版 mapping 的支援

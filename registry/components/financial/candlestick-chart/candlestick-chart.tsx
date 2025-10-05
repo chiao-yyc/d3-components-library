@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { CandlestickChartCore, CandlestickChartCoreConfig } from './core/candlestick-chart-core';
 
 // 擴展 React props 接口
-export interface CandlestickChartProps extends ReactChartWrapperProps, CandlestickChartCoreConfig {
+export interface CandlestickChartProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, CandlestickChartCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 
