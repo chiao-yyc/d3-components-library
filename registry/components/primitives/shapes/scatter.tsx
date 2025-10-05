@@ -16,7 +16,7 @@ export interface ScatterProps extends Omit<ReactChartWrapperProps, 'data' | 'gro
 export type ScatterShapeData = ScatterCoreData;
 
 // 創建 Scatter 組件
-const ScatterComponent = createReactChartWrapper(ScatterCore);
+const ScatterComponent = createReactChartWrapper(ScatterCore as any);
 
 // 導出最終組件
 export const Scatter = React.forwardRef<ScatterCore, ScatterProps>((props, ref) => {

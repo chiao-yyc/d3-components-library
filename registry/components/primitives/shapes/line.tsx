@@ -16,7 +16,7 @@ export interface LineProps extends Omit<ReactChartWrapperProps, 'data' | 'groupB
 export type LineShapeData = LineCoreData;
 
 // 創建 Line 組件
-const LineComponent = createReactChartWrapper(LineCore);
+const LineComponent = createReactChartWrapper(LineCore as any);
 
 // 導出最終組件
 export const Line = React.forwardRef<LineCore, LineProps>((props, ref) => {

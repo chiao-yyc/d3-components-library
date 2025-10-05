@@ -12,7 +12,7 @@ export interface RadarChartProps extends ReactChartWrapperProps, RadarChartCoreC
 }
 
 // 創建基於 BaseChartCore 的組件
-const RadarChartComponent = createReactChartWrapper(RadarChartCore);
+const RadarChartComponent = createReactChartWrapper(RadarChartCore as any);
 
 // 主要導出
 export const RadarChart = React.forwardRef<RadarChartCore, RadarChartProps>((props, ref) => {

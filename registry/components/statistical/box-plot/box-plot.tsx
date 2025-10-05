@@ -12,7 +12,7 @@ export interface BoxPlotProps extends Omit<ReactChartWrapperProps, 'data' | 'gro
 }
 
 // 創建基於 BaseChartCore 的組件
-const BoxPlotComponent = createReactChartWrapper(BoxPlotCore);
+const BoxPlotComponent = createReactChartWrapper(BoxPlotCore as any);
 
 // 主要導出
 export const BoxPlot = React.forwardRef<BoxPlotCore, BoxPlotProps>((props, ref) => {
