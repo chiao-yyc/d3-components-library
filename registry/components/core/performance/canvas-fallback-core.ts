@@ -67,17 +67,17 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
   // 性能監控
   private renderStartTime = 0;
   private animationFrameId: number | null = null;
-  
+
   // 🎯 Canvas Tooltip 支援
   private isCanvasTooltipEnabled = true;
-  private tooltipThrottleTimer: number | null = null;
+  private tooltipThrottleTimer: ReturnType<typeof setTimeout> | null = null;
   private lastHoveredData: any = null;
 
   constructor(
-    config: BaseChartCoreConfig & CanvasFallbackConfig,
+    config: BaseChartCoreConfig<TData> & CanvasFallbackConfig,
     callbacks?: ChartStateCallbacks
   ) {
-    super(config, callbacks);
+    super(config, callbacks ?? {});
     
     this.canvasConfig = {
       dataThreshold: 10000,
@@ -174,9 +174,8 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
     // 創建 Canvas 元素
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d', {
-      alpha: this.canvasConfig.alpha,
-      antialias: this.canvasConfig.antialias
-    });
+      alpha: this.canvasConfig.alpha
+    }) as CanvasRenderingContext2D | null;
 
     if (!context) {
       console.error('[CanvasFallback] Failed to get 2D context');
@@ -188,7 +187,7 @@ export abstract class CanvasFallbackCore<TData extends BaseChartData = BaseChart
     canvas.height = height * pixelRatio;
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
-    
+
     // 設置上下文縮放
     context.scale(pixelRatio, pixelRatio);
     
