@@ -13,6 +13,7 @@ demo/d3-components.json
 
 # 臨時參考檔案
 temp_ref/
+*.tmp
 
 # 符號連結
 demo/src/registry
