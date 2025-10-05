@@ -83,9 +83,9 @@ export function createClipPath(
   config: ClipPathConfig
 ): string {
   // 確保 defs 元素存在
-  let defs = svg.select('defs');
+  let defs = svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
   if (defs.empty()) {
-    defs = svg.append('defs');
+    defs = svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
   }
 
   // 移除現有的同名剪裁路徑
@@ -146,9 +146,9 @@ export function createDropShadow(
   config: DropShadowConfig = { id: 'drop-shadow' }
 ): string {
   // 確保 defs 元素存在
-  let defs = svg.select('defs');
+  let defs = svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
   if (defs.empty()) {
-    defs = svg.append('defs');
+    defs = svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
   }
 
   // 移除現有的同名濾鏡
@@ -213,9 +213,9 @@ export function createGlowEffect(
   config: GlowConfig = { id: 'glow' }
 ): string {
   // 確保 defs 元素存在
-  let defs = svg.select('defs');
+  let defs = svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
   if (defs.empty()) {
-    defs = svg.append('defs');
+    defs = svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
   }
 
   // 移除現有的同名濾鏡
@@ -282,27 +282,27 @@ export function createGradient(
   config: GradientConfig
 ): string {
   // 確保 defs 元素存在
-  let defs = svg.select('defs');
+  let defs = svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
   if (defs.empty()) {
-    defs = svg.append('defs');
+    defs = svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
   }
 
   // 移除現有的同名漸層
   defs.select(`#${config.id}`).remove();
 
-  let gradient: d3.Selection<SVGLinearGradientElement | SVGRadialGradientElement, unknown, null, undefined>;
+  let gradient: d3.Selection<any, unknown, null, undefined>;
 
   if (config.type === 'radial') {
-    gradient = defs.append('radialGradient').attr('id', config.id);
-    
+    gradient = defs.append('radialGradient').attr('id', config.id) as d3.Selection<any, unknown, null, undefined>;
+
     if (config.cx) gradient.attr('cx', config.cx);
     if (config.cy) gradient.attr('cy', config.cy);
     if (config.r) gradient.attr('r', config.r);
     if (config.fx) gradient.attr('fx', config.fx);
     if (config.fy) gradient.attr('fy', config.fy);
   } else {
-    gradient = defs.append('linearGradient').attr('id', config.id);
-    
+    gradient = defs.append('linearGradient').attr('id', config.id) as d3.Selection<any, unknown, null, undefined>;
+
     if (config.x1) gradient.attr('x1', config.x1);
     if (config.y1) gradient.attr('y1', config.y1);
     if (config.x2) gradient.attr('x2', config.x2);
@@ -338,9 +338,9 @@ export function createPattern(
   height: number = 10
 ): string {
   // 確保 defs 元素存在
-  let defs = svg.select('defs');
+  let defs = svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
   if (defs.empty()) {
-    defs = svg.append('defs');
+    defs = svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
   }
 
   // 移除現有的同名圖案

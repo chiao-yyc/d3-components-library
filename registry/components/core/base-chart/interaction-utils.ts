@@ -80,8 +80,8 @@ export class EnhancedBrushZoomController {
     this.config = config;
     this.svg = svg || null;
     this.originalDomain = {
-      x: [...scales.xScale.domain()],
-      y: [...scales.yScale.domain()]
+      x: [...scales.xScale.domain()] as [any, any],
+      y: [...scales.yScale.domain()] as [any, any]
     };
   }
 
@@ -175,9 +175,9 @@ export class EnhancedBrushZoomController {
     const clipPathId = 'enhanced-chart-clip';
     
     // 確保 defs 元素存在
-    let defs = this.svg.select('defs');
+    let defs = this.svg.select('defs') as d3.Selection<any, unknown, null, undefined>;
     if (defs.empty()) {
-      defs = this.svg.append('defs');
+      defs = this.svg.append('defs') as d3.Selection<any, unknown, null, undefined>;
     }
 
     // 移除現有的剪裁路徑
@@ -285,9 +285,9 @@ export class EnhancedBrushZoomController {
       const axisGroup = this.container.select(selector);
       if (!axisGroup.empty()) {
         if (selector.includes('bottom') || selector.includes('x')) {
-          axisGroup.transition().duration(duration).call(d3.axisBottom(this.scales.xScale));
+          axisGroup.transition().duration(duration).call(d3.axisBottom(this.scales.xScale) as any);
         } else if (selector.includes('left') || selector.includes('y')) {
-          axisGroup.transition().duration(duration).call(d3.axisLeft(this.scales.yScale));
+          axisGroup.transition().duration(duration).call(d3.axisLeft(this.scales.yScale) as any);
         }
       }
     });
@@ -343,8 +343,8 @@ export class BrushZoomController {
     this.scales = scales;
     this.config = config;
     this.originalDomain = {
-      x: [...scales.xScale.domain()],
-      y: [...scales.yScale.domain()]
+      x: [...scales.xScale.domain()] as [any, any],
+      y: [...scales.yScale.domain()] as [any, any]
     };
   }
 
@@ -744,12 +744,12 @@ export class ViewportController {
   constructor(scales: { xScale: any; yScale: any }) {
     this.scales = scales;
     this.originalDomain = {
-      x: [...scales.xScale.domain()],
-      y: [...scales.yScale.domain()]
+      x: [...scales.xScale.domain()] as [any, any],
+      y: [...scales.yScale.domain()] as [any, any]
     };
     this.currentDomain = {
-      x: [...scales.xScale.domain()],
-      y: [...scales.yScale.domain()]
+      x: [...scales.xScale.domain()] as [any, any],
+      y: [...scales.yScale.domain()] as [any, any]
     };
   }
 
