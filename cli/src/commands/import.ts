@@ -3,8 +3,8 @@ import fs from 'fs'
 import path from 'path'
 import readline from 'readline'
 import { CsvAdapter } from '../../../registry/adapters'
-import { suggestMapping, suggestChartType } from '../../../registry/utils/data-detector'
-import { SuggestedMapping, ChartSuggestion } from '../../../registry/types'
+import { suggestFieldMapping, suggestChartType } from '../../../registry/utils/data-detector'
+import { FieldSuggestion, ChartSuggestion } from '../../../registry/types'
 
 interface ImportOptions {
   chart?: string
@@ -17,7 +17,7 @@ interface ParsedData {
   data: any[]
   adapter: string
   suggestions: {
-    mapping: SuggestedMapping[]
+    mapping: FieldSuggestion[]
     charts: ChartSuggestion[]
   }
 }
@@ -102,7 +102,7 @@ async function parseDataFile(filePath: string): Promise<ParsedData | null> {
     }
     
     // 生成建議
-    const mapping = suggestMapping(data)
+    const mapping = suggestFieldMapping(data)
     const charts = suggestChartType(data)
     
     return {
