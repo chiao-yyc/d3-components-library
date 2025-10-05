@@ -5,12 +5,12 @@
 
 import * as d3 from 'd3';
 import { BaseChart } from '../../../core/base-chart/base-chart';
-import { DataProcessor } from '../../../core/data-processor/data-processor';
+// import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 import { PolarUtils, RadarAxisConfig, InterpolationType } from '../../shared/polar-utils';
 import { RadarGridRenderer, GridOptions } from '../../shared/radar-grid-renderer';
 import { RadarDataRenderer, RadarSeries, DataOptions } from '../../shared/radar-data-renderer';
-import { TextUtils } from '../../shared/text-utils';
+// import { TextUtils } from '../../shared/text-utils';
 import { RadarChartProps, ProcessedRadarDataPoint, RadarValue } from './types';
 
 export class D3RadarChart extends BaseChart<RadarChartProps> {

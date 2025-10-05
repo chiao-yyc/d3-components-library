@@ -132,7 +132,7 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
     })
 
     // 繪製堆疊區域
-    stackedData.forEach((layerData, index) => {
+    stackedData.forEach((layerData, _index) => {
       const seriesItem = series.find(s => s.key === layerData.key)
       if (!seriesItem) return
 

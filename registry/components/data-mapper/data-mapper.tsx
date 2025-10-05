@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react'
+// import React, { useState, useEffect, useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { suggestFieldMapping, detectColumnType } from '../../utils/data-detector'
 import { DataMapperProps, DataMapping, FieldInfo } from './types'
 
 export function DataMapper({
   data,
-  chartType = 'bar-chart',
+  chartType: _chartType = 'bar-chart',
   onMappingChange,
   autoSuggest = true,
   className

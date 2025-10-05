@@ -94,9 +94,9 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   private scatterGroup: D3Selection | null = null;
   
   // 交互控制器
-  private __brushZoomController: any = null;
-  private __crosshairController: any = null;
-  private __voronoiController: any = null;
+  // private ___brushZoomController: any = null;
+  // private ___crosshairController: any = null;
+  // private ___voronoiController: any = null;
 
   constructor(
     config: ScatterPlotCoreConfig,
@@ -467,31 +467,31 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
    * }
    */
 
-  private __renderGrid(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
-  ): void {
-    if (!this.chartGroup) return;
+  // private ___renderGrid(
+  //   xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+  //   yScale: d3.ScaleLinear<number, number>
+  // ): void {
+  //   if (!this.chartGroup) return;
 
-    // X軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'x-grid')
-      .attr('transform', `translate(0, ${this.chartHeight})`)
-      .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
+  //   // X軸網格
+  //   this.chartGroup
+  //     .append('g')
+  //     .attr('class', 'x-grid')
+  //     .attr('transform', `translate(0, ${this.chartHeight})`)
+  //     .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
+  //     .selectAll('line')
+  //     .attr('stroke', '#e5e7eb')
+  //     .attr('stroke-width', 0.5);
 
-    // Y軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'y-grid')
-      .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
-  }
+  //   // Y軸網格
+  //   this.chartGroup
+  //     .append('g')
+  //     .attr('class', 'y-grid')
+  //     .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
+  //     .selectAll('line')
+  //     .attr('stroke', '#e5e7eb')
+  //     .attr('stroke-width', 0.5);
+  // }
 
   private renderTrendline(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,

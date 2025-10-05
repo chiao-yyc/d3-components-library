@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react'
+// import React, { useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { BarChart } from '../basic/bar-chart'
-import { MappingPreviewProps, DataMapping } from './types'
+import { MappingPreviewProps, /* DataMapping */ } from './types'
 
 export function MappingPreview({
   data,

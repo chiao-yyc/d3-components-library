@@ -51,7 +51,7 @@ const BOOLEAN_PATTERNS = [
  */
 export function analyzeSingleValue(value: unknown): SingleValueAnalysis {
   const originalValue = value
-  const _reasoning = ''
+  // const ___reasoning = ''
 
   // 如果是 null 或 undefined
   if (value == null) {
