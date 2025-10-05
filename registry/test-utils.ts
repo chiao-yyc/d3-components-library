@@ -78,17 +78,17 @@ export const setupDOMEnvironment = () => {
       return createMockSVGElement();
     }
     return createMockElement();
-  });
+  }) as any;
 
   global.document.createElementNS = vi.fn((namespace: string, _tagName: string) => {
     if (namespace === 'http://www.w3.org/2000/svg') {
       return createMockSVGElement();
     }
     return createMockElement();
-  });
+  }) as any;
 
-  global.document.querySelector = vi.fn();
-  global.document.querySelectorAll = vi.fn(() => []);
+  global.document.querySelector = vi.fn() as any;
+  global.document.querySelectorAll = vi.fn(() => []) as any;
   global.document.getElementById = vi.fn();
 
   // Mock window methods
@@ -97,20 +97,20 @@ export const setupDOMEnvironment = () => {
     height: '600px',
     marginTop: '0px',
     marginLeft: '0px',
-  }));
+  })) as any;
 
   // Mock IntersectionObserver
   global.IntersectionObserver = class IntersectionObserver {
     observe = vi.fn();
     disconnect = vi.fn();
     unobserve = vi.fn();
-  };
+  } as any;
 
-  // Mock MutationObserver  
+  // Mock MutationObserver
   global.MutationObserver = class MutationObserver {
     observe = vi.fn();
     disconnect = vi.fn();
-  };
+  } as any;
 };
 
 // 清理 DOM 環境

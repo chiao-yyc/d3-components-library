@@ -106,7 +106,7 @@ async function getConfig(config: any, key?: string, options?: ConfigOptions) {
   }
 }
 
-async function setConfig(config: any, key: string | undefined, value: string | undefined, configPath: string) {
+async function setConfig(config: any, key: string | undefined, value: string | undefined, configPath: string, _options?: ConfigOptions) { // eslint-disable-line @typescript-eslint/no-unused-vars
   if (!key || value === undefined) {
     console.log(chalk.red('❌ 請指定要設置的配置鍵和值'))
     console.log(chalk.gray('例如: d3-components config set paths.components ./components'))
@@ -125,7 +125,7 @@ async function setConfig(config: any, key: string | undefined, value: string | u
   console.log(chalk.green(`✅ 配置已更新: ${key} = ${formatValue(parsedValue)}`))
 }
 
-async function unsetConfig(config: any, key: string | undefined, configPath: string) {
+async function unsetConfig(config: any, key: string | undefined, configPath: string, _options?: ConfigOptions) { // eslint-disable-line @typescript-eslint/no-unused-vars
   if (!key) {
     console.log(chalk.red('❌ 請指定要刪除的配置鍵'))
     console.log(chalk.gray('例如: d3-components config unset paths.custom'))

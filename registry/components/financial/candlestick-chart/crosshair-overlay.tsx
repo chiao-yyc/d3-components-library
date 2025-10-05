@@ -41,7 +41,7 @@ export const CrosshairOverlay: React.FC<CrosshairOverlayProps> = ({
   const [activeDataPoint, setActiveDataPoint] = useState<{ data: any; index: number } | null>(null)
 
   const throttledMouseMove = useCallback(
-    throttle((event: MouseEvent) => {
+    throttle((event: any) => {
       if (!overlayRef.current) return
 
       const svgElement = overlayRef.current.closest('svg') as SVGSVGElement

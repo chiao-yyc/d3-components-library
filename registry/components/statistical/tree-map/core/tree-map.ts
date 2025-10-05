@@ -11,7 +11,7 @@ import { HierarchyDataItem, StratifiedDataItem } from '../types';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
 // import { DataProcessor } from '../../../core/data-processor/data-processor';
 
-export class D3TreeMap extends BaseChart<TreeMapProps> {
+export class D3TreeMap extends (BaseChart as any)<TreeMapProps> {
   private nodes: TreeMapNode[] = [];
   // private root: d3.HierarchyRectangularNode<any> | null = null;
   private treeMapState: TreeMapSpecificState = {
@@ -411,7 +411,8 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
   private updateNodeStyles(): void {
     if (!this.svg) return;
 
-    this.svg.selectAll<SVGRectElement, TreeMapNode>('.treemap-rect')
+    const rects = this.svg.selectAll<SVGRectElement, TreeMapNode>('.treemap-rect') as any;
+    rects
       .style('opacity', (d: any) => {
         if (this.treeMapState.hoveredNode === d) return 1;
         if (this.treeMapState.selectedNodes.includes(d)) return 0.9;

@@ -20,7 +20,8 @@ const AreaComponent = createReactChartWrapper(AreaCore as any);
 
 // 導出最終組件
 export const Area = React.forwardRef<AreaCore, AreaProps>((props, ref) => {
-  return <AreaComponent ref={ref as any} {...props} />;
+  const Component = AreaComponent as any;
+  return <Component ref={ref as any} {...props} />;
 });
 
 Area.displayName = 'Area';
