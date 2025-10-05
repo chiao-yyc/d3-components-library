@@ -464,7 +464,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
       }
 
       // 添加名稱標籤
-      labelGroup.append('text')
+      const _nameLabel = labelGroup.append('text')
         .attr('class', 'node-name')
         .style('font-size', typeof fontSize === 'function' ? fontSize(d) : fontSize)
         .style('font-family', fontFamily)

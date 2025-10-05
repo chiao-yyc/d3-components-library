@@ -260,7 +260,7 @@ export class EnhancedBrushZoomController {
    * 應用邊界保護
    */
   private applyBoundaryProtection(domain: [any, any], axis: 'x' | 'y'): [any, any] {
-    const padding = this.config.boundaryProtection?.padding || 2;
+    const _padding = this.config.boundaryProtection?.padding || 2;
     const originalDomain = axis === 'x' ? this.originalDomain.x : this.originalDomain.y;
     
     // 確保縮放域值不超出原始範圍
@@ -600,7 +600,7 @@ export class CrosshairController {
   private handleMouseMove(event: MouseEvent): void {
     if (!this.container) return;
 
-    const [mouseX, mouseY] = d3.pointer(event, this.container.node());
+    const [mouseX, _mouseY] = d3.pointer(event, this.container.node());
     
     // 反轉比例尺獲取數據值
     const xValue = this.scales.xScale.invert(mouseX);

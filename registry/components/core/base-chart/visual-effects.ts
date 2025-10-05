@@ -354,7 +354,7 @@ export function createPattern(
     .attr('height', height);
 
   const color = patternData.color || '#000000';
-  const spacing = patternData.spacing || 5;
+  const _spacing = patternData.spacing || 5;
   const strokeWidth = patternData.strokeWidth || 1;
 
   switch (patternData.type) {

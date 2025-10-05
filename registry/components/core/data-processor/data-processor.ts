@@ -164,7 +164,7 @@ export class DataProcessor {
   /**
    * 解析最終映射策略
    */
-  private resolveMapping(data: any[], fieldInfo: Record<string, FieldInfo>): Required<DataMapping> {
+  private resolveMapping(_data: any[], fieldInfo: Record<string, FieldInfo>): Required<DataMapping> {
     const resolved: Required<DataMapping> = {
       x: '',
       y: '',
@@ -331,7 +331,7 @@ export class DataProcessor {
   /**
    * 清理和轉換值
    */
-  private cleanValue(value: any, field: string, errors: string[], warnings: string[]): any {
+  private cleanValue(value: any, _field: string, _errors: string[], _warnings: string[]): any {
     if (value == null) {
       return this.config.removeNulls ? undefined : null
     }

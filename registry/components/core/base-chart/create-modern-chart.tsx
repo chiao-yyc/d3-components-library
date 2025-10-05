@@ -3,7 +3,7 @@
  * 基於 hooks 和組合模式，取代類別繼承模式
  */
 
-import React, { ReactNode } from 'react';
+import React, { /*ReactNode*/ } from 'react';
 import { BaseChartCore } from './core/base-chart-core';
 import { useBaseChart, UseBaseChartOptions } from './use-base-chart';
 import type { BaseChartCoreConfig, ChartStateCallbacks } from './core';

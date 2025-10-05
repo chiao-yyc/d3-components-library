@@ -69,7 +69,7 @@ export const RegressionLine: React.FC<RegressionLineProps> = ({
       const sumY = validData.reduce((sum, d) => sum + d.y, 0)
       const sumXY = validData.reduce((sum, d) => sum + d.x * d.y, 0)
       const sumXX = validData.reduce((sum, d) => sum + d.x * d.x, 0)
-      const _sumYY = validData.reduce((sum, d) => sum + d.y * d.y, 0)
+      const sumYY = validData.reduce((sum, d) => sum + d.y * d.y, 0)
 
       slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX)
       intercept = (sumY - slope * sumX) / n

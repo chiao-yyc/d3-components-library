@@ -828,7 +828,7 @@ export const analyzeThemePerformance = (theme: ThemeCore) => {
   
   // 測試令牌訪問效能
   const tokens = theme.getTokens();
-  const _colorAccess = theme.getColor('primary.main');
+  const colorAccess = theme.getColor('primary.main');
   const cssGeneration = theme.generateCSSVariables();
   
   const end = performance.now();

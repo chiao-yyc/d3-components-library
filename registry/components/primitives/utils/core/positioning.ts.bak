@@ -65,7 +65,7 @@ export const calculateBarPosition = (
   barWidth: number,
   offset: number = 0
 ): { x: number; width: number } => {
-  const alignedPosition = calculateAlignedPosition(value, scale, _alignment, offset)
+  const alignedPosition = calculateAlignedPosition(value, scale, alignment, offset)
   
   let x: number
   
@@ -250,7 +250,7 @@ export const debugAlignment = (
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Alignment Debug] ${componentType}:`, {
       value,
-      _alignment,
+      alignment,
       hasBandwidth: !!scale.bandwidth,
       bandwidth: scale.bandwidth?.() || 'N/A',
       basePosition: scale(value),

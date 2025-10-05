@@ -80,7 +80,7 @@ export const setupDOMEnvironment = () => {
     return createMockElement();
   });
 
-  global.document.createElementNS = vi.fn((namespace: string, tagName: string) => {
+  global.document.createElementNS = vi.fn((namespace: string, _tagName: string) => {
     if (namespace === 'http://www.w3.org/2000/svg') {
       return createMockSVGElement();
     }

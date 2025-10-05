@@ -358,7 +358,7 @@ export function renderLegend(
     .enter()
     .append('g')
     .attr('class', 'legend-item')
-    .attr('transform', (d, i) => {
+    .attr('transform', (_d, i) => {
       if (config.orientation === 'horizontal') {
         return `translate(${i * itemSpacing - (data.length * itemSpacing) / 2}, 0)`;
       } else {
@@ -369,7 +369,7 @@ export function renderLegend(
   // 圖例符號
   legendItems.append(config.symbolType === 'square' ? 'rect' : 'circle')
     .attr('fill', (d: any) => d.color)
-    .each(function(d: any, i: number) {
+    .each(function(_d: any, _i: number) {
       const element = d3.select(this);
       if (config.symbolType === 'square') {
         element
@@ -428,7 +428,7 @@ export function renderArcLabels(
   const fontColor = config.fontColor || '#fff';
   const threshold = config.threshold || 0.05; // 5% 最小顯示閾值
 
-  const labels = labelGroup.selectAll('.arc-label')
+  labelGroup.selectAll('.arc-label')
     .data(arcs.filter((d: any) => d.data.percentage >= threshold))
     .enter()
     .append('text')
@@ -538,7 +538,7 @@ export function renderPointLabels(
   const offset = config.offset || 8;
   const { xScale, yScale } = scales;
 
-  const labels = labelGroup.selectAll('.point-label')
+  labelGroup.selectAll('.point-label')
     .data(data)
     .enter()
     .append('text')

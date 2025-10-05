@@ -10,7 +10,7 @@ import {
   ChartData, 
   BaseChartCoreConfig, 
   DataKeyOrAccessor,
-  // D3Selection,
+  D3Selection,
   ChartStateCallbacks
 } from '../../../core/types';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
