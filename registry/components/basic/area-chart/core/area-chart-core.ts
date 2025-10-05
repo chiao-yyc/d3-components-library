@@ -13,7 +13,7 @@ import {
   D3Selection,
   ChartStateCallbacks
 } from '../../../core/types';
-import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
+// import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';  // Reserved for future use
 import { ProcessedAreaDataPoint } from './types';
 
 // AreaChart 專用數據接口
@@ -90,7 +90,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private areaProcessedData: ProcessedAreaDataPoint[] = [];
   private seriesData: AreaSeriesData[] = [];
   private stackedData: StackedDataPoint[] = [];
-  private _colorScale: ColorScale | null = null;
+  // private _colorScale: ColorScale | null = null;  // Reserved for future use
   private areaGroup: D3Selection<SVGGElement> | null = null;
   private chartGroup: D3Selection<SVGGElement> | null = null;
 
@@ -98,9 +98,9 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private chartWidth: number = 0;
   private chartHeight: number = 0;
 
-  // 交互控制器
-  private _brushZoomController: { destroy: () => void } | null = null;
-  private _crosshairController: { destroy: () => void } | null = null;
+  // 交互控制器 - reserved for future use
+  // private _brushZoomController: { destroy: () => void } | null = null;
+  // private _crosshairController: { destroy: () => void } | null = null;
 
   // Tooltip 相關
   private tooltipOverlay: D3Selection<SVGRectElement> | null = null;
@@ -119,7 +119,8 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
 
   /**
    * Parse date strings with better support for various formats
-   * @private Reserved for future use
+   * @private
+   * @internal Reserved for future use
    */
   private _parseDate(dateStr: string): Date {
     // Handle YYYY-MM format like '2023-01'
@@ -247,9 +248,9 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     }
 
     // 創建顏色比例尺
-    if (config.colors) {
-      this._colorScale = createColorScale(config.colors, [0, this.seriesData.length - 1]);
-    }
+    // if (config.colors) {
+    //   this._colorScale = createColorScale(config.colors, [0, this.seriesData.length - 1]);
+    // }
   }
 
   private processStackedData(stackMode: 'normal' | 'percent' | 'streamgraph'): void {
@@ -289,6 +290,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     this.stackedData = stackedGroups.flat();
   }
 
+  /** @internal Reserved for future use */
   private _getYValues(): number[] {
     const config = this.config as AreaChartCoreConfig;
     
@@ -302,6 +304,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     return this.areaProcessedData.map(d => d.y);
   }
 
+  /** @internal Reserved for future use */
   private _createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
 
@@ -329,6 +332,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       .range([0, this.chartWidth]);
   }
 
+  /** @internal Reserved for future use */
   private _createYScale(values: number[]): d3.ScaleLinear<number, number> {
     if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
     
@@ -347,7 +351,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       .nice();
   }
 
-
+  /** @internal Reserved for future use */
   private _renderAreas(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
@@ -478,6 +482,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     });
   }
 
+  /** @internal Reserved for future use */
   private _renderPoints(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
     yScale: d3.ScaleLinear<number, number>
@@ -551,7 +556,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
    *   // 軸標籤實現...
    * }
    */
-
+  /** @internal Reserved for future use */
   private _renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
