@@ -1,8 +1,8 @@
 // ==========================================
 // 🚀 最新推薦：Primitives 架構組件
 // ==========================================
-export { 
-  MultiSeriesComboChartV2, 
+export {
+  MultiSeriesComboChartV2,
   MultiSeriesComboChart,
   BarLineComboChart,
   AreaLineComboChart,
@@ -10,10 +10,10 @@ export {
   AreaLineComboChart as AreaLineComboChartV2,
   defaultMultiSeriesComboChartV2Props
 } from './multi-series-combo-chart-v2'
-export type { 
-  MultiSeriesComboChartV2Props, 
-  ComboSeries,
-  AxisConfig
+export type {
+  MultiSeriesComboChartV2Props,
+  ComboSeries
+  // AxisConfig is exported from chart-axis-renderer to avoid duplication
 } from './multi-series-combo-chart-v2'
 
 // ==========================================
@@ -45,11 +45,10 @@ export type { ChartSeriesRendererProps } from './chart-series-renderer'
 // @deprecated 請使用 MultiSeriesComboChartV2 替代
 export { EnhancedComboChart } from './enhanced-combo-chart'
 export type { EnhancedComboChartProps } from './enhanced-combo-chart'
-export type { 
-  ComboChartData, 
-  ComboChartProps,
-  ComboChartSeries,
-  EnhancedComboData
+export type {
+  ComboChartData,
+  ComboChartProps
+  // ComboChartSeries and EnhancedComboData are already exported from chart-series-processor
 } from './types'
 
 // ==========================================
