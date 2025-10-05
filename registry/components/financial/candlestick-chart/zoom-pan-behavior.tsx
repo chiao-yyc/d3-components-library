@@ -80,7 +80,7 @@ export const ZoomPanBehavior: React.FC<ZoomPanBehaviorProps> = ({
           if (constrainToData) {
             const constraints = getDataConstraints()
             if (constraints) {
-              const [x0, x1] = newXScale.range()
+              const [_x0, _x1] = newXScale.range()
               const [dx0, dx1] = newXScale.domain()
               
               // 限制平移範圍，確保不超出數據範圍

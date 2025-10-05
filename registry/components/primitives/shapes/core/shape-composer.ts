@@ -113,8 +113,8 @@ export class BarRenderer extends ShapeRenderer {
 
   render(): void {
     this.barGroup = this.createGroup();
-    
-    const bars = this.barGroup
+
+    this.barGroup
       .selectAll('.bar-element')
       .data(this.config.data)
       .enter()

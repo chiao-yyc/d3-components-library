@@ -5,12 +5,12 @@
 
 import React, { useMemo, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { ChartCanvas, useChartCanvas } from '../primitives/canvas/chart-canvas';
+import { ChartCanvas, /*useChartCanvas*/ } from '../primitives/canvas/chart-canvas';
 import { XAxis, YAxis, DualAxis } from '../primitives/axis';
-import { 
-  AlignmentStrategy, 
-  calculateAlignedPosition, 
-  calculateBarPosition 
+import {
+  AlignmentStrategy,
+  calculateAlignedPosition,
+  // calculateBarPosition
 } from '../primitives/utils/core/positioning';
 
 // 系列配置接口
@@ -278,7 +278,7 @@ const SeriesRenderer: React.FC<{
           .attr('r', 0)
           .transition()
           .duration(500)
-          .delay((d, i) => i * 50)
+          .delay((_d, i) => i * 50)
           .attr('r', s.pointRadius || 4);
       } else {
         circles.attr('r', s.pointRadius || 4);
@@ -347,7 +347,7 @@ export const MultiSeriesComboChartV2: React.FC<MultiSeriesComboChartV2Props> = (
     colors = defaultMultiSeriesComboChartV2Props.colors!,
     barWidth = 0.6,
     animate = true,
-    interactive = true,
+    interactive: _interactive = true,
     alignment = 'center',
     showAlignmentGuides = false,
     onDataClick,

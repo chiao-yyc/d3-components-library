@@ -45,7 +45,7 @@ export const MultiBar: React.FC<MultiBarProps> = ({
   animationDuration = 300,
   barWidth,
   groupOffset = 0,
-  alignment = 'center',
+  alignment: _alignment = 'center',
   onDataClick,
   onDataHover,
   onBarClick,

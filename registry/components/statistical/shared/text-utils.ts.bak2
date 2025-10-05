@@ -1,7 +1,7 @@
 /**
  * 文字處理工具模組
  * 提供文字自動換行、智能定位、長度計算等功能
- * 純 JavaScript/TypeScript 核心實現，框架無關
+ * 參考 radar_02.js 的文字換行實現
  */
 
 import * as d3 from 'd3';
@@ -374,7 +374,7 @@ export class TextUtils {
     endAngle: number
   ): string {
     const circumference = 2 * Math.PI * radius;
-    const _arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
+    const arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
     
     // 簡化的弧形路徑生成
     const startRadians = (startAngle * Math.PI) / 180;

@@ -305,7 +305,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
       .enter()
       .append('path')
       .attr('class', 'scatter-point')
-      .attr('data-testid', (d, i) => `scatter-point-${i}`)
+      .attr('data-testid', (_d, i) => `scatter-point-${i}`)
       .attr('transform', (d: ScatterCoreData) => {
         const x = this.getXPosition(d, xScale);
         const y = yScale(d.y);
@@ -325,7 +325,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
 
   private renderGroupedPoints(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
-    data: ChartData<ScatterCoreData>[],
+    _data: ChartData<ScatterCoreData>[],
     scales: Record<string, any>
   ): void {
     const groupKeys = Array.from(this.groupedData.keys());
@@ -340,7 +340,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
         .enter()
         .append('path')
         .attr('class', `scatter-point scatter-point-group-${groupKey}`)
-        .attr('data-testid', (d, i) => `scatter-point-${groupKey}-${i}`)
+        .attr('data-testid', (_d, i) => `scatter-point-${groupKey}-${i}`)
         .attr('transform', (d: ScatterCoreData) => {
           const x = this.getXPosition(d, scales.xScale);
           const y = scales.yScale(d.y);
@@ -508,7 +508,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
 
     svg.selectAll('.scatter-point')
       .on('click', (event, d: ScatterCoreData) => {
-        const index = this.getProcessedData()!.indexOf(d);
+        // const _index = this.getProcessedData()!.indexOf(d);
         this.showTooltip(event.pageX, event.pageY, `${d.label}: (${d.x}, ${d.y})`);
       })
       .on('mouseenter', (event, d: ScatterCoreData) => {
@@ -525,7 +525,7 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
         }
         this.showTooltip(event.pageX, event.pageY, `${d.label}: (${d.x}, ${d.y})`);
       })
-      .on('mouseleave', (event, d: ScatterCoreData) => {
+      .on('mouseleave', (event, _d: ScatterCoreData) => {
         if (hoverEffect) {
           d3.select(event.currentTarget)
             .transition()

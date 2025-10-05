@@ -374,7 +374,7 @@ export class TextUtils {
     endAngle: number
   ): string {
     const circumference = 2 * Math.PI * radius;
-    const _arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
+    const arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
     
     // 簡化的弧形路徑生成
     const startRadians = (startAngle * Math.PI) / 180;

@@ -151,7 +151,7 @@ export class D3CandlestickChartSimple extends BaseChart<CandlestickChartProps> {
       return;
     }
 
-    const { xScale, yScale, chartWidth, chartHeight } = this.scales;
+    const { xScale, yScale, chartWidth, chartHeight: _chartHeight } = this.scales;
     const { colorMode = 'tw' } = this.props;
 
     // 顏色配置

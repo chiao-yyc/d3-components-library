@@ -12,7 +12,7 @@ import {
   DataKeyOrAccessor,
   ChartStateCallbacks
 } from '../../../core/types';
-import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
+import { /*createColorScale,*/ ColorScale } from '../../../core/color-scheme/color-manager';
 
 // CandlestickChart 專用數據接口
 export interface CandlestickData extends BaseChartData {
@@ -107,7 +107,7 @@ const DEFAULT_COLORS = {
 // 主要的 CandlestickChart 核心類
 export class CandlestickChartCore extends BaseChartCore<CandlestickData> {
   protected processedData: ProcessedCandlestickDataPoint[] = [];
-  private colorScale: ColorScale | null = null;
+  private _colorScale: ColorScale | null = null;
   private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private xScale: d3.ScaleTime<number, number> | null = null;
   private yScale: d3.ScaleLinear<number, number> | null = null;
@@ -400,14 +400,14 @@ export class CandlestickChartCore extends BaseChartCore<CandlestickData> {
     if (animate) {
       wicks.attr('opacity', 0)
         .transition()
-        .delay((d, i) => animationDelay + i * 10)
+        .delay((_d, i) => animationDelay + i * 10)
         .duration(animationDuration)
         .ease(d3.easeBackOut)
         .attr('opacity', 1);
 
       bodies.attr('opacity', 0)
         .transition()
-        .delay((d, i) => animationDelay + i * 10)
+        .delay((_d, i) => animationDelay + i * 10)
         .duration(animationDuration)
         .ease(d3.easeBackOut)
         .attr('opacity', 1);
@@ -443,8 +443,8 @@ export class CandlestickChartCore extends BaseChartCore<CandlestickData> {
       .attr('x', d => this.xScale!(d.date) - volumeBarWidth / 2)
       .attr('y', d => this.volumeScale!(d.volume))
       .attr('width', volumeBarWidth)
-      .attr('height', d => (chartHeight * volumeHeightRatio - 10) - this.volumeScale!(d.volume))
-      .attr('fill', d => d.color)
+      .attr('height', _d => (chartHeight * volumeHeightRatio - 10) - this.volumeScale!(_d.volume))
+      .attr('fill', _d => _d.color)
       .attr('opacity', config.volumeOpacity || 0.6);
   }
 
@@ -464,7 +464,7 @@ export class CandlestickChartCore extends BaseChartCore<CandlestickData> {
         this.showTooltip(x, y, tooltipContent);
         config.onDataHover?.(d, event);
       })
-      .on('mouseleave', (event, d) => {
+      .on('mouseleave', (event, _d) => {
         this.hideTooltip();
         config.onDataHover?.(null, event);
       });

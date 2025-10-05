@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { cn } from '../../../utils/cn'
-import { ChartTooltipProps, TooltipPosition, TooltipContent } from './types'
+import { ChartTooltipProps, /*TooltipPosition,*/ TooltipContent } from './types'
 
 export function ChartTooltip({
   visible,
@@ -36,7 +36,7 @@ export function ChartTooltip({
       y: position.y + offset.y
     }
   })
-  const [actualPlacement, setActualPlacement] = useState<string>('top')
+  const [_actualPlacement, setActualPlacement] = useState<string>('top')
   const hideTimeoutRef = useRef<number | undefined>()
   const showTimeoutRef = useRef<number | undefined>()
 
@@ -50,8 +50,8 @@ export function ChartTooltip({
     const rect = tooltip.getBoundingClientRect()
     const containerEl = container || document.body
     const boundaryEl = boundary || document.documentElement
-    
-    const containerRect = containerEl.getBoundingClientRect()
+
+    const _containerRect = containerEl.getBoundingClientRect()
     const boundaryRect = boundaryEl.getBoundingClientRect()
     
     let adjustedX = position.x + offset.x
@@ -68,7 +68,7 @@ export function ChartTooltip({
     else if (placement === 'auto') {
       const spaceTop = position.y - boundaryRect.top
       const spaceBottom = boundaryRect.bottom - position.y
-      const spaceLeft = position.x - boundaryRect.left
+      const _spaceLeft = position.x - boundaryRect.left
       const spaceRight = boundaryRect.right - position.x
 
       // 選擇空間最大的方向

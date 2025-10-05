@@ -94,9 +94,9 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
   private scatterGroup: D3Selection | null = null;
   
   // 交互控制器
-  private _brushZoomController: any = null;
-  private _crosshairController: any = null;
-  private _voronoiController: any = null;
+  private __brushZoomController: any = null;
+  private __crosshairController: any = null;
+  private __voronoiController: any = null;
 
   constructor(
     config: ScatterPlotCoreConfig,
@@ -467,7 +467,7 @@ export class ScatterPlotCore extends BaseChartCore<ScatterPlotData> {
    * }
    */
 
-  private _renderGrid(
+  private __renderGrid(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
     yScale: d3.ScaleLinear<number, number>
   ): void {

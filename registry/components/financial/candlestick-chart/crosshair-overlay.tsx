@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
-import * as d3 from 'd3'
+// import * as d3 from 'd3'
 import { throttle, getChartRelativePosition, findClosestDataPoint } from '../../../utils/interaction-helpers'
 
 export interface CrosshairOverlayProps {

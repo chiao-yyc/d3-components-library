@@ -156,7 +156,7 @@ export const Waterfall: React.FC<WaterfallProps> = ({
       if (animate) {
         connectorGroup.selectAll('.waterfall-connector')
           .transition()
-          .delay((_d, i) => i * 50)
+          .delay((d, i) => i * 50)
           .duration(animationDuration)
           .attr('opacity', 0.6)
       }
@@ -200,7 +200,7 @@ export const Waterfall: React.FC<WaterfallProps> = ({
           if (animate) {
             enterBars
               .transition()
-              .delay((_d, i) => i * 100)
+              .delay((d, i) => i * 100)
               .duration(animationDuration)
               .attr('opacity', opacity)
           }

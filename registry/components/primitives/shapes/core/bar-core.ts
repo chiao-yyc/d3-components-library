@@ -224,7 +224,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
           enter => enter
             .append('rect')
             .attr('class', 'bar-shape')
-            .attr('data-testid', (d, i) => `bar-${i}`)
+            .attr('data-testid', (_d, i) => `bar-${i}`)
             .attr('x', (d: BarCoreData) => {
               const { x } = calculateBarPosition(d.x, xScale, alignment, this.barWidth);
               return x;
@@ -344,7 +344,7 @@ export class BarCore extends BaseChartCore<BarCoreData> {
         enter => enter
           .append('rect')
           .attr('class', 'bar-shape horizontal-bar')
-          .attr('data-testid', (d, i) => `horizontal-bar-${i}`)
+          .attr('data-testid', (_d, i) => `horizontal-bar-${i}`)
           .attr('x', xScale(0))
           .attr('y', (d: BarCoreData) => yScale(d.y))
           .attr('width', 0)
@@ -369,15 +369,15 @@ export class BarCore extends BaseChartCore<BarCoreData> {
 
     svg.selectAll('.bar-shape')
       .on('click', (event, d: BarCoreData) => {
-        const index = this.getProcessedData()!.indexOf(d);
+        // const _index = this.getProcessedData()!.indexOf(d);
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.value}`);
       })
-      .on('mouseenter', (event, d: BarCoreData) => {
+      .on('mouseenter', (event, _d: BarCoreData) => {
         if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', 0.8);
         }
       })
-      .on('mouseleave', (event, d: BarCoreData) => {
+      .on('mouseleave', (event, _d: BarCoreData) => {
         if (config.hoverEffect) {
           d3.select(event.currentTarget).attr('opacity', config.opacity || 1);
         }

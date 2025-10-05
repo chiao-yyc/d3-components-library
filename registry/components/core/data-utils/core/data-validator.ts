@@ -7,9 +7,9 @@ import { extent } from '../d3-utils';
 import { 
   ChartData, 
   BaseChartData, 
-  DataAccessor, 
+  DataAccessor,
   DataKeyOrAccessor,
-  ChartError,
+  // ChartError,
   DataValidationError
 } from '../types';
 
@@ -415,7 +415,7 @@ export function aggregateData<T extends BaseChartData>(
  */
 export function analyzeDataQuality<T extends BaseChartData>(
   data: ChartData<T>[],
-  chartType: string = 'chart'
+  _chartType: string = 'chart'
 ): {
   totalRows: number;
   nullValues: number;
@@ -437,8 +437,8 @@ export function analyzeDataQuality<T extends BaseChartData>(
 
   // 分析每個字段的數據類型和空值
   const seen = new Set<string>();
-  
-  data.forEach((item, index) => {
+
+  data.forEach((item, _index) => {
     const itemStr = JSON.stringify(item);
     if (seen.has(itemStr)) {
       analysis.duplicateRows++;

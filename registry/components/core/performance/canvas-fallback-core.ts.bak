@@ -3,7 +3,7 @@
  * 自動在 SVG 和 Canvas 之間切換，支援 50K+ 數據點
  */
 
-// import * as d3 from 'd3';
+import * as d3 from 'd3';
 import { BaseChartCore } from '../base-chart/core';
 import { BaseChartCoreConfig, ChartStateCallbacks, BaseChartData } from '../types';
 
