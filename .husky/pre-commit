@@ -12,11 +12,18 @@ if [ $REGISTRY_CHANGED -gt 0 ]; then
   echo "🔴 Registry 異動偵測 ($REGISTRY_CHANGED 檔案)，執行嚴格品質檢查..."
   cd registry
 
-  # TEMPORARY: TypeScript errors from @typescript-eslint v8 upgrade
-  # TODO: Remove '|| true' after fixing 1101 TypeScript errors
-  # Tracking: See registry/TYPESCRIPT_ERRORS.md
-  echo "   📝 TypeScript 型別檢查（暫時非阻塞）..."
-  npm run type-check || true
+  # TypeScript 型別檢查（非測試程式碼）- 使用根目錄 tsc 排除測試檔案
+  # 成就: 非測試程式碼已達成 0 errors ✅ (2025-10-06)
+  # 待修復: 測試檔案仍有 ~200 個錯誤，暫不檢查
+  echo "   📝 TypeScript 型別檢查（非測試程式碼）..."
+  cd ..
+  npx tsc --noEmit
+  if [ $? -ne 0 ]; then
+    echo "   ❌ TypeScript 檢查失敗"
+    cd registry
+    exit 1
+  fi
+  cd registry
 
   # TEMPORARY: Allow ESLint warnings during transition period
   # TODO: Restore lint:strict after addressing warnings
@@ -35,14 +42,23 @@ fi
 if [ $CLI_CHANGED -gt 0 ]; then
   echo "🟡 CLI 異動偵測 ($CLI_CHANGED 檔案)，執行基本品質檢查..."
   cd cli
-  
+
+  # TypeScript 型別檢查
+  # 成就: CLI 已達成 0 errors ✅ (2025-10-06)
+  echo "   📝 TypeScript 型別檢查..."
+  npm run type-check
+  if [ $? -ne 0 ]; then
+    echo "   ❌ TypeScript 檢查失敗"
+    exit 1
+  fi
+
   echo "   🔍 基本 ESLint 檢查..."
   npm run lint
   if [ $? -ne 0 ]; then
     echo "   ❌ CLI 基本檢查失敗"
     exit 1
   fi
-  
+
   echo "   ✅ CLI 品質檢查通過"
   cd ..
 fi
