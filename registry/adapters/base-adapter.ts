@@ -67,26 +67,26 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
    * 解析欄位路徑（支援巢狀物件）
    */
   protected resolveFieldPath<T = unknown>(obj: Record<string, unknown>, path: string | ((d: Record<string, unknown>) => T) | undefined): T | null {
-    if (path === undefined) return undefined
-    
+    if (path === undefined) return null
+
     if (typeof path === 'function') {
       return path(obj)
     }
-    
+
     if (typeof path !== 'string') {
-      return path
+      return path as T
     }
-    
+
     // 支援巢狀路徑如 'user.profile.name'
     const keys = path.split('.')
-    let result = obj
-    
+    let result: any = obj
+
     for (const key of keys) {
       if (result == null) return null
       result = result[key]
     }
-    
-    return result
+
+    return result as T
   }
   
   /**
@@ -120,24 +120,28 @@ export abstract class BaseAdapter<T = unknown> implements DataAdapter<T> {
    */
   protected cleanValue(value: unknown): string | number | Date | null {
     if (value == null) return null
-    
+
     if (typeof value === 'string') {
       const trimmed = value.trim()
-      
+
       // 嘗試轉換為數值
       const numValue = this.cleanNumber(trimmed)
       if (!isNaN(numValue) && /^[0-9.,%-]+$/.test(trimmed)) {
         return numValue
       }
-      
+
       // 嘗試轉換為日期
       const dateValue = this.cleanDate(trimmed)
       if (dateValue) return dateValue
-      
+
       return trimmed
     }
-    
-    return value
+
+    if (typeof value === 'number') return value
+    if (value instanceof Date) return value
+
+    // 其他類型嘗試轉換為字符串
+    return String(value)
   }
   
   /**
