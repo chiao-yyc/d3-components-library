@@ -14,26 +14,24 @@ import {
   createViewportController
 } from './interaction-utils'
 import { createChartClipPath, createStandardDropShadow, createStandardGlow } from './visual-effects'
-import { 
-  GroupDataProcessor, 
-  GroupProcessorResult, 
-  GroupConfig,
+import {
+  GroupDataProcessor,
+  GroupProcessorResult,
   createGroupHighlightManager,
   createGroupFilterManager,
   createGroupLegend,
   GroupHighlightManager,
   GroupFilterManager
 } from './chart-group-utils'
-import { 
-  createInteractionComposer, 
+import {
+  createInteractionComposer,
   createTransitionManager,
   InteractionComposer,
-  TransitionManager,
-  AnimationConfig
+  TransitionManager
 } from './interaction-animation-utils'
 
 // 匯入 tooltip 相關類型和組件
-import type { TooltipFormatter, TooltipData } from '../../ui/chart-tooltip/types'
+import type { TooltipFormatter } from '../../ui/chart-tooltip/types'
 import { ChartTooltip } from '../../ui/chart-tooltip/chart-tooltip'
 
 // Tooltip 配置介面
@@ -133,20 +131,20 @@ export interface BaseChartState {
 }
 
 export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> {
-  protected svgRef: React.RefObject<SVGSVGElement> | null = null;
-  protected containerRef: React.RefObject<HTMLDivElement> | null = null;
+  public svgRef: React.RefObject<SVGSVGElement> | null = null;
+  public containerRef: React.RefObject<HTMLDivElement> | null = null;
   protected props: TProps
   protected state: BaseChartState
-  
+
   // Group functionality managers
   protected groupProcessor?: GroupDataProcessor
   protected groupHighlightManager?: GroupHighlightManager
   protected groupFilterManager?: GroupFilterManager
   protected interactionComposer?: InteractionComposer
   protected transitionManager?: TransitionManager
-  
+
   // 🎯 統一 Tooltip 管理
-  protected tooltipConfig: TooltipConfig
+  protected tooltipConfig!: TooltipConfig
   protected shouldShowTooltip: boolean = true
   
   // 🎯 React tooltip setter 由 createChartComponent 注入
@@ -421,12 +419,12 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
   }
 
   protected createSVGContainer(): d3.Selection<SVGGElement, unknown, null, undefined> {
-    if (!this.svgRef.current) {
+    if (!this.svgRef?.current) {
       throw new Error('SVG ref is not available')
     }
 
     const { margin } = this.getChartDimensions()
-    const svg = d3.select(this.svgRef.current)
+    const svg = d3.select(this.svgRef.current!)
     
     // 清除現有內容
     svg.selectAll('*').remove()
@@ -670,17 +668,17 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
    */
   private formatTooltipContent(data: any): ReactNode {
     const { tooltipFormatter, tooltip } = this.props
-    
+
     // 優先使用 props 中的格式化函數
     if (tooltipFormatter) {
-      return tooltipFormatter({ data, series: this.getChartType() })
+      return tooltipFormatter({ data, series: this.getChartType() }) as ReactNode
     }
-    
+
     // 使用 tooltip 配置中的格式化函數
     if (tooltip?.format) {
-      return tooltip.format({ data, series: this.getChartType() })
+      return tooltip.format({ data, series: this.getChartType() }) as ReactNode
     }
-    
+
     // 預設格式化
     return this.getDefaultTooltipContent(data)
   }
@@ -994,7 +992,7 @@ export abstract class BaseChart<TProps extends BaseChartProps = BaseChartProps> 
 
   // 向下兼容的 render 方法
   render(): ReactNode {
-    return this.renderContent(this.containerRef, this.svgRef)
+    return this.renderContent(this.containerRef!, this.svgRef!)
   }
 }
 
@@ -1018,7 +1016,7 @@ export function createChartComponent<TProps extends BaseChartProps>(
     
     const containerRef = useRef<HTMLDivElement>(null);
     const svgRef = useRef<SVGSVGElement>(null);
-    const [, forceUpdate] = useState({});
+    const [, _forceUpdate] = useState({});
     const [responsiveDimensions, setResponsiveDimensions] = useState<{ width: number; height: number } | null>(null);
     
     // 🎯 直接用 React state 管理 tooltip
@@ -1041,7 +1039,7 @@ export function createChartComponent<TProps extends BaseChartProps>(
     const chartInstanceRef = useRef<BaseChart<TProps> | null>(null);
     
     if (!chartInstanceRef.current) {
-      const instance = new ChartClass(propsWithDefaults);
+      const instance = new ChartClass(propsWithDefaults as TProps);
       chartInstanceRef.current = instance;
     }
     
@@ -1061,13 +1059,13 @@ export function createChartComponent<TProps extends BaseChartProps>(
       console.log('🎯 finalProps:', finalProps);
       if (chartInstance.svgRef?.current) {
         console.log('🎯 About to call chartInstance.update...');
-        chartInstance.update(finalProps);
+        chartInstance.update(finalProps as TProps);
         console.log('🎯 chartInstance.update call completed');
       } else {
         console.log('🎯 SVG ref not available, skipping update');
       }
     }, [finalProps, chartInstance]);
-    
+
     // 單獨的 useEffect 用於 SVG ref 變化
     useEffect(() => {
       console.log('🔧 SVG ref useEffect triggered!');
@@ -1075,7 +1073,7 @@ export function createChartComponent<TProps extends BaseChartProps>(
       console.log('🔧 finalProps exists:', !!finalProps);
       if (chartInstance.svgRef?.current && finalProps) {
         console.log('🔧 About to call chartInstance.update from SVG ref effect...');
-        chartInstance.update(finalProps);
+        chartInstance.update(finalProps as TProps);
         console.log('🔧 chartInstance.update from SVG ref effect completed');
       }
     }, [chartInstance.svgRef?.current]);
