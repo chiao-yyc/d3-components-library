@@ -4,7 +4,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { CorrelogramCore, CorrelogramCoreConfig } from './core/correlogram-core';
 
 // 新的 props 介面
-export interface CorrelogramProps extends ReactChartWrapperProps, CorrelogramCoreConfig {
+export interface CorrelogramProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, CorrelogramCoreConfig {
   // 新架構不需要額外的 React 專用 props
 }
 

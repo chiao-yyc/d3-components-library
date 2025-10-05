@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { TreeMapCore, TreeMapCoreConfig } from './core/tree-map-core';
 
 // 擴展 React props 接口
-export interface TreeMapProps extends ReactChartWrapperProps, TreeMapCoreConfig {
+export interface TreeMapProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, TreeMapCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 
@@ -60,10 +60,9 @@ export const defaultTreeMapProps: Partial<TreeMapProps> = {
   strokeColor: '#ffffff',
   opacity: 1,
   rectRadius: 0,
-  
+
   // 交互配置默認值
   interactive: true,
-  enableTooltip: true,
   enableZoom: false,
   enableDrill: false,
   
@@ -73,10 +72,7 @@ export const defaultTreeMapProps: Partial<TreeMapProps> = {
   
   // 排序配置默認值
   sortBy: 'value',
-  sortDirection: 'desc',
-  
-  // 響應式
-  responsive: true
+  sortDirection: 'desc'
 };
 
 // 為向下兼容，提供舊 props 名稱的映射

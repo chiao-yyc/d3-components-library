@@ -123,7 +123,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
 
   constructor(
     config: RadarChartCoreConfig,
-    callbacks?: ChartStateCallbacks<RadarChartData>
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
   }

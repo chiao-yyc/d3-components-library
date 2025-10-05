@@ -89,7 +89,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
 
   constructor(
     config: BoxPlotCoreConfig,
-    callbacks?: ChartStateCallbacks<BoxPlotData>
+    callbacks?: ChartStateCallbacks
   ) {
     super(config, callbacks);
   }

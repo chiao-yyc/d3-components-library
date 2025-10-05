@@ -33,8 +33,8 @@ export const calculateAlignedPosition = (
   
   // Band Scale：根據對齊策略計算
   const bandwidth = scale.bandwidth()
-  
-  switch (alignment) {
+
+  switch (_alignment) {
     case 'start':
       return basePosition + offset
       

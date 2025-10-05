@@ -7,7 +7,7 @@ import { ViolinPlotCore, ViolinPlotCoreConfig } from './core/violin-plot-core'
 import { ViolinPlotProps as LegacyViolinPlotProps } from './types'
 
 // 新的 props 介面
-export interface ViolinPlotProps extends ReactChartWrapperProps, ViolinPlotCoreConfig {
+export interface ViolinPlotProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, ViolinPlotCoreConfig {
   // 新架構不需要額外的 React 專用 props
 }
 

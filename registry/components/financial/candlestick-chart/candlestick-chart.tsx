@@ -33,9 +33,8 @@ export const defaultCandlestickChartProps: Partial<CandlestickChartProps> = {
   showTooltip: true,
   showGrid: true,
   showVolume: false,
-  bullishColor: '#00C851',
-  bearishColor: '#FF4444',
-  volumeColor: '#6c757d'
+  upColor: '#00C851',
+  downColor: '#FF4444'
 };
 
 // 重新導出類型

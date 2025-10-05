@@ -7,7 +7,7 @@ import { RadarChartCore, RadarChartCoreConfig } from './core/radar-chart-core';
 import { RadarChartProps as LegacyRadarChartProps } from './core/types';
 
 // 新的 props 介面
-export interface RadarChartProps extends ReactChartWrapperProps, RadarChartCoreConfig {
+export interface RadarChartProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, RadarChartCoreConfig {
   // 新架構不需要額外的 React 專用 props
 }
 
@@ -95,7 +95,6 @@ export const defaultRadarChartProps: Partial<RadarChartProps> = {
   dotStroke: '#fff',
   dotStrokeWidth: 2,
   axisLabelOffset: 20,
-  gridLabelOffset: 10,
   fontSize: 12,
   fontFamily: 'sans-serif',
   glowEffect: false,
@@ -104,8 +103,6 @@ export const defaultRadarChartProps: Partial<RadarChartProps> = {
   animationDelay: 100,
   interactive: true,
   showTooltip: true,
-  showLegend: true,
-  legendPosition: 'bottom',
   colors: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
   colorScheme: 'custom'
 }
