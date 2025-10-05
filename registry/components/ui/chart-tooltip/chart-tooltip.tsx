@@ -168,7 +168,7 @@ export function ChartTooltip({
       if (React.isValidElement(formattedContent)) {
         return formattedContent
       }
-      if (typeof formattedContent === 'object' && 'items' in formattedContent) {
+      if (formattedContent && typeof formattedContent === 'object' && 'items' in formattedContent) {
         return renderTooltipContent(formattedContent as TooltipContent)
       }
     }
