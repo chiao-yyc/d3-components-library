@@ -147,23 +147,13 @@ export class BarCore extends BaseChartCore<BarCoreData> {
       return;
     }
 
-    const {
-      orientation = 'vertical',
-      animate = true,
-      animationDuration = 300,
-      opacity = 1,
-      strokeWidth = 0,
-      strokeColor = 'none',
-      cornerRadius = 0
-    } = this.config as BarCoreConfig;
-
     // 清除舊內容
     svg.selectAll('.bar-shape').remove();
 
     if (this.isGrouped) {
-      this.renderGroupedBars(svg, processedData, xScale, yScale);
+      this.renderGroupedBars(svg, processedData, scales.xScale, scales.yScale);
     } else {
-      this.renderBars(svg, processedData, xScale, yScale);
+      this.renderBars(svg, processedData, scales.xScale, scales.yScale);
     }
   }
 

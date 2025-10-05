@@ -249,7 +249,7 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
 }
 
 // 堆疊順序映射
-function getStackOrder(order: string): d3.StackOrderFunction<any, any> {
+function getStackOrder(order: string): any {
   switch (order) {
     case 'ascending': return d3.stackOrderAscending
     case 'descending': return d3.stackOrderDescending
@@ -261,7 +261,7 @@ function getStackOrder(order: string): d3.StackOrderFunction<any, any> {
 }
 
 // 堆疊偏移映射
-function getStackOffset(offset: string): d3.StackOffsetFunction<any, any> {
+function getStackOffset(offset: string): any {
   switch (offset) {
     case 'expand': return d3.stackOffsetExpand
     case 'diverging': return d3.stackOffsetDiverging

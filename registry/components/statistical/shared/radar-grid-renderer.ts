@@ -195,9 +195,9 @@ export class RadarGridRenderer {
 
     axes.forEach((axis, _index) => {
       const endPosition = PolarUtils.polarToCartesian(centerX, centerY, radius, axis.angle);
-      
+
       axisGroup.append('line')
-        .attr('class', `axis-line axis-${index}`)
+        .attr('class', `axis-line axis-${_index}`)
         .attr('x1', centerX)
         .attr('y1', centerY)
         .attr('x2', endPosition.x)
@@ -270,7 +270,7 @@ export class RadarGridRenderer {
 
     axes.forEach((axis, _index) => {
       labelGroup.append('text')
-        .attr('class', `axis-label axis-${index}`)
+        .attr('class', `axis-label axis-${_index}`)
         .attr('x', axis.position.x)
         .attr('y', axis.position.y)
         .attr('text-anchor', textAnchor)

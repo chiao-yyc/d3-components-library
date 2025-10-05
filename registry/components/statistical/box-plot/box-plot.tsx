@@ -79,8 +79,6 @@ export const defaultBoxPlotProps: Partial<BoxPlotProps> = {
   showOutliers: true,
   showMean: true,
   showMedian: true,
-  outlierRadius: 3,
-  meanStyle: 'diamond',
   boxFillOpacity: 0.7,
   boxStroke: '#374151',
   boxStrokeWidth: 1,

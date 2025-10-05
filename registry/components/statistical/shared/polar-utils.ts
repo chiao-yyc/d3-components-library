@@ -144,7 +144,7 @@ export class PolarUtils {
   /**
    * 生成線性路徑
    */
-  private static generateLinearPath(points: Point[], closed: boolean = true): string {
+  public static generateLinearPath(points: Point[], closed: boolean = true): string {
     if (points.length === 0) return '';
 
     let path = `M ${points[0].x} ${points[0].y}`;
