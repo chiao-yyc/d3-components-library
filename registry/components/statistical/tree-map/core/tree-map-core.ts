@@ -5,20 +5,20 @@
 
 import * as d3 from 'd3';
 import { BaseChartCore } from '../../../core/base-chart/core';
-import { 
-  BaseChartData, 
-  ChartData, 
-  BaseChartCoreConfig, 
+import {
+  ChartData,
+  BaseChartCoreConfig,
   DataKeyOrAccessor,
   D3Selection
 } from '../../../core/types';
 
-export interface TreeMapData extends BaseChartData {
+export interface TreeMapData {
   id?: string;
   name?: string;
   value?: number;
   parent?: string;
   children?: TreeMapData[];
+  [key: string]: any; // Allow additional properties
 }
 
 export interface TreeMapDataPoint {
@@ -440,7 +440,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
     // 儲存 positionLabel 方法的引用以避免 this 綁定問題
     const positionLabel = this.positionLabel.bind(this);
 
-    nodes.each(function(d: TreeMapDataPoint): void {
+    nodes.each(function(d: any): void {
       const node = d3.select(this);
       const width = d.x1 - d.x0;
       const height = d.y1 - d.y0;
@@ -584,7 +584,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
         container.attr('transform', event.transform);
       });
 
-    svg.call(this.zoom);
+    svg.call(this.zoom as any);
   }
 
   private formatTooltipContent(data: TreeMapDataPoint): string {
@@ -623,7 +623,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
     svg.transition()
       .duration(750)
       .call(
-        this.zoom.transform,
+        this.zoom.transform as any,
         d3.zoomIdentity.translate(x, y).scale(scale)
       );
   }
@@ -634,6 +634,6 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
     const svg = d3.select(this.containerElement).select('svg');
     svg.transition()
       .duration(750)
-      .call(this.zoom.transform, d3.zoomIdentity);
+      .call(this.zoom.transform as any, d3.zoomIdentity);
   }
 }
