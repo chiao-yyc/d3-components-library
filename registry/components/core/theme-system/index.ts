@@ -68,7 +68,7 @@ export {
 export type { ChartThemeConfig, CustomPaletteConfig, ThemeTransitionConfig } from './theme-utils';
 
 // 便捷導出：常用的主題創建函數
-export const createTheme = (config: Partial<ThemeCoreConfig> & { name: string }) => {
+export const createTheme = (config: Partial<import('./core/theme-core').ThemeCoreConfig> & { name: string }) => {
   const { ThemeCore } = require('./core/theme-core');
   const { baseTokens } = require('./preset-themes');
   

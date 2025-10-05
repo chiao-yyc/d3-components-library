@@ -1,4 +1,4 @@
-// import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { suggestFieldMapping, detectColumnType } from '../../utils/data-detector'
 import { DataMapperProps, DataMapping, FieldInfo } from './types'
@@ -59,8 +59,8 @@ export function DataMapper({
   // 自動設定初始映射
   useEffect(() => {
     if (fieldInfos.length > 0 && autoSuggest && (!mapping.x || !mapping.y)) {
-      const xField = fieldInfos.find(f => f.suggested === 'x')
-      const yField = fieldInfos.find(f => f.suggested === 'y')
+      const xField = fieldInfos.find((f: FieldInfo) => f.suggested === 'x')
+      const yField = fieldInfos.find((f: FieldInfo) => f.suggested === 'y')
       
       if (xField && yField) {
         const newMapping = { x: xField.name, y: yField.name }
@@ -68,8 +68,8 @@ export function DataMapper({
         onMappingChange(newMapping)
       } else {
         // 備用方案：手動分配第一個 string 給 x，第一個 number 給 y
-        const stringField = fieldInfos.find(f => f.type === 'string')
-        const numberField = fieldInfos.find(f => f.type === 'number')
+        const stringField = fieldInfos.find((f: FieldInfo) => f.type === 'string')
+        const numberField = fieldInfos.find((f: FieldInfo) => f.type === 'number')
         
         if (stringField && numberField) {
           const newMapping = { x: stringField.name, y: numberField.name }
@@ -89,20 +89,20 @@ export function DataMapper({
   const getFieldsByType = (targetAxis: 'x' | 'y' | 'color' | 'size') => {
     switch (targetAxis) {
       case 'x':
-        return fieldInfos.filter(f => 
+        return fieldInfos.filter((f: FieldInfo) =>
           f.type === 'string' || f.type === 'date' || f.suggested === 'x'
         )
       case 'y':
-        return fieldInfos.filter(f => 
+        return fieldInfos.filter((f: FieldInfo) =>
           f.type === 'number' || f.suggested === 'y'
         )
       case 'color':
-        return fieldInfos.filter(f => 
-          f.type === 'string' || f.type === 'boolean' || 
+        return fieldInfos.filter((f: FieldInfo) =>
+          f.type === 'string' || f.type === 'boolean' ||
           (f.type === 'number' && f.uniqueCount <= 10)
         )
       case 'size':
-        return fieldInfos.filter(f => f.type === 'number')
+        return fieldInfos.filter((f: FieldInfo) => f.type === 'number')
       default:
         return fieldInfos
     }
@@ -139,7 +139,7 @@ export function DataMapper({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">選擇 X 軸欄位</option>
-            {getFieldsByType('x').map(field => (
+            {getFieldsByType('x').map((field: FieldInfo) => (
               <option key={field.name} value={field.name}>
                 {getFieldIcon(field.type)} {field.name} ({field.type})
               </option>
@@ -158,7 +158,7 @@ export function DataMapper({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">選擇 Y 軸欄位</option>
-            {getFieldsByType('y').map(field => (
+            {getFieldsByType('y').map((field: FieldInfo) => (
               <option key={field.name} value={field.name}>
                 {getFieldIcon(field.type)} {field.name} ({field.type})
               </option>
@@ -177,7 +177,7 @@ export function DataMapper({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">無分組</option>
-            {getFieldsByType('color').map(field => (
+            {getFieldsByType('color').map((field: FieldInfo) => (
               <option key={field.name} value={field.name}>
                 {getFieldIcon(field.type)} {field.name} ({field.type})
               </option>
@@ -196,7 +196,7 @@ export function DataMapper({
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">固定大小</option>
-            {getFieldsByType('size').map(field => (
+            {getFieldsByType('size').map((field: FieldInfo) => (
               <option key={field.name} value={field.name}>
                 {getFieldIcon(field.type)} {field.name} ({field.type})
               </option>
@@ -212,7 +212,7 @@ export function DataMapper({
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {fieldInfos.map(field => (
+          {fieldInfos.map((field: FieldInfo) => (
             <div
               key={field.name}
               className={cn(
@@ -249,7 +249,7 @@ export function DataMapper({
                 <div className="mt-2 pt-2 border-t border-gray-200">
                   <div className="text-xs text-gray-600">
                     <div className="font-medium mb-1">樣本資料:</div>
-                    {field.samples.slice(0, 3).map((sample, i) => (
+                    {field.samples.slice(0, 3).map((sample: any, i: number) => (
                       <div key={i} className="truncate">
                         {String(sample)}
                       </div>

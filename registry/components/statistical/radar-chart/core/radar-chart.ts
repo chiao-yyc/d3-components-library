@@ -226,7 +226,7 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
       interpolation as InterpolationType,
       (d) => d.label,
       (d, axis) => {
-        const value = d.values.find(v => v.axis === axis);
+        const value = d.values.find((v: any) => v.axis === axis);
         return value ? value.normalizedValue : 0;
       }
     );

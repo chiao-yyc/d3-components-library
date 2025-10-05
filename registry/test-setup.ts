@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { expect, beforeEach, afterEach } from 'vitest';
+import { expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { toHaveNoViolations } from 'jest-axe';
 import { setupDOMEnvironment, cleanupDOMEnvironment } from './test-utils';
 

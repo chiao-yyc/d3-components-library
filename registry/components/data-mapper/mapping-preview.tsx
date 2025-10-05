@@ -1,4 +1,4 @@
-// import React, { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { BarChart } from '../basic/bar-chart'
 import { MappingPreviewProps, /* DataMapping */ } from './types'
@@ -30,8 +30,8 @@ export function MappingPreview({
   // 生成顏色映射
   const colorMapping = useMemo(() => {
     if (!mapping.color || !processedData.length) return {}
-    
-    const uniqueColors = [...new Set(processedData.map(d => d.color).filter(Boolean))]
+
+    const uniqueColors = [...new Set(processedData.map((d: any) => d.color).filter(Boolean))]
     const colorPalette = [
       '#3b82f6', '#ef4444', '#10b981', '#f59e0b', 
       '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'
@@ -50,8 +50,8 @@ export function MappingPreview({
     if (!mapping.color || !processedData.length) {
       return ['#3b82f6']
     }
-    
-    return processedData.map(d => 
+
+    return processedData.map((d: any) =>
       colorMapping[String(d.color)] || '#3b82f6'
     )
   }, [mapping.color, processedData, colorMapping])
@@ -59,9 +59,9 @@ export function MappingPreview({
   // 統計資訊
   const statistics = useMemo(() => {
     if (!processedData.length) return null
-    
-    const values = processedData.map(d => d.y)
-    const sum = values.reduce((a, b) => a + b, 0)
+
+    const values = processedData.map((d: any) => d.y)
+    const sum = values.reduce((a: any, b: any) => a + b, 0)
     const mean = sum / values.length
     const min = Math.min(...values)
     const max = Math.max(...values)
@@ -237,7 +237,7 @@ export function MappingPreview({
               </tr>
             </thead>
             <tbody>
-              {processedData.slice(0, 5).map((row, index) => (
+              {processedData.slice(0, 5).map((row: any, index: number) => (
                 <tr key={index} className="border-t border-gray-200">
                   <td className="px-3 py-2 text-gray-900">
                     {String(row.x)}
