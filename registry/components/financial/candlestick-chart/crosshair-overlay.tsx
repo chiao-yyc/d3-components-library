@@ -65,7 +65,7 @@ export const CrosshairOverlay: React.FC<CrosshairOverlayProps> = ({
         setActiveDataPoint(closest)
         onDataPoint?.(closest.data, closest.index)
       }
-    }, 16), // ~60fps
+    }, 16) as any, // ~60fps
     [data, xScale, xAccessor, margin, width, height, onDataPoint]
   )
 

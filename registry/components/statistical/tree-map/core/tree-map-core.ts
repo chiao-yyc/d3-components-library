@@ -375,11 +375,11 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
 
     // 添加標籤
     if (showLabels) {
-      this.renderLabels(nodes);
+      this.renderLabels(nodes as any);
     }
 
     // 添加交互
-    this.addInteractivity(nodes);
+    this.addInteractivity(nodes as any);
 
     // 添加動畫
     if (animate) {
@@ -440,7 +440,7 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
     // 儲存 positionLabel 方法的引用以避免 this 綁定問題
     const positionLabel = this.positionLabel.bind(this);
 
-    nodes.each(function(d: TreeMapDataPoint) {
+    nodes.each(function(d: TreeMapDataPoint): void {
       const node = d3.select(this);
       const width = d.x1 - d.x0;
       const height = d.y1 - d.y0;

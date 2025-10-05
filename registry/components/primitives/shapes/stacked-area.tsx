@@ -107,7 +107,7 @@ export const StackedArea: React.FC<StackedAreaProps> = ({
       if (seriesItem.gradient) {
         let defs = selection.select('defs')
         if (defs.empty()) {
-          defs = selection.append('defs')
+          defs = selection.append('defs') as any
         }
 
         const gradientDef = defs
