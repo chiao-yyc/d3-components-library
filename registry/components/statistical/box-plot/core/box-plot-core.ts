@@ -166,7 +166,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
   }
 
   protected createScales(): Record<string, any> {
-    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedBoxPlotDataPoint[];
     if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as BoxPlotCoreConfig;
@@ -199,7 +199,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
-    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedBoxPlotDataPoint[];
     if (!processedData || processedData.length === 0) {
       this.chartGroup?.selectAll('*').remove();
       return;
@@ -276,7 +276,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     if (!this.chartGroup) return;
 
     const config = this.config as BoxPlotCoreConfig;
-    const processedData = this.processedData as ProcessedBoxPlotDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedBoxPlotDataPoint[];
 
     // 為每個 box plot 組添加事件
     this.chartGroup.selectAll('[class*="box-plot-group-"]')

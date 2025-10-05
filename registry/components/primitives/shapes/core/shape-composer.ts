@@ -217,11 +217,13 @@ export class ShapeRendererFactory {
 export class ShapeComposer extends BaseChartCore<BaseChartData> {
   private renderers: Map<string, ShapeRenderer> = new Map();
   private layerGroup!: d3.Selection<SVGGElement, unknown, null, undefined>;
-  private config!: ShapeComposerConfig;
 
   constructor(config: ShapeComposerConfig, callbacks: ChartStateCallbacks) {
     super(config, callbacks);
-    this.config = config;
+  }
+
+  private get composerConfig(): ShapeComposerConfig {
+    return this.config as ShapeComposerConfig;
   }
 
   public getChartType(): string {
@@ -231,8 +233,8 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
   protected processData(): ChartData<BaseChartData>[] {
     // 組合器不直接處理數據，而是委託給各個形狀渲染器
     const allData: ChartData<BaseChartData>[] = [];
-    
-    this.config.shapes.forEach(shape => {
+
+    this.composerConfig.shapes.forEach(shape => {
       allData.push(...shape.data);
     });
     
@@ -240,7 +242,7 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
   }
 
   protected createScales(): Record<string, any> {
-    if (!this.config.sharedScales) {
+    if (!this.composerConfig.sharedScales) {
       return {}; // 每個形狀有自己的比例尺
     }
 
@@ -255,12 +257,12 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
     // X 軸比例尺
     const xValues = allData.map(d => d.x);
     const xScale = this.isNumericData(xValues)
-      ? d3.scaleLinear().domain(d3.extent(xValues as any) as [number, number]).range([0, chartWidth])
-      : d3.scaleBand().domain(xValues as Iterable<string>).range([0, chartWidth]).padding(0.1);
+      ? d3.scaleLinear().domain(d3.extent(xValues as any) as unknown as [number, number]).range([0, chartWidth])
+      : d3.scaleBand().domain(xValues as unknown as Iterable<string>).range([0, chartWidth]).padding(0.1);
 
     // Y 軸比例尺
     const yValues = allData.map(d => d.y);
-    const yExtent = d3.extent(yValues as any) as [number, number];
+    const yExtent = d3.extent(yValues as any) as unknown as [number, number];
     const yScale = d3.scaleLinear()
       .domain([Math.min(0, yExtent[0]), yExtent[1]])
       .range([chartHeight, 0])
@@ -294,7 +296,7 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
     });
 
     // 渲染圖例
-    if (this.config.legend?.show) {
+    if (this.composerConfig.legend?.show) {
       this.renderLegend(svg);
     }
   }
@@ -302,7 +304,7 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
   // === 公共方法 ===
 
   public addShape(shapeConfig: ShapeConfig): void {
-    this.config.shapes.push(shapeConfig);
+    this.composerConfig.shapes.push(shapeConfig);
     this.render(); // 重新渲染
   }
 
@@ -315,25 +317,25 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
     }
 
     // 從配置中移除
-    this.config.shapes = this.config.shapes.filter(shape => shape.id !== shapeId);
+    this.composerConfig.shapes = this.composerConfig.shapes.filter(shape => shape.id !== shapeId);
   }
 
   public updateShape(shapeId: string, newConfig: Partial<ShapeConfig>): void {
-    const shapeIndex = this.config.shapes.findIndex(shape => shape.id === shapeId);
+    const shapeIndex = this.composerConfig.shapes.findIndex(shape => shape.id === shapeId);
     if (shapeIndex === -1) return;
 
     // 更新配置
-    this.config.shapes[shapeIndex] = { ...this.config.shapes[shapeIndex], ...newConfig };
+    this.composerConfig.shapes[shapeIndex] = { ...this.composerConfig.shapes[shapeIndex], ...newConfig };
 
     // 更新渲染器
     const renderer = this.renderers.get(shapeId);
     if (renderer) {
-      renderer.update(this.config.shapes[shapeIndex]);
+      renderer.update(this.composerConfig.shapes[shapeIndex]);
     }
   }
 
   public toggleShapeVisibility(shapeId: string): void {
-    const shape = this.config.shapes.find(s => s.id === shapeId);
+    const shape = this.composerConfig.shapes.find(s => s.id === shapeId);
     if (shape) {
       shape.visible = !shape.visible;
       
@@ -357,18 +359,18 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
   // === 私有方法 ===
 
   private getSortedShapes(): ShapeConfig[] {
-    const { layerOrder = 'zIndex' } = this.config;
+    const { layerOrder = 'zIndex' } = this.composerConfig;
 
     switch (layerOrder) {
       case 'zIndex':
-        return [...this.config.shapes].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+        return [...this.composerConfig.shapes].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
       
       case 'data':
-        return [...this.config.shapes].sort((a, b) => a.data.length - b.data.length);
+        return [...this.composerConfig.shapes].sort((a, b) => a.data.length - b.data.length);
       
       case 'manual':
       default:
-        return this.config.shapes;
+        return this.composerConfig.shapes;
     }
   }
 
@@ -377,13 +379,13 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
   }
 
   private renderLegend(svg: d3.Selection<SVGGElement, unknown, null, undefined>): void {
-    const { legend } = this.config;
+    const { legend } = this.composerConfig;
     if (!legend) return;
 
     const legendGroup = svg.append('g').attr('class', 'shape-legend');
     
     // 簡單的圖例實現
-    this.config.shapes.forEach((shape, index) => {
+    this.composerConfig.shapes.forEach((shape, index) => {
       const legendItem = legendGroup
         .append('g')
         .attr('class', 'legend-item')

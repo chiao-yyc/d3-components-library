@@ -3,8 +3,6 @@
  * 提供虛擬滾動的輔助功能
  */
 
-import { VirtualScrollState, VirtualScrollItem } from '../../core/performance/virtual-scrolling';
-
 /**
  * 自動估算項目高度
  */

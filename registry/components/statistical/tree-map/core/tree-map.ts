@@ -409,6 +409,8 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
   }
 
   private updateNodeStyles(): void {
+    if (!this.svg) return;
+
     this.svg.selectAll<SVGRectElement, TreeMapNode>('.treemap-rect')
       .style('opacity', (d: TreeMapNode) => {
         if (this.treeMapState.hoveredNode === d) return 1;
@@ -427,12 +429,14 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
       .scaleExtent([0.5, 10])
       .on('zoom', (event: any) => {
         const { transform } = event;
-        this.svg.select('.treemap-container')
+        this.svg?.select('.treemap-container')
           .attr('transform', transform);
         this.treeMapState.zoomLevel = transform.k;
       });
 
-    this.svg.call(this.zoom);
+    if (this.svg) {
+      this.svg.call(this.zoom);
+    }
   }
 
   public drillDown(node: TreeMapNode): void {
@@ -458,7 +462,7 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
     this.treeMapState.hoveredNode = null;
     this.treeMapState.zoomLevel = 1;
 
-    if (this.zoom) {
+    if (this.zoom && this.svg) {
       this.svg.transition()
         .duration(this.props.animationDuration || 750)
         .call(this.zoom.transform, d3.zoomIdentity);
@@ -484,7 +488,7 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
   }
 
   public destroy(): void {
-    if (this.zoom) {
+    if (this.zoom && this.svg) {
       this.svg.on('.zoom', null);
       this.zoom = null;
     }
