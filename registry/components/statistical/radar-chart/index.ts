@@ -10,14 +10,11 @@ export type {
   RadarChartCoreConfig,
   RadarChartData,
   ProcessedRadarDataPoint,
-  RadarValue,
-  RadarAxis,
-  RadarSeries,
-  GridConfig,
-  AxisConfig,
-  DotConfig,
-  AreaConfig
+  RadarValue
 } from './core/radar-chart-core'
+
+// RadarSeries is exported from radar-data-renderer via shared module
+export type { RadarSeries } from '../shared/radar-data-renderer'
 
 // 向下兼容：舊版核心（已棄用）
 export { D3RadarChart } from './core/radar-chart'

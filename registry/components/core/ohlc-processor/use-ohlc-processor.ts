@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { processOHLCData } from './ohlc-processor'
-import { UseOHLCProcessorOptions, OHLCProcessorResult } from './types'
+import { processOHLCData } from './core/ohlc-processor'
+import { UseOHLCProcessorOptions, OHLCProcessorResult } from './core/types'
 
 /**
  * React Hook for OHLC data processing

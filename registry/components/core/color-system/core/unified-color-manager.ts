@@ -4,14 +4,14 @@
  * 提供完整的顏色方案和分類顏色管理
  */
 
-import { 
-  scaleOrdinal, 
+import {
+  scaleOrdinal,
   scaleLinear,
   color as d3Color,
   hsl,
   interpolate,
-  schemeCategory10 
-} from '../d3-utils';
+  schemeCategory10
+} from '../../d3-utils';
 
 // === 核心類型定義 ===
 

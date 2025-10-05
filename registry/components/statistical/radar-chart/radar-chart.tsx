@@ -61,13 +61,7 @@ export type {
   RadarChartCoreConfig,
   RadarChartData,
   ProcessedRadarDataPoint,
-  RadarValue,
-  RadarAxis,
-  RadarSeries,
-  GridConfig,
-  AxisConfig,
-  DotConfig,
-  AreaConfig
+  RadarValue
 } from './core/radar-chart-core'
 
 // 默認配置

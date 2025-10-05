@@ -3,7 +3,7 @@
  * 統一測試模式，提供 mock 數據和測試輔助工具
  */
 
-import { ChartData, BaseChartData } from '../types';
+import { ChartData, BaseChartData } from '../../types';
 
 // === 測試數據生成器 ===
 

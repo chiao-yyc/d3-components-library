@@ -9,15 +9,14 @@ export { BoxPlotCore } from './core/box-plot-core'
 export type {
   BoxPlotCoreConfig,
   BoxPlotData,
-  ProcessedBoxPlotDataPoint,
-  BoxPlotStatistics,
-  BoxPlotBox,
-  OutlierConfig,
-  MeanConfig,
-  MedianConfig,
-  WhiskerConfig,
-  BoxConfig
+  ProcessedBoxPlotDataPoint
 } from './core/box-plot-core'
+
+// Additional types from legacy system
+export type {
+  BoxPlotStatistics,
+  BoxPlotBox
+} from './types'
 
 // 向下兼容：舊版核心（已棄用）
 export { D3BoxPlot } from './core/box-plot'

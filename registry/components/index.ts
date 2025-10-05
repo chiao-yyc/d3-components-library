@@ -35,9 +35,7 @@ export * from './ui/chart-tooltip'
 export * from './data-mapper'
 
 // Resolve duplicate exports by explicitly re-exporting preferred versions
-// AxisConfig is exported from both radar-chart and other modules
 export * from './statistical/radar-chart'
-export type { AxisConfig } from './statistical/radar-chart'
 
 // LegendConfig and ChartDimensions duplicates
 export type { LegendConfig } from './basic/pie-chart'

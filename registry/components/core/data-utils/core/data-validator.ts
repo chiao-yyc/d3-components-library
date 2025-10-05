@@ -3,15 +3,15 @@
  * 抽取共用的數據驗證、處理和轉換邏輯
  */
 
-import { extent } from '../d3-utils';
-import { 
-  ChartData, 
-  BaseChartData, 
+import { extent } from '../../d3-utils';
+import {
+  ChartData,
+  BaseChartData,
   DataAccessor,
   DataKeyOrAccessor,
   // ChartError,
   DataValidationError
-} from '../types';
+} from '../../types';
 
 // === 數據驗證相關 ===
 
