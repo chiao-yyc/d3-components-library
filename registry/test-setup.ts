@@ -4,7 +4,7 @@ import { toHaveNoViolations } from 'jest-axe';
 import { setupDOMEnvironment, cleanupDOMEnvironment } from './test-utils';
 
 // Extend Vitest matchers with jest-dom and jest-axe
-expect.extend(toHaveNoViolations);
+expect.extend(toHaveNoViolations as any);
 
 // 全局設置 DOM 環境
 beforeEach(() => {
