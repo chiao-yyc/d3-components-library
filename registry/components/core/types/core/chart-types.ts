@@ -195,7 +195,7 @@ export interface RenderConfig {
 export interface AnimationConfig {
   duration?: number;
   delay?: number;
-  ease?: d3.EasingFunction;
+  ease?: (t: number) => number;
 }
 
 /**

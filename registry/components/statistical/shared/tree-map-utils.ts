@@ -37,7 +37,7 @@ export interface TreeMapOptions {
   paddingRight?: number;
   paddingBottom?: number;
   paddingLeft?: number;
-  tile?: d3.TreemapTilingMethod;
+  tile?: any; // D3 treemap tiling function
   round?: boolean;
 }
 
@@ -190,7 +190,7 @@ export class TreeMapUtils {
    * @param method 瓦片算法名稱
    * @returns D3 瓦片算法函數
    */
-  static getTilingMethod(method: string): d3.TreemapTilingMethod {
+  static getTilingMethod(method: string): any {
     switch (method.toLowerCase()) {
       case 'binary':
         return d3.treemapBinary;

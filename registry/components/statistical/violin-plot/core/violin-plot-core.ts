@@ -106,7 +106,6 @@ export interface ViolinPlotCoreConfig extends BaseChartCoreConfig<ViolinPlotData
 
 // 主要的 ViolinPlot 核心類
 export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
-  protected processedData: ProcessedViolinDataPoint[] = [];
   protected scales: Record<string, any> = {};
   private colorScale: ColorScale | null = null;
   private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
@@ -136,12 +135,12 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     });
 
     if (!data || data.length === 0) {
-      this.processedData = [];
+      this.processedData = [] as any;
       return [];
     }
 
     // 處理數據點 - 使用統一的數據存取模式
-    this.processedData = data.map((item, index) => {
+    const processedData: ProcessedViolinDataPoint[] = data.map((item, index) => {
       // 處理 Label 值
       let label: string;
       if (typeof labelAccessor === 'function') {
@@ -153,7 +152,7 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
       }
 
       // 處理 Values 數組
-      let values: number[];
+      let values: number[] = [];
       if (valuesAccessor) {
         if (typeof valuesAccessor === 'function') {
           values = valuesAccessor(item, index, data) || [];
@@ -190,35 +189,38 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
       };
     });
 
+    this.processedData = processedData as any;
+
     // 創建顏色比例尺
     if (config.colors) {
       this.colorScale = createColorScale({
         type: 'custom',
         colors: config.colors,
-        domain: [0, Math.max(1, this.processedData.length - 1)]
+        domain: [0, Math.max(1, processedData.length - 1)]
       });
     }
 
-    return this.processedData;
+    return processedData as any;
   }
 
   protected createScales(): Record<string, any> {
-    if (this.processedData.length === 0) return {};
+    const processedData = this.processedData as ProcessedViolinDataPoint[];
+    if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as ViolinPlotCoreConfig;
     const { chartWidth, chartHeight } = this.getChartDimensions();
 
     // 找出所有數值的範圍
-    const allValues = this.processedData.flatMap(d => d.values);
+    const allValues = processedData.flatMap(d => d.values);
     const valueExtent = d3.extent(allValues) as [number, number];
 
     // 找出最大密度值（用於標準化小提琴寬度）
-    const maxDensity = Math.max(...this.processedData.flatMap(d => d.densityData.map(p => p.density)));
+    const maxDensity = Math.max(...processedData.flatMap(d => d.densityData.map(p => p.density)));
 
     if (config.orientation === 'horizontal') {
       // 水平方向：Y軸為類別，X軸為數值
       this.yScale = d3.scaleBand()
-        .domain(this.processedData.map(d => d.label))
+        .domain(processedData.map(d => d.label))
         .range([0, chartHeight])
         .padding(0.2);
 
@@ -229,7 +231,7 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     } else {
       // 垂直方向（默認）：X軸為類別，Y軸為數值
       this.xScale = d3.scaleBand()
-        .domain(this.processedData.map(d => d.label))
+        .domain(processedData.map(d => d.label))
         .range([0, chartWidth])
         .padding(0.2);
 
@@ -258,20 +260,21 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據
-    if (!this.processedData || this.processedData.length === 0) {
+    const processedData = this.processedData as ProcessedViolinDataPoint[];
+    if (!processedData || processedData.length === 0) {
       console.warn('ViolinPlotCore: No processed data available');
       this.chartGroup.selectAll('*').remove();
       return;
     }
 
     // 渲染小提琴圖
-    this.renderViolins();
+    this.renderViolins(processedData);
 
     // 使用統一軸線系統渲染軸線
     this.renderUnifiedAxes();
   }
 
-  private renderViolins(): void {
+  private renderViolins(processedData: ProcessedViolinDataPoint[]): void {
     if (!this.chartGroup || !this.xScale || !this.yScale || !this.densityScale) return;
 
     const config = this.config as ViolinPlotCoreConfig;
@@ -286,7 +289,7 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     } = config;
 
     // 繪製每個小提琴
-    this.processedData.forEach((d, i) => {
+    processedData.forEach((d, i) => {
       const violinGroup = this.chartGroup!
         .append('g')
         .attr('class', `violin-group-${i}`)
@@ -594,8 +597,8 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
   }
 
   // 公共方法：獲取處理後的數據
-  public getProcessedData(): ChartData<ViolinPlotData>[] {
-    return this.processedData;
+  public override getProcessedData(): ChartData<ViolinPlotData>[] | null {
+    return this.processedData as any;
   }
 
   // 公共方法：獲取比例尺

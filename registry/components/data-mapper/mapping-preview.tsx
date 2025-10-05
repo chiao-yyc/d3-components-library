@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { cn } from '../../utils/cn'
 import { BarChart } from '../basic/bar-chart'
 import { MappingPreviewProps, /* DataMapping */ } from './types'

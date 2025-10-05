@@ -113,7 +113,6 @@ export interface RadarChartCoreConfig extends BaseChartCoreConfig<RadarChartData
 
 // 主要的 RadarChart 核心類
 export class RadarChartCore extends BaseChartCore<RadarChartData> {
-  private processedData: ProcessedRadarDataPoint[] = [];
   private colorScale: ColorScale | null = null;
   private chartGroup: D3Selection | null = null;
   private radarAxes: RadarAxisConfig[] = [];
@@ -142,14 +141,14 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     } = config;
 
     if (!data || data.length === 0 || axisKeys.length === 0) {
-      this.processedData = [];
+      this.processedData = [] as any;
       return [];
     }
 
     // 計算數值範圍
     let actualMaxValue = maxValue;
     if (autoScale || actualMaxValue === undefined) {
-      const allValues = data.flatMap(d => 
+      const allValues = data.flatMap(d =>
         axisKeys.map(axis => {
           if (valueAccessor) {
             return valueAccessor(d, axis);
@@ -162,7 +161,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     }
 
     // 處理數據點 - 使用統一的數據存取模式
-    this.processedData = data.map((item, index) => {
+    const processedData: ProcessedRadarDataPoint[] = data.map((item, index) => {
       // 處理 Label 值
       let label: string;
       if (typeof labelAccessor === 'function') {
@@ -201,12 +200,14 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
       };
     });
 
+    this.processedData = processedData as any;
+
     // 創建顏色比例尺
     try {
       this.colorScale = createColorScale({
         type: config.colorScheme || 'custom',
         colors: config.colors || ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
-        domain: [0, Math.max(1, this.processedData.length - 1)],
+        domain: [0, Math.max(1, processedData.length - 1)],
         interpolate: config.colorScheme !== 'custom'
       } as any);
     } catch (error) {
@@ -218,16 +219,17 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
           return defaultColors[index % defaultColors.length];
         },
         getColors: (_count?: number) => ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
-        domain: () => [0, this.processedData.length - 1],
+        domain: () => [0, processedData.length - 1],
         range: () => ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']
       } as ColorScale;
     }
 
-    return this.processedData;
+    return processedData as any;
   }
 
   protected createScales(): Record<string, any> {
-    if (this.processedData.length === 0) return {};
+    const processedData = this.processedData as ProcessedRadarDataPoint[];
+    if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as RadarChartCoreConfig;
     const { 
@@ -280,8 +282,9 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
-    if (!this.processedData || this.processedData.length === 0) {
-      this.chartGroup.selectAll('*').remove();
+    const processedData = this.processedData as ProcessedRadarDataPoint[];
+    if (!processedData || processedData.length === 0) {
+      this.chartGroup?.selectAll('*').remove();
       return;
     }
 
@@ -322,7 +325,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
 
     // 生成雷達數據系列
     this.radarSeries = RadarDataRenderer.generateRadarSeries(
-      this.processedData,
+      processedData,
       this.radarAxes,
       this.centerX,
       this.centerY,
@@ -425,8 +428,8 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
   }
 
   // 公共方法：獲取處理後的數據
-  public getProcessedData(): ProcessedRadarDataPoint[] {
-    return this.processedData;
+  public override getProcessedData(): ChartData<RadarChartData>[] | null {
+    return this.processedData as any;
   }
 
   // 公共方法：獲取雷達系列數據
