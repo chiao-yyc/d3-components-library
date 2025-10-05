@@ -365,13 +365,13 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
         type: 'diverging',
         colors: colorRange,
         domain: [-1, 0, 1]
-      });
+      } as any);
     } else {
       this.colorScale = createColorScale({
         type: 'custom',
         colors: config.colors || colorRange,
         domain: [0, 1]
-      });
+      } as any);
     }
 
     // 創建尺寸比例尺 - 支持新舊參數名稱

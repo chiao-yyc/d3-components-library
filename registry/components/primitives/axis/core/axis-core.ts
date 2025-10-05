@@ -34,19 +34,19 @@ export class AxisCore {
     
     switch (orientation) {
       case 'top':
-        axis = d3.axisTop(scale);
+        axis = d3.axisTop(scale as any);
         break;
       case 'right':
-        axis = d3.axisRight(scale);
+        axis = d3.axisRight(scale as any);
         break;
       case 'bottom':
-        axis = d3.axisBottom(scale);
+        axis = d3.axisBottom(scale as any);
         break;
       case 'left':
-        axis = d3.axisLeft(scale);
+        axis = d3.axisLeft(scale as any);
         break;
       default:
-        axis = d3.axisBottom(scale);
+        axis = d3.axisBottom(scale as any);
     }
 
     if (tickCount) axis.ticks(tickCount);

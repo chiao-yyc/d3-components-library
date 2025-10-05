@@ -254,13 +254,13 @@ export class ShapeComposer extends BaseChartCore<BaseChartData> {
 
     // X 軸比例尺
     const xValues = allData.map(d => d.x);
-    const xScale = this.isNumericData(xValues) 
-      ? d3.scaleLinear().domain(d3.extent(xValues) as [number, number]).range([0, chartWidth])
-      : d3.scaleBand().domain(xValues).range([0, chartWidth]).padding(0.1);
+    const xScale = this.isNumericData(xValues)
+      ? d3.scaleLinear().domain(d3.extent(xValues as any) as [number, number]).range([0, chartWidth])
+      : d3.scaleBand().domain(xValues as Iterable<string>).range([0, chartWidth]).padding(0.1);
 
     // Y 軸比例尺
     const yValues = allData.map(d => d.y);
-    const yExtent = d3.extent(yValues) as [number, number];
+    const yExtent = d3.extent(yValues as any) as [number, number];
     const yScale = d3.scaleLinear()
       .domain([Math.min(0, yExtent[0]), yExtent[1]])
       .range([chartHeight, 0])

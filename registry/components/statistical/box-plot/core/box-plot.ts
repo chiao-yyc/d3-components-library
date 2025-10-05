@@ -213,7 +213,7 @@ export class D3BoxPlot extends BaseChart<BoxPlotProps> {
             centerX = 0; // 不需要在水平模式下使用
           }
 
-          this.renderAllPoints(boxGroup, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth, animate, animationDuration, animationDelay);
+          this.renderAllPoints(boxGroup as any, d, orientation, centerX, centerY, i, pointColorMode, jitterWidth, pointRadius, pointOpacity, boxWidth, animate, animationDuration, animationDelay);
         }
       });
     }

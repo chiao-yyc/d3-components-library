@@ -155,7 +155,7 @@ export class TestDataGenerator {
           }
         ]
       }
-    ] as ChartData<BaseChartData>[];
+    ] as any;
   }
 }
 
@@ -352,7 +352,7 @@ export class TestAsyncUtils {
   static async waitForDOM(): Promise<void> {
     return new Promise(resolve => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(resolve);
+        requestAnimationFrame(resolve as any);
       });
     });
   }

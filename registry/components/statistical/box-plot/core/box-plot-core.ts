@@ -242,7 +242,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     const config = this.config as BoxPlotCoreConfig;
     
     // 使用 BoxPlotRenderer.renderStandalone 方法
-    BoxPlotRenderer.renderStandalone(this.chartGroup, this.processedData, {
+    BoxPlotRenderer.renderStandalone(this.chartGroup as any, this.processedData, {
       xScale,
       yScale,
       colorScale: this.colorScale,

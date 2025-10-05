@@ -78,12 +78,12 @@ export const CrosshairOverlay: React.FC<CrosshairOverlayProps> = ({
     const overlay = overlayRef.current
     if (!overlay) return
 
-    overlay.addEventListener('mousemove', throttledMouseMove)
-    overlay.addEventListener('mouseleave', handleMouseLeave)
+    overlay.addEventListener('mousemove', throttledMouseMove as any)
+    overlay.addEventListener('mouseleave', handleMouseLeave as any)
 
     return () => {
-      overlay.removeEventListener('mousemove', throttledMouseMove)
-      overlay.removeEventListener('mouseleave', handleMouseLeave)
+      overlay.removeEventListener('mousemove', throttledMouseMove as any)
+      overlay.removeEventListener('mouseleave', handleMouseLeave as any)
     }
   }, [throttledMouseMove, handleMouseLeave])
 
