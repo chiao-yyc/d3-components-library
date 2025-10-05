@@ -9,7 +9,7 @@ export interface CorrelogramProps extends ReactChartWrapperProps, CorrelogramCor
 }
 
 // 創建基於 BaseChartCore 的組件
-const CorrelogramComponent = createReactChartWrapper(CorrelogramCore);
+const CorrelogramComponent = createReactChartWrapper(CorrelogramCore as any);
 
 // 主要導出
 export const Correlogram = React.forwardRef<CorrelogramCore, CorrelogramProps>((props, ref) => {

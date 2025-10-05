@@ -13,7 +13,7 @@ export interface CandlestickChartProps extends Omit<ReactChartWrapperProps, 'dat
 }
 
 // 創建 CandlestickChart 組件
-const CandlestickChartComponent = createReactChartWrapper(CandlestickChartCore);
+const CandlestickChartComponent = createReactChartWrapper(CandlestickChartCore as any);
 
 // 導出最終組件
 export const CandlestickChart = React.forwardRef<CandlestickChartCore, CandlestickChartProps>((props, ref) => {

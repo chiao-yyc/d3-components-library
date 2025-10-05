@@ -16,7 +16,7 @@ export interface AreaProps extends Omit<ReactChartWrapperProps, 'data' | 'groupB
 export type AreaShapeData = AreaCoreData;
 
 // 創建 Area 組件
-const AreaComponent = createReactChartWrapper(AreaCore);
+const AreaComponent = createReactChartWrapper(AreaCore as any);
 
 // 導出最終組件
 export const Area = React.forwardRef<AreaCore, AreaProps>((props, ref) => {

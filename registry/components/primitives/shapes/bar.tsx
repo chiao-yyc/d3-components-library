@@ -16,7 +16,7 @@ export interface BarProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy
 export type BarShapeData = BarCoreData;
 
 // 創建 Bar 組件
-const BarComponent = createReactChartWrapper(BarCore);
+const BarComponent = createReactChartWrapper(BarCore as any);
 
 // 導出最終組件
 export const Bar = React.forwardRef<BarCore, BarProps>((props, ref) => {

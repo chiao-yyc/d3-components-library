@@ -19,7 +19,7 @@ export interface ShapeComposerProps extends ReactChartWrapperProps, ShapeCompose
 }
 
 // 創建 ShapeComposer 組件
-const ShapeComposerComponent = createReactChartWrapper(ShapeComposerCore);
+const ShapeComposerComponent = createReactChartWrapper(ShapeComposerCore as any);
 
 // 導出最終組件
 export const ShapeComposer = React.forwardRef<ShapeComposerCore, ShapeComposerProps>((props, ref) => {

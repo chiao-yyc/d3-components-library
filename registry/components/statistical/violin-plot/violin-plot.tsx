@@ -12,7 +12,7 @@ export interface ViolinPlotProps extends ReactChartWrapperProps, ViolinPlotCoreC
 }
 
 // 創建基於 BaseChartCore 的組件
-const ViolinPlotComponent = createReactChartWrapper(ViolinPlotCore)
+const ViolinPlotComponent = createReactChartWrapper(ViolinPlotCore as any)
 
 // 主要導出
 export const ViolinPlot = React.forwardRef<ViolinPlotCore, ViolinPlotProps>((props, ref) => {
