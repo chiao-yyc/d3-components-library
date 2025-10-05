@@ -208,27 +208,27 @@ export const MultiBar: React.FC<MultiBarProps> = ({
       selection.selectAll('.multi-bar-shape')
         .style('cursor', 'pointer')
         .on('click', function(event, d) {
-          const index = data.indexOf(d)
+          const index = data.indexOf(d as MultiBarData)
           if (onDataClick) {
-            onDataClick(d, index, event)
+            onDataClick(d as MultiBarData, index, event)
           } else if (onBarClick) {
-            onBarClick(d, index, event)
+            onBarClick(d as MultiBarData, index, event)
           }
         })
         .on('mouseenter', function(event, d) {
-          const index = data.indexOf(d)
+          const index = data.indexOf(d as MultiBarData)
           if (onDataHover) {
-            onDataHover(d, index, event)
+            onDataHover(d as MultiBarData, index, event)
           } else if (onBarMouseEnter) {
-            onBarMouseEnter(d, index, event)
+            onBarMouseEnter(d as MultiBarData, index, event)
           }
         })
         .on('mouseleave', function(event, d) {
-          const index = data.indexOf(d)
+          const index = data.indexOf(d as MultiBarData)
           if (onDataHover) {
             onDataHover(null, index, event)
           } else if (onBarMouseLeave) {
-            onBarMouseLeave(d, index, event)
+            onBarMouseLeave(d as MultiBarData, index, event)
           }
         })
     }

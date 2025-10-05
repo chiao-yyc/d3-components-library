@@ -49,7 +49,7 @@ export const PREDEFINED_COLOR_SCHEMES: Record<string, ColorScheme> = {
   // D3 categorical schemes
   category10: {
     name: 'Category10',
-    colors: schemeCategory10,
+    colors: [...schemeCategory10],
     type: 'categorical',
     description: 'D3 default 10-color categorical scheme'
   },
@@ -149,7 +149,7 @@ export class UnifiedColorScale implements ColorScale {
     if (this.config.interpolate && this._range.length > 1) {
       // 使用線性插值比例尺
       this.scale = scaleLinear()
-        .range(this._range)
+        .range(this._range as any)
         .interpolate(interpolate);
     } else {
       // 使用序數比例尺

@@ -208,7 +208,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
         colors: config.colors || ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
         domain: [0, Math.max(1, this.processedData.length - 1)],
         interpolate: config.colorScheme !== 'custom'
-      });
+      } as any);
     } catch (error) {
       console.warn('Failed to create color scale, using fallback:', error);
       // 創建簡單的 fallback colorScale

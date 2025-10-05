@@ -280,7 +280,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
         });
     }
 
-    this.pathElements.push(path);
+    this.pathElements.push(path as any);
   }
 
   private renderGroupedLines(
@@ -317,7 +317,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
           .attr('opacity', (this.config as LineCoreConfig).opacity || 1);
       }
 
-      this.pathElements.push(path);
+      this.pathElements.push(path as any);
     });
   }
 
