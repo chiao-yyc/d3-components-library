@@ -107,7 +107,7 @@ const DEFAULT_COLORS = {
 // 主要的 CandlestickChart 核心類
 export class CandlestickChartCore extends BaseChartCore<CandlestickData> {
   protected processedData: ProcessedCandlestickDataPoint[] = [];
-  private _colorScale: ColorScale | null = null;
+  // private __colorScale: ColorScale | null = null;
   private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private xScale: d3.ScaleTime<number, number> | null = null;
   private yScale: d3.ScaleLinear<number, number> | null = null;

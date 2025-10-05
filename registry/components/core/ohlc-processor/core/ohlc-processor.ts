@@ -180,7 +180,7 @@ export class OHLCProcessor {
     return errors
   }
 
-  private extractOHLCData(item: any, mapping: OHLCMapping, index: number): OHLCData | null {
+  private extractOHLCData(item: any, mapping: OHLCMapping, _index: number): OHLCData | null {
     try {
       const getValue = (field: string | ((d: any) => any)): any => {
         return typeof field === 'function' ? field(item) : item[field]

@@ -193,7 +193,7 @@ export class RadarGridRenderer {
 
     const axisGroup = container.append('g').attr('class', 'radial-axes');
 
-    axes.forEach((axis, index) => {
+    axes.forEach((axis, _index) => {
       const endPosition = PolarUtils.polarToCartesian(centerX, centerY, radius, axis.angle);
       
       axisGroup.append('line')
@@ -268,7 +268,7 @@ export class RadarGridRenderer {
 
     const labelGroup = container.append('g').attr('class', 'axis-labels');
 
-    axes.forEach((axis, index) => {
+    axes.forEach((axis, _index) => {
       labelGroup.append('text')
         .attr('class', `axis-label axis-${index}`)
         .attr('x', axis.position.x)
@@ -380,7 +380,7 @@ export class RadarGridRenderer {
       startAngle
     );
 
-    gridPoints.forEach(({ level, angle, point }, index) => {
+    gridPoints.forEach(({ level, angle, point }, _index) => {
       pointsGroup.append('circle')
         .attr('class', `grid-point level-${level} angle-${Math.round(angle)}`)
         .attr('cx', point.x)

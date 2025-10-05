@@ -9,7 +9,7 @@ import {
 } from '../../shared';
 import { HierarchyDataItem, StratifiedDataItem } from '../types';
 import { createColorScale } from '../../../core/color-scheme/color-manager';
-import { DataProcessor } from '../../../core/data-processor/data-processor';
+// import { DataProcessor } from '../../../core/data-processor/data-processor';
 
 export class D3TreeMap extends BaseChart<TreeMapProps> {
   private nodes: TreeMapNode[] = [];

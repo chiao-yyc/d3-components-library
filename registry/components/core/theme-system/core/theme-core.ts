@@ -316,7 +316,7 @@ export class ThemeCore {
     const theme = new ThemeCore(parsed.config);
     
     if (parsed.variants) {
-      parsed.variants.forEach(([name, variant]: [string, ThemeVariant]) => {
+      parsed.variants.forEach(([_name, variant]: [string, ThemeVariant]) => {
         theme.addVariant(variant);
       });
     }
@@ -339,7 +339,7 @@ export class ThemeCore {
     const clonedTheme = new ThemeCore(newConfig);
     
     // 複製變體
-    this.variants.forEach((variant, name) => {
+    this.variants.forEach((variant, _name) => {
       clonedTheme.addVariant({ ...variant });
     });
     

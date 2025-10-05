@@ -141,13 +141,13 @@ export function createHoverEffectManager(
     ...animationConfig
   } = config
 
-  let _currentHoveredElement: Element | null = null
+  // let __currentHoveredElement: Element | null = null
 
   const onHover = (event: MouseEvent, data: any) => {
     const element = event.currentTarget as Element
     const selection = d3.select(element)
 
-    _currentHoveredElement = element
+    // __currentHoveredElement = element
     
     selection.classed(hoverClass, true)
     
@@ -174,8 +174,8 @@ export function createHoverEffectManager(
   const onLeave = (event: MouseEvent, data: any) => {
     const element = event.currentTarget as Element
     const selection = d3.select(element)
-    
-    currentHoveredElement = null
+
+    // __currentHoveredElement = null
     
     selection.classed(hoverClass, false)
     

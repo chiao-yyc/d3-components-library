@@ -122,15 +122,15 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
    * @private
    * @internal Reserved for future use
    */
-  private _parseDate(dateStr: string): Date {
-    // Handle YYYY-MM format like '2023-01'
-    if (/^\d{4}-\d{1,2}$/.test(dateStr)) {
-      return new Date(dateStr + '-01'); // Add day to make it a valid date
-    }
-    // Handle other common formats
-    const parsed = new Date(dateStr);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
-  }
+//   private _parseDate(dateStr: string): Date {
+//     // Handle YYYY-MM format like '2023-01'
+//     if (/^\d{4}-\d{1,2}$/.test(dateStr)) {
+//       return new Date(dateStr + '-01'); // Add day to make it a valid date
+//     }
+//     // Handle other common formats
+//     const parsed = new Date(dateStr);
+//     return isNaN(parsed.getTime()) ? new Date() : parsed;
+//   }
 
   protected processData(): ChartData<AreaChartData>[] {
     const config = this.config as AreaChartCoreConfig;
@@ -291,82 +291,82 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   /** @internal Reserved for future use */
-  private _getYValues(): number[] {
-    const config = this.config as AreaChartCoreConfig;
-    
-    if (config.stackMode && config.stackMode !== 'none' && this.stackedData.length > 0) {
-      const maxY1Values = d3.group(this.stackedData, d => d.x);
-      return Array.from(maxY1Values.values()).map(points => 
-        d3.max(points, d => d.y1 || d.y) || 0
-      );
-    }
-    
-    return this.areaProcessedData.map(d => d.y);
-  }
+//   private _getYValues(): number[] {
+//     const config = this.config as AreaChartCoreConfig;
+//     
+//     if (config.stackMode && config.stackMode !== 'none' && this.stackedData.length > 0) {
+//       const maxY1Values = d3.group(this.stackedData, d => d.x);
+//       return Array.from(maxY1Values.values()).map(points => 
+//         d3.max(points, d => d.y1 || d.y) || 0
+//       );
+//     }
+//     
+//     return this.areaProcessedData.map(d => d.y);
+//   }
 
   /** @internal Reserved for future use */
-  private _createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
-    if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
-
-    // 檢查是否為日期類型
-    if (values[0] instanceof Date) {
-      const dateValues = values.filter((v): v is Date => v instanceof Date);
-      const extent = d3.extent(dateValues) as [Date, Date];
-      return d3.scaleTime()
-        .domain(extent)
-        .range([0, this.chartWidth]);
-    }
-
-    // 檢查是否為字符串類型
-    if (typeof values[0] === 'string') {
-      const uniqueCategories = Array.from(new Set(values as string[]));
-      return d3.scaleBand()
-        .domain(uniqueCategories)
-        .range([0, this.chartWidth])
-        .padding(0.1);
-    }
-
-    // 數值類型
-    return d3.scaleLinear()
-      .domain(d3.extent(values as number[]) as [number, number])
-      .range([0, this.chartWidth]);
-  }
-
-  /** @internal Reserved for future use */
-  private _createYScale(values: number[]): d3.ScaleLinear<number, number> {
-    if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
-    
-    const config = this.config as AreaChartCoreConfig;
-    let domain: [number, number];
-    
-    if (config.stackMode === 'percent') {
-      domain = [0, 100];
-    } else {
-      domain = [0, d3.max(values) || 0];
-    }
-    
-    return d3.scaleLinear()
-      .domain(domain)
-      .range([this.chartHeight, 0])
-      .nice();
-  }
+//   private _createXScale(values: (number | Date | string)[]): d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string> {
+//     if (values.length === 0) return d3.scaleLinear().range([0, this.chartWidth]);
+// 
+//     // 檢查是否為日期類型
+//     if (values[0] instanceof Date) {
+//       const dateValues = values.filter((v): v is Date => v instanceof Date);
+//       const extent = d3.extent(dateValues) as [Date, Date];
+//       return d3.scaleTime()
+//         .domain(extent)
+//         .range([0, this.chartWidth]);
+//     }
+// 
+//     // 檢查是否為字符串類型
+//     if (typeof values[0] === 'string') {
+//       const uniqueCategories = Array.from(new Set(values as string[]));
+//       return d3.scaleBand()
+//         .domain(uniqueCategories)
+//         .range([0, this.chartWidth])
+//         .padding(0.1);
+//     }
+// 
+//     // 數值類型
+//     return d3.scaleLinear()
+//       .domain(d3.extent(values as number[]) as [number, number])
+//       .range([0, this.chartWidth]);
+//   }
 
   /** @internal Reserved for future use */
-  private _renderAreas(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
-    yScale: d3.ScaleLinear<number, number>
-  ): void {
-    if (!this.areaGroup) return;
+//   private _createYScale(values: number[]): d3.ScaleLinear<number, number> {
+//     if (values.length === 0) return d3.scaleLinear().range([this.chartHeight, 0]);
+//     
+//     const config = this.config as AreaChartCoreConfig;
+//     let domain: [number, number];
+//     
+//     if (config.stackMode === 'percent') {
+//       domain = [0, 100];
+//     } else {
+//       domain = [0, d3.max(values) || 0];
+//     }
+//     
+//     return d3.scaleLinear()
+//       .domain(domain)
+//       .range([this.chartHeight, 0])
+//       .nice();
+//   }
 
-    const config = this.config as AreaChartCoreConfig;
-    const curve = this.getCurveFunction(config.curve);
-
-    if (config.stackMode && config.stackMode !== 'none') {
-      this.renderStackedAreas(xScale, yScale, curve);
-    } else {
-      this.renderRegularAreas(xScale, yScale, curve);
-    }
-  }
+  /** @internal Reserved for future use */
+//   private _renderAreas(
+//     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
+//     yScale: d3.ScaleLinear<number, number>
+//   ): void {
+//     if (!this.areaGroup) return;
+// 
+//     const config = this.config as AreaChartCoreConfig;
+//     const curve = this.getCurveFunction(config.curve);
+// 
+//     if (config.stackMode && config.stackMode !== 'none') {
+//       this.renderStackedAreas(xScale, yScale, curve);
+//     } else {
+//       this.renderRegularAreas(xScale, yScale, curve);
+//     }
+//   }
 
   private renderRegularAreas(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
@@ -483,51 +483,51 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   }
 
   /** @internal Reserved for future use */
-  private _renderPoints(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
-    yScale: d3.ScaleLinear<number, number>
-  ): void {
-    if (!this.areaGroup) return;
-
-    const config = this.config as AreaChartCoreConfig;
-    const pointRadius = config.pointRadius || 3;
-
-    // 創建 x 位置計算函數
-    const getXPosition = (d: ProcessedAreaDataPoint): number => {
-      const xPos = xScale(d.x as any);
-      // 如果是 scaleBand，返回中心位置
-      if (xPos !== undefined && 'bandwidth' in xScale) {
-        return xPos + (xScale.bandwidth() / 2);
-      }
-      return xPos || 0;
-    };
-
-    this.seriesData.forEach((series, seriesIndex) => {
-      const points = this.areaGroup!
-        .selectAll<SVGCircleElement, ProcessedAreaDataPoint>(`.points-series-${seriesIndex}`)
-        .data(series.data)
-        .join('circle')
-        .attr('class', `points-series-${seriesIndex}`)
-        .attr('cx', getXPosition)
-        .attr('cy', d => yScale(d.y))
-        .attr('r', pointRadius)
-        .attr('fill', series.color)
-        .attr('stroke', 'white')
-        .attr('stroke-width', 1);
-
-      // 添加點擊和懸停事件
-      points
-        .on('click', (event, d) => {
-          config.onDataClick?.(d, event);
-        })
-        .on('mouseenter', (event, d) => {
-          config.onDataHover?.(d, event);
-        })
-        .on('mouseleave', (event) => {
-          config.onDataHover?.(null, event);
-        });
-    });
-  }
+//   private _renderPoints(
+//     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,
+//     yScale: d3.ScaleLinear<number, number>
+//   ): void {
+//     if (!this.areaGroup) return;
+// 
+//     const config = this.config as AreaChartCoreConfig;
+//     const pointRadius = config.pointRadius || 3;
+// 
+//     // 創建 x 位置計算函數
+//     const getXPosition = (d: ProcessedAreaDataPoint): number => {
+//       const xPos = xScale(d.x as any);
+//       // 如果是 scaleBand，返回中心位置
+//       if (xPos !== undefined && 'bandwidth' in xScale) {
+//         return xPos + (xScale.bandwidth() / 2);
+//       }
+//       return xPos || 0;
+//     };
+// 
+//     this.seriesData.forEach((series, seriesIndex) => {
+//       const points = this.areaGroup!
+//         .selectAll<SVGCircleElement, ProcessedAreaDataPoint>(`.points-series-${seriesIndex}`)
+//         .data(series.data)
+//         .join('circle')
+//         .attr('class', `points-series-${seriesIndex}`)
+//         .attr('cx', getXPosition)
+//         .attr('cy', d => yScale(d.y))
+//         .attr('r', pointRadius)
+//         .attr('fill', series.color)
+//         .attr('stroke', 'white')
+//         .attr('stroke-width', 1);
+// 
+//       // 添加點擊和懸停事件
+//       points
+//         .on('click', (event, d) => {
+//           config.onDataClick?.(d, event);
+//         })
+//         .on('mouseenter', (event, d) => {
+//           config.onDataHover?.(d, event);
+//         })
+//         .on('mouseleave', (event) => {
+//           config.onDataHover?.(null, event);
+//         });
+//     });
+//   }
 
   private getCurveFunction(curveType?: string): any {
     switch (curveType) {
@@ -557,31 +557,31 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
    * }
    */
   /** @internal Reserved for future use */
-  private _renderGrid(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
-  ): void {
-    if (!this.chartGroup) return;
-
-    // X軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'x-grid')
-      .attr('transform', `translate(0, ${this.chartHeight})`)
-      .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
-
-    // Y軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'y-grid')
-      .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
-  }
+//   private _renderGrid(
+//     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+//     yScale: d3.ScaleLinear<number, number>
+//   ): void {
+//     if (!this.chartGroup) return;
+// 
+//     // X軸網格
+//     this.chartGroup
+//       .append('g')
+//       .attr('class', 'x-grid')
+//       .attr('transform', `translate(0, ${this.chartHeight})`)
+//       .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
+//       .selectAll('line')
+//       .attr('stroke', '#e5e7eb')
+//       .attr('stroke-width', 0.5);
+// 
+//     // Y軸網格
+//     this.chartGroup
+//       .append('g')
+//       .attr('class', 'y-grid')
+//       .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
+//       .selectAll('line')
+//       .attr('stroke', '#e5e7eb')
+//       .attr('stroke-width', 0.5);
+//   }
 
   private setupInteractions(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number> | d3.ScaleBand<string>,

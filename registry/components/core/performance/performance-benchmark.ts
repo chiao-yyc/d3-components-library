@@ -352,7 +352,8 @@ export async function quickPerformanceTest(): Promise<void> {
     return renderTime;
   };
   
-  const _results = await benchmark.runBenchmarkSuite(
+  // const _results =
+  await benchmark.runBenchmarkSuite(
     {
       testName: '快速測試',
       dataSizes: [1000, 5000, 15000],

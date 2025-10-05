@@ -21,7 +21,7 @@ export interface PositionConfig {
 export const calculateAlignedPosition = (
   value: any,
   scale: any,
-  alignment: AlignmentStrategy = 'center',
+  _alignment: AlignmentStrategy = 'center',
   offset: number = 0
 ): number => {
   const basePosition = scale(value)
@@ -61,15 +61,15 @@ export const calculateAlignedPosition = (
 export const calculateBarPosition = (
   value: any,
   scale: any,
-  alignment: AlignmentStrategy = 'center',
+  _alignment: AlignmentStrategy = 'center',
   barWidth: number,
   offset: number = 0
 ): { x: number; width: number } => {
   const alignedPosition = calculateAlignedPosition(value, scale, _alignment, offset)
-  
+
   let x: number
-  
-  switch (alignment) {
+
+  switch (_alignment) {
     case 'start':
       x = alignedPosition
       break
@@ -104,7 +104,7 @@ export const calculateGroupedBarPosition = (
   groupIndex: number,
   groupCount: number,
   barWidthRatio: number = 0.8,
-  alignment: AlignmentStrategy = 'center'
+  _alignment: AlignmentStrategy = 'center'
 ): { x: number; width: number } => {
   if (!scale.bandwidth) {
     throw new Error('分組條形圖需要 Band Scale')
@@ -167,9 +167,9 @@ export const checkAlignment = (
 export const createLinePositionGenerator = (
   xScale: any,
   yScale: any,
-  alignment: AlignmentStrategy = 'center'
+  _alignment: AlignmentStrategy = 'center'
 ) => ({
-  x: (d: any) => calculateAlignedPosition(d.x, xScale, alignment),
+  x: (d: any) => calculateAlignedPosition(d.x, xScale, _alignment),
   y: (d: any) => yScale(d.y)
 })
 
@@ -183,15 +183,15 @@ export const createLinePositionGenerator = (
 export const calculatePositionsBatch = (
   data: any[],
   xScale: any,
-  alignment: AlignmentStrategy = 'center',
+  _alignment: AlignmentStrategy = 'center',
   offset: number = 0
 ): number[] => {
   // 預計算常用值以提高性能
   const hasBandwidth = !!xScale.bandwidth
   const bandwidth = hasBandwidth ? xScale.bandwidth() : 0
-  
+
   let offsetValue: number
-  switch (alignment) {
+  switch (_alignment) {
     case 'start':
       offsetValue = offset
       break
@@ -222,9 +222,9 @@ export const DEFAULT_ALIGNMENT_CONFIG: Record<string, AlignmentStrategy> = {
 /**
  * 驗證對齊策略是否有效
  */
-export const validateAlignment = (alignment: any): AlignmentStrategy => {
+export const validateAlignment = (_alignment: any): AlignmentStrategy => {
   const validAlignments: AlignmentStrategy[] = ['start', 'center', 'end']
-  return validAlignments.includes(alignment) ? alignment : 'center'
+  return validAlignments.includes(_alignment) ? _alignment : 'center'
 }
 
 /**
@@ -244,13 +244,13 @@ export const debugAlignment = (
   componentType: string,
   value: any,
   scale: any,
-  alignment: AlignmentStrategy,
+  _alignment: AlignmentStrategy,
   calculatedPosition: number
 ): void => {
   if (process.env.NODE_ENV === 'development') {
     console.log(`[Alignment Debug] ${componentType}:`, {
       value,
-      _alignment,
+      alignment: _alignment,
       hasBandwidth: !!scale.bandwidth,
       bandwidth: scale.bandwidth?.() || 'N/A',
       basePosition: scale(value),

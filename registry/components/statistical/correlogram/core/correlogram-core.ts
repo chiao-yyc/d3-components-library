@@ -667,7 +667,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
         this.showTooltip(x, y, tooltipContent);
         config.onDataHover?.(d, event);
       })
-      .on('mouseleave', (event, d) => {
+      .on('mouseleave', (event, _d) => {
         this.hideTooltip();
         config.onDataHover?.(null, event);
       });

@@ -4,7 +4,7 @@ import { DataProcessor } from '../../../core/data-processor/data-processor';
 import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
 import { StatisticalUtils } from '../../shared/statistical-utils';
 import { BoxPlotRenderer } from '../../shared/box-plot-renderer';
-import { BoxPlotProps, ProcessedBoxPlotDataPoint, BoxPlotStatistics } from './types';
+import { BoxPlotProps, ProcessedBoxPlotDataPoint/* , BoxPlotStatistics */ } from './types';
 
 export class D3BoxPlot extends BaseChart<BoxPlotProps> {
   private processedData: ProcessedBoxPlotDataPoint[] = [];
