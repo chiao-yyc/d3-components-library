@@ -14,7 +14,7 @@ export type { ColorScale, ColorSchemeConfig, ColorSchemeType, ColorFormat, Color
 
 // D3 色彩比例尺實現
 class D3ColorScale implements ColorScale {
-  private scale: d3.ScaleOrdinal<string, string> | d3.ScaleSequential<string>
+  private scale: d3.ScaleOrdinal<string, string> | d3.ScaleSequential<string> | any
   private _domain: unknown[]
   private _range: string[]
   private config: ColorSchemeConfig
@@ -23,6 +23,7 @@ class D3ColorScale implements ColorScale {
     this.config = config
     this._domain = []
     this._range = []
+    this.scale = d3.scaleOrdinal<string, string>()
     this.createScale()
   }
 
@@ -41,19 +42,22 @@ class D3ColorScale implements ColorScale {
     if (interpolate) {
       // 創建插值比例尺
       if (colorArray.length === 1) {
-        this.scale = d3.scaleOrdinal().range(colorArray)
+        this.scale = d3.scaleOrdinal<string, string>().range(colorArray) as any
       } else if (colorArray.length === 2) {
-        this.scale = d3.scaleLinear()
+        const linearScale = d3.scaleLinear<string, string>()
+          .domain([0, 1])
           .range(colorArray)
-          .interpolate(d3.interpolateRgb)
+        this.scale = linearScale as any
       } else {
-        this.scale = d3.scaleLinear()
+        const indices = colorArray.map((_, i) => i)
+        const linearScale = d3.scaleLinear<string, string>()
+          .domain(indices)
           .range(colorArray)
-          .interpolate(d3.interpolateRgb)
+        this.scale = linearScale as any
       }
     } else {
       // 創建序數比例尺
-      this.scale = d3.scaleOrdinal().range(colorArray)
+      this.scale = d3.scaleOrdinal<string, string>().range(colorArray) as any
     }
   }
 
@@ -61,13 +65,13 @@ class D3ColorScale implements ColorScale {
     if (this.config.interpolate && typeof value === 'number') {
       return this.scale(value)
     }
-    
+
     if (typeof value === 'string' || index !== undefined) {
       const idx = index !== undefined ? index : 0
-      return this.scale(idx % this._range.length)
+      return this.scale(String(idx % this._range.length))
     }
-    
-    return this.scale(value)
+
+    return this.scale(String(value))
   }
 
   getColors(count?: number): string[] {
@@ -109,9 +113,9 @@ class D3ColorScale implements ColorScale {
       const index = Math.floor(t * this._range.length)
       return this._range[Math.min(index, this._range.length - 1)]
     }
-    
+
     const normalizedT = Math.max(0, Math.min(1, t))
-    return this.scale(normalizedT)
+    return this.scale(String(normalizedT))
   }
 
   copy(): ColorScale {

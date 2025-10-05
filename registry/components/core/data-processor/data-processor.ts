@@ -10,8 +10,22 @@ import {
 import { detectColumnType } from '../../../utils/data-detector'
 
 export class DataProcessor {
-  private config: Required<DataProcessorConfig>
-  
+  private config: DataProcessorConfig & {
+    mapping: DataMapping
+    accessors: DataAccessors
+    keys: DataKeys
+    autoDetect: boolean
+    autoDetectThreshold: number
+    removeNulls: boolean
+    removeInvalid: boolean
+    validateTypes: boolean
+    parseNumbers: boolean
+    parseDates: boolean
+    trimStrings: boolean
+    filter: (d: any, index: number) => boolean
+    offset: number
+  }
+
   constructor(config: DataProcessorConfig = {}) {
     this.config = {
       mapping: {},
@@ -26,8 +40,6 @@ export class DataProcessor {
       parseDates: true,
       trimStrings: true,
       filter: () => true,
-      sort: undefined,
-      limit: undefined,
       offset: 0,
       ...config
     }
