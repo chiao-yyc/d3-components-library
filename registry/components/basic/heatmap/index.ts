@@ -26,6 +26,9 @@ export type {
 // 向下兼容類型（舊版本支持）
 export type { HeatmapDataPoint as OldHeatmapDataPoint, ProcessedHeatmapDataPoint, LegendTick } from './types';
 
+// 導入 Heatmap 組件用於向下兼容變體
+import { Heatmap } from './heatmap';
+
 // 舊版本的專用變體組件 (向下兼容)
 export const CorrelationHeatmap = (props: any) => {
   return React.createElement(Heatmap, { ...props, colorScheme: "reds", showValues: true, domain: [-1, 1] });

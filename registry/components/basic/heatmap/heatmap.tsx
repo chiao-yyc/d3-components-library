@@ -78,8 +78,7 @@ const getDefaultHeatmapProps = (): Partial<HeatmapProps> => ({
   
   // 交互配置默認值
   interactive: true,
-  enableTooltip: true,
-  
+
   // 動畫配置默認值
   animate: true,
   animationDuration: 750
@@ -123,10 +122,7 @@ export const HeatmapWithLegacySupport = React.forwardRef<HeatmapCore,
     xAccessor: modernProps.xAccessor || xKey || 'x',
     yAccessor: modernProps.yAccessor || yKey || 'y',
     valueAccessor: modernProps.valueAccessor || valueKey || 'value',
-    
-    // 配置映射
-    enableTooltip: modernProps.enableTooltip ?? showTooltip ?? true,
-    
+
     // 事件名稱映射
     onDataClick: modernProps.onDataClick || onCellClick,
     onDataHover: modernProps.onDataHover || onCellHover,

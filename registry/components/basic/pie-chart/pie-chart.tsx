@@ -67,10 +67,9 @@ export const PieChartLegacy = React.forwardRef<PieChartCore, LegacyPieChartProps
 
   const finalProps: PieChartProps = {
     ...modernProps,
-    // 映射舊版資料存取模式到新版
-    labelAccessor: modernProps.labelAccessor || legacyLabelAccessor || labelKey || 'label',
-    valueAccessor: modernProps.valueAccessor || legacyValueAccessor || valueKey || 'value',
-    colorAccessor: modernProps.colorAccessor || legacyColorAccessor || colorKey,
+    labelAccessor: legacyLabelAccessor || labelKey || 'label',
+    valueAccessor: legacyValueAccessor || valueKey || 'value',
+    colorAccessor: legacyColorAccessor || colorKey,
   };
 
   return <PieChart ref={ref} {...finalProps} />;
@@ -153,7 +152,8 @@ export const DonutChart = React.forwardRef<PieChartCore, Omit<PieChartProps, 'in
 DonutChart.displayName = 'DonutChart';
 
 export const PieChartWithLegend = React.forwardRef<PieChartCore, Omit<PieChartProps, 'legend'>>((props, ref) => {
-  return <PieChart ref={ref} {...props} legend={{ ...defaultPieChartProps.legend, show: true }} />;
+  const legendConfig: LegendConfig = { ...(defaultPieChartProps.legend as LegendConfig), show: true };
+  return <PieChart ref={ref} {...props} legend={legendConfig} />;
 });
 
 PieChartWithLegend.displayName = 'PieChartWithLegend';
@@ -165,7 +165,8 @@ export const HalfPieChart = React.forwardRef<PieChartCore, Omit<PieChartProps, '
 HalfPieChart.displayName = 'HalfPieChart';
 
 export const PieChartNoLabels = React.forwardRef<PieChartCore, Omit<PieChartProps, 'labels'>>((props, ref) => {
-  return <PieChart ref={ref} {...props} labels={{ ...defaultPieChartProps.labels, show: false }} />;
+  const labelConfig: LabelConfig = { ...(defaultPieChartProps.labels as LabelConfig), show: false };
+  return <PieChart ref={ref} {...props} labels={labelConfig} />;
 });
 
 PieChartNoLabels.displayName = 'PieChartNoLabels';

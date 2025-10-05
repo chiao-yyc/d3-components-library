@@ -42,7 +42,7 @@ export type {
 export type { PieChartProps as LegacyPieChartProps, LegendItem } from './types';
 
 // 快捷變體組件（已整合到主檔案）
-export const DonutChartLegacy = React.forwardRef<unknown, unknown>((props, ref) => {
+export const DonutChartLegacy = React.forwardRef<unknown, any>((props: any, ref) => {
   return React.createElement(DonutChartComponent, { ref, ...props });
 });
 DonutChartLegacy.displayName = 'DonutChartLegacy';
