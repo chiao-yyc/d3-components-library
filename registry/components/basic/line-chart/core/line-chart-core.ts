@@ -12,7 +12,8 @@ import {
   DataKeyOrAccessor,
   ChartStateCallbacks
 } from '../../../core/types';
-import { createColorScale, ColorScale } from '../../../core/color-scheme/color-manager';
+import { createColorScale } from '../../../core/color-scheme/color-manager';
+// import type { ColorScale } from '../../../core/color-scheme/color-manager';
 
 // LineChart 專用數據接口
 export interface LineChartData extends BaseChartData {
@@ -116,7 +117,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   protected processedData: ChartData<LineChartData>[] = [];
   private internalProcessedData: ProcessedLineDataPoint[] = [];
   private seriesData: LineSeriesData[] = [];
-  private _colorScale: ColorScale | null = null;
+  // private _colorScale: ColorScale | null = null;
   private lineGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private pointsGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
   private clipPathId: string;
@@ -127,8 +128,8 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
   private chartGroup: d3.Selection<SVGGElement, unknown, null, undefined> | null = null;
 
   // 交互控制器
-  private _brushZoomController: any = null;
-  private _crosshairController: any = null;
+  // private _brushZoomController: any = null;
+  // private _crosshairController: any = null;
 
   // Tooltip 相關
   private tooltipOverlay: d3.Selection<SVGRectElement, unknown, null, undefined> | null = null;
@@ -266,7 +267,8 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
 
     // 創建顏色比例尺
     if (config.colors) {
-      this._colorScale = createColorScale(config.colors, [0, Math.max(0, this.seriesData.length - 1)]);
+      // this._colorScale = createColorScale(config.colors, [0, Math.max(0, this.seriesData.length - 1)]);
+      createColorScale(config.colors, [0, Math.max(0, this.seriesData.length - 1)]);
     }
   }
 
@@ -568,31 +570,32 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
    * }
    */
 
-  private _renderGrid(
-    xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
-    yScale: d3.ScaleLinear<number, number>
-  ): void {
-    if (!this.chartGroup) return;
+  // Commented out - unused method (网格现在由 BaseChartCore 的轴线系统统一处理)
+  // private __renderGrid(
+  //   xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
+  //   yScale: d3.ScaleLinear<number, number>
+  // ): void {
+  //   if (!this.chartGroup) return;
 
-    // X軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'x-grid')
-      .attr('transform', `translate(0, ${this.chartHeight})`)
-      .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
+  //   // X軸網格
+  //   this.chartGroup
+  //     .append('g')
+  //     .attr('class', 'x-grid')
+  //     .attr('transform', `translate(0, ${this.chartHeight})`)
+  //     .call(d3.axisBottom(xScale).tickSize(-this.chartHeight).tickFormat('' as any))
+  //     .selectAll('line')
+  //     .attr('stroke', '#e5e7eb')
+  //     .attr('stroke-width', 0.5);
 
-    // Y軸網格
-    this.chartGroup
-      .append('g')
-      .attr('class', 'y-grid')
-      .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
-      .selectAll('line')
-      .attr('stroke', '#e5e7eb')
-      .attr('stroke-width', 0.5);
-  }
+  //   // Y軸網格
+  //   this.chartGroup
+  //     .append('g')
+  //     .attr('class', 'y-grid')
+  //     .call(d3.axisLeft(yScale).tickSize(-this.chartWidth).tickFormat('' as any))
+  //     .selectAll('line')
+  //     .attr('stroke', '#e5e7eb')
+  //     .attr('stroke-width', 0.5);
+  // }
 
   private setupInteractions(
     xScale: d3.ScaleLinear<number, number> | d3.ScaleTime<number, number>,
@@ -745,7 +748,7 @@ export class LineChartCore extends BaseChartCore<LineChartData> {
 
   private findDataPointsAtX(xValue: number | Date): ProcessedLineDataPoint[] {
     const config = this.config as LineChartCoreConfig;
-    const _isTimeScale = xValue instanceof Date || typeof xValue === 'object';
+    // const _isTimeScale = xValue instanceof Date || typeof xValue === 'object';
     
     // 根據 tooltip 模式決定查找邏輯
     switch (config.tooltipMode) {

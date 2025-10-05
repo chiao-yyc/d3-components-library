@@ -12,7 +12,7 @@ import {
   DataKeyOrAccessor,
   D3Selection
 } from '../../../core/types';
-import { ColorScale, createColorScale } from '../../../core/color-scheme/color-manager';
+// import { ColorScale, createColorScale } from '../../../core/color-scheme/color-manager';
 
 export interface HeatmapData extends BaseChartData {
   x?: string | number;
@@ -340,7 +340,7 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
         .attr('opacity', 0)
         .transition()
         .duration(animationDuration)
-        .delay((d, i) => (config.animationDelay || 0) + i * 20)
+        .delay((_d, i) => (config.animationDelay || 0) + i * 20)
         .attr('opacity', 1);
     }
   }
@@ -348,7 +348,7 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
 
   private renderLegend(container: D3Selection<SVGGElement>): void {
     const config = this.config;
-    const { 
+    const {
       legendPosition = 'right',
       legendTitle = 'Value',
       legendFormat = (d: number) => d.toString()
@@ -356,7 +356,7 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
 
     if (!this.colorScale) return;
 
-    const { chartWidth, chartHeight, margin, width, height } = this.getChartDimensions();
+    const { chartWidth: _chartWidth, chartHeight: _chartHeight, margin, width, height } = this.getChartDimensions();
     
     // 創建圖例組
     const legendGroup = container.append('g').attr('class', 'heatmap-legend');
@@ -470,7 +470,7 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
           this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
         }
       })
-      .on('mouseout', (event: MouseEvent, d: HeatmapDataPoint) => {
+      .on('mouseout', (event: MouseEvent, _d: HeatmapDataPoint) => {
         // 移除懸停效果
         d3.select(event.currentTarget as SVGGElement)
           .select('rect')

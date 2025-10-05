@@ -173,7 +173,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
 
   protected renderChart(): void {
     const { cellRadius, showValues, valueFormat, textColor, showXAxis, showYAxis, xAxisFormat, yAxisFormat, xAxisRotation, yAxisRotation, animate, animationDuration, showLegend = true, legendPosition = 'right', legendTitle = '值', legendFormat } = this.props;
-    const { xScale, yScale, chartHeight } = this.scales;
+    const { xScale, yScale, chartHeight: _chartHeight } = this.scales;
 
     // 關鍵調試信息
     console.log('HeatMap renderChart:', {
@@ -203,7 +203,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
       .attr('stroke-width', 1);
 
     if (animate) {
-      cells.attr('opacity', 0).transition().duration(animationDuration || 750).delay((d, i) => (i % this.xValues.length) * 50).attr('opacity', 1);
+      cells.attr('opacity', 0).transition().duration(animationDuration || 750).delay((_d, i) => (i % this.xValues.length) * 50).attr('opacity', 1);
     }
 
     if (showValues) {
@@ -221,7 +221,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
         .text(d => valueFormat ? valueFormat(d.value) : d.value.toFixed(1));
 
       if (animate) {
-        labels.attr('opacity', 0).transition().duration(animationDuration || 750).delay((d, i) => (i % this.xValues.length) * 50 + 200).attr('opacity', 1);
+        labels.attr('opacity', 0).transition().duration(animationDuration || 750).delay((_d, i) => (i % this.xValues.length) * 50 + 200).attr('opacity', 1);
       }
     }
 
@@ -245,7 +245,7 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
 
     // 渲染圖例
     if (showLegend) {
-      this.renderLegend(g, legendPosition, legendTitle, legendFormat);
+      this.renderHeatmapLegend(g, legendPosition, legendTitle, legendFormat);
     }
   }
 
@@ -253,18 +253,18 @@ export class D3Heatmap extends BaseChart<HeatmapProps> {
     return 'heatmap';
   }
 
-  private renderLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string, format?: (d: number) => string): void {
+  protected renderHeatmapLegend(g: d3.Selection<SVGGElement, unknown, null, undefined>, position: 'top' | 'bottom' | 'left' | 'right', title: string, format?: (d: number) => string): void {
     if (!this.colorScale) return;
 
-    const { chartWidth, chartHeight, width: containerWidth, height: containerHeight, margin } = this.getChartDimensions();
+    const { chartWidth, chartHeight, width: containerWidth, height: _containerHeight, margin } = this.getChartDimensions();
     const valueExtent = d3.extent(this.processedData, d => d.value) as [number, number];
     
     // 計算實際可用空間 - 修正邏輯
     // containerWidth/Height 是整個容器尺寸，chartWidth/Height 是圖表繪製區尺寸
     const rightSpaceInContainer = margin.right;  // 右側 margin 就是可用空間
     const bottomSpaceInContainer = margin.bottom;  // 底部 margin 就是可用空間
-    const leftSpaceInContainer = margin.left;
-    const topSpaceInContainer = margin.top;
+    // const _leftSpaceInContainer = margin.left;
+    // const _topSpaceInContainer = margin.top;
     
     // 圖例尺寸設定 - 響應式調整
     const baseHorizontalWidth = Math.min(180, chartWidth * 0.5);
