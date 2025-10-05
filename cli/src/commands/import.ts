@@ -292,7 +292,7 @@ async function askQuestion(rl: readline.Interface, question: string): Promise<st
   })
 }
 
-async function selectField(rl: readline.Interface, axisName: string, options: SuggestedMapping[]): Promise<string | null> {
+async function selectField(rl: readline.Interface, axisName: string, options: FieldSuggestion[]): Promise<string | null> {
   if (options.length === 0) return null
   
   console.log(`\n${axisName} 軸候選欄位:`)
