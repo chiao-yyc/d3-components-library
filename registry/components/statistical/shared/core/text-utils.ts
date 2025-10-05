@@ -55,7 +55,7 @@ export class TextUtils {
     } = options;
 
     textSelection.each(function() {
-      // const __text = d3.select(this);
+      const text = d3.select(this);
       const words = text.text().split(/\s+/).reverse();
       const originalText = text.text();
       
@@ -366,15 +366,15 @@ export class TextUtils {
    * 生成文字路徑（弧形文字）
    */
   static generateTextPath(
-    text: string,
+    _text: string,
     centerX: number,
     centerY: number,
     radius: number,
     startAngle: number,
     endAngle: number
   ): string {
-    const circumference = 2 * Math.PI * radius;
-    // const __arcLength = (Math.abs(endAngle - startAngle) / 360) * circumference;
+    // const _circumference = 2 * Math.PI * radius;  // Reserved for future use
+    // const __arcLength = (Math.abs(endAngle - startAngle) / 360) * _circumference;
     
     // 簡化的弧形路徑生成
     const startRadians = (startAngle * Math.PI) / 180;

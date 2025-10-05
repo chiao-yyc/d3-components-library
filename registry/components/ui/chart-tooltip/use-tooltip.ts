@@ -150,7 +150,7 @@ export function useD3Tooltip(options: UseTooltipOptions = {}) {
         const data = getData(d)
         showTooltip(position, data)
       },
-      onMouseMove: function(event: any, d: any) {
+      onMouseMove: function(event: any, _d: any) {
         const position = getPositionFromEvent(event)
         updateTooltip(position)
       },

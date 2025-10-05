@@ -147,7 +147,7 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
           const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'];
           return defaultColors[index % defaultColors.length];
         },
-        getColors: (count?: number) => ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
+        getColors: (_count?: number) => ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
         domain: () => [0, this.processedData.length - 1],
         range: () => ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']
       } as ColorScale;

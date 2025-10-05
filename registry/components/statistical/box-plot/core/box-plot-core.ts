@@ -276,21 +276,21 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
     // 為每個 box plot 組添加事件
     this.chartGroup.selectAll('[class*="box-plot-group-"]')
       .style('cursor', 'pointer')
-      .on('click', (event, d) => {
+      .on('click', (event, _d) => {
         const index = parseInt(event.currentTarget.className.baseVal.split('-').pop());
         const dataPoint = this.processedData[index];
         if (dataPoint) {
           config.onDataClick?.(dataPoint, event);
         }
       })
-      .on('mouseenter', (event, d) => {
+      .on('mouseenter', (event, _d) => {
         const index = parseInt(event.currentTarget.className.baseVal.split('-').pop());
         const dataPoint = this.processedData[index];
         if (dataPoint) {
           config.onDataHover?.(dataPoint, event);
         }
       })
-      .on('mouseleave', (event, d) => {
+      .on('mouseleave', (event, _d) => {
         config.onDataHover?.(null, event);
       });
   }

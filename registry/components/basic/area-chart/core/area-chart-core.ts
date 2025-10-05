@@ -92,7 +92,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
   private stackedData: StackedDataPoint[] = [];
   // private _colorScale: ColorScale | null = null;  // Reserved for future use
   private areaGroup: D3Selection<SVGGElement> | null = null;
-  private chartGroup: D3Selection<SVGGElement> | null = null;
+  // private _chartGroup: D3Selection<SVGGElement> | null = null;  // Reserved for future use
 
   // 添加缺失的屬性（與 ScatterPlot 一致）
   private chartWidth: number = 0;
@@ -937,7 +937,7 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
     // 創建主要的圖表容器
     const chartArea = this.createSVGContainer();
     this.areaGroup = chartArea;
-    this.chartGroup = chartArea;
+    // this._chartGroup = chartArea;  // Reserved for future use
     
     // 獲取曲線類型
     const curve = this.getCurveFunction(config.curve);

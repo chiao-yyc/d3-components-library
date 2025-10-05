@@ -12,7 +12,7 @@ import {
   DataKeyOrAccessor,
   ChartStateCallbacks
 } from '../../../core/types';
-import { /*createColorScale,*/ ColorScale } from '../../../core/color-scheme/color-manager';
+// import { /*createColorScale,*/ ColorScale } from '../../../core/color-scheme/color-manager';  // Reserved for future use
 
 // CandlestickChart 專用數據接口
 export interface CandlestickData extends BaseChartData {

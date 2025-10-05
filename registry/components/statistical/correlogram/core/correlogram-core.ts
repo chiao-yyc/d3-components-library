@@ -597,7 +597,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
         .attr('r', 0)
         .transition()
         .duration(duration)
-        .delay((d, i) => i * 50)
+        .delay((_d, i) => i * 50)
         .attr('r', d => Math.max(1, d.size / 2)); // 確保至少有 1px 半徑
     } else {
       circles.attr('r', d => Math.max(1, d.size / 2));
@@ -624,7 +624,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
         .attr('height', 0)
         .transition()
         .duration(duration)
-        .delay((d, i) => i * 50)
+        .delay((_d, i) => i * 50)
         .attr('width', d => d.size)
         .attr('height', d => d.size);
     } else {
@@ -667,7 +667,7 @@ export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
         this.showTooltip(x, y, tooltipContent);
         config.onDataHover?.(d, event);
       })
-      .on('mouseleave', (event, _d) => {
+      .on('mouseleave', (event, __d) => {
         this.hideTooltip();
         config.onDataHover?.(null, event);
       });

@@ -80,7 +80,7 @@ export class TreeMapRenderer {
    */
   static renderRectangles(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     options: RectangleRenderOptions = {}
   ): d3.Selection<SVGRectElement, TreeMapNode, SVGGElement, unknown> {
     const {
@@ -96,7 +96,7 @@ export class TreeMapRenderer {
 
     const rectangles = container
       .selectAll<SVGRectElement, TreeMapNode>('.treemap-rect')
-      .data(nodes, (d: TreeMapNode) => d.data.id || d.data.name || Math.random().toString());
+      .data(_nodes, (d: TreeMapNode) => d.data.id || d.data.name || Math.random().toString());
 
     const enter = rectangles
       .enter()
@@ -144,12 +144,12 @@ export class TreeMapRenderer {
   /**
    * 渲染邊框
    * @param container SVG 容器
-   * @param nodes TreeMap 節點陣列
+   * @param _nodes TreeMap 節點陣列
    * @param options 邊框選項
    */
   static renderBorders(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     options: BorderRenderOptions = {}
   ): void {
     const {
@@ -161,9 +161,9 @@ export class TreeMapRenderer {
     } = options;
 
     // 過濾特定層級的節點
-    const filteredNodes = hierarchyLevel !== undefined 
-      ? nodes.filter(d => d.depth === hierarchyLevel)
-      : nodes;
+    const filteredNodes = hierarchyLevel !== undefined
+      ? _nodes.filter(d => d.depth === hierarchyLevel)
+      : _nodes;
 
     container
       .selectAll('.treemap-border')
@@ -185,12 +185,12 @@ export class TreeMapRenderer {
   /**
    * 應用顏色映射
    * @param container SVG 容器
-   * @param nodes TreeMap 節點陣列
+   * @param _nodes TreeMap 節點陣列 (used via closure in colorMapper)
    * @param options 顏色映射選項
    */
   static applyColorMapping(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     options: ColorMappingOptions
   ): void {
     const {
@@ -224,12 +224,12 @@ export class TreeMapRenderer {
   /**
    * 渲染漸層效果
    * @param container SVG 容器
-   * @param nodes TreeMap 節點陣列
+   * @param _nodes TreeMap 節點陣列 (reserved for future use)
    * @param options 漸層選項
    */
   static renderGradients(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     options: GradientOptions
   ): void {
     const {
@@ -283,13 +283,13 @@ export class TreeMapRenderer {
   /**
    * TreeMap 動畫效果
    * @param container SVG 容器
-   * @param fromNodes 起始節點
+   * @param _fromNodes 起始節點 (reserved for future use)
    * @param toNodes 目標節點
    * @param options 動畫選項
    */
   static animateTreeMap(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    fromNodes: TreeMapNode[],
+    _fromNodes: TreeMapNode[],
     toNodes: TreeMapNode[],
     options: AnimationOptions = {}
   ): void {
