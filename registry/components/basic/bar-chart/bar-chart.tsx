@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { BarChartCore, BarChartCoreConfig } from './core/bar-chart-core';
 
 // 擴展 React props 接口，包含向下兼容的 key-based props
-export interface BarChartProps extends ReactChartWrapperProps, BarChartCoreConfig {
+export interface BarChartProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, BarChartCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 
   // 向下兼容的 key-based 屬性

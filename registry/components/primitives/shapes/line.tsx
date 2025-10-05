@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { LineCore, LineCoreConfig, LineCoreData } from './core/line-core';
 
 // 擴展 React props 接口
-export interface LineProps extends ReactChartWrapperProps, LineCoreConfig {
+export interface LineProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, LineCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 

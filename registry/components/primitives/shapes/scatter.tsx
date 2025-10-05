@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { ScatterCore, ScatterCoreConfig, ScatterCoreData } from './core/scatter-core';
 
 // 擴展 React props 接口
-export interface ScatterProps extends ReactChartWrapperProps, ScatterCoreConfig {
+export interface ScatterProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, ScatterCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 

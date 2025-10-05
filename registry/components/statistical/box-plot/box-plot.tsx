@@ -7,7 +7,7 @@ import { BoxPlotCore, BoxPlotCoreConfig } from './core/box-plot-core';
 import { BoxPlotProps as LegacyBoxPlotProps } from './types';
 
 // 新的 props 介面
-export interface BoxPlotProps extends ReactChartWrapperProps, BoxPlotCoreConfig {
+export interface BoxPlotProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, BoxPlotCoreConfig {
   // 新架構不需要額外的 React 專用 props
 }
 

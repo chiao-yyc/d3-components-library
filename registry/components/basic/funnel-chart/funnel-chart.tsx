@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { FunnelChartCore, FunnelChartCoreConfig } from './core/funnel-chart-core';
 
 // 擴展 React props 接口
-export interface FunnelChartProps extends ReactChartWrapperProps, FunnelChartCoreConfig {
+export interface FunnelChartProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, FunnelChartCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 

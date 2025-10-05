@@ -8,7 +8,7 @@ import { createReactChartWrapper, ReactChartWrapperProps } from '../../core/base
 import { AreaCore, AreaCoreConfig, AreaCoreData } from './core/area-core';
 
 // 擴展 React props 接口
-export interface AreaProps extends ReactChartWrapperProps, AreaCoreConfig {
+export interface AreaProps extends Omit<ReactChartWrapperProps, 'data' | 'groupBy'>, AreaCoreConfig {
   // React 專用 props 已經在 ReactChartWrapperProps 中定義
 }
 
