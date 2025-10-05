@@ -16,3 +16,6 @@ temp_ref/
 
 # 符號連結
 demo/src/registry
+
+# 測試目錄
+test-d3/
