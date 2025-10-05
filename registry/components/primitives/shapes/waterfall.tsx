@@ -28,6 +28,10 @@ export interface WaterfallProps {
   connectorColor?: string
   connectorWidth?: number
   connectorDasharray?: string
+  // Event handlers (standardized naming)
+  onDataClick?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
+  onDataHover?: (dataPoint: WaterfallShapeData | null, cumulativeValue?: number, event?: React.MouseEvent) => void
+  // Legacy event handlers (deprecated)
   onBarClick?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
   onBarMouseEnter?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
   onBarMouseLeave?: (dataPoint: WaterfallShapeData, cumulativeValue: number, event: React.MouseEvent) => void
