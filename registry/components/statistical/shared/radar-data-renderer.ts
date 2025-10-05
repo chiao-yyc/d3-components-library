@@ -58,9 +58,9 @@ export class RadarDataRenderer {
   static renderData(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
     series: RadarSeries[],
-    centerX: number,
-    centerY: number,
-    axes: RadarAxisConfig[],
+    _centerX: number,
+    _centerY: number,
+    _axes: RadarAxisConfig[],
     options: DataOptions = {}
   ): void {
     const {
@@ -126,8 +126,8 @@ export class RadarDataRenderer {
       .data(series)
       .enter()
       .append('path')
-      .attr('class', (d, i) => `radar-area area-${i}`)
-      .attr('data-testid', (d, i) => `radar-area-${i}`)
+      .attr('class', (_d, i) => `radar-area area-${i}`)
+      .attr('data-testid', (_d, i) => `radar-area-${i}`)
       .attr('d', d => d.area || d.path)
       .attr('fill', d => d.color)
       .attr('fill-opacity', animate ? 0 : areaOpacity)
@@ -138,7 +138,7 @@ export class RadarDataRenderer {
     if (animate) {
       areas.transition()
         .duration(animationDuration)
-        .delay((d, i) => i * 50)
+        .delay((_d, i) => i * 50)
         .ease(d3.easeQuadOut)
         .attr('fill-opacity', areaOpacity);
     }
@@ -154,12 +154,12 @@ export class RadarDataRenderer {
           
           onSeriesHover?.(d, event);
         })
-        .on('mouseleave', function(event, d) {
+        .on('mouseleave', function(event, _d) {
           d3.select(this)
             .transition()
             .duration(200)
             .attr('fill-opacity', areaOpacity);
-          
+
           onSeriesHover?.(null, event);
         })
         .on('click', function(event, d) {
@@ -193,8 +193,8 @@ export class RadarDataRenderer {
       .data(series)
       .enter()
       .append('path')
-      .attr('class', (d, i) => `radar-line line-${i}`)
-      .attr('data-testid', (d, i) => `radar-line-${i}`)
+      .attr('class', (_d, i) => `radar-line line-${i}`)
+      .attr('data-testid', (_d, i) => `radar-line-${i}`)
       .attr('d', d => d.path)
       .attr('fill', 'none')
       .attr('stroke', d => d.color)
@@ -203,7 +203,7 @@ export class RadarDataRenderer {
 
     // 動畫效果
     if (animate) {
-      lines.each(function(d, i) {
+      lines.each(function(_d, i) {
         const line = d3.select(this);
         const node = line.node() as SVGPathElement;
         
@@ -246,12 +246,12 @@ export class RadarDataRenderer {
           
           onSeriesHover?.(d, event);
         })
-        .on('mouseleave', function(event, d) {
+        .on('mouseleave', function(event, _d) {
           d3.select(this)
             .transition()
             .duration(200)
             .attr('stroke-width', strokeWidth);
-          
+
           onSeriesHover?.(null, event);
         })
         .on('click', function(event, d) {
@@ -290,7 +290,7 @@ export class RadarDataRenderer {
       .data(series)
       .enter()
       .append('g')
-      .attr('class', (d, i) => `series-dots series-${i}`);
+      .attr('class', (_d, i) => `series-dots series-${i}`);
 
     // 在每個系列群組中渲染點
     seriesGroups.each(function(seriesData, seriesIndex) {
@@ -300,8 +300,8 @@ export class RadarDataRenderer {
         .data(seriesData.points)
         .enter()
         .append('circle')
-        .attr('class', (d, i) => `radar-dot dot-${seriesIndex}-${i}`)
-        .attr('data-testid', (d, i) => `radar-dot-${seriesIndex}-${i}`)
+        .attr('class', (_d, i) => `radar-dot dot-${seriesIndex}-${i}`)
+        .attr('data-testid', (_d, i) => `radar-dot-${seriesIndex}-${i}`)
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
         .attr('r', animate ? 0 : dotRadius)
@@ -315,7 +315,7 @@ export class RadarDataRenderer {
       if (animate) {
         dots.transition()
           .duration(animationDuration / 2)
-          .delay((d, i) => seriesIndex * 100 + i * 50)
+          .delay((_d, i) => seriesIndex * 100 + i * 50)
           .ease(d3.easeBackOut.overshoot(1.5))
           .attr('r', dotRadius);
       }
@@ -331,7 +331,7 @@ export class RadarDataRenderer {
             
             onDotHover?.(d.point, d.series, event);
           })
-          .on('mouseleave', function(event, d: any) {
+          .on('mouseleave', function(event, _d: any) {
             d3.select(this)
               .transition()
               .duration(200)
@@ -461,12 +461,12 @@ export class RadarDataRenderer {
       container.selectAll('.radar-area, .radar-line')
         .transition()
         .duration(200)
-        .style('opacity', (d: any, i: number) => i === seriesIndex ? 1 : dimOpacity);
-      
+        .style('opacity', (_d: any, i: number) => i === seriesIndex ? 1 : dimOpacity);
+
       container.selectAll('.series-dots')
         .transition()
         .duration(200)
-        .style('opacity', (d: any, i: number) => i === seriesIndex ? 1 : dimOpacity);
+        .style('opacity', (_d: any, i: number) => i === seriesIndex ? 1 : dimOpacity);
     }
   }
 

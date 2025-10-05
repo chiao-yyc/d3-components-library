@@ -105,7 +105,7 @@ export class TreeMapLabelRenderer {
       textAnchor = 'middle',
       dominantBaseline = 'central',
       className = 'treemap-label',
-      padding = 4,
+      // padding = 4,
       minNodeSize = { width: 30, height: 20, area: 500 },
       maxTextLength = 20,
       ellipsis = '...'
@@ -140,7 +140,7 @@ export class TreeMapLabelRenderer {
         ellipsis
       }));
 
-    const update = labels
+    labels
       .transition()
       .duration(300)
       .attr('x', d => (d.x0 + d.x1) / 2)
@@ -303,7 +303,7 @@ export class TreeMapLabelRenderer {
    */
   static positionLabels(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     alignment: 'center' | 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' = 'center'
   ): void {
     const getPosition = (node: TreeMapNode) => {
@@ -357,7 +357,7 @@ export class TreeMapLabelRenderer {
       style = {}
     } = options;
 
-    const valueLabels = container
+    container
       .selectAll<SVGTextElement, TreeMapNode>('.treemap-value')
       .data(nodes.filter(d => d.value !== undefined))
       .enter()
@@ -391,7 +391,7 @@ export class TreeMapLabelRenderer {
    */
   static renderTooltips(
     container: d3.Selection<SVGGElement, unknown, null, undefined>,
-    nodes: TreeMapNode[],
+    _nodes: TreeMapNode[],
     options: TooltipOptions = {}
   ): void {
     const {
@@ -400,8 +400,8 @@ export class TreeMapLabelRenderer {
       className = 'treemap-tooltip',
       offsetX = 10,
       offsetY = -10,
-      delay = 500,
-      hideDelay = 200
+      // delay = 500,
+      // hideDelay = 200
     } = options;
 
     if (!show) return;
@@ -426,7 +426,7 @@ export class TreeMapLabelRenderer {
     // 為矩形添加事件監聽
     container
       .selectAll<SVGRectElement, TreeMapNode>('.treemap-rect')
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function(_event, d) {
         tooltip
           .style('visibility', 'visible')
           .html(content(d));

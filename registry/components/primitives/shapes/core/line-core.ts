@@ -223,7 +223,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
   private renderSingleLine(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
     data: ChartData<LineCoreData>[],
-    scales: Record<string, any>
+    _scales: Record<string, any>
   ): void {
     const {
       strokeWidth = 2,
@@ -285,8 +285,8 @@ export class LineCore extends BaseChartCore<LineCoreData> {
 
   private renderGroupedLines(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
-    data: ChartData<LineCoreData>[],
-    scales: Record<string, any>
+    _data: ChartData<LineCoreData>[],
+    _scales: Record<string, any>
   ): void {
     const groupKeys = Array.from(this.groupedData.keys());
     const { animate = true, animationDuration = 300, animationDelay = 0 } = this.config as LineCoreConfig;
@@ -342,7 +342,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       .enter()
       .append('circle')
       .attr('class', 'point-element')
-      .attr('data-testid', (d, i) => `point-${i}`)
+      .attr('data-testid', (_d, i) => `point-${i}`)
       .attr('cx', (d: ChartData<LineCoreData>) => this.getXPosition(d, xScale))
       .attr('cy', (d: ChartData<LineCoreData>) => yScale(d.y))
       .attr('r', animate ? 0 : pointRadius)
@@ -356,7 +356,7 @@ export class LineCore extends BaseChartCore<LineCoreData> {
       points
         .transition()
         .duration(animationDuration)
-        .delay((d, i) => i * 50)
+        .delay((_d, i) => i * 50)
         .attr('r', pointRadius);
     }
   }
@@ -411,12 +411,12 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     // 為線條添加懸停效果
     this.pathElements.forEach(path => {
       path
-        .on('mouseenter', (event) => {
+        .on('mouseenter', (_event) => {
           if ((this.config as LineCoreConfig).hoverEffect) {
             path.attr('stroke-width', ((this.config as LineCoreConfig).strokeWidth || 2) + 1);
           }
         })
-        .on('mouseleave', (event) => {
+        .on('mouseleave', (_event) => {
           if ((this.config as LineCoreConfig).hoverEffect) {
             path.attr('stroke-width', (this.config as LineCoreConfig).strokeWidth || 2);
           }
@@ -434,15 +434,14 @@ export class LineCore extends BaseChartCore<LineCoreData> {
     // 為點添加交互
     svg.selectAll('.point-element')
       .on('click', (event, d: ChartData<LineCoreData>) => {
-        const index = this.getProcessedData()!.indexOf(d);
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.y}`);
       })
-      .on('mouseenter', (event, d: ChartData<LineCoreData>) => {
+      .on('mouseenter', (event, _d: ChartData<LineCoreData>) => {
         if ((this.config as LineCoreConfig).hoverEffect) {
           d3.select(event.currentTarget).attr('r', ((this.config as LineCoreConfig).pointRadius || 4) + 2);
         }
       })
-      .on('mouseleave', (event, d: ChartData<LineCoreData>) => {
+      .on('mouseleave', (event, _d: ChartData<LineCoreData>) => {
         if ((this.config as LineCoreConfig).hoverEffect) {
           d3.select(event.currentTarget).attr('r', (this.config as LineCoreConfig).pointRadius || 4);
         }

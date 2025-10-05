@@ -19,12 +19,12 @@ import {
   mergeAxisConfig 
 } from '../../../core/axis-config';
 import { AxisCore } from '../../../primitives/axis/core/axis-core';
-import { 
-  applyStandardAxisStyles, 
-  addAxisLabel, 
+import {
+  applyStandardAxisStyles,
+  addAxisLabel,
   renderGrid,
-  type StandardAxisStyles, 
-  type AxisLabelConfig,
+  type StandardAxisStyles,
+  // type AxisLabelConfig,
   type GridConfig
 } from '../../axis-styles/axis-styles';
 
@@ -188,7 +188,7 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     shortcuts?: { includeOrigin?: boolean; beginAtZero?: boolean }
   ): [number, number] {
     // 配置優先級：明確配置 > 快捷配置 > 圖表默認值
-    const chartDefaults = this.getChartAxisDefaults();
+    // const chartDefaults = this.getChartAxisDefaults();
     const mergedConfig = mergeAxisConfig(axisConfig, shortcuts);
     
     // 處理自定義 domain
@@ -402,10 +402,10 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
     orientation: 'top' | 'right' | 'bottom' | 'left',
     chartWidth: number,
     chartHeight: number,
-    xScale?: d3.AxisScale<any>,
-    yScale?: d3.AxisScale<any>,
-    forceIntersection?: boolean,
-    intersectionPoint?: [number, number]
+    _xScale?: d3.AxisScale<any>,
+    _yScale?: d3.AxisScale<any>,
+    _forceIntersection?: boolean,
+    _intersectionPoint?: [number, number]
   ): string {
     // 軸線位置保持固定，相交通過 tickSizeOuter 來實現
     switch (orientation) {

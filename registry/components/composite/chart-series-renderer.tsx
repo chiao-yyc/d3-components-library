@@ -1,16 +1,16 @@
 import React from 'react'
 import * as d3 from 'd3'
 import {
-  Bar,
+  // Bar,
   Line,
   Area,
   StackedArea,
   Scatter,
   RegressionLine,
   Waterfall,
-  type BarShapeData,
-  type LineShapeData,
-  type AreaShapeData,
+  // type BarShapeData,
+  // type LineShapeData,
+  // type AreaShapeData,
   type StackedAreaData,
   type StackedAreaSeries,
   type ScatterShapeData,
@@ -20,7 +20,7 @@ import {
 import { MultiBar } from '../primitives/shapes/multi-bar'
 import type { ComboChartSeries, EnhancedComboData } from './chart-series-processor'
 import { ChartScaleFactory } from './chart-scale-factory'
-import { CHART_LAYER_ORDER, sortChartsByLayer, type ChartType } from '../primitives/layouts/chart-layer-constants'
+import { sortChartsByLayer, type ChartType } from '../primitives/layouts/chart-layer-constants'
 
 // 系列渲染器屬性
 export interface ChartSeriesRendererProps {
@@ -190,7 +190,7 @@ function renderStackedAreaGroup(
  * 渲染 Bar 組
  */
 function renderBarGroup(
-  groupKey: string,
+  _groupKey: string,
   groupSeries: any[],
   data: EnhancedComboData[],
   xKey: string,
@@ -239,10 +239,10 @@ function renderBarGroup(
         className={`combo-bar-${originalIndex}`}
         barWidth={barWidth}
         groupOffset={groupOffset}
-        onBarClick={interactive && onSeriesClick ? 
-          (d, i, event) => onSeriesClick(seriesConfig, d, event) : undefined}
+        onBarClick={interactive && onSeriesClick ?
+          (d, _i, event) => onSeriesClick(seriesConfig, d, event) : undefined}
         onBarMouseEnter={interactive && onSeriesHover ?
-          (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
+          (d, _i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
       />
     )
 
@@ -317,9 +317,9 @@ function renderNonBarSeries(
           onLineClick={interactive && onSeriesClick ?
             (event: any) => onSeriesClick(seriesConfig, null, event) : undefined}
           onPointClick={interactive && onSeriesClick ?
-            (d: any, i: any, event: any) => onSeriesClick(seriesConfig, d, event) : undefined}
+            (d: any, _i: any, event: any) => onSeriesClick(seriesConfig, d, event) : undefined}
           onPointMouseEnter={interactive && onSeriesHover ?
-            (d: any, i: any, event: any) => onSeriesHover(seriesConfig, d, event) : undefined}
+            (d: any, _i: any, event: any) => onSeriesHover(seriesConfig, d, event) : undefined}
         />
       )
 

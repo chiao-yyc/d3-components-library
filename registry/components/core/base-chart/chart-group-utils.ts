@@ -113,8 +113,8 @@ export function createGroupHighlightManager(
   } = {}
 ): GroupHighlightManager {
   const {
-    highlightClass = 'group-highlighted',
-    dimClass = 'group-dimmed', 
+    // highlightClass = 'group-highlighted',
+    // dimClass = 'group-dimmed',
     transitionDuration = 200
   } = config
 
@@ -131,11 +131,11 @@ export function createGroupHighlightManager(
     container.selectAll('[data-group]')
       .transition()
       .duration(transitionDuration)
-      .style('opacity', function(d: any) {
+      .style('opacity', function(_d: any) {
         const itemGroup = d3.select(this).attr('data-group')
         return itemGroup === group ? 1 : 0.3
       })
-      .attr('r', function(d: any) {
+      .attr('r', function(_d: any) {
         const itemGroup = d3.select(this).attr('data-group')
         return itemGroup === group ? 7 : 3
       })
@@ -253,7 +253,7 @@ export function createGroupLegend(
     .enter()
     .append('g')
     .attr('class', 'legend-item')
-    .attr('transform', (d, i) => `translate(0, ${i * itemSpacing})`)
+    .attr('transform', (_d, i) => `translate(0, ${i * itemSpacing})`)
     .style('cursor', onClick ? 'pointer' : 'default')
 
   legendItems
@@ -273,7 +273,7 @@ export function createGroupLegend(
     .text(d => d)
 
   if (onClick) {
-    legendItems.on('click', (event, d) => onClick(d))
+    legendItems.on('click', (_event, d) => onClick(d))
   }
 
   return legend
