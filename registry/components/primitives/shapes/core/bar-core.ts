@@ -147,7 +147,6 @@ export class BarCore extends BaseChartCore<BarCoreData> {
       return;
     }
 
-    const { xScale, yScale } = scales;
     const {
       orientation = 'vertical',
       animate = true,

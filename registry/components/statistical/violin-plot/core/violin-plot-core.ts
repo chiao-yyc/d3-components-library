@@ -204,7 +204,7 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
   }
 
   protected createScales(): Record<string, any> {
-    const processedData = this.processedData as ProcessedViolinDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedViolinDataPoint[];
     if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as ViolinPlotCoreConfig;
@@ -260,7 +260,7 @@ export class ViolinPlotCore extends BaseChartCore<ViolinPlotData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據
-    const processedData = this.processedData as ProcessedViolinDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedViolinDataPoint[];
     if (!processedData || processedData.length === 0) {
       console.warn('ViolinPlotCore: No processed data available');
       this.chartGroup.selectAll('*').remove();

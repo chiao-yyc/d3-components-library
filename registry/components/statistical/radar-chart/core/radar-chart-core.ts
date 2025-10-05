@@ -228,7 +228,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
   }
 
   protected createScales(): Record<string, any> {
-    const processedData = this.processedData as ProcessedRadarDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedRadarDataPoint[];
     if (!processedData || processedData.length === 0) return {};
 
     const config = this.config as RadarChartCoreConfig;
@@ -282,7 +282,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     this.chartGroup = this.createSVGContainer();
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
-    const processedData = this.processedData as ProcessedRadarDataPoint[];
+    const processedData = this.processedData as unknown as ProcessedRadarDataPoint[];
     if (!processedData || processedData.length === 0) {
       this.chartGroup?.selectAll('*').remove();
       return;

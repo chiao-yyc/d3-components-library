@@ -95,7 +95,6 @@ export interface CorrelogramCoreConfig extends BaseChartCoreConfig<CorrelogramDa
 
 // 主要的 Correlogram 核心類
 export class CorrelogramCore extends BaseChartCore<CorrelogramData> {
-  private processedData: ProcessedCorrelogramDataPoint[] = [];
   private variables: string[] = [];
   private colorScale: ColorScale | null = null;
   private sizeScale: d3.ScaleLinear<number, number> | null = null;

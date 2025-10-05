@@ -88,7 +88,7 @@ export class ThemeCore {
 
   public getSpacing(key: string): string {
     const spacing = this.getTokens().spacing;
-    return spacing[key as keyof Spacing] || '0px';
+    return spacing[key as unknown as keyof Spacing] || '0px';
   }
 
   public getAnimation(): Animation {

@@ -12,11 +12,6 @@ import {
   DataKeyOrAccessor,
   D3Selection
 } from '../../../core/types';
-import { 
-  TreeMapUtils, 
-  TreeMapRenderer, 
-  TreeMapLabelRenderer 
-} from '../../shared';
 
 export interface TreeMapData extends BaseChartData {
   id?: string;
@@ -559,13 +554,15 @@ export class TreeMapCore extends BaseChartCore<TreeMapData> {
           .style('filter', 'brightness(1.1)');
 
         config.onDataHover?.(d, event);
-        
+
         // 計算相對於圖表容器的座標（修復 tooltip 偏移問題）
-        const containerRect = this.containerElement.getBoundingClientRect();
-        const tooltipX = event.clientX - containerRect.left;
-        const tooltipY = event.clientY - containerRect.top;
-        
-        this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
+        if (this.containerElement) {
+          const containerRect = this.containerElement.getBoundingClientRect();
+          const tooltipX = event.clientX - containerRect.left;
+          const tooltipY = event.clientY - containerRect.top;
+
+          this.showTooltip(tooltipX, tooltipY, this.formatTooltipContent(d));
+        }
       })
       .on('mouseout', (event: MouseEvent, _d: TreeMapDataPoint) => {
         // 移除懸停效果
