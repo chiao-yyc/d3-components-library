@@ -47,10 +47,20 @@ export abstract class BaseChartCore<TData extends BaseChartData = BaseChartData>
 
   // === 抽象方法，子類必須實現 ===
   protected abstract processData(): ChartData<TData>[];
-  protected abstract createScales(): Record<string, any>;  
+  protected abstract createScales(): Record<string, any>;
   protected abstract renderChart(): void;
   public abstract getChartType(): string;
-  
+
+  /**
+   * 觸發重新渲染
+   * 子類可以使用此方法來觸發渲染更新
+   */
+  protected render(): void {
+    if (this.svgElement) {
+      this.renderChart();
+    }
+  }
+
   /**
    * 獲取圖表類型默認軸線配置
    * 子類可以覆蓋此方法提供特定的默認配置
