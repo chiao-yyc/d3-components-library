@@ -85,7 +85,7 @@ async function listConfig(config: any, options: ConfigOptions) {
   }
 }
 
-async function getConfig(config: any, key?: string, options: ConfigOptions) {
+async function getConfig(config: any, key?: string, options?: ConfigOptions) {
   if (!key) {
     console.log(chalk.red('❌ 請指定要獲取的配置鍵'))
     console.log(chalk.gray('例如: d3-components config get paths.components'))
@@ -99,14 +99,14 @@ async function getConfig(config: any, key?: string, options: ConfigOptions) {
     return
   }
   
-  if (options.json) {
+  if (options?.json) {
     console.log(JSON.stringify(value, null, 2))
   } else {
     console.log(chalk.blue(`${key}: ${formatValue(value)}`))
   }
 }
 
-async function setConfig(config: any, key: string | undefined, value: string | undefined, configPath: string, _options?: ConfigOptions) {
+async function setConfig(config: any, key: string | undefined, value: string | undefined, configPath: string) {
   if (!key || value === undefined) {
     console.log(chalk.red('❌ 請指定要設置的配置鍵和值'))
     console.log(chalk.gray('例如: d3-components config set paths.components ./components'))
@@ -125,7 +125,7 @@ async function setConfig(config: any, key: string | undefined, value: string | u
   console.log(chalk.green(`✅ 配置已更新: ${key} = ${formatValue(parsedValue)}`))
 }
 
-async function unsetConfig(config: any, key: string | undefined, configPath: string, _options?: ConfigOptions) {
+async function unsetConfig(config: any, key: string | undefined, configPath: string) {
   if (!key) {
     console.log(chalk.red('❌ 請指定要刪除的配置鍵'))
     console.log(chalk.gray('例如: d3-components config unset paths.custom'))

@@ -307,7 +307,7 @@ export function VirtualTable<T = any>({
   onRowClick
 }: VirtualTableProps<T>) {
   const totalWidth = useMemo(() => {
-    return columns.reduce((sum, col) => sum + col._width, 0);
+    return columns.reduce((sum, col) => sum + col.width, 0);
   }, [columns]);
 
   const renderRow = useCallback((item: VirtualScrollItem<T>) => {
