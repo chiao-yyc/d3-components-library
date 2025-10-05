@@ -111,7 +111,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     if (currentVariant && theme.getVariants().includes(currentVariant)) {
       theme.setVariant(currentVariant);
     } else {
-      theme.setVariant(null);
+      // 清除變體：不呼叫 setVariant(null)，直接更新狀態
       setCurrentVariant(null);
     }
 
@@ -122,7 +122,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     // 觸發事件
     const event: ThemeChangeEvent = {
       type: 'theme-change',
-      oldTheme,
+      oldTheme: oldTheme ?? undefined,
       newTheme: newThemeName,
       oldVariant,
       newVariant: theme.getCurrentVariant()
@@ -137,12 +137,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     if (!currentTheme) return;
 
     const oldVariant = currentVariant;
-    
+
     if (variantName && currentTheme.getVariants().includes(variantName)) {
       currentTheme.setVariant(variantName);
       setCurrentVariant(variantName);
     } else {
-      currentTheme.setVariant(null);
+      // 清除變體：不呼叫 setVariant(null)，直接更新狀態
       setCurrentVariant(null);
     }
 

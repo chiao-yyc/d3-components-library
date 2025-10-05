@@ -347,7 +347,11 @@ const darkColors: ColorPalette = {
 const baseTokens: DesignTokens = {
   colors: defaultColors,
   typography: {
-    fontFamily: 'Inter, "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    fontFamily: {
+      sans: 'Inter, "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      serif: 'Georgia, "Times New Roman", Times, serif',
+      mono: '"Courier New", Courier, monospace'
+    },
     fontSize: {
       xs: '0.75rem',
       sm: '0.875rem',
@@ -356,41 +360,172 @@ const baseTokens: DesignTokens = {
       xl: '1.25rem',
       '2xl': '1.5rem',
       '3xl': '1.875rem',
-      '4xl': '2.25rem'
+      '4xl': '2.25rem',
+      '5xl': '3rem',
+      '6xl': '3.75rem'
     },
     fontWeight: {
       light: 300,
-      normal: 400,
+      regular: 400,
       medium: 500,
       semibold: 600,
       bold: 700
     },
     lineHeight: {
-      tight: 1.25,
-      normal: 1.5,
-      relaxed: 1.625
+      tight: '1.25',
+      normal: '1.5',
+      relaxed: '1.625'
+    },
+    letterSpacing: {
+      tight: '-0.025em',
+      normal: '0',
+      wide: '0.025em'
+    },
+    variants: {
+      h1: {
+        fontSize: '48px',
+        fontWeight: 700,
+        lineHeight: '1.25',
+        letterSpacing: '-0.025em'
+      },
+      h2: {
+        fontSize: '36px',
+        fontWeight: 700,
+        lineHeight: '1.25',
+        letterSpacing: '-0.025em'
+      },
+      h3: {
+        fontSize: '30px',
+        fontWeight: 600,
+        lineHeight: '1.25',
+        letterSpacing: '0'
+      },
+      h4: {
+        fontSize: '24px',
+        fontWeight: 600,
+        lineHeight: '1.25',
+        letterSpacing: '0'
+      },
+      h5: {
+        fontSize: '20px',
+        fontWeight: 600,
+        lineHeight: '1.25',
+        letterSpacing: '0'
+      },
+      h6: {
+        fontSize: '18px',
+        fontWeight: 600,
+        lineHeight: '1.25',
+        letterSpacing: '0'
+      },
+      subtitle1: {
+        fontSize: '16px',
+        fontWeight: 500,
+        lineHeight: '1.5',
+        letterSpacing: '0'
+      },
+      subtitle2: {
+        fontSize: '14px',
+        fontWeight: 500,
+        lineHeight: '1.5',
+        letterSpacing: '0'
+      },
+      body1: {
+        fontSize: '16px',
+        fontWeight: 400,
+        lineHeight: '1.5',
+        letterSpacing: '0'
+      },
+      body2: {
+        fontSize: '14px',
+        fontWeight: 400,
+        lineHeight: '1.5',
+        letterSpacing: '0'
+      },
+      caption: {
+        fontSize: '12px',
+        fontWeight: 400,
+        lineHeight: '1.5',
+        letterSpacing: '0'
+      },
+      overline: {
+        fontSize: '12px',
+        fontWeight: 500,
+        lineHeight: '1.5',
+        letterSpacing: '0.025em',
+        textTransform: 'uppercase'
+      }
     }
   },
   spacing: {
-    xs: '0.25rem',
-    sm: '0.5rem',
-    md: '1rem',
-    lg: '1.5rem',
-    xl: '2rem',
-    '2xl': '3rem',
-    '3xl': '4rem'
+    0: '0px',
+    1: '0.25rem',
+    2: '0.5rem',
+    3: '0.75rem',
+    4: '1rem',
+    5: '1.25rem',
+    6: '1.5rem',
+    7: '1.75rem',
+    8: '2rem',
+    9: '2.25rem',
+    10: '2.5rem',
+    11: '2.75rem',
+    12: '3rem',
+    14: '3.5rem',
+    16: '4rem',
+    20: '5rem',
+    24: '6rem',
+    28: '7rem',
+    32: '8rem',
+    36: '9rem',
+    40: '10rem',
+    44: '11rem',
+    48: '12rem',
+    52: '13rem',
+    56: '14rem',
+    60: '15rem',
+    64: '16rem',
+    72: '18rem',
+    80: '20rem',
+    96: '24rem'
   },
   animation: {
     duration: {
       fast: '150ms',
       normal: '300ms',
-      slow: '500ms'
+      slow: '500ms',
+      slower: '750ms',
+      slowest: '1000ms'
     },
     easing: {
-      ease: 'ease',
+      linear: 'linear',
       easeIn: 'ease-in',
       easeOut: 'ease-out',
-      easeInOut: 'ease-in-out'
+      easeInOut: 'ease-in-out',
+      bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+      elastic: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+    },
+    presets: {
+      fadeIn: {
+        duration: '300ms',
+        easing: 'ease-out',
+        keyframes: '@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }'
+      },
+      slideIn: {
+        duration: '300ms',
+        easing: 'ease-out',
+        keyframes: '@keyframes slideIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }'
+      },
+      scaleIn: {
+        duration: '300ms',
+        easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        keyframes: '@keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }'
+      },
+      bounce: {
+        duration: '600ms',
+        easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        keyframes: '@keyframes bounce { 0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); } 40%, 43% { transform: translate3d(0,-30px,0); } 70% { transform: translate3d(0,-15px,0); } 90% { transform: translate3d(0,-4px,0); } }'
+      }
     }
   },
   borderRadius: {
@@ -401,18 +536,22 @@ const baseTokens: DesignTokens = {
     lg: '0.5rem',
     xl: '0.75rem',
     '2xl': '1rem',
+    '3xl': '1.5rem',
     full: '9999px'
   },
   shadows: {
     none: 'none',
+    xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
     base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+    '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+    inner: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)'
   },
   breakpoints: {
+    xs: '0px',
     sm: '640px',
     md: '768px',
     lg: '1024px',
@@ -626,7 +765,11 @@ const corporateThemeConfig: ThemeCoreConfig = {
     colors: corporateColors,
     typography: {
       ...baseTokens.typography,
-      fontFamily: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif'
+      fontFamily: {
+        sans: '"SF Pro Display", "Helvetica Neue", Arial, sans-serif',
+        serif: 'Georgia, "Times New Roman", Times, serif',
+        mono: '"Courier New", Courier, monospace'
+      }
     }
   },
   dark: false
@@ -818,16 +961,19 @@ const minimalThemeConfig: ThemeCoreConfig = {
       lg: '0.25rem',
       xl: '0.25rem',
       '2xl': '0.25rem',
+      '3xl': '0.25rem',
       full: '0.25rem'
     },
     shadows: {
       none: 'none',
+      xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       base: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
       md: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
       lg: '0 4px 6px 0 rgba(0, 0, 0, 0.1)',
       xl: '0 8px 15px 0 rgba(0, 0, 0, 0.1)',
-      '2xl': '0 15px 25px 0 rgba(0, 0, 0, 0.1)'
+      '2xl': '0 15px 25px 0 rgba(0, 0, 0, 0.1)',
+      inner: 'inset 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
     }
   },
   dark: false
