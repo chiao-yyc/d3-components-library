@@ -48,10 +48,10 @@ export function ChartTooltip({
 
     const tooltip = tooltipRef.current
     const rect = tooltip.getBoundingClientRect()
-    const containerEl = container || document.body
+    // const _containerEl = container || document.body  // Reserved for future use
     const boundaryEl = boundary || document.documentElement
 
-    const _containerRect = containerEl.getBoundingClientRect()
+    // const _containerRect = _containerEl.getBoundingClientRect()  // Reserved for future use
     const boundaryRect = boundaryEl.getBoundingClientRect()
     
     let adjustedX = position.x + offset.x
@@ -68,7 +68,7 @@ export function ChartTooltip({
     else if (placement === 'auto') {
       const spaceTop = position.y - boundaryRect.top
       const spaceBottom = boundaryRect.bottom - position.y
-      const _spaceLeft = position.x - boundaryRect.left
+      // const _spaceLeft = position.x - boundaryRect.left  // Reserved for future use
       const spaceRight = boundaryRect.right - position.x
 
       // 選擇空間最大的方向

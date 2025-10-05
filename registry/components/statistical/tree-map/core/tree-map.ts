@@ -167,10 +167,10 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
     
     // 根據顏色策略設置域值，但不需要直接調用 getColorScale()
     if (this.props.colorStrategy === 'depth') {
-      const _depths = [...new Set(this.nodes.map(d => d.depth))];
+      // const _depths = [...new Set(this.nodes.map(d => d.depth))];  // Reserved for future use
       // 更新 colorScale 的 domain，會在 getColor 時自動應用
     } else if (this.props.colorStrategy === 'parent') {
-      const _parents = [...new Set(this.nodes.map(d => d.parent?.data?.id || d.parent?.data?.name || 'root'))];
+      // const _parents = [...new Set(this.nodes.map(d => d.parent?.data?.id || d.parent?.data?.name || 'root'))];  // Reserved for future use
       // 更新 colorScale 的 domain，會在 getColor 時自動應用
     } else if (this.props.colorStrategy === 'value') {
       // 對於數值映射，重新創建顏色比例尺 - 使用更好閱讀性的顏色

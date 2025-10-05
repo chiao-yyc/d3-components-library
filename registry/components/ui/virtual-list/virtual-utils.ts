@@ -193,8 +193,8 @@ export class VirtualScrollPerformanceMonitor {
  */
 export class VirtualScrollDataProcessor<T = any> {
   private cache = new Map<string, any>();
-  private sortedIndices: number[] = [];
-  
+  // private _sortedIndices: number[] = [];  // Reserved for future use
+
   constructor(private data: T[]) {
     this.updateIndices();
   }
@@ -317,7 +317,7 @@ export class VirtualScrollDataProcessor<T = any> {
   }
 
   private updateIndices(): void {
-    this.sortedIndices = Array.from({ length: this.data.length }, (_, i) => i);
+    // this._sortedIndices = Array.from({ length: this.data.length }, (_, i) => i);  // Reserved for future use
   }
 }
 
