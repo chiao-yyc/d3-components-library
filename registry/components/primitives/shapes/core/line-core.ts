@@ -433,15 +433,15 @@ export class LineCore extends BaseChartCore<LineCoreData> {
 
     // 為點添加交互
     svg.selectAll('.point-element')
-      .on('click', (event, d: ChartData<LineCoreData>) => {
+      .on('click', (event, d: any) => {
         this.showTooltip(event.pageX, event.pageY, `${d.label}: ${d.y}`);
       })
-      .on('mouseenter', (event, _d: ChartData<LineCoreData>) => {
+      .on('mouseenter', (event, _d: any) => {
         if ((this.config as LineCoreConfig).hoverEffect) {
           d3.select(event.currentTarget).attr('r', ((this.config as LineCoreConfig).pointRadius || 4) + 2);
         }
       })
-      .on('mouseleave', (event, _d: ChartData<LineCoreData>) => {
+      .on('mouseleave', (event, _d: any) => {
         if ((this.config as LineCoreConfig).hoverEffect) {
           d3.select(event.currentTarget).attr('r', (this.config as LineCoreConfig).pointRadius || 4);
         }

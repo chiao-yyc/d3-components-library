@@ -412,12 +412,12 @@ export class D3TreeMap extends BaseChart<TreeMapProps> {
     if (!this.svg) return;
 
     this.svg.selectAll<SVGRectElement, TreeMapNode>('.treemap-rect')
-      .style('opacity', (d: TreeMapNode) => {
+      .style('opacity', (d: any) => {
         if (this.treeMapState.hoveredNode === d) return 1;
         if (this.treeMapState.selectedNodes.includes(d)) return 0.9;
         return this.props.opacity || 0.8;
       })
-      .style('stroke-width', (d: TreeMapNode) => {
+      .style('stroke-width', (d: any) => {
         if (this.treeMapState.selectedNodes.includes(d)) return 2;
         return this.props.strokeWidth || 1;
       });

@@ -507,16 +507,16 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
     const { hoverRadius = 6, hoverEffect = true } = this.config as ScatterCoreConfig;
 
     svg.selectAll('.scatter-point')
-      .on('click', (event, d: ScatterCoreData) => {
+      .on('click', (event, d: any) => {
         // const _index = this.getProcessedData()!.indexOf(d);
         this.showTooltip(event.pageX, event.pageY, `${d.label}: (${d.x}, ${d.y})`);
       })
-      .on('mouseenter', (event, d: ScatterCoreData) => {
+      .on('mouseenter', (event, d: any) => {
         if (hoverEffect) {
           d3.select(event.currentTarget)
             .transition()
             .duration(150)
-            .attr('transform', (d: ScatterCoreData) => {
+            .attr('transform', (d: any) => {
               const x = this.getXPosition(d, this.getScales().xScale);
               const y = this.getScales().yScale(d.y);
               const scale = hoverRadius / ((this.config as ScatterCoreConfig).radius || 4);
@@ -525,12 +525,12 @@ export class ScatterCore extends BaseChartCore<ScatterCoreData> {
         }
         this.showTooltip(event.pageX, event.pageY, `${d.label}: (${d.x}, ${d.y})`);
       })
-      .on('mouseleave', (event, _d: ScatterCoreData) => {
+      .on('mouseleave', (event, _d: any) => {
         if (hoverEffect) {
           d3.select(event.currentTarget)
             .transition()
             .duration(150)
-            .attr('transform', (d: ScatterCoreData) => {
+            .attr('transform', (d: any) => {
               const x = this.getXPosition(d, this.getScales().xScale);
               const y = this.getScales().yScale(d.y);
               return `translate(${x}, ${y}) scale(1)`;
