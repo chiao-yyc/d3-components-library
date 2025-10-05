@@ -77,7 +77,7 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
     }, [ChartCoreClass, callbacks]);
 
     // 暴露實例給 ref
-    React.useImperativeHandle(ref, () => chartInstance, [chartInstance]);
+    React.useImperativeHandle(ref, () => chartInstance!, [chartInstance]);
 
     // 初始化邏輯 - 確保 DOM 準備好後才初始化
     useEffect(() => {

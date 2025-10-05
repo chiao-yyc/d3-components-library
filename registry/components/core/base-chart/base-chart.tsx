@@ -50,11 +50,11 @@ export interface TooltipConfig {
 }
 
 // 預設配置常數
-const DEFAULT_CHART_CONFIG = {
+export const DEFAULT_CHART_CONFIG = {
   responsive: true,        // 🎯 響應式優先
   aspect: 4/3,            // 標準寬高比 (4:3 更適合大多數圖表)
   minWidth: 300,          // 最小寬度
-  maxWidth: 1200,         // 最大寬度  
+  maxWidth: 1200,         // 最大寬度
   minHeight: 200,         // 最小高度
   maxHeight: 800,         // 最大高度
   fallbackWidth: 600,     // 後備寬度

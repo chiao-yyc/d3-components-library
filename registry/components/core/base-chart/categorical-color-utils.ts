@@ -11,7 +11,7 @@ export const PREDEFINED_COLOR_SCHEMES: Record<string, ColorScheme> = {
   // D3 categorical schemes
   category10: {
     name: 'Category10',
-    colors: d3.schemeCategory10,
+    colors: [...d3.schemeCategory10],
     type: 'categorical',
     description: 'D3 default 10-color categorical scheme'
   },

@@ -37,9 +37,9 @@ export const useScaleManager = (options: UseScaleManagerOptions = {}) => {
     name: string,
     scale: any,
     config: ScaleConfig,
-    axis?: 'x' | 'y' | 'y2'
+    axis?: string
   ) => {
-    return scaleManager.registerExistingScale(name, scale, config, axis)
+    return scaleManager.registerExistingScale(name, scale, config, axis as 'x' | 'y' | 'y2' | undefined)
   }, [scaleManager])
 
   const autoConfigureScale = useCallback((
