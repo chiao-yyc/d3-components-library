@@ -20,7 +20,7 @@ const LineComponent = createReactChartWrapper(LineCore as any);
 
 // 導出最終組件
 export const Line = React.forwardRef<LineCore, LineProps>((props, ref) => {
-  return <LineComponent ref={ref} {...props} />;
+  return <LineComponent ref={ref as any} {...props} />;
 });
 
 Line.displayName = 'Line';

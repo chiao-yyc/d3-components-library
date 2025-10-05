@@ -83,7 +83,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
             normalizedValue: Math.abs(value),
             position,
             originalData: { x: variables[xIndex], y: variables[yIndex], value }
-          });
+          } as any);
         }
       });
     });
@@ -148,7 +148,7 @@ export class D3Correlogram extends BaseChart<CorrelogramProps> {
             normalizedValue: Math.abs(value),
             position,
             originalData: { x, y, value }
-          });
+          } as any);
         }
       });
     });

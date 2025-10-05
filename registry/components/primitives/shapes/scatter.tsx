@@ -20,7 +20,7 @@ const ScatterComponent = createReactChartWrapper(ScatterCore as any);
 
 // 導出最終組件
 export const Scatter = React.forwardRef<ScatterCore, ScatterProps>((props, ref) => {
-  return <ScatterComponent ref={ref} {...props} />;
+  return <ScatterComponent ref={ref as any} {...props} />;
 });
 
 Scatter.displayName = 'Scatter';

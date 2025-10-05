@@ -221,7 +221,7 @@ export class D3CandlestickChartSimple extends BaseChart<CandlestickChartProps> {
       showXAxis: true,
       showYAxis: true,
       xAxisConfig: {
-        format: d3.timeFormat('%m/%d'),
+        format: d3.timeFormat('%m/%d') as any,
         fontSize: '12px',
         fontColor: '#6b7280'
       },

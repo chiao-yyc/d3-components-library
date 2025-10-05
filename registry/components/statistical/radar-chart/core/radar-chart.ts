@@ -290,7 +290,7 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
       onSeriesHover,
       onDotClick,
       onDotHover
-    };
+    } as any;
 
     RadarDataRenderer.renderData(
       chartArea,
@@ -327,9 +327,9 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
   // 高亮特定系列
   public highlightSeries(seriesIndex: number | null): void {
     if (!this.svgRef?.current) return;
-    
+
     const chartArea = d3.select(this.svgRef.current).select('.chart-area');
-    RadarDataRenderer.highlightSeries(chartArea, seriesIndex);
+    RadarDataRenderer.highlightSeries(chartArea as any, seriesIndex);
   }
 
   // 更新樣式
@@ -339,9 +339,9 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
     dotRadius?: number;
   }): void {
     if (!this.svgRef?.current) return;
-    
+
     const chartArea = d3.select(this.svgRef.current).select('.chart-area');
-    RadarDataRenderer.updateDataStyles(chartArea, styles);
+    RadarDataRenderer.updateDataStyles(chartArea as any, styles);
   }
 
   // 切換數據可見性
@@ -351,8 +351,8 @@ export class D3RadarChart extends BaseChart<RadarChartProps> {
     showDots?: boolean;
   }): void {
     if (!this.svgRef?.current) return;
-    
+
     const chartArea = d3.select(this.svgRef.current).select('.chart-area');
-    RadarDataRenderer.toggleDataVisibility(chartArea, options);
+    RadarDataRenderer.toggleDataVisibility(chartArea as any, options);
   }
 }

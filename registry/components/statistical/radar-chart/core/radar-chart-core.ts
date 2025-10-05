@@ -279,7 +279,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
 
   protected renderChart(): void {
     // 創建 SVG 容器和圖表組
-    this.chartGroup = this.createSVGContainer();
+    this.chartGroup = this.createSVGContainer() as any;
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
     const processedData = this.processedData as unknown as ProcessedRadarDataPoint[];
@@ -376,7 +376,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     };
 
     RadarGridRenderer.renderGrid(
-      this.chartGroup,
+      this.chartGroup as any,
       this.centerX,
       this.centerY,
       this.chartRadius,
@@ -406,10 +406,10 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
       onSeriesHover,
       onDotClick,
       onDotHover
-    };
+    } as any;
 
     RadarDataRenderer.renderData(
-      this.chartGroup,
+      this.chartGroup as any,
       this.radarSeries,
       this.centerX,
       this.centerY,
@@ -445,8 +445,8 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
   // 公共方法：高亮特定系列
   public highlightSeries(seriesIndex: number | null): void {
     if (!this.chartGroup) return;
-    
-    RadarDataRenderer.highlightSeries(this.chartGroup, seriesIndex);
+
+    RadarDataRenderer.highlightSeries(this.chartGroup as any, seriesIndex);
   }
 
   // 公共方法：更新樣式
@@ -456,8 +456,8 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     dotRadius?: number;
   }): void {
     if (!this.chartGroup) return;
-    
-    RadarDataRenderer.updateDataStyles(this.chartGroup, styles);
+
+    RadarDataRenderer.updateDataStyles(this.chartGroup as any, styles);
   }
 
   // 公共方法：切換數據可見性
@@ -467,7 +467,7 @@ export class RadarChartCore extends BaseChartCore<RadarChartData> {
     showDots?: boolean;
   }): void {
     if (!this.chartGroup) return;
-    
-    RadarDataRenderer.toggleDataVisibility(this.chartGroup, options);
+
+    RadarDataRenderer.toggleDataVisibility(this.chartGroup as any, options);
   }
 }

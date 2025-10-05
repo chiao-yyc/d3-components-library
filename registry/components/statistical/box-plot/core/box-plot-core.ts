@@ -196,7 +196,7 @@ export class BoxPlotCore extends BaseChartCore<BoxPlotData> {
 
   protected renderChart(): void {
     // 創建 SVG 容器和圖表組
-    this.chartGroup = this.createSVGContainer();
+    this.chartGroup = this.createSVGContainer() as any;
 
     // 使用已處理的數據（由 BaseChartCore.initialize() 呼叫 processData() 設置）
     const processedData = this.processedData as unknown as ProcessedBoxPlotDataPoint[];
