@@ -153,7 +153,7 @@ export function renderGrid(
     opacity = 0.7
   } = config;
 
-  const tickValues = scale.ticks ? scale.ticks() : scale.domain();
+  const tickValues = 'ticks' in scale ? (scale as any).ticks() : scale.domain();
   
   const gridGroup = container
     .append('g')
@@ -168,8 +168,8 @@ export function renderGrid(
       .attr('class', 'grid-line')
       .attr('x1', 0)
       .attr('x2', size)
-      .attr('y1', d => scale(d))
-      .attr('y2', d => scale(d))
+      .attr('y1', (d: any) => scale(d) as number)
+      .attr('y2', (d: any) => scale(d) as number)
       .style('stroke', color)
       .style('stroke-width', strokeWidth)
       .style('stroke-dasharray', strokeDasharray);
@@ -179,8 +179,8 @@ export function renderGrid(
       .data(tickValues)
       .join('line')
       .attr('class', 'grid-line')
-      .attr('x1', d => scale(d))
-      .attr('x2', d => scale(d))
+      .attr('x1', (d: any) => scale(d) as number)
+      .attr('x2', (d: any) => scale(d) as number)
       .attr('y1', 0)
       .attr('y2', size)
       .style('stroke', color)

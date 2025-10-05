@@ -98,18 +98,18 @@ export const ChartSeriesRenderer: React.FC<ChartSeriesRendererProps> = ({
   return (
     <>
       {/* 渲染分組的 StackedArea 系列 */}
-      {Array.from(stackedAreaGroups.entries()).map(([groupKey, groupSeries]) => 
-        renderStackedAreaGroup(groupKey, groupSeries, data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
+      {Array.from(stackedAreaGroups.entries()).map(([groupKey, groupSeries]) =>
+        renderStackedAreaGroup(groupKey, groupSeries as any[], data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
       )}
 
       {/* 渲染分組的 Bar 系列 */}
-      {Array.from(barGroups.entries()).map(([groupKey, groupSeries]) => 
-        renderBarGroup(groupKey, groupSeries, data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
+      {Array.from(barGroups.entries()).map(([groupKey, groupSeries]) =>
+        renderBarGroup(groupKey, groupSeries as any[], data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
       )}
 
       {/* 渲染非 Bar 系列 */}
-      {nonBarSeries.map((seriesConfig, index) => 
-        renderNonBarSeries(seriesConfig, index, data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
+      {nonBarSeries.map((seriesConfig, index) =>
+        renderNonBarSeries(seriesConfig as any, index, data, xKey, xScale, leftYScale, rightYScale, animate, animationDuration, interactive, onSeriesClick, onSeriesHover)
       )}
     </>
   )
@@ -160,8 +160,8 @@ function renderStackedAreaGroup(
   return (
     <StackedArea
       key={`stacked-area-${groupKey}`}
-      data={stackedAreaData}
-      series={stackedAreaSeriesConfig}
+      data={stackedAreaData as any}
+      series={stackedAreaSeriesConfig as any}
       xScale={xScale}
       yScale={yScale}
       curve={ChartScaleFactory.getCurveFunction(firstSeries?.curve || 'monotone')}
@@ -295,13 +295,13 @@ function renderNonBarSeries(
       return (
         <Area
           key={`area-${seriesConfig.name}-${index}`}
-          {...commonProps}
+          {...(commonProps as any)}
           opacity={seriesConfig.areaOpacity || 0.6}
           baseline={seriesConfig.baseline || 0}
           curve={ChartScaleFactory.getCurveFunction(seriesConfig.curve || 'monotone')}
-          gradient={seriesConfig.gradient}
+          gradient={seriesConfig.gradient as any}
           onAreaClick={interactive && onSeriesClick ?
-            (event) => onSeriesClick(seriesConfig, null, event) : undefined}
+            (event: any) => onSeriesClick(seriesConfig, null, event) : undefined}
         />
       )
 
@@ -309,17 +309,17 @@ function renderNonBarSeries(
       return (
         <Line
           key={`line-${seriesConfig.name}-${index}`}
-          {...commonProps}
+          {...(commonProps as any)}
           strokeWidth={seriesConfig.strokeWidth || 2}
           showPoints={seriesConfig.showPoints ?? true}
           pointRadius={seriesConfig.pointRadius || 3}
           curve={ChartScaleFactory.getCurveFunction(seriesConfig.curve || 'monotone')}
           onLineClick={interactive && onSeriesClick ?
-            (event) => onSeriesClick(seriesConfig, null, event) : undefined}
+            (event: any) => onSeriesClick(seriesConfig, null, event) : undefined}
           onPointClick={interactive && onSeriesClick ?
-            (d, i, event) => onSeriesClick(seriesConfig, d, event) : undefined}
+            (d: any, i: any, event: any) => onSeriesClick(seriesConfig, d, event) : undefined}
           onPointMouseEnter={interactive && onSeriesHover ?
-            (d, i, event) => onSeriesHover(seriesConfig, d, event) : undefined}
+            (d: any, i: any, event: any) => onSeriesHover(seriesConfig, d, event) : undefined}
         />
       )
 
@@ -392,23 +392,25 @@ function renderScatterSeries(
 
   const scatterElement = (
     <Scatter
-      key={`scatter-${seriesConfig.name}-${index}`}
-      data={scatterData}
-      xScale={xScale}
-      yScale={yScale}
-      radius={seriesConfig.scatterRadius || 4}
-      sizeScale={sizeScale}
-      colorScale={colorScale}
-      opacity={seriesConfig.scatterOpacity || 0.7}
-      strokeWidth={seriesConfig.scatterStrokeWidth || 1}
-      strokeColor={seriesConfig.strokeColor || 'white'}
-      animate={animate}
-      animationDuration={animationDuration}
-      className={`combo-scatter-${index}`}
-      onPointClick={interactive && onSeriesClick ?
-        (d, event) => onSeriesClick(seriesConfig, d.originalData, event) : undefined}
-      onPointMouseEnter={interactive && onSeriesHover ?
-        (d, event) => onSeriesHover(seriesConfig, d.originalData, event) : undefined}
+      {...{
+        key: `scatter-${seriesConfig.name}-${index}`,
+        data: scatterData,
+        xScale: xScale,
+        yScale: yScale,
+        radius: seriesConfig.scatterRadius || 4,
+        sizeScale: sizeScale,
+        colorScale: colorScale,
+        opacity: seriesConfig.scatterOpacity || 0.7,
+        strokeWidth: seriesConfig.scatterStrokeWidth || 1,
+        strokeColor: seriesConfig.strokeColor || 'white',
+        animate: animate,
+        animationDuration: animationDuration,
+        className: `combo-scatter-${index}`,
+        onPointClick: interactive && onSeriesClick ?
+          (d: any, event: any) => onSeriesClick(seriesConfig, d.originalData, event) : undefined,
+        onPointMouseEnter: interactive && onSeriesHover ?
+          (d: any, event: any) => onSeriesHover(seriesConfig, d.originalData, event) : undefined
+      } as any}
     />
   )
 
@@ -463,19 +465,20 @@ function renderWaterfallSeries(
   onSeriesHover?: (series: ComboChartSeries, dataPoint: any, event: React.MouseEvent) => void
 ) {
   // 轉換 waterfall 數據格式
-  const waterfallData: WaterfallShapeData[] = data.map(d => ({
+  const waterfallData = data.map((d: any) => ({
     x: d[xKey],
+    y: 0, // Required by ShapeDataBase
     value: Number(d[seriesConfig.dataKey]) || 0,
     type: seriesConfig.typeKey ? d[seriesConfig.typeKey] : undefined,
     label: d.label,
     category: d.category,
     originalData: d
-  }))
+  })) as unknown as WaterfallShapeData[]
 
   return (
     <Waterfall
       key={`waterfall-${seriesConfig.name}-${index}`}
-      data={waterfallData}
+      data={waterfallData as any}
       xScale={xScale}
       yScale={yScale}
       animate={animate}

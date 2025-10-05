@@ -74,8 +74,8 @@ export const EnhancedComboChart: React.FC<EnhancedComboChartProps> = (props) => 
   
   // 設置默認值
   const finalProps = {
-    xAccessor: 'x',
     ...otherProps,
+    xAccessor: otherProps.xAccessor || 'x',
     data: convertedData,
     series: convertedSeries
   };
