@@ -48,7 +48,7 @@ export function useTooltip(options: UseTooltipOptions = {}): TooltipHook {
           position,
           data
         })
-      }, showDelay)
+      }, showDelay) as unknown as number
     } else {
       setTooltip({
         visible: true,
@@ -68,7 +68,7 @@ export function useTooltip(options: UseTooltipOptions = {}): TooltipHook {
           ...prev,
           visible: false
         }))
-      }, hideDelay)
+      }, hideDelay) as unknown as number
     } else {
       setTooltip(prev => ({
         ...prev,
