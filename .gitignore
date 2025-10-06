@@ -20,3 +20,6 @@ demo/src/registry
 
 # 測試目錄
 test-d3/
+
+# 部署說明
+DEPLOYMENT.md
