@@ -6,6 +6,7 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { ScatterPlot } from '../ui/scatter-plot';
 import { benchmarkInstance, BenchmarkResult } from './SimpleBenchmark';
+import { RocketLaunchIcon, CheckCircleIcon, BoltIcon, PaintBrushIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 // Local performance utilities
 function calculateOptimalRenderMode(dataCount: number, threshold: number = 10000): 'svg' | 'canvas' {
@@ -223,16 +224,18 @@ export function RealPerformanceScatterPlot({
       
       if (recommendation === 'canvas' && renderMode === 'svg') {
         return (
-          <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-blue-100 border border-blue-300 rounded text-xs">
-            <strong>🚀 基準建議:</strong> Canvas 模式比 SVG 快 {speedupRatio.toFixed(1)}x，建議切換以獲得 {((speedupRatio - 1) * 100).toFixed(0)}% 性能提升
+          <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-blue-100 border border-blue-300 rounded text-xs flex items-center gap-1">
+            <RocketLaunchIcon className="w-4 h-4 flex-shrink-0" />
+            <span><strong>基準建議:</strong> Canvas 模式比 SVG 快 {speedupRatio.toFixed(1)}x，建議切換以獲得 {((speedupRatio - 1) * 100).toFixed(0)}% 性能提升</span>
           </div>
         );
       }
-      
+
       if (recommendation === 'canvas' && renderMode === 'canvas') {
         return (
-          <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-green-100 border border-green-300 rounded text-xs">
-            <strong>✅ 最佳選擇:</strong> 已使用推薦的 Canvas 模式，性能提升 {speedupRatio.toFixed(1)}x
+          <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-green-100 border border-green-300 rounded text-xs flex items-center gap-1">
+            <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+            <span><strong>最佳選擇:</strong> 已使用推薦的 Canvas 模式，性能提升 {speedupRatio.toFixed(1)}x</span>
           </div>
         );
       }
@@ -249,16 +252,18 @@ export function RealPerformanceScatterPlot({
     
     if (renderTime > 500) {
       return (
-        <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-red-100 border border-red-300 rounded text-xs">
-          <strong>⚠️ 性能警告:</strong> 渲染時間過長({renderTime.toFixed(1)}ms)，建議減少數據量或啟用 Canvas 模式
+        <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-red-100 border border-red-300 rounded text-xs flex items-center gap-1">
+          <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
+          <span><strong>性能警告:</strong> 渲染時間過長({renderTime.toFixed(1)}ms)，建議減少數據量或啟用 Canvas 模式</span>
         </div>
       );
     }
-    
+
     if (renderTime < 50 && renderMode === 'canvas') {
       return (
-        <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-green-100 border border-green-300 rounded text-xs">
-          <strong>✅ 性能優異:</strong> Canvas 模式運行良好，渲染時間僅 {renderTime.toFixed(1)}ms
+        <div className="absolute bottom-2 left-2 right-2 px-3 py-2 bg-green-100 border border-green-300 rounded text-xs flex items-center gap-1">
+          <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+          <span><strong>性能優異:</strong> Canvas 模式運行良好，渲染時間僅 {renderTime.toFixed(1)}ms</span>
         </div>
       );
     }
@@ -337,8 +342,12 @@ export function RealPerformanceScatterPlot({
       )}
       
       {/* 渲染模式指示器 */}
-      <div className="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-75 text-white text-xs rounded z-10">
-        {actualRenderMode === 'canvas' ? '⚡ HIGH PERF' : '🎨 STANDARD'}
+      <div className="absolute top-2 right-2 px-2 py-1 bg-black bg-opacity-75 text-white text-xs rounded z-10 flex items-center gap-1">
+        {actualRenderMode === 'canvas' ? (
+          <><BoltIcon className="w-3 h-3" /> HIGH PERF</>
+        ) : (
+          <><PaintBrushIcon className="w-3 h-3" /> STANDARD</>
+        )}
       </div>
     </div>
   );

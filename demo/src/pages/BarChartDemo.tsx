@@ -22,7 +22,16 @@ import {
   type DataTableColumn
 } from '../components/ui'
 import RelatedComponents from '../components/RelatedComponents'
-import { CogIcon, ChartBarIcon, PaintBrushIcon, PlayIcon } from '@heroicons/react/24/outline'
+import {
+  CogIcon,
+  ChartBarIcon,
+  PaintBrushIcon,
+  PlayIcon,
+  FunnelIcon,
+  TagIcon,
+  ScaleIcon,
+  LightBulbIcon
+} from '@heroicons/react/24/outline'
 
 export default function BarChartDemo() {
   // 基本狀態
@@ -92,7 +101,7 @@ export default function BarChartDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -125,7 +134,7 @@ export default function BarChartDemo() {
             {/* 移除邊距設定控制項，統一使用系統預設 margin 以確保一致性 */}
 
             {/* 功能開關 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
@@ -157,7 +166,7 @@ export default function BarChartDemo() {
 
             {/* 標籤配置 */}
             {showLabels && (
-              <ControlGroup title="標籤配置" icon="🏷️" cols={1}>
+              <ControlGroup title="標籤配置" icon={<TagIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="標籤位置"
                   value={labelPosition}
@@ -172,7 +181,7 @@ export default function BarChartDemo() {
             )}
 
             {/* 軸線配置 */}
-            <ControlGroup title="軸線配置" icon="📊" cols={1}>
+            <ControlGroup title="軸線配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="顯示網格"
                 checked={showGrid}
@@ -202,7 +211,7 @@ export default function BarChartDemo() {
             </ControlGroup>
 
             {/* 新增：進階軸線配置 */}
-            <ControlGroup title="軸線行為" icon="⚖️" cols={1}>
+            <ControlGroup title="軸線行為" icon={<ScaleIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="Y軸從零開始"
                 checked={beginAtZero}
@@ -345,7 +354,10 @@ const data = [
           
           <div className="space-y-4">
             <div className="bg-white/80 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-800 mb-2">💡 BarChart 軸線特性</h4>
+              <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <LightBulbIcon className="w-5 h-5" />
+                BarChart 軸線特性
+              </h4>
               <p className="text-gray-700 text-sm">
                 柱狀圖通常需要 Y 軸從零開始，以正確顯示數據的比例關係。X 軸多為類別軸，使用自動域值配置。
               </p>

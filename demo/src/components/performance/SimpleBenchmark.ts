@@ -147,13 +147,13 @@ export class SimpleBenchmark {
     
     const recommendations = [];
     if (avgCanvasRenderTime < avgSvgRenderTime * 0.5) {
-      recommendations.push('🚀 Canvas 模式顯著優於 SVG，建議大數據集使用 Canvas');
+      recommendations.push('Canvas 模式顯著優於 SVG，建議大數據集使用 Canvas');
     }
     if (avgCanvasMemory < avgSvgMemory * 0.7) {
-      recommendations.push('💾 Canvas 模式記憶體效率更高');
+      recommendations.push('Canvas 模式記憶體效率更高');
     }
     if (avgCanvasFPS > avgSvgFPS * 1.2) {
-      recommendations.push('📊 Canvas 模式提供更流暢的動畫體驗');
+      recommendations.push('Canvas 模式提供更流暢的動畫體驗');
     }
     
     return {

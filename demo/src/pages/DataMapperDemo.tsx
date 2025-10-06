@@ -15,7 +15,12 @@ import {
   SparklesIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  FolderOpenIcon,
+  FunnelIcon,
+  PaintBrushIcon,
+  BoltIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 export default function DataMapperDemo() {
@@ -176,7 +181,15 @@ export default function DataMapperDemo() {
           </AnimatePresence>
 
           {/* 步驟 1: 資料上傳 */}
-          <ChartContainer title="📁 步驟 1: 上傳資料" loading={isLoading}>
+          <ChartContainer
+            title={
+              <span className="flex items-center gap-2">
+                <FolderOpenIcon className="w-5 h-5" />
+                步驟 1: 上傳資料
+              </span>
+            }
+            loading={isLoading}
+          >
             <div className="p-6">
               {isLoading && (
                 <div className="mb-4">
@@ -205,7 +218,14 @@ export default function DataMapperDemo() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <ChartContainer title="🎯 步驟 2: 配置欄位映射">
+              <ChartContainer
+                title={
+                  <span className="flex items-center gap-2">
+                    <FunnelIcon className="w-5 h-5" />
+                    步驟 2: 配置欄位映射
+                  </span>
+                }
+              >
                 <div className="p-6">
                   <DataMapper
                     data={data}
@@ -225,7 +245,14 @@ export default function DataMapperDemo() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
-              <ChartContainer title="📊 步驟 3: 即時圖表預覽">
+              <ChartContainer
+                title={
+                  <span className="flex items-center gap-2">
+                    <ChartBarIcon className="w-5 h-5" />
+                    步驟 3: 即時圖表預覽
+                  </span>
+                }
+              >
                 <div className="h-96 flex items-center justify-center">
                   <MappingPreview
                     data={data}
@@ -246,8 +273,9 @@ export default function DataMapperDemo() {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 backdrop-blur-sm border border-white/20"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-              ✨ 功能特色
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center gap-2">
+              <SparklesIcon className="w-6 h-6 text-purple-500" />
+              功能特色
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -259,7 +287,7 @@ export default function DataMapperDemo() {
                   <SparklesIcon className="h-6 w-6 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  🧠 智慧偵測
+                  智慧偵測
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   自動分析資料類型，包含數值、文字、日期、布林等，並提供最佳欄位映射建議
@@ -274,7 +302,7 @@ export default function DataMapperDemo() {
                   <ChartBarIcon className="h-6 w-6 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  📊 即時預覽
+                  即時預覽
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   調整映射配置時立即更新圖表，包含統計資訊、顏色圖例和資料表格
@@ -289,7 +317,7 @@ export default function DataMapperDemo() {
                   <CogIcon className="h-6 w-6 text-purple-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  🎨 彈性映射
+                  彈性映射
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   支援 X/Y 軸、顏色分組、大小映射等多維度資料視覺化
@@ -304,7 +332,7 @@ export default function DataMapperDemo() {
                   <DocumentArrowUpIcon className="h-6 w-6 text-amber-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  📁 多格式支援
+                  多格式支援
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   支援 CSV、JSON 等格式，並提供專業的資料解析和清理功能
@@ -319,7 +347,7 @@ export default function DataMapperDemo() {
                   <InformationCircleIcon className="h-6 w-6 text-pink-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  🔍 資料分析
+                  資料分析
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   提供欄位統計、信心度評分、樣本預覽等詳細分析資訊
@@ -334,7 +362,7 @@ export default function DataMapperDemo() {
                   <SparklesIcon className="h-6 w-6 text-cyan-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2 text-center">
-                  ⚡ 高效能
+                  高效能
                 </h3>
                 <p className="text-sm text-gray-600 text-center">
                   採用智慧快取和增量處理，即使大型資料集也能流暢操作

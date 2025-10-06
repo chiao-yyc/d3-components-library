@@ -5,6 +5,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { benchmarkInstance, BenchmarkComparison } from './SimpleBenchmark';
+import {
+  ChartBarIcon,
+  FunnelIcon,
+  BoltIcon,
+  PaintBrushIcon,
+  ChartPieIcon,
+  LightBulbIcon
+} from '@heroicons/react/24/outline';
 
 export interface PerformanceComparisonProps {
   currentDataSize: number;
@@ -56,7 +64,9 @@ export function PerformanceComparison({
     return (
       <div className={`p-4 bg-gray-50 border border-gray-200 rounded-lg ${className}`}>
         <div className="text-center text-gray-500">
-          <div className="text-2xl mb-2">📊</div>
+          <div className="flex justify-center mb-2">
+            <ChartBarIcon className="w-8 h-8" />
+          </div>
           <p>累積測試數據中...</p>
           <p className="text-sm mt-1">請切換不同的渲染模式以收集比較數據</p>
         </div>
@@ -69,8 +79,9 @@ export function PerformanceComparison({
       {/* SVG vs Canvas 直接對比 */}
       {comparison && (
         <div className="p-4 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg">
-          <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-            🎯 SVG vs Canvas 性能對比
+          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <FunnelIcon className="w-5 h-5" />
+            SVG vs Canvas 性能對比
             <span className="ml-2 text-sm text-gray-500">
               ({currentDataSize.toLocaleString()} 數據點)
             </span>
@@ -118,11 +129,17 @@ export function PerformanceComparison({
               </div>
               <div className="text-sm">
                 {comparison.recommendation === 'canvas' ? (
-                  <span className="text-green-600 font-medium">⚡ Canvas</span>
+                  <span className="text-green-600 font-medium flex items-center justify-center gap-1">
+                    <BoltIcon className="w-4 h-4" /> Canvas
+                  </span>
                 ) : comparison.recommendation === 'svg' ? (
-                  <span className="text-blue-600 font-medium">🎨 SVG</span>
+                  <span className="text-blue-600 font-medium flex items-center justify-center gap-1">
+                    <PaintBrushIcon className="w-4 h-4" /> SVG
+                  </span>
                 ) : (
-                  <span className="text-gray-600">🤖 Auto</span>
+                  <span className="text-gray-600 flex items-center justify-center gap-1">
+                    <ChartPieIcon className="w-4 h-4" /> Auto
+                  </span>
                 )}
               </div>
               {improvementMetrics?.isSignificantSpeedup && (
@@ -136,8 +153,9 @@ export function PerformanceComparison({
       {/* 總體性能報告 */}
       {report && report.totalTests > 0 && (
         <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <h3 className="font-semibold text-gray-900 mb-3">
-            📈 總體性能報告 ({report.totalTests} 次測試)
+          <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <ChartBarIcon className="w-5 h-5" />
+            總體性能報告 ({report.totalTests} 次測試)
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -187,7 +205,10 @@ export function PerformanceComparison({
           {/* 智能建議 */}
           {report.recommendations.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">💡 智能建議</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                <LightBulbIcon className="w-5 h-5" />
+                智能建議
+              </h4>
               <div className="space-y-1">
                 {report.recommendations.map((rec: string, index: number) => (
                   <div key={index} className="text-sm text-gray-600">

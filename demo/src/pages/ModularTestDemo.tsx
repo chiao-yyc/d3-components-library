@@ -14,7 +14,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, BeakerIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { CogIcon, BeakerIcon, SparklesIcon, PaintBrushIcon, RectangleStackIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 // 測試數據
 const sampleData = [
@@ -161,7 +161,7 @@ export default function ModularTestDemo() {
           >
             <div className="space-y-8">
               {/* 功能測試選擇 */}
-              <ControlGroup title="功能測試類型" icon="🧪" cols={1}>
+              <ControlGroup title="功能測試類型" icon={<BeakerIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="測試類型"
                   value={selectedTest}
@@ -176,7 +176,7 @@ export default function ModularTestDemo() {
               </ControlGroup>
 
               {/* 圖表配置 */}
-              <ControlGroup title="圖表配置" icon="🎨" cols={1}>
+              <ControlGroup title="圖表配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="色彩方案"
                   value={selectedScheme}
@@ -205,7 +205,7 @@ export default function ModularTestDemo() {
               </ControlGroup>
 
               {/* 運行時功能 */}
-              <ControlGroup title="運行時功能" icon="🎯" cols={1}>
+              <ControlGroup title="運行時功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
                 <ToggleControl
                   label="動畫效果"
                   checked={animate}

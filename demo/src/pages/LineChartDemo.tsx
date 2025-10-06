@@ -20,7 +20,17 @@ import {
   ChartTooltip,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import {
+  CogIcon,
+  ChartBarIcon,
+  SparklesIcon,
+  RectangleStackIcon,
+  PaintBrushIcon,
+  EyeIcon,
+  FunnelIcon,
+  ScaleIcon,
+  ChatBubbleLeftIcon
+} from '@heroicons/react/24/outline'
 
 // 生成範例資料
 const generateTimeSeriesData = (points: number = 30) => {
@@ -174,7 +184,7 @@ export default function LineChartDemo() {
           >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={3}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -200,7 +210,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={2}>
+            <ControlGroup title="尺寸配置" icon={<RectangleStackIcon className="w-4 h-4" />} cols={2}>
               <RangeSlider
                 label="寬度"
                 value={chartWidth}
@@ -223,7 +233,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* 樣式設定 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+            <ControlGroup title="樣式配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={3}>
               <RangeSlider
                 label="線條寬度"
                 value={strokeWidth}
@@ -257,7 +267,7 @@ export default function LineChartDemo() {
 
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="顯示數據點"
                 checked={showDots}
@@ -288,7 +298,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="互動功能"
                 checked={interactive}
@@ -312,7 +322,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* 軸線配置 */}
-            <ControlGroup title="軸線配置" icon="⚖️" cols={1}>
+            <ControlGroup title="軸線配置" icon={<ScaleIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="包含原點"
                 checked={includeOrigin}
@@ -365,7 +375,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* Tooltip 配置 */}
-            <ControlGroup title="Tooltip 配置" icon="💬" cols={2}>
+            <ControlGroup title="Tooltip 配置" icon={<ChatBubbleLeftIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="啟用 Tooltip"
                 checked={enableTooltip}
@@ -397,7 +407,7 @@ export default function LineChartDemo() {
             </ControlGroup>
 
             {/* 視覺效果 */}
-            <ControlGroup title="視覺效果" icon="✨" cols={2}>
+            <ControlGroup title="視覺效果" icon={<SparklesIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="陰影效果"
                 checked={enableDropShadow}

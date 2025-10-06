@@ -20,7 +20,7 @@ import {
   ChartTooltip,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarIcon, SwatchIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartBarIcon, SwatchIcon, PaintBrushIcon, EyeIcon, FunnelIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline'
 
 // 時間序列資料
 const timeSeriesData = [
@@ -179,7 +179,7 @@ export default function AreaChartDemo() {
           >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={3}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -217,7 +217,7 @@ export default function AreaChartDemo() {
             </ControlGroup>
 
             {/* 視覺配置 */}
-            <ControlGroup title="視覺配置" icon="🎨" cols={3}>
+            <ControlGroup title="視覺配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={3}>
               <RangeSlider
                 label="填充透明度"
                 value={fillOpacity}
@@ -251,7 +251,7 @@ export default function AreaChartDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="漸變填充"
                 checked={gradient}
@@ -283,7 +283,7 @@ export default function AreaChartDemo() {
 
             {/* 圖例配置 */}
             {showLegend && (
-              <ControlGroup title="圖例配置" icon="📊" cols={1}>
+              <ControlGroup title="圖例配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="圖例位置"
                   value={legendPosition}
@@ -299,7 +299,7 @@ export default function AreaChartDemo() {
             )}
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
@@ -330,7 +330,7 @@ export default function AreaChartDemo() {
             </ControlGroup>
 
             {/* Tooltip 配置 */}
-            <ControlGroup title="Tooltip 配置" icon="💬" cols={2}>
+            <ControlGroup title="Tooltip 配置" icon={<ChatBubbleLeftIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="啟用 Tooltip"
                 checked={enableTooltip}

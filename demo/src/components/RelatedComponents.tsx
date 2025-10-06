@@ -1,9 +1,27 @@
 import { Link } from 'react-router-dom'
+import { ReactNode } from 'react'
+import {
+  ArrowTrendingUpIcon,
+  BoltIcon,
+  FireIcon,
+  PuzzlePieceIcon,
+  RectangleGroupIcon,
+  CircleStackIcon,
+  CubeIcon,
+  ChartBarIcon,
+  ChartPieIcon,
+  FunnelIcon,
+  ArrowsPointingOutIcon,
+  RocketLaunchIcon,
+  WrenchScrewdriverIcon,
+  DevicePhoneMobileIcon,
+  LinkIcon
+} from '@heroicons/react/24/outline'
 
 interface RelatedComponent {
   path: string
   name: string
-  icon: string
+  icon: ReactNode
   description: string
   category: 'basic' | 'advanced' | 'combo' | 'system'
 }
@@ -15,41 +33,41 @@ interface RelatedComponentsProps {
 // 組件關聯映射
 const componentRelations: Record<string, RelatedComponent[]> = {
   '/bar-chart': [
-    { path: '/line-chart', name: '折線圖', icon: '📈', description: '時間序列數據展示', category: 'basic' },
-    { path: '/combo-chart', name: '組合圖表', icon: '⚡', description: '結合長條圖與其他圖表', category: 'combo' },
-    { path: '/heatmap', name: '熱力圖', icon: '🔥', description: '類別數據的另一種視覺化', category: 'advanced' },
-    { path: '/modular-test', name: '組件測試', icon: '🧩', description: '測試長條圖組件', category: 'system' }
+    { path: '/line-chart', name: '折線圖', icon: <ArrowTrendingUpIcon className="w-5 h-5" />, description: '時間序列數據展示', category: 'basic' },
+    { path: '/combo-chart', name: '組合圖表', icon: <BoltIcon className="w-5 h-5" />, description: '結合長條圖與其他圖表', category: 'combo' },
+    { path: '/heatmap', name: '熱力圖', icon: <FireIcon className="w-5 h-5" />, description: '類別數據的另一種視覺化', category: 'advanced' },
+    { path: '/modular-test', name: '組件測試', icon: <PuzzlePieceIcon className="w-5 h-5" />, description: '測試長條圖組件', category: 'system' }
   ],
   '/line-chart': [
-    { path: '/area-chart', name: '區域圖', icon: '🌊', description: '填充面積的線條圖', category: 'basic' },
-    { path: '/scatter-plot', name: '散點圖', icon: '🔵', description: '點狀數據分佈', category: 'basic' },
-    { path: '/area-line-combo', name: '面積線條組合', icon: '🌊', description: '結合面積圖與線條圖', category: 'combo' },
-    { path: '/responsive-chart', name: '響應式圖表', icon: '📱', description: '響應式線條圖實例', category: 'system' }
+    { path: '/area-chart', name: '區域圖', icon: <RectangleGroupIcon className="w-5 h-5" />, description: '填充面積的線條圖', category: 'basic' },
+    { path: '/scatter-plot', name: '散點圖', icon: <CircleStackIcon className="w-5 h-5" />, description: '點狀數據分佈', category: 'basic' },
+    { path: '/area-line-combo', name: '面積線條組合', icon: <RectangleGroupIcon className="w-5 h-5" />, description: '結合面積圖與線條圖', category: 'combo' },
+    { path: '/responsive-chart', name: '響應式圖表', icon: <DevicePhoneMobileIcon className="w-5 h-5" />, description: '響應式線條圖實例', category: 'system' }
   ],
   '/scatter-plot': [
-    { path: '/line-chart', name: '折線圖', icon: '📈', description: '連接散點的趨勢線', category: 'basic' },
-    { path: '/box-plot', name: '箱形圖', icon: '📦', description: '統計分佈視覺化', category: 'advanced' },
-    { path: '/scatter-regression-combo', name: '散點回歸組合', icon: '🔵', description: '散點圖與回歸線', category: 'combo' }
+    { path: '/line-chart', name: '折線圖', icon: <ArrowTrendingUpIcon className="w-5 h-5" />, description: '連接散點的趨勢線', category: 'basic' },
+    { path: '/box-plot', name: '箱形圖', icon: <CubeIcon className="w-5 h-5" />, description: '統計分佈視覺化', category: 'advanced' },
+    { path: '/scatter-regression-combo', name: '散點回歸組合', icon: <CircleStackIcon className="w-5 h-5" />, description: '散點圖與回歸線', category: 'combo' }
   ],
   '/pie-chart': [
-    { path: '/bar-chart', name: '長條圖', icon: '📊', description: '比例數據的替代展示', category: 'basic' },
-    { path: '/funnel-chart', name: '漏斗圖', icon: '🎯', description: '流程轉化視覺化', category: 'advanced' },
-    { path: '/tree-map', name: '樹狀結構', icon: '🌳', description: '層級比例視覺化', category: 'advanced' }
+    { path: '/bar-chart', name: '長條圖', icon: <ChartBarIcon className="w-5 h-5" />, description: '比例數據的替代展示', category: 'basic' },
+    { path: '/funnel-chart', name: '漏斗圖', icon: <FunnelIcon className="w-5 h-5" />, description: '流程轉化視覺化', category: 'advanced' },
+    { path: '/tree-map', name: '樹狀結構', icon: <ArrowsPointingOutIcon className="w-5 h-5" />, description: '層級比例視覺化', category: 'advanced' }
   ],
   '/area-chart': [
-    { path: '/line-chart', name: '折線圖', icon: '📈', description: '面積圖的基礎形式', category: 'basic' },
-    { path: '/bar-chart', name: '長條圖', icon: '📊', description: '類似的數值比較', category: 'basic' },
-    { path: '/area-line-combo', name: '面積線條組合', icon: '🌊', description: '組合不同數據系列', category: 'combo' }
+    { path: '/line-chart', name: '折線圖', icon: <ArrowTrendingUpIcon className="w-5 h-5" />, description: '面積圖的基礎形式', category: 'basic' },
+    { path: '/bar-chart', name: '長條圖', icon: <ChartBarIcon className="w-5 h-5" />, description: '類似的數值比較', category: 'basic' },
+    { path: '/area-line-combo', name: '面積線條組合', icon: <RectangleGroupIcon className="w-5 h-5" />, description: '組合不同數據系列', category: 'combo' }
   ],
   '/combo-chart': [
-    { path: '/enhanced-combo-chart', name: '增強組合圖表', icon: '🔧', description: '更多功能的組合圖', category: 'combo' },
-    { path: '/area-line-combo', name: '面積線條組合', icon: '🌊', description: '特定類型組合', category: 'combo' },
-    { path: '/simple-components', name: '簡化組件模式', icon: '🚀', description: '了解組合原理', category: 'system' }
+    { path: '/enhanced-combo-chart', name: '增強組合圖表', icon: <WrenchScrewdriverIcon className="w-5 h-5" />, description: '更多功能的組合圖', category: 'combo' },
+    { path: '/area-line-combo', name: '面積線條組合', icon: <RectangleGroupIcon className="w-5 h-5" />, description: '特定類型組合', category: 'combo' },
+    { path: '/simple-components', name: '簡化組件模式', icon: <RocketLaunchIcon className="w-5 h-5" />, description: '了解組合原理', category: 'system' }
   ],
   '/simple-components': [
-    { path: '/composable-primitives', name: '完全組合模式', icon: '🧩', description: '進階組合架構', category: 'system' },
-    { path: '/combo-chart', name: '組合圖表展示', icon: '⚡', description: '實際組合應用', category: 'combo' },
-    { path: '/modular-test', name: '組件測試', icon: '🧩', description: '測試組合式組件', category: 'system' }
+    { path: '/composable-primitives', name: '完全組合模式', icon: <PuzzlePieceIcon className="w-5 h-5" />, description: '進階組合架構', category: 'system' },
+    { path: '/combo-chart', name: '組合圖表展示', icon: <BoltIcon className="w-5 h-5" />, description: '實際組合應用', category: 'combo' },
+    { path: '/modular-test', name: '組件測試', icon: <PuzzlePieceIcon className="w-5 h-5" />, description: '測試組合式組件', category: 'system' }
   ]
 }
 
@@ -82,8 +100,8 @@ export default function RelatedComponents({ currentPath }: RelatedComponentsProp
   
   return (
     <div className="mt-12 p-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
-      <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-        <span className="mr-3">🔗</span>
+      <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+        <LinkIcon className="w-6 h-6 text-gray-700" />
         相關組件推薦
       </h3>
       
@@ -95,8 +113,8 @@ export default function RelatedComponents({ currentPath }: RelatedComponentsProp
             className="group block p-4 bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200"
           >
             <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center">
-                <span className="text-xl mr-3">{component.icon}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 group-hover:text-blue-600 transition-colors">{component.icon}</span>
                 <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                   {component.name}
                 </h4>

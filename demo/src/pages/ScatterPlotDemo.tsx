@@ -20,7 +20,17 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarSquareIcon, SparklesIcon, PlayIcon } from '@heroicons/react/24/outline'
+import {
+  CogIcon,
+  ChartBarSquareIcon,
+  SparklesIcon,
+  PlayIcon,
+  FunnelIcon,
+  ChartBarIcon,
+  ScaleIcon,
+  SquaresPlusIcon,
+  PaintBrushIcon
+} from '@heroicons/react/24/outline'
 
 // 生成相關性資料
 const generateCorrelationData = (points: number = 50, correlation: number = 0.7) => {
@@ -217,7 +227,7 @@ export default function ScatterPlotDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -252,7 +262,7 @@ export default function ScatterPlotDemo() {
 
 
             {/* 基本功能 */}
-            <ControlGroup title="基本功能" icon="🎯" cols={1}>
+            <ControlGroup title="基本功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
@@ -290,7 +300,7 @@ export default function ScatterPlotDemo() {
             </ControlGroup>
 
             {/* 軸線配置 */}
-            <ControlGroup title="軸線設定" icon="📊" cols={1}>
+            <ControlGroup title="軸線設定" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="X軸刻度數量"
                 value={xTickCount}
@@ -313,7 +323,7 @@ export default function ScatterPlotDemo() {
             </ControlGroup>
 
             {/* 新增：進階軸線配置 */}
-            <ControlGroup title="進階軸線" icon="⚖️" cols={1}>
+            <ControlGroup title="進階軸線" icon={<ScaleIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="包含原點"
                 checked={includeOrigin}
@@ -366,7 +376,7 @@ export default function ScatterPlotDemo() {
             </ControlGroup>
 
             {/* 新增：軸線外觀 */}
-            <ControlGroup title="軸線外觀" icon="📐" cols={1}>
+            <ControlGroup title="軸線外觀" icon={<SquaresPlusIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="軸線相交"
                 checked={axisIntersection}
@@ -387,7 +397,7 @@ export default function ScatterPlotDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="筆刷縮放"
                 checked={enableBrushZoom}
@@ -429,7 +439,7 @@ export default function ScatterPlotDemo() {
             </ControlGroup>
 
             {/* 群組功能 */}
-            <ControlGroup title="群組功能" icon="🎨" cols={1}>
+            <ControlGroup title="群組功能" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="群組高亮"
                 checked={enableGroupHighlight}
