@@ -27,7 +27,14 @@ import {
   StatusDisplay,
   CodeExample
 } from '../components/ui'
-import { CogIcon, RectangleStackIcon, EyeIcon, PlayIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline'
+import {
+  CogIcon,
+  RectangleStackIcon,
+  EyeIcon,
+  PlayIcon,
+  ArrowTopRightOnSquareIcon,
+  FolderIcon
+} from '@heroicons/react/24/outline'
 
 // 示範數據
 const timeSeriesData = [
@@ -451,7 +458,7 @@ export default function ChartsShowcase() {
           >
             <div className="space-y-8">
               {/* 分類篩選 */}
-              <ControlGroup title="圖表分類" icon="🗂️" cols={1}>
+              <ControlGroup title="圖表分類" icon={<FolderIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="分類篩選"
                   value={categoryFilter}
@@ -466,7 +473,7 @@ export default function ChartsShowcase() {
               </ControlGroup>
 
               {/* 展示設置 */}
-              <ControlGroup title="展示設置" icon="👁️" cols={1}>
+              <ControlGroup title="展示設置" icon={<EyeIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="檢視模式"
                   value={viewMode}
@@ -490,7 +497,7 @@ export default function ChartsShowcase() {
               </ControlGroup>
 
               {/* 全局功能 */}
-              <ControlGroup title="全局功能" icon="⚙️" cols={1}>
+              <ControlGroup title="全局功能" icon={<CogIcon className="w-4 h-4" />} cols={1}>
                 <ToggleControl
                   label="動畫效果"
                   checked={animate}

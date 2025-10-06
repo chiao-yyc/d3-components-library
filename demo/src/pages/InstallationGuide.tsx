@@ -14,11 +14,12 @@ import {
   CodeExample,
   StatusDisplay
 } from '../components/ui'
-import { 
-  CommandLineIcon, 
-  DocumentIcon, 
-  CheckCircleIcon, 
-  RocketLaunchIcon 
+import {
+  CommandLineIcon,
+  DocumentIcon,
+  CheckCircleIcon,
+  RocketLaunchIcon,
+  LightBulbIcon
 } from '@heroicons/react/24/outline'
 
 export default function InstallationGuide() {
@@ -164,8 +165,9 @@ npx d3-components add area-chart --variant stacked`}
                   />
                   
                   <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                      💡 提示
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+                      <LightBulbIcon className="w-5 h-5" />
+                      提示
                     </h4>
                     <p className="text-sm text-blue-700 dark:text-blue-300">
                       組件會自動複製到 <code>src/components/ui/</code> 目錄，並可以直接使用。

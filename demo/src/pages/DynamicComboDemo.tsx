@@ -14,7 +14,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarSquareIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartBarSquareIcon, AdjustmentsHorizontalIcon, BoltIcon, ChartBarIcon, FunnelIcon, PaintBrushIcon, ClipboardIcon } from '@heroicons/react/24/outline'
 
 interface DataPoint {
   [key: string]: any
@@ -224,7 +224,7 @@ const DynamicComboDemo: React.FC = () => {
           >
           <div className="space-y-8">
             {/* 快速配置 */}
-            <ControlGroup title="快速配置" icon="⚡" cols={1}>
+            <ControlGroup title="快速配置" icon={<BoltIcon className="w-4 h-4" />} cols={1}>
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
                   {presetConfigurations.map((preset, index) => (
@@ -249,7 +249,7 @@ const DynamicComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 圖表設定 */}
-            <ControlGroup title="圖表設定" icon="📊" cols={2}>
+            <ControlGroup title="圖表設定" icon={<ChartBarIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="動畫效果"
                 checked={chartSettings.animate}
@@ -266,7 +266,7 @@ const DynamicComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 軸線設定 */}
-            <ControlGroup title="軸線設定" icon="🎯" cols={2}>
+            <ControlGroup title="軸線設定" icon={<FunnelIcon className="w-4 h-4" />} cols={2}>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">左軸標籤</label>
                 <input
@@ -291,7 +291,7 @@ const DynamicComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 系列類別篩選 */}
-            <ControlGroup title="系列類別篩選" icon="🎨" cols={1}>
+            <ControlGroup title="系列類別篩選" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="系列類別"
                 value={selectedCategory}
@@ -302,7 +302,7 @@ const DynamicComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 可用系列選擇 */}
-            <ControlGroup title="可用圖表系列" icon="📋" cols={1}>
+            <ControlGroup title="可用圖表系列" icon={<ClipboardIcon className="w-4 h-4" />} cols={1}>
               <div className="space-y-3">
                 <div className="text-sm text-gray-600">
                   點擊下方系列來動態添加或移除至圖表中

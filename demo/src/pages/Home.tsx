@@ -1,4 +1,22 @@
 import { Link } from 'react-router-dom'
+import {
+  CogIcon,
+  PaintBrushIcon,
+  BoltIcon,
+  WrenchScrewdriverIcon,
+  BookOpenIcon,
+  HomeIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  FireIcon,
+  CubeIcon,
+  RocketLaunchIcon,
+  DevicePhoneMobileIcon,
+  FunnelIcon,
+  ArrowsPointingOutIcon,
+  PuzzlePieceIcon,
+  BeakerIcon
+} from '@heroicons/react/24/outline'
 
 function Home() {
   return (
@@ -16,30 +34,42 @@ function Home() {
         {/* 主要導航卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link to="/installation" className="block p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm border border-green-200 hover:shadow-lg hover:-translate-y-1 transition-all">
-            <h3 className="text-lg font-semibold text-green-900 mb-2">⚙️ 快速安裝</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <CogIcon className="w-5 h-5 text-green-700" />
+              <h3 className="text-lg font-semibold text-green-900">快速安裝</h3>
+            </div>
             <p className="text-green-700">5 分鐘完成設置，互動式安裝嚮導幫你搞定一切。</p>
           </Link>
 
           <Link to="/gallery" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">🎨 組件庫總覽</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <PaintBrushIcon className="w-5 h-5 text-gray-700" />
+              <h3 className="text-lg font-semibold text-gray-900">組件庫總覽</h3>
+            </div>
             <p className="text-gray-600">瀏覽所有可用的圖表組件，快速預覽效果。</p>
           </Link>
 
           <Link to="/combo-chart" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">⚡ 組合圖表</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <BoltIcon className="w-5 h-5 text-gray-700" />
+              <h3 className="text-lg font-semibold text-gray-900">組合圖表</h3>
+            </div>
             <p className="text-gray-600">多種圖表類型組合，實現複雜的數據視覺化。</p>
           </Link>
 
           <Link to="/data-mapper" className="block p-6 bg-white rounded-lg shadow-sm border hover:shadow-lg hover:-translate-y-1 transition-all">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">🛠️ 開發者工具</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <WrenchScrewdriverIcon className="w-5 h-5 text-gray-700" />
+              <h3 className="text-lg font-semibold text-gray-900">開發者工具</h3>
+            </div>
             <p className="text-gray-600">資料映射、測試工具和除錯助手。</p>
           </Link>
         </div>
 
         {/* 三層式學習架構 */}
         <div className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 border border-blue-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-            <span className="mr-3">📚</span>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
+            <BookOpenIcon className="w-7 h-7 text-blue-600" />
             三層式學習架構
           </h2>
           
@@ -55,12 +85,12 @@ function Home() {
               </div>
               <p className="text-gray-600 mb-4">從基礎概念開始，快速了解專案架構和組件庫。</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Link to="/" className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                  <span className="mr-2">🏠</span>
+                <Link to="/" className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors gap-2">
+                  <HomeIcon className="w-5 h-5 text-green-700" />
                   <span className="font-medium">專案概覽</span>
                 </Link>
-                <Link to="/gallery" className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                  <span className="mr-2">🎨</span>
+                <Link to="/gallery" className="flex items-center p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors gap-2">
+                  <PaintBrushIcon className="w-5 h-5 text-green-700" />
                   <span className="font-medium">組件庫總覽</span>
                 </Link>
               </div>
@@ -79,23 +109,47 @@ function Home() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700">基礎圖表</h4>
-                  <Link to="/bar-chart" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">📊 長條圖</Link>
-                  <Link to="/line-chart" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">📈 折線圖</Link>
+                  <Link to="/bar-chart" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <ChartBarIcon className="w-4 h-4" />
+                    長條圖
+                  </Link>
+                  <Link to="/line-chart" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <ArrowTrendingUpIcon className="w-4 h-4" />
+                    折線圖
+                  </Link>
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700">進階圖表</h4>
-                  <Link to="/box-plot" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">📦 箱形圖</Link>
-                  <Link to="/heatmap" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">🔥 熱力圖</Link>
+                  <Link to="/box-plot" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <CubeIcon className="w-4 h-4" />
+                    箱形圖
+                  </Link>
+                  <Link to="/heatmap" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <FireIcon className="w-4 h-4" />
+                    熱力圖
+                  </Link>
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700">組合架構</h4>
-                  <Link to="/simple-components" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">🚀 簡化組件</Link>
-                  <Link to="/combo-chart" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">⚡ 組合圖表</Link>
+                  <Link to="/simple-components" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <RocketLaunchIcon className="w-4 h-4" />
+                    簡化組件
+                  </Link>
+                  <Link to="/combo-chart" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <BoltIcon className="w-4 h-4" />
+                    組合圖表
+                  </Link>
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700">響應式系統</h4>
-                  <Link to="/responsive-chart" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">📱 響應式圖表</Link>
-                  <Link to="/alignment-test" className="block text-sm text-blue-700 hover:text-blue-900 hover:underline">🎯 對齊策略</Link>
+                  <Link to="/responsive-chart" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <DevicePhoneMobileIcon className="w-4 h-4" />
+                    響應式圖表
+                  </Link>
+                  <Link to="/alignment-test" className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    <FunnelIcon className="w-4 h-4" />
+                    對齊策略
+                  </Link>
                 </div>
               </div>
             </div>
@@ -112,14 +166,32 @@ function Home() {
               <p className="text-gray-600 mb-4">深入使用測試工具和進階功能，提升開發效率。</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-gray-700">🧪 測試與除錯</h4>
-                  <Link to="/modular-test" className="block text-sm text-purple-700 hover:text-purple-900 hover:underline">🧩 組件測試</Link>
-                  <Link to="/combo-debug" className="block text-sm text-purple-700 hover:text-purple-900 hover:underline">🔧 Combo 除錯</Link>
+                  <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <BeakerIcon className="w-4 h-4" />
+                    測試與除錯
+                  </h4>
+                  <Link to="/modular-test" className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900 hover:underline">
+                    <PuzzlePieceIcon className="w-4 h-4" />
+                    組件測試
+                  </Link>
+                  <Link to="/combo-debug" className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900 hover:underline">
+                    <WrenchScrewdriverIcon className="w-4 h-4" />
+                    Combo 除錯
+                  </Link>
                 </div>
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-gray-700">🛠️ 進階工具</h4>
-                  <Link to="/data-mapper" className="block text-sm text-purple-700 hover:text-purple-900 hover:underline">🗂️ 資料映射</Link>
-                  <Link to="/tree-map" className="block text-sm text-purple-700 hover:text-purple-900 hover:underline">🌳 樹狀結構</Link>
+                  <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <WrenchScrewdriverIcon className="w-4 h-4" />
+                    進階工具
+                  </h4>
+                  <Link to="/data-mapper" className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900 hover:underline">
+                    <BeakerIcon className="w-4 h-4" />
+                    資料映射
+                  </Link>
+                  <Link to="/tree-map" className="flex items-center gap-2 text-sm text-purple-700 hover:text-purple-900 hover:underline">
+                    <ArrowsPointingOutIcon className="w-4 h-4" />
+                    樹狀結構
+                  </Link>
                 </div>
               </div>
             </div>

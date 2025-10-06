@@ -13,7 +13,7 @@ import {
   StatusDisplay,
   CodeExample
 } from '../components/ui'
-import { CogIcon, ChartPieIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartPieIcon, ChartBarIcon, MusicalNoteIcon, CubeIcon, EyeIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 
 // 生成正常分佈數據
 function generateNormalData(mean: number, std: number, count: number): number[] {
@@ -324,7 +324,7 @@ export default function ViolinPlotDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -363,7 +363,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* KDE 設定 */}
-            <ControlGroup title="核密度估計" icon="📊" cols={1}>
+            <ControlGroup title="核密度估計" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="KDE 方法"
                 value={kdeMethod}
@@ -386,7 +386,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 小提琴設定 */}
-            <ControlGroup title="小提琴配置" icon="🎻" cols={1}>
+            <ControlGroup title="小提琴配置" icon={<MusicalNoteIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="最大寬度"
                 value={violinWidth}
@@ -417,7 +417,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 箱形圖設定 */}
-            <ControlGroup title="箱形圖配置" icon="📦" cols={1}>
+            <ControlGroup title="箱形圖配置" icon={<CubeIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="箱形圖寬度"
                 value={boxPlotWidth}
@@ -430,7 +430,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="顯示箱形圖"
                 checked={showBoxPlot}
@@ -461,7 +461,7 @@ export default function ViolinPlotDemo() {
             </ControlGroup>
 
             {/* 高級選項 */}
-            <ControlGroup title="進階功能" icon="🔧" cols={2}>
+            <ControlGroup title="進階功能" icon={<WrenchScrewdriverIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="顯示異常值"
                 checked={showOutliers}

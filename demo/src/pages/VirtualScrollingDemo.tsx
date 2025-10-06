@@ -8,6 +8,7 @@ import { ModernControlPanel } from '../components/ui/ModernControlPanel';
 import { ChartContainer, StatusDisplay } from '../components/ui/ChartContainer';
 import { DataTable } from '../components/ui/DataTable';
 import { CodeExample } from '../components/ui/CodeExample';
+import { RocketLaunchIcon, CogIcon, WrenchIcon, ChartBarIcon, ClipboardDocumentListIcon, BoltIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
 
 // 導入虛擬滾動組件（模擬實現）
 interface VirtualListProps {
@@ -157,8 +158,12 @@ const MockVirtualizedScatterPlot: React.FC<MockVirtualizedScatterPlotProps> = ({
       style={{ width, height }}
     >
       <div className="text-center">
-        <div className="text-3xl mb-2">
-          {virtualEnabled ? '🚀' : '📊'}
+        <div className="text-3xl mb-2 flex justify-center">
+          {virtualEnabled ? (
+            <RocketLaunchIcon className="w-12 h-12 text-green-500" />
+          ) : (
+            <ChartBarIcon className="w-12 h-12 text-blue-500" />
+          )}
         </div>
         <div className="font-bold text-lg">
           {metrics.renderMode}
@@ -286,9 +291,9 @@ export default function VirtualScrollingDemo() {
 
   // 性能狀態顯示
   const statusData = [
-    { 
-      label: '虛擬化狀態', 
-      value: virtualEnabled ? '🚀 啟用' : '📊 禁用', 
+    {
+      label: '虛擬化狀態',
+      value: virtualEnabled ? '啟用' : '禁用',
       status: virtualEnabled ? 'success' as const : 'info' as const
     },
     { 
@@ -369,8 +374,9 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
       <div className="container mx-auto px-4 py-8">
         {/* 頁面標題 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🚀 Virtual Scrolling 性能優化
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <RocketLaunchIcon className="w-8 h-8 text-green-500" />
+            Virtual Scrolling 性能優化
           </h1>
           <p className="text-gray-600 text-lg">
             虛擬滾動技術演示：處理百萬級數據的高效渲染解決方案
@@ -381,7 +387,8 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
           {/* 控制面板 */}
           <div className="xl:col-span-1">
             <ModernControlPanel
-              title="🎛️ 虛擬化控制"
+              title="虛擬化控制"
+              icon={<CogIcon className="w-5 h-5" />}
               controls={controls}
             />
             
@@ -394,8 +401,9 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
             
             {/* 技術說明 */}
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">
-                🔧 Virtual Scrolling 原理
+              <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                <WrenchIcon className="w-5 h-5" />
+                Virtual Scrolling 原理
               </h3>
               <div className="text-sm text-blue-800 space-y-1">
                 <p>• 只渲染可見區域內容</p>
@@ -410,7 +418,12 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
           <div className="xl:col-span-3 space-y-6">
             {/* 虛擬列表展示 */}
             <ChartContainer
-              title="📋 Virtual List 演示"
+              title={
+                <span className="flex items-center gap-2">
+                  <ClipboardDocumentListIcon className="w-5 h-5" />
+                  Virtual List 演示
+                </span>
+              }
               subtitle={`${listData.length.toLocaleString()} 項目 ${virtualEnabled ? '(虛擬化)' : '(標準模式)'}`}
             >
               <VirtualList
@@ -424,7 +437,12 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
 
             {/* 虛擬化散點圖展示 */}
             <ChartContainer
-              title="🎯 Virtual ScatterPlot 演示"
+              title={
+                <span className="flex items-center gap-2">
+                  <ChartBarIcon className="w-5 h-5" />
+                  Virtual ScatterPlot 演示
+                </span>
+              }
               subtitle={`${scatterData.length.toLocaleString()} 數據點 ${virtualEnabled ? '(虛擬化)' : '(標準模式)'}`}
             >
               <MockVirtualizedScatterPlot
@@ -442,13 +460,23 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 數據表格 */}
           <DataTable
-            title={`📋 測試數據樣本 (前8筆/${listData.length.toLocaleString()})`}
+            title={
+              <span className="flex items-center gap-2">
+                <ClipboardDocumentListIcon className="w-5 h-5" />
+                測試數據樣本 (前8筆/{listData.length.toLocaleString()})
+              </span>
+            }
             data={sampleData}
           />
 
           {/* 程式碼示例 */}
           <CodeExample
-            title="💻 實現代碼"
+            title={
+              <span className="flex items-center gap-2">
+                <CodeBracketIcon className="w-5 h-5" />
+                實現代碼
+              </span>
+            }
             code={codeExample}
             language="typescript"
           />
@@ -456,8 +484,9 @@ import { VirtualList, VirtualizedScatterPlot } from 'd3-components';
 
         {/* 性能對比說明 */}
         <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            ⚡ Virtual Scrolling 性能提升
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <BoltIcon className="w-6 h-6 text-yellow-500" />
+            Virtual Scrolling 性能提升
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center">

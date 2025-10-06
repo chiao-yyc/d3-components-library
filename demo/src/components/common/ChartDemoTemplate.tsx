@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import { ChartDemoConfig, DatasetOption } from '../../hooks/useChartDemo'
 import InteractiveTutorial from '../InteractiveTutorial'
+import { ChartBarIcon } from '@heroicons/react/24/outline'
 
 // === 教學步驟介面 ===
 export interface TutorialStep {
@@ -285,8 +286,13 @@ export function ChartDemoTemplate<T = any>({
           {/* 圖表顯示區 */}
           <div className="lg:col-span-2">
             {tutorialSteps.length > 0 ? (
-              <InteractiveTutorial 
-                title="📊 圖表互動教學"
+              <InteractiveTutorial
+                title={
+                  <span className="flex items-center gap-2">
+                    <ChartBarIcon className="w-5 h-5" />
+                    圖表互動教學
+                  </span>
+                }
                 steps={tutorialSteps}
               >
                 <div className="flex justify-center">

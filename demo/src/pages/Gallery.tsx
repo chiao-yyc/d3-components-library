@@ -22,7 +22,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, RectangleGroupIcon, ArrowLeftIcon, HomeIcon } from '@heroicons/react/24/outline'
+import { CogIcon, RectangleGroupIcon, ArrowLeftIcon, HomeIcon, FolderIcon, ChartBarIcon, CogIcon as SettingsIcon } from '@heroicons/react/24/outline'
 
 // 生成範例資料
 const timeSeriesData = [
@@ -202,7 +202,7 @@ function Gallery() {
           >
             <div className="space-y-8">
               {/* 分類篩選 */}
-              <ControlGroup title="圖表分類" icon="🗂️" cols={1}>
+              <ControlGroup title="圖表分類" icon={<FolderIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="分類篩選"
                   value={selectedCategory}
@@ -212,7 +212,7 @@ function Gallery() {
               </ControlGroup>
 
               {/* 圖表選擇 */}
-              <ControlGroup title="圖表選擇" icon="📊" cols={1}>
+              <ControlGroup title="圖表選擇" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="選擇圖表"
                   value={selectedChart}
@@ -222,7 +222,7 @@ function Gallery() {
               </ControlGroup>
 
               {/* 全局設置 */}
-              <ControlGroup title="全局設置" icon="⚙️" cols={1}>
+              <ControlGroup title="全局設置" icon={<SettingsIcon className="w-4 h-4" />} cols={1}>
                 <ToggleControl
                   label="動畫效果"
                   checked={animate}

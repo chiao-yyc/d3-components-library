@@ -9,6 +9,7 @@ import { DataTable } from '../components/ui/DataTable';
 import { CodeExample } from '../components/ui/CodeExample';
 import { RealPerformanceScatterPlot } from '../components/performance/RealPerformanceScatterPlot';
 import { PerformanceComparison } from '../components/performance/PerformanceComparison';
+import { BoltIcon, CogIcon, ArrowPathIcon, ChartBarIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 
 // Real performance testing with actual ScatterPlot implementation
 
@@ -237,8 +238,9 @@ const bigData = generateData(${dataSize.toLocaleString()});
       <div className="container mx-auto px-4 py-8">
         {/* 頁面標題 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ⚡ Canvas Fallback 性能測試
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <BoltIcon className="w-8 h-8 text-yellow-500" />
+            Canvas Fallback 性能測試
           </h1>
           <p className="text-gray-600 text-lg">
             測試 SVG ↔ Canvas 自動切換系統，支援 50K+ 數據點高性能渲染
@@ -249,7 +251,8 @@ const bigData = generateData(${dataSize.toLocaleString()});
           {/* 控制面板 */}
           <div className="xl:col-span-1">
             <ModernControlPanel
-              title="🎛️ 性能測試控制"
+              title="性能測試控制"
+              icon={<CogIcon className="w-5 h-5" />}
               controls={controls}
             />
             
@@ -276,7 +279,7 @@ const bigData = generateData(${dataSize.toLocaleString()});
             {/* Tooltip 智慧說明 */}
             <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
               <h3 className="font-semibold text-green-900 mb-2">
-                🎯 Tooltip 智慧模式
+                Tooltip 智慧模式
               </h3>
               <div className="text-sm text-green-800 space-y-1">
                 <p>• 自動: &gt; 50K 點時禁用</p>
@@ -290,7 +293,12 @@ const bigData = generateData(${dataSize.toLocaleString()});
           {/* 主要圖表區域 */}
           <div className="xl:col-span-3">
             <ChartContainer
-              title={`📊 性能測試散點圖 - ${performanceMetrics?.renderMode?.toUpperCase() || (isRerendering ? 'RENDERING...' : 'LOADING')} 模式`}
+              title={
+                <span className="flex items-center gap-2">
+                  <ChartBarIcon className="w-5 h-5" />
+                  性能測試散點圖 - {performanceMetrics?.renderMode?.toUpperCase() || (isRerendering ? 'RENDERING...' : 'LOADING')} 模式
+                </span>
+              }
               subtitle={`${testData.length.toLocaleString()} 個數據點 ${performanceMetrics ? `• 渲染時間 ${performanceMetrics.renderTime.toFixed(1)}ms` : (isRerendering ? '• 重新渲染中...' : '')}`}
             >
               <RealPerformanceScatterPlot
@@ -319,7 +327,12 @@ const bigData = generateData(${dataSize.toLocaleString()});
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 數據表格 */}
           <DataTable
-            title={`📋 測試數據樣本 (前10筆/${testData.length.toLocaleString()})`}
+            title={
+              <span className="flex items-center gap-2">
+                <ClipboardDocumentListIcon className="w-5 h-5" />
+                測試數據樣本 (前10筆/{testData.length.toLocaleString()})
+              </span>
+            }
             data={sampleData}
           />
 
@@ -341,8 +354,9 @@ const bigData = generateData(${dataSize.toLocaleString()});
 
         {/* 效能對比說明 */}
         <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
-            🚀 Canvas Fallback 效能提升
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <BoltIcon className="w-6 h-6 text-green-600" />
+            Canvas Fallback 效能提升
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">

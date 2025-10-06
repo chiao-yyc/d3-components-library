@@ -24,7 +24,7 @@ import {
   StatusDisplay,
   CodeExample,
 } from '../components/ui'
-import { DevicePhoneMobileIcon, ComputerDesktopIcon, DeviceTabletIcon } from '@heroicons/react/24/outline'
+import { DevicePhoneMobileIcon, ComputerDesktopIcon, DeviceTabletIcon, ChartBarIcon, RectangleStackIcon, CogIcon, SquaresPlusIcon } from '@heroicons/react/24/outline'
 
 const CHART_COMPONENTS = {
   bar: BarChart,
@@ -179,7 +179,7 @@ ${props}
         <ModernControlPanel title="響應式控制面板">
           <div className="space-y-6">
             {/* 圖表選擇 */}
-            <ControlGroup title="圖表選擇" icon="📊" cols={2}>
+            <ControlGroup title="圖表選擇" icon={<ChartBarIcon className="w-4 h-4" />} cols={2}>
               <SelectControl
                 label="圖表類型"
                 value={selectedChart}
@@ -199,7 +199,7 @@ ${props}
             </ControlGroup>
 
             {/* 設備預設 */}
-            <ControlGroup title="設備預設" icon="📱" cols={3}>
+            <ControlGroup title="設備預設" icon={<DevicePhoneMobileIcon className="w-4 h-4" />} cols={3}>
               {Object.entries(devicePresets).map(([key, preset]) => {
                 const IconComponent = preset.icon
                 return (
@@ -224,7 +224,7 @@ ${props}
             </ControlGroup>
 
             {/* 容器寬度調整 */}
-            <ControlGroup title="容器寬度" icon="📏" cols={1}>
+            <ControlGroup title="容器寬度" icon={<RectangleStackIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="寬度百分比"
                 value={containerWidth}
@@ -240,7 +240,7 @@ ${props}
             </ControlGroup>
 
             {/* 響應式參數 */}
-            <ControlGroup title="響應式參數" icon="⚙️" cols={2}>
+            <ControlGroup title="響應式參數" icon={<CogIcon className="w-4 h-4" />} cols={2}>
               <RangeSlider
                 label="寬高比"
                 value={aspect}
@@ -262,7 +262,7 @@ ${props}
               />
             </ControlGroup>
 
-            <ControlGroup title="尺寸限制" icon="📐" cols={2}>
+            <ControlGroup title="尺寸限制" icon={<SquaresPlusIcon className="w-4 h-4" />} cols={2}>
               <RangeSlider
                 label="最大寬度"
                 value={maxWidth}

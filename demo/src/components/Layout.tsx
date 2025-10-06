@@ -1,6 +1,31 @@
 import { NavLink } from 'react-router-dom'
 import { ReactNode, useState } from 'react'
 import Breadcrumb from './Breadcrumb'
+import {
+  HomeIcon,
+  CogIcon,
+  BuildingLibraryIcon,
+  BeakerIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  CircleStackIcon,
+  ChartPieIcon,
+  RectangleGroupIcon,
+  FireIcon,
+  CubeIcon,
+  MusicalNoteIcon,
+  FunnelIcon,
+  ClockIcon,
+  LinkIcon,
+  ArrowsPointingOutIcon,
+  RocketLaunchIcon,
+  BoltIcon,
+  BriefcaseIcon,
+  PuzzlePieceIcon,
+  DevicePhoneMobileIcon,
+  WrenchScrewdriverIcon,
+  FolderIcon
+} from '@heroicons/react/24/outline'
 
 interface LayoutProps {
   children: ReactNode
@@ -9,7 +34,7 @@ interface LayoutProps {
 interface NavigationItem {
   path: string
   name: string
-  icon: string
+  icon: ReactNode
 }
 
 interface NavigationGroup {
@@ -21,104 +46,104 @@ interface NavigationGroup {
 
 function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['🚀 快速開始', '📊 基礎圖表']))
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['快速開始', '基礎圖表']))
 
   const navigationGroups: NavigationGroup[] = [
     // 第一層：快速開始
     {
-      title: '🚀 快速開始',
+      title: '快速開始',
       tier: 1,
       description: '新手入門必看',
       items: [
-        { path: '/', name: '專案概覽', icon: '🏠' },
-        { path: '/installation', name: '安裝指南', icon: '⚙️' },
-        { path: '/charts-showcase', name: '圖表總覽館', icon: '🏛️' },
-        { path: '/gallery', name: '圖表實驗室', icon: '🧪' },
+        { path: '/', name: '專案概覽', icon: <HomeIcon className="w-4 h-4" /> },
+        { path: '/installation', name: '安裝指南', icon: <CogIcon className="w-4 h-4" /> },
+        { path: '/charts-showcase', name: '圖表總覽館', icon: <BuildingLibraryIcon className="w-4 h-4" /> },
+        { path: '/gallery', name: '圖表實驗室', icon: <BeakerIcon className="w-4 h-4" /> },
       ]
     },
     
-    // 第二層：開發指南  
+    // 第二層：開發指南
     {
-      title: '📊 基礎圖表',
+      title: '基礎圖表',
       tier: 2,
       description: '常用圖表組件',
       items: [
-        { path: '/bar-chart', name: '長條圖', icon: '📊' },
-        { path: '/line-chart', name: '折線圖', icon: '📈' },
-        { path: '/scatter-plot', name: '散點圖', icon: '🔵' },
-        { path: '/pie-chart', name: '圓餅圖', icon: '🥧' },
-        { path: '/area-chart', name: '區域圖', icon: '🌊' }
+        { path: '/bar-chart', name: '長條圖', icon: <ChartBarIcon className="w-4 h-4" /> },
+        { path: '/line-chart', name: '折線圖', icon: <ArrowTrendingUpIcon className="w-4 h-4" /> },
+        { path: '/scatter-plot', name: '散點圖', icon: <CircleStackIcon className="w-4 h-4" /> },
+        { path: '/pie-chart', name: '圓餅圖', icon: <ChartPieIcon className="w-4 h-4" /> },
+        { path: '/area-chart', name: '區域圖', icon: <RectangleGroupIcon className="w-4 h-4" /> }
       ]
     },
     {
-      title: '📈 進階圖表',
+      title: '進階圖表',
       tier: 2,
       description: '專業數據視覺化',
       items: [
-        { path: '/heatmap', name: '熱力圖', icon: '🔥' },
-        { path: '/box-plot', name: '箱形圖', icon: '📦' },
-        { path: '/violin-plot', name: '小提琴圖', icon: '🎻' },
-        { path: '/radar-chart', name: '雷達圖', icon: '🎯' },
-        { path: '/funnel-chart', name: '漏斗圖', icon: '🎯' },
-        { path: '/gauge-chart', name: '儀表盤', icon: '⏱️' },
-        { path: '/candlestick', name: 'K線圖', icon: '📊' },
-        { path: '/tree-map', name: '樹狀圖', icon: '🌳' },
-        { path: '/correlogram', name: '相關性分析', icon: '🔗' }
+        { path: '/heatmap', name: '熱力圖', icon: <FireIcon className="w-4 h-4" /> },
+        { path: '/box-plot', name: '箱形圖', icon: <CubeIcon className="w-4 h-4" /> },
+        { path: '/violin-plot', name: '小提琴圖', icon: <MusicalNoteIcon className="w-4 h-4" /> },
+        { path: '/radar-chart', name: '雷達圖', icon: <FunnelIcon className="w-4 h-4" /> },
+        { path: '/funnel-chart', name: '漏斗圖', icon: <FunnelIcon className="w-4 h-4" /> },
+        { path: '/gauge-chart', name: '儀表盤', icon: <ClockIcon className="w-4 h-4" /> },
+        { path: '/candlestick', name: 'K線圖', icon: <ChartBarIcon className="w-4 h-4" /> },
+        { path: '/tree-map', name: '樹狀圖', icon: <ArrowsPointingOutIcon className="w-4 h-4" /> },
+        { path: '/correlogram', name: '相關性分析', icon: <LinkIcon className="w-4 h-4" /> }
       ]
     },
     {
-      title: '🔧 組合式架構',
+      title: '組合式架構',
       tier: 2,
       description: '靈活的圖表組合系統',
       items: [
-        { path: '/simple-components', name: '簡化組件模式', icon: '🚀' },
-        { path: '/combo-chart', name: '基礎組合圖表', icon: '⚡' },
-        { path: '/enhanced-combo-chart', name: '商業分析組合', icon: '💼' },
-        { path: '/area-line-combo', name: '趨勢分析組合', icon: '🌊' },
-        { path: '/scatter-regression-combo', name: '統計分析組合', icon: '📊' },
-        { path: '/composable-primitives', name: '架構展示組合', icon: '🧩' }
+        { path: '/simple-components', name: '簡化組件模式', icon: <RocketLaunchIcon className="w-4 h-4" /> },
+        { path: '/combo-chart', name: '基礎組合圖表', icon: <BoltIcon className="w-4 h-4" /> },
+        { path: '/enhanced-combo-chart', name: '商業分析組合', icon: <BriefcaseIcon className="w-4 h-4" /> },
+        { path: '/area-line-combo', name: '趨勢分析組合', icon: <RectangleGroupIcon className="w-4 h-4" /> },
+        { path: '/scatter-regression-combo', name: '統計分析組合', icon: <ChartBarIcon className="w-4 h-4" /> },
+        { path: '/composable-primitives', name: '架構展示組合', icon: <PuzzlePieceIcon className="w-4 h-4" /> }
       ]
     },
     {
-      title: '🎯 專業應用場景',
+      title: '專業應用場景',
       tier: 2,
       description: '特定領域的圖表組合',
       items: [
-        { path: '/advanced-combo', name: '進階組合展示', icon: '🚀' },
-        { path: '/special-analysis', name: '特殊分析組合', icon: '🔬' },
-        { path: '/financial-combo', name: '金融圖表組合', icon: '💰' },
-        { path: '/dynamic-combo', name: '動態配置組合', icon: '⚙️' }
+        { path: '/advanced-combo', name: '進階組合展示', icon: <RocketLaunchIcon className="w-4 h-4" /> },
+        { path: '/special-analysis', name: '特殊分析組合', icon: <BeakerIcon className="w-4 h-4" /> },
+        { path: '/financial-combo', name: '金融圖表組合', icon: <ChartBarIcon className="w-4 h-4" /> },
+        { path: '/dynamic-combo', name: '動態配置組合', icon: <CogIcon className="w-4 h-4" /> }
       ]
     },
     {
-      title: '📱 響應式系統',
+      title: '響應式系統',
       tier: 2,
       description: '適配各種螢幕',
       items: [
-        { path: '/responsive-chart', name: '響應式圖表', icon: '📱' },
-        { path: '/responsive-test', name: '容器測試', icon: '🧪' }
+        { path: '/responsive-chart', name: '響應式圖表', icon: <DevicePhoneMobileIcon className="w-4 h-4" /> },
+        { path: '/responsive-test', name: '容器測試', icon: <BeakerIcon className="w-4 h-4" /> }
       ]
     },
 
     // 第三層：開發者工具
     {
-      title: '🧪 測試與除錯',
+      title: '測試與除錯',
       tier: 3,
       description: '開發者專用工具',
       items: [
-        { path: '/modular-test', name: '組件測試', icon: '🧩' },
-        { path: '/data-processor-test', name: '數據處理測試', icon: '🔬' },
-        { path: '/performance-test', name: '性能測試', icon: '⚡' },
-        { path: '/virtual-scrolling', name: '虛擬滾動', icon: '🚀' },
-        { path: '/combo-debug-tools', name: '組合圖表調試工具', icon: '🔧' }
+        { path: '/modular-test', name: '組件測試', icon: <PuzzlePieceIcon className="w-4 h-4" /> },
+        { path: '/data-processor-test', name: '數據處理測試', icon: <BeakerIcon className="w-4 h-4" /> },
+        { path: '/performance-test', name: '性能測試', icon: <BoltIcon className="w-4 h-4" /> },
+        { path: '/virtual-scrolling', name: '虛擬滾動', icon: <RocketLaunchIcon className="w-4 h-4" /> },
+        { path: '/combo-debug-tools', name: '組合圖表調試工具', icon: <WrenchScrewdriverIcon className="w-4 h-4" /> }
       ]
     },
     {
-      title: '🛠️ 進階工具',
+      title: '進階工具',
       tier: 3,
       description: '提升開發效率',
       items: [
-        { path: '/data-mapper', name: '資料映射器', icon: '🗂️' }
+        { path: '/data-mapper', name: '資料映射器', icon: <FolderIcon className="w-4 h-4" /> }
       ]
     }
   ]
@@ -202,7 +227,7 @@ function Layout({ children }: LayoutProps) {
                             tier === 2 ? 'text-blue-800' :
                             'text-purple-800'
                           } ${isSidebarOpen ? 'text-sm' : 'text-xs'}`}>
-                            {isSidebarOpen ? group.title : group.title.split(' ')[0]}
+                            {group.title}
                           </span>
                           {isSidebarOpen && group.description && (
                             <div className="text-xs text-gray-500 mt-0.5">
@@ -245,7 +270,7 @@ function Layout({ children }: LayoutProps) {
                               }
                               title={!isSidebarOpen ? item.name : undefined}
                             >
-                              <span className="mr-3">{item.icon}</span>
+                              <span className="mr-3 text-gray-500">{item.icon}</span>
                               {isSidebarOpen && (
                                 <span className="flex-1 truncate">{item.name}</span>
                               )}

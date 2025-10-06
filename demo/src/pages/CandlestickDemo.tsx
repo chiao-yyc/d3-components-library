@@ -20,7 +20,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarSquareIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartBarSquareIcon, CurrencyDollarIcon, ChartBarIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 // 生成模擬股票數據
 function generateStockData(days: number = 60, initialPrice: number = 100) {
@@ -290,7 +290,7 @@ export default function CandlestickDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -317,7 +317,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 圖表配置 */}
-            <ControlGroup title="圖表配置" icon="📊" cols={1}>
+            <ControlGroup title="圖表配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="蠟燭寬度"
                 value={candleWidth}
@@ -330,7 +330,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="顯示成交量"
                 checked={showVolume}
@@ -368,7 +368,7 @@ export default function CandlestickDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="互動功能"
                 checked={interactive}

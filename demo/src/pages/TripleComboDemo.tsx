@@ -16,7 +16,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarSquareIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartBarSquareIcon, PresentationChartBarIcon, FunnelIcon, ChartBarIcon, PaintBrushIcon } from '@heroicons/react/24/outline'
 
 const TripleComboDemo: React.FC = () => {
   // 場景 1: 電商業務分析 - 銷售額(柱) + 成長區間(面) + 目標線(線)
@@ -356,7 +356,7 @@ const TripleComboDemo: React.FC = () => {
           >
           <div className="space-y-8">
             {/* 場景選擇 */}
-            <ControlGroup title="場景選擇" icon="🎯" cols={1}>
+            <ControlGroup title="場景選擇" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="分析場景"
                 value={activeScenario}
@@ -370,7 +370,7 @@ const TripleComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 三重組合配置 */}
-            <ControlGroup title="三重組合配置" icon="📊" cols={2}>
+            <ControlGroup title="三重組合配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="顯示區域圖"
                 checked={showAreaChart}
@@ -391,7 +391,7 @@ const TripleComboDemo: React.FC = () => {
             </ControlGroup>
 
             {/* 系列控制 */}
-            <ControlGroup title="系列控制" icon="🎨" cols={1}>
+            <ControlGroup title="系列控制" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-700">可見系列</span>

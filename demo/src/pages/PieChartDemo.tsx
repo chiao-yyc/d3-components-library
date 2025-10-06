@@ -19,7 +19,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartPieIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartPieIcon, SparklesIcon, CircleStackIcon, PaintBrushIcon, EyeIcon, RectangleStackIcon, PencilIcon, PlayIcon } from '@heroicons/react/24/outline'
 
 // 範例資料
 const sampleData = [
@@ -151,7 +151,7 @@ export default function PieChartDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={3}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={3}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -179,7 +179,7 @@ export default function PieChartDemo() {
 
 
             {/* 半徑配置 */}
-            <ControlGroup title="半徑配置" icon="⚪" cols={4}>
+            <ControlGroup title="半徑配置" icon={<CircleStackIcon className="w-4 h-4" />} cols={4}>
               <RangeSlider
                 label="內半徑"
                 value={innerRadius}
@@ -220,7 +220,7 @@ export default function PieChartDemo() {
             </ControlGroup>
 
             {/* 標籤和圖例 */}
-            <ControlGroup title="標籤圖例" icon="📝" cols={3}>
+            <ControlGroup title="標籤圖例" icon={<PencilIcon className="w-4 h-4" />} cols={3}>
               <ToggleControl
                 label="顯示標籤"
                 checked={showLabels}
@@ -274,7 +274,7 @@ export default function PieChartDemo() {
             </ControlGroup>
 
             {/* 動畫和交互 */}
-            <ControlGroup title="動畫交互" icon="🎬" cols={2}>
+            <ControlGroup title="動畫交互" icon={<PlayIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}

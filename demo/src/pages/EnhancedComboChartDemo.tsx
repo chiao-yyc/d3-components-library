@@ -15,7 +15,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline'
+import { CogIcon, PresentationChartBarIcon, FunnelIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 
 // 生成示例數據
 const generateSalesData = () => {
@@ -204,7 +204,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
           >
             <div className="space-y-8">
               {/* 場景選擇 */}
-              <ControlGroup title="場景選擇" icon="🎯" cols={1}>
+              <ControlGroup title="場景選擇" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
                 <SelectControl
                   label="分析場景"
                   value={activeScenario}
@@ -217,7 +217,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
               </ControlGroup>
 
               {/* 系列控制 */}
-              <ControlGroup title="系列選擇" icon="📊" cols={1}>
+              <ControlGroup title="系列選擇" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
                 <div className="space-y-3">
                   <div className="text-sm text-gray-600 mb-3">選擇要顯示的圖表系列：</div>
                   <div className="grid grid-cols-1 gap-2">
@@ -251,7 +251,7 @@ export const EnhancedComboChartDemo: React.FC = () => {
               </ControlGroup>
 
               {/* 全域設定 */}
-              <ControlGroup title="全域設定" icon="⚙️" cols={1}>
+              <ControlGroup title="全域設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
                 <ToggleControl
                   label="動畫效果"
                   checked={animate}

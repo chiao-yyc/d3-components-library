@@ -20,7 +20,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartPieIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartPieIcon, SparklesIcon, RectangleStackIcon, PaintBrushIcon, ClipboardIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 // 員工技能評估數據
 const skillAssessmentData = [
@@ -311,7 +311,7 @@ export default function RadarChartDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -340,7 +340,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 尺寸設定 */}
-            <ControlGroup title="尺寸配置" icon="📏" cols={1}>
+            <ControlGroup title="尺寸配置" icon={<RectangleStackIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="圖表寬度"
                 value={chartWidth}
@@ -404,7 +404,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 樣式設定 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={1}>
+            <ControlGroup title="樣式配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="線條寬度"
                 value={strokeWidth}
@@ -437,7 +437,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 圖例設定 */}
-            <ControlGroup title="圖例配置" icon="📋" cols={2}>
+            <ControlGroup title="圖例配置" icon={<ClipboardIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="顯示圖例"
                 checked={showLegend}
@@ -460,7 +460,7 @@ export default function RadarChartDemo() {
 
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={1}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="顯示網格"
                 checked={showGrid}
@@ -505,7 +505,7 @@ export default function RadarChartDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={1}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={1}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}

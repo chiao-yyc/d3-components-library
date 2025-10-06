@@ -21,7 +21,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, Squares2X2Icon, BuildingOffice2Icon } from '@heroicons/react/24/outline'
+import { CogIcon, Squares2X2Icon, BuildingOffice2Icon, ChartBarIcon, PaintBrushIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 // 公司組織架構數據
 const companyData: HierarchyDataItem = {
@@ -395,7 +395,7 @@ export default function TreeMapDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="數據集"
                 value={selectedDataset}
@@ -423,7 +423,7 @@ export default function TreeMapDemo() {
 
 
             {/* 佈局配置 */}
-            <ControlGroup title="佈局配置" icon="📊" cols={1}>
+            <ControlGroup title="佈局配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="內邊距"
                 value={padding}
@@ -436,7 +436,7 @@ export default function TreeMapDemo() {
             </ControlGroup>
 
             {/* 樣式配置 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={3}>
+            <ControlGroup title="樣式配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={3}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   邊框顏色
@@ -504,7 +504,7 @@ export default function TreeMapDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="工具提示"
                 checked={showTooltip}

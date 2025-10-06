@@ -15,7 +15,8 @@ import {
   BanknotesIcon,
   CogIcon,
   EyeIcon,
-  SparklesIcon
+  SparklesIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline'
 
 const ComboChartDemo: React.FC = () => {
@@ -200,7 +201,7 @@ const series: ComboSeries[] = [
 
   return (
     <DemoPageTemplate
-      title="組合圖表演示 📊"
+      title="組合圖表演示"
       description="展示 Bar + Line 的基本組合圖表，支援雙軸配置、系列控制與對齊測試功能，適用於不同量綱數據的對比分析。包含對齊策略測試，確保組合圖表中各元素的視覺一致性。"
     >
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -267,7 +268,7 @@ const series: ComboSeries[] = [
               {/* 對齊測試控制 */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-red-500">🎯</span>
+                  <FunnelIcon className="h-4 w-4 text-red-500" />
                   <h3 className="text-sm font-semibold text-gray-700">對齊測試</h3>
                 </div>
                 <div className="space-y-3">
@@ -327,19 +328,19 @@ const series: ComboSeries[] = [
                   </button>
                 </div>
                 <div className="max-h-48 overflow-y-auto space-y-2">
-                  {(activeScenario === 'sales' ? salesSeries : 
+                  {(activeScenario === 'sales' ? salesSeries :
                     activeScenario === 'revenue' ? revenueSeries : trafficSeries).map((series) => (
                     <motion.button
-                      key={series.dataKey}
+                      key={series.yKey}
                       onClick={() => toggleSeries(series.yKey)}
                       whileHover={{ x: 2 }}
                       className={`w-full p-2 rounded-lg text-xs transition-all duration-200 text-left ${
-                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey)
+                        activeSeriesIds.size === 0 || activeSeriesIds.has(series.yKey)
                           ? 'bg-white border-2 shadow-sm'
                           : 'bg-gray-100 border border-gray-300 opacity-60'
                       }`}
                       style={{
-                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.dataKey) 
+                        borderColor: activeSeriesIds.size === 0 || activeSeriesIds.has(series.yKey) 
                           ? series.color 
                           : undefined
                       }}
@@ -426,7 +427,8 @@ const series: ComboSeries[] = [
             transition={{ delay: 0.3, duration: 0.5 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-4"
           >
-            <motion.div 
+            <motion.div
+              key="bar-series-card"
               whileHover={{ y: -2, scale: 1.02 }}
               className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200"
             >
@@ -440,8 +442,9 @@ const series: ComboSeries[] = [
                 {currentSeries.filter(s => s.type === 'bar').length} 個柱狀圖
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
+              key="line-series-card"
               whileHover={{ y: -2, scale: 1.02 }}
               className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200"
             >
@@ -455,8 +458,9 @@ const series: ComboSeries[] = [
                 {currentSeries.filter(s => s.type === 'line').length} 條趨勢線
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
+              key="data-points-card"
               whileHover={{ y: -2, scale: 1.02 }}
               className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200"
             >

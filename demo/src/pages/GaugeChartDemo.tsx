@@ -15,7 +15,7 @@ import {
   CodeExample,
   type DataTableColumn
 } from '../components/ui'
-import { CogIcon, ChartBarSquareIcon } from '@heroicons/react/24/outline'
+import { CogIcon, ChartBarSquareIcon, ChartBarIcon, PaintBrushIcon, EyeIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 // KPI 資料
 const kpiData = [
@@ -204,7 +204,7 @@ export default function GaugeChartDemo() {
         >
           <div className="space-y-8">
             {/* 基本設定 */}
-            <ControlGroup title="基本設定" icon="⚙️" cols={1}>
+            <ControlGroup title="基本設定" icon={<CogIcon className="w-4 h-4" />} cols={1}>
               <SelectControl
                 label="資料集"
                 value={selectedDataset}
@@ -245,7 +245,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 儀表盤配置 */}
-            <ControlGroup title="儀表盤配置" icon="📊" cols={1}>
+            <ControlGroup title="儀表盤配置" icon={<ChartBarIcon className="w-4 h-4" />} cols={1}>
               <RangeSlider
                 label="起始角度"
                 value={startAngle}
@@ -277,7 +277,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 樣式設定 */}
-            <ControlGroup title="樣式配置" icon="🎨" cols={1}>
+            <ControlGroup title="樣式配置" icon={<PaintBrushIcon className="w-4 h-4" />} cols={1}>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   指針顏色
@@ -316,7 +316,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 顯示選項 */}
-            <ControlGroup title="顯示選項" icon="👁️" cols={2}>
+            <ControlGroup title="顯示選項" icon={<EyeIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="顯示數值"
                 checked={showValue}
@@ -347,7 +347,7 @@ export default function GaugeChartDemo() {
             </ControlGroup>
 
             {/* 交互功能 */}
-            <ControlGroup title="交互功能" icon="🎯" cols={2}>
+            <ControlGroup title="交互功能" icon={<FunnelIcon className="w-4 h-4" />} cols={2}>
               <ToggleControl
                 label="動畫效果"
                 checked={animate}
