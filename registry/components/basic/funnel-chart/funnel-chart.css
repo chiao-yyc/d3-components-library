@@ -1,11 +1,43 @@
+/* FunnelChart Component Styles */
+
+/* CSS 變數定義 - 與其他圖表保持一致 */
+:root {
+  --funnel-chart-primary: #3b82f6;
+  --funnel-chart-text: #374151;
+  --funnel-chart-text-muted: #6b7280;
+  --funnel-chart-text-light: #9ca3af;
+  --funnel-chart-segment-stroke: rgba(255, 255, 255, 0.8);
+  --funnel-chart-background: #ffffff;
+
+  --funnel-chart-font-family: system-ui, -apple-system, sans-serif;
+  --funnel-chart-font-size: 12px;
+  --funnel-chart-value-font-size: 10px;
+
+  --funnel-chart-transition-duration: 0.2s;
+  --funnel-chart-transition-easing: ease;
+}
+
+/* 深色模式支援 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --funnel-chart-text: #d1d5db;
+    --funnel-chart-text-muted: #9ca3af;
+    --funnel-chart-text-light: #6b7280;
+    --funnel-chart-segment-stroke: rgba(0, 0, 0, 0.3);
+    --funnel-chart-background: #1f2937;
+  }
+}
+
 .funnel-chart-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: var(--funnel-chart-background);
+  font-family: var(--funnel-chart-font-family);
 }
 
 .funnel-chart-svg {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .chart-area {
@@ -17,7 +49,8 @@
 }
 
 .funnel-segment path {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--funnel-chart-transition-duration) var(--funnel-chart-transition-easing),
+              transform var(--funnel-chart-transition-duration) var(--funnel-chart-transition-easing);
 }
 
 .funnel-segment:hover path {
@@ -33,6 +66,7 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  fill: var(--funnel-chart-text);
 }
 
 /* 動畫效果 */
@@ -60,16 +94,29 @@
   }
 }
 
-/* 高對比模式 */
+/* 高對比度模式 */
 @media (prefers-contrast: high) {
+  :root {
+    --funnel-chart-text: #000000;
+    --funnel-chart-segment-stroke: #000000;
+  }
+
   .funnel-chart-svg path {
-    stroke: #000;
+    stroke: var(--funnel-chart-segment-stroke);
     stroke-width: 2px;
   }
-  
+
   .funnel-chart-svg text {
-    fill: #000;
-    font-weight: bold;
+    fill: var(--funnel-chart-text);
+    font-weight: 600;
+  }
+}
+
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
+  .funnel-chart-svg .funnel-segment path {
+    transition: none !important;
+    animation: none !important;
   }
 }
 
@@ -79,7 +126,7 @@
   color: white;
   padding: 8px 12px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--funnel-chart-font-size);
   line-height: 1.4;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }

@@ -816,7 +816,7 @@ export default function FunnelChartDemo() {
                       { step: 3, value: 405, label: 'Click End Card*' }
                     ]}
                     width={350}
-                    height={200}
+                    height={350}
                     background="#f5f5f5"
                     gradient1="#FF6B6B"
                     gradient2="#4ECDC4"
@@ -836,7 +836,7 @@ export default function FunnelChartDemo() {
                       { step: 4, value: 1800, label: 'Conversion' }
                     ]}
                     width={350}
-                    height={200}
+                    height={350}
                     background="#f9f9f9"
                     gradient1="#8B5CF6"
                     gradient2="#06B6D4"

@@ -356,30 +356,41 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
 
     if (!this.colorScale) return;
 
-    const { chartWidth: _chartWidth, chartHeight: _chartHeight, margin, width, height } = this.getChartDimensions();
-    
+    const { chartWidth, chartHeight, margin, width } = this.getChartDimensions();
+
+    // 定義圖例尺寸
+    const isHorizontal = legendPosition === 'top' || legendPosition === 'bottom';
+    const legendWidth = isHorizontal ? Math.min(200, chartWidth * 0.6) : 20;
+    const legendHeight = isHorizontal ? 20 : Math.min(200, chartHeight * 0.6);
+
+    // 計算標籤所需空間
+    const titleHeight = 20;
+    const tickLabelSpace = isHorizontal ? 20 : 35; // 刻度標籤需要的額外空間
+
     // 創建圖例組
     const legendGroup = container.append('g').attr('class', 'heatmap-legend');
 
-    // 設置圖例位置 - 基於整個 SVG 尺寸，考慮邊距
+    // 設置圖例位置 - 確保在 SVG 邊界內
     let legendX = 0, legendY = 0;
     switch (legendPosition) {
       case 'top':
-        legendX = width / 2;
-        legendY = margin.top / 2;
+        legendX = margin.left + chartWidth / 2 - legendWidth / 2;
+        legendY = Math.max(titleHeight + 5, margin.top / 2);
         break;
       case 'bottom':
-        legendX = width / 2;
-        legendY = height - margin.bottom / 2;
+        legendX = margin.left + chartWidth / 2 - legendWidth / 2;
+        legendY = margin.top + chartHeight + Math.min(30, (margin.bottom - tickLabelSpace) / 2);
         break;
       case 'left':
-        legendX = margin.left / 2;
-        legendY = height / 2;
+        legendX = Math.max(tickLabelSpace + 5, margin.left / 2 - legendWidth / 2);
+        legendY = margin.top + chartHeight / 2 - legendHeight / 2;
         break;
       case 'right':
       default:
-        legendX = width - margin.right / 2;
-        legendY = height / 2;
+        // 確保圖例不會超出 SVG 右邊界
+        const maxX = width - tickLabelSpace - legendWidth - 5;
+        legendX = Math.min(margin.left + chartWidth + 15, maxX);
+        legendY = margin.top + chartHeight / 2 - legendHeight / 2;
     }
 
     legendGroup.attr('transform', `translate(${legendX}, ${legendY})`);
@@ -387,12 +398,12 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
     // 創建顏色漸變
     const defs = container.select('defs').empty() ? container.append('defs') : container.select('defs');
     const gradientId = `heatmap-gradient-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const gradient = defs.append('linearGradient')
       .attr('id', gradientId)
       .attr('gradientUnits', 'userSpaceOnUse');
 
-    if (legendPosition === 'top' || legendPosition === 'bottom') {
+    if (isHorizontal) {
       gradient.attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
     } else {
       gradient.attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
@@ -408,9 +419,6 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
     }
 
     // 繪製圖例矩形
-    const legendWidth = legendPosition === 'top' || legendPosition === 'bottom' ? 200 : 20;
-    const legendHeight = legendPosition === 'top' || legendPosition === 'bottom' ? 20 : 200;
-
     legendGroup.append('rect')
       .attr('width', legendWidth)
       .attr('height', legendHeight)
@@ -420,23 +428,23 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
     legendGroup.append('text')
       .attr('class', 'legend-title')
       .attr('text-anchor', 'middle')
-      .attr('x', legendWidth / 2)
+      .attr('x', isHorizontal ? legendWidth / 2 : legendWidth / 2)
       .attr('y', -5)
       .style('font-size', '12px')
-      .style('font-weight', 'bold')
+      .style('font-weight', '600')
       .text(legendTitle);
 
     // 添加刻度標籤
     const tickCount = 5;
     for (let i = 0; i <= tickCount; i++) {
       const value = domain[0] + (i / tickCount) * (domain[1] - domain[0]);
-      const tickPos = (i / tickCount) * (legendPosition === 'top' || legendPosition === 'bottom' ? legendWidth : legendHeight);
-      
+      const tickPos = (i / tickCount) * (isHorizontal ? legendWidth : legendHeight);
+
       legendGroup.append('text')
         .attr('class', 'legend-tick')
-        .attr('text-anchor', 'middle')
-        .attr('x', legendPosition === 'top' || legendPosition === 'bottom' ? tickPos : legendWidth + 10)
-        .attr('y', legendPosition === 'top' || legendPosition === 'bottom' ? legendHeight + 15 : tickPos + 4)
+        .attr('text-anchor', isHorizontal ? 'middle' : 'start')
+        .attr('x', isHorizontal ? tickPos : legendWidth + 5)
+        .attr('y', isHorizontal ? legendHeight + 15 : tickPos + 4)
         .style('font-size', '10px')
         .text(legendFormat(value));
     }
@@ -453,10 +461,10 @@ export class HeatmapCore extends BaseChartCore<HeatmapData> {
         config.onDataClick?.(d, event);
       })
       .on('mouseover', (event: MouseEvent, d: HeatmapDataPoint) => {
-        // 添加懸停效果
+        // 添加懸停效果 - 使用 CSS 變數顏色
         d3.select(event.currentTarget as SVGGElement)
           .select('rect')
-          .style('stroke', '#333')
+          .style('stroke', 'var(--heatmap-hover-stroke, #1f2937)')
           .style('stroke-width', '2px');
 
         config.onDataHover?.(d, event);

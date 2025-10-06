@@ -1,14 +1,49 @@
 /* Heatmap Component Styles */
+
+/* CSS 變數定義 - 與其他圖表保持一致 */
+:root {
+  --heatmap-primary: #3b82f6;
+  --heatmap-text: #374151;
+  --heatmap-text-muted: #6b7280;
+  --heatmap-text-light: #9ca3af;
+  --heatmap-border: #e5e7eb;
+  --heatmap-grid: #f3f4f6;
+  --heatmap-hover-stroke: #1f2937;
+  --heatmap-background: #ffffff;
+
+  --heatmap-font-family: system-ui, -apple-system, sans-serif;
+  --heatmap-font-size: 12px;
+  --heatmap-label-font-size: 12px;
+  --heatmap-legend-font-size: 10px;
+
+  --heatmap-transition-duration: 0.2s;
+  --heatmap-transition-easing: ease;
+}
+
+/* 深色模式支援 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --heatmap-text: #d1d5db;
+    --heatmap-text-muted: #9ca3af;
+    --heatmap-text-light: #6b7280;
+    --heatmap-border: #4b5563;
+    --heatmap-grid: #374151;
+    --heatmap-hover-stroke: #f9fafb;
+    --heatmap-background: #1f2937;
+  }
+}
+
 .heatmap-container {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--heatmap-font-family);
+  background: var(--heatmap-background);
 }
 
 .heatmap-svg {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .heatmap-cell {
-  transition: all 0.15s ease;
+  transition: all var(--heatmap-transition-duration) var(--heatmap-transition-easing);
 }
 
 .heatmap-cell:hover {
@@ -22,22 +57,24 @@
 
 .x-axis,
 .y-axis {
-  font-size: 12px;
+  font-size: var(--heatmap-font-size);
 }
 
 .x-axis text,
 .y-axis text {
-  fill: #374151;
+  fill: var(--heatmap-text);
 }
 
 .x-axis .domain,
 .y-axis .domain {
-  stroke: #9ca3af;
+  stroke: var(--heatmap-border);
+  stroke-width: 1;
 }
 
 .x-axis .tick line,
 .y-axis .tick line {
-  stroke: #9ca3af;
+  stroke: var(--heatmap-border);
+  stroke-width: 1;
 }
 
 .legend {
@@ -46,6 +83,11 @@
 
 .legend-title {
   font-weight: 600;
+  fill: var(--heatmap-text);
+}
+
+.legend-tick {
+  fill: var(--heatmap-text-muted);
 }
 
 .color-bar {
@@ -54,7 +96,7 @@
 }
 
 .legend-labels {
-  font-size: 10px;
+  font-size: var(--heatmap-legend-font-size);
   line-height: 1.2;
 }
 
@@ -63,7 +105,7 @@
   align-items: center;
   justify-content: center;
   min-height: 200px;
-  color: #6b7280;
+  color: var(--heatmap-text-muted);
 }
 
 /* 格子動畫 */
@@ -110,37 +152,26 @@
   }
 }
 
-/* 暗色主題支援 */
-@media (prefers-color-scheme: dark) {
-  .x-axis text,
-  .y-axis text {
-    fill: #d1d5db;
-  }
-  
-  .x-axis .domain,
-  .y-axis .domain,
-  .x-axis .tick line,
-  .y-axis .tick line {
-    stroke: #6b7280;
-  }
-  
-  .legend-title {
-    color: #d1d5db !important;
-  }
-  
-  .legend-labels {
-    color: #9ca3af !important;
-  }
-  
-  .empty-state {
-    color: #9ca3af;
-  }
-  
-  /* 移除預設邊框，採用現代化無邊框設計
+/* 可訪問性支援 */
+@media (prefers-reduced-motion: reduce) {
   .heatmap-cell {
-    stroke: #374151;
+    transition: none !important;
+    animation: none !important;
   }
-  */
+}
+
+/* 高對比度模式 */
+@media (prefers-contrast: high) {
+  :root {
+    --heatmap-text: #000000;
+    --heatmap-border: #000000;
+    --heatmap-hover-stroke: #000000;
+  }
+
+  .heatmap-cell {
+    stroke: var(--heatmap-border);
+    stroke-width: 1;
+  }
 }
 
 /* 特殊狀態 */
