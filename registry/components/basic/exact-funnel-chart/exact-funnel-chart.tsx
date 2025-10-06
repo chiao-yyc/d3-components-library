@@ -27,20 +27,20 @@ ExactFunnelChart.displayName = 'ExactFunnelChart';
 // 向下兼容導出
 export const ExactFunnelChartV2 = ExactFunnelChart;
 
-// 默認配置
+// 默認配置 - 使用統一的設計系統顏色
 export const defaultExactFunnelChartProps: Partial<ExactFunnelChartProps> = {
   width: 600,
   height: 300,
   margin: { top: 80, right: 60, bottom: 40, left: 60 },
-  background: '#f5f5f5',
-  gradient1: '#FF6B6B',
-  gradient2: '#4ECDC4',
-  values: '#333333',
-  labels: '#555555',
-  percentages: '#666666',
+  background: '#ffffff',
+  gradient1: '#60a5fa',  // blue-400 - 柔和的藍色
+  gradient2: '#3b82f6',  // blue-500 - 主色
+  values: '#1f2937',     // gray-800 - 數值文字
+  labels: '#374151',     // gray-700 - 標籤文字
+  percentages: '#6b7280', // gray-500 - 百分比文字
   showBorder: false,
   borderColor: '#ffffff',
-  fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
   fontSize: 22,
   labelFontSize: 14,
   percentageFontSize: 18,

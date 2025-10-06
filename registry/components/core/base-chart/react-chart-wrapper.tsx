@@ -156,7 +156,7 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
     }
 
     return (
-      <div ref={containerRef} className={cn('relative', className)} style={style}>
+      <div ref={containerRef} className={cn('relative', className)} style={{ ...style, maxWidth: '100%', overflow: 'hidden' }}>
         <svg
           ref={svgRef}
           width={width}
@@ -166,7 +166,8 @@ export function createReactChartWrapper<TProps extends ReactChartWrapperProps>(
           aria-describedby={props['aria-describedby']}
           aria-labelledby={props['aria-labelledby']}
           tabIndex={interactive ? 0 : undefined}
-          className={`${chartInstance?.getChartType?.() || 'chart'}-svg overflow-visible`}
+          className={`${chartInstance?.getChartType?.() || 'chart'}-svg`}
+          style={{ display: 'block' }}
         >
           {/* SVG 內容由 chartInstance 管理 */}
         </svg>

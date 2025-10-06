@@ -336,9 +336,9 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
 
   private renderLabels(container: D3Selection<SVGGElement>): void {
     const config = this.config;
-    const { 
+    const {
       values = '#ffffff',
-      labels = '#cccccc', 
+      labels = '#cccccc',
       percentages = '#888888',
       fontSize = 22,
       labelFontSize = 14,
@@ -350,11 +350,17 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
 
     const xScale = this.scales?.xScale as d3.ScaleLinear<number, number>;
     const formatter = d3.format(',');
-    
+
     if (!xScale) {
       console.error('xScale not found in scales');
       return;
     }
+
+    const { chartHeight } = this.getChartDimensions();
+
+    // 計算安全的標籤位置邊界
+    const minTopSpace = fontSize + 5; // 頂部最小空間
+    const minBottomSpace = percentageFontSize + 5; // 底部最小空間
 
     // 添加垂直 tick 線段
     const tickLines = container.selectAll('.tick-line')
@@ -364,10 +370,16 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .attr('class', 'tick-line')
       .attr('x1', (_d, i) => xScale(i))
       .attr('x2', (_d, i) => xScale(i))
-      .attr('y1', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 30 : 0) // tick 線開始位置
-      .attr('y2', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 5 : 0)  // tick 線結束位置
+      .attr('y1', (_d, i) => {
+        const upperY = this.upperPoints[i] ? this.upperPoints[i][1] : 0;
+        return Math.max(upperY - 30, minTopSpace);
+      })
+      .attr('y2', (_d, i) => {
+        const upperY = this.upperPoints[i] ? this.upperPoints[i][1] : 0;
+        return Math.max(upperY - 5, minTopSpace);
+      })
       .attr('stroke', values)
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 1)
       .attr('opacity', 0.8);
 
     // 添加數值標籤
@@ -377,11 +389,15 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'value-label')
       .attr('x', (_d, i) => xScale(i))
-      .attr('y', (_d, i) => this.upperPoints[i] ? this.upperPoints[i][1] - 35 : 0) // 調整位置，放在 tick 線上方
+      .attr('y', (_d, i) => {
+        const upperY = this.upperPoints[i] ? this.upperPoints[i][1] : 0;
+        // 確保標籤不會超出頂部邊界
+        return Math.max(upperY - 35, minTopSpace);
+      })
       .attr('text-anchor', 'middle')
       .attr('fill', values)
       .style('font-size', `${fontSize}px`)
-      .style('font-weight', 'bold')
+      .style('font-weight', '600')
       .style('font-family', fontFamily)
       .text(d => formatter(d.value));
 
@@ -392,7 +408,12 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'stage-label')
       .attr('x', (_d, i) => xScale(i))
-      .attr('y', (_d, i) => (this.upperPoints[i] && this.lowerPoints[i]) ? (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2 : 0) // 放在中心，帶安全檢查
+      .attr('y', (_d, i) => {
+        if (this.upperPoints[i] && this.lowerPoints[i]) {
+          return (this.upperPoints[i][1] + this.lowerPoints[i][1]) / 2;
+        }
+        return chartHeight / 2;
+      })
       .attr('text-anchor', 'middle')
       .attr('fill', labels)
       .style('font-size', `${labelFontSize}px`)
@@ -407,7 +428,11 @@ export class ExactFunnelChartCore extends BaseChartCore<ExactFunnelChartData> {
       .append('text')
       .attr('class', 'percentage-label')
       .attr('x', (_d, i) => xScale(i))
-      .attr('y', (_d, i) => this.lowerPoints && this.lowerPoints[i] ? this.lowerPoints[i][1] + 20 : 0) // 放在漏斗下方
+      .attr('y', (_d, i) => {
+        const lowerY = this.lowerPoints && this.lowerPoints[i] ? this.lowerPoints[i][1] : chartHeight;
+        // 確保標籤不會超出底部邊界
+        return Math.min(lowerY + 20, chartHeight - minBottomSpace);
+      })
       .attr('text-anchor', 'middle')
       .attr('fill', percentages)
       .style('font-size', `${percentageFontSize}px`)

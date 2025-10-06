@@ -296,7 +296,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
       .attr('class', 'funnel-segment')
       .attr('d', (_d: FunnelSegment) => _d.path)
       .attr('fill', (_d: FunnelSegment) => _d.color)
-      .attr('stroke', '#fff')
+      .attr('stroke', 'var(--funnel-chart-segment-stroke, rgba(255, 255, 255, 0.8))')
       .attr('stroke-width', 1)
       .style('cursor', interactive ? 'pointer' : 'default');
 
@@ -355,6 +355,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
 
     if (!showLabels) return;
 
+    const { chartWidth } = this.getChartDimensions();
     const labelGroup = container.append('g').attr('class', 'funnel-labels');
 
     this.segments.forEach(segment => {
@@ -363,9 +364,20 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
       let labelX: number, labelY: number, textAnchor: string;
 
       if (labelPosition === 'side') {
-        labelX = x + topWidth + 10;
+        // 計算標籤可用空間，確保不溢出
+        const rightSpace = chartWidth - (x + topWidth);
+        const minLabelSpace = 100; // 標籤最小需要空間
+
+        if (rightSpace >= minLabelSpace) {
+          // 有足夠空間放在右側
+          labelX = x + topWidth + 10;
+          textAnchor = 'start';
+        } else {
+          // 空間不足，放在漏斗內部居中
+          labelX = x + topWidth / 2;
+          textAnchor = 'middle';
+        }
         labelY = y + height / 2;
-        textAnchor = 'start';
       } else {
         labelX = x + topWidth / 2;
         labelY = y + height / 2;
@@ -380,7 +392,8 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
         .attr('dominant-baseline', 'middle')
         .style('font-size', `${fontSize}px`)
         .style('font-family', fontFamily)
-        .style('font-weight', 'bold')
+        .style('font-weight', '600')
+        .style('fill', 'var(--funnel-chart-text, #374151)')
         .text(data.label);
 
       // 數值標籤
@@ -393,16 +406,16 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
           .attr('dominant-baseline', 'middle')
           .style('font-size', `${fontSize - 2}px`)
           .style('font-family', fontFamily)
-          .style('fill', '#666')
+          .style('fill', 'var(--funnel-chart-text-muted, #6b7280)')
           .text(valueText);
       }
 
       // 百分比標籤
       if (showPercentages) {
-        const percentageText = config.percentageFormat ? 
-          config.percentageFormat(data.percentage) : 
+        const percentageText = config.percentageFormat ?
+          config.percentageFormat(data.percentage) :
           `${data.percentage.toFixed(1)}%`;
-        
+
         labelGroup.append('text')
           .attr('x', labelX)
           .attr('y', labelY + (fontSize + 2) * (showValues ? 2 : 1))
@@ -410,7 +423,7 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
           .attr('dominant-baseline', 'middle')
           .style('font-size', `${fontSize - 2}px`)
           .style('font-family', fontFamily)
-          .style('fill', '#999')
+          .style('fill', 'var(--funnel-chart-text-light, #9ca3af)')
           .text(percentageText);
       }
     });
