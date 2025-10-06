@@ -17,6 +17,18 @@ export default defineConfig({
       'clsx': resolve(__dirname, './node_modules/clsx'),
       'tailwind-merge': resolve(__dirname, './node_modules/tailwind-merge'),
       'd3': resolve(__dirname, './node_modules/d3'),
+      // D3 子模組 - 確保 Rollup 能正確解析 registry 中的 imports
+      'd3-selection': resolve(__dirname, './node_modules/d3-selection'),
+      'd3-scale': resolve(__dirname, './node_modules/d3-scale'),
+      'd3-axis': resolve(__dirname, './node_modules/d3-axis'),
+      'd3-shape': resolve(__dirname, './node_modules/d3-shape'),
+      'd3-array': resolve(__dirname, './node_modules/d3-array'),
+      'd3-format': resolve(__dirname, './node_modules/d3-format'),
+      'd3-time-format': resolve(__dirname, './node_modules/d3-time-format'),
+      'd3-transition': resolve(__dirname, './node_modules/d3-transition'),
+      'd3-ease': resolve(__dirname, './node_modules/d3-ease'),
+      'd3-color': resolve(__dirname, './node_modules/d3-color'),
+      'd3-interpolate': resolve(__dirname, './node_modules/d3-interpolate'),
     },
   },
   optimizeDeps: {
