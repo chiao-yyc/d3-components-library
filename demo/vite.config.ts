@@ -13,6 +13,9 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, './src'),
       '@registry': resolve(__dirname, '../registry'),
+      // 強制使用 demo/node_modules 中的 React（避免多副本問題）
+      'react': resolve(__dirname, './node_modules/react'),
+      'react-dom': resolve(__dirname, './node_modules/react-dom'),
       // 為 Registry 中的依賴提供正確的解析路徑
       'clsx': resolve(__dirname, './node_modules/clsx'),
       'tailwind-merge': resolve(__dirname, './node_modules/tailwind-merge'),
@@ -37,6 +40,7 @@ export default defineConfig({
       'd3-transition': resolve(__dirname, './node_modules/d3-transition'),
       'd3-zoom': resolve(__dirname, './node_modules/d3-zoom'),
     },
+    dedupe: ['react', 'react-dom']
   },
   optimizeDeps: {
     include: [
