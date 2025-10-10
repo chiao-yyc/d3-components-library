@@ -251,6 +251,21 @@ export async function downloadComponentWithDependencies(
   }
 }
 
+/**
+ * 驗證檔案路徑安全性，防止路徑穿越攻擊
+ */
+function validateFilePath(fileName: string): void {
+  // 防止路徑穿越攻擊
+  if (fileName.includes('..') || fileName.startsWith('/') || fileName.includes('\\')) {
+    throw new Error(`Invalid file path: ${fileName}`)
+  }
+
+  // 防止絕對路徑
+  if (path.isAbsolute(fileName)) {
+    throw new Error(`Absolute paths are not allowed: ${fileName}`)
+  }
+}
+
 export async function downloadComponentFiles(
   componentName: string,
   variant: string,
@@ -267,6 +282,10 @@ export async function downloadComponentFiles(
 
     // 使用組件的 path 欄位（如果存在），否則回退到使用 componentName
     const componentPath = (config as any).path || componentName
+
+    // 驗證組件路徑安全性
+    validateFilePath(componentPath)
+
     const sourceDir = path.join(LOCAL_REGISTRY_PATH, 'components', componentPath)
 
     // 確保目標目錄存在
@@ -285,9 +304,12 @@ export async function downloadComponentFiles(
         }
       }
     }
-    
+
     // 複製組件檔案
     for (const fileName of filesToCopy) {
+      // 驗證每個檔案路徑
+      validateFilePath(fileName)
+
       const sourcePath = path.join(sourceDir, fileName)
       const targetPath = path.join(targetDir, fileName)
       
