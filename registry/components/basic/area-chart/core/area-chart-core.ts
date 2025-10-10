@@ -400,9 +400,30 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       .y(d => yScale(d.y))
       .curve(curve);
 
+    // 判斷是否為多系列（超過1個系列）
+    const isMultiSeries = this.seriesData.length > 1;
+
+    // 多系列非堆疊模式：使用較低的透明度，讓重疊區域更明顯
+    const effectiveFillOpacity = isMultiSeries
+      ? (config.fillOpacity !== undefined ? config.fillOpacity : 0.4)
+      : (config.fillOpacity !== undefined ? config.fillOpacity : 0.6);
+
     // 渲染每個系列
     this.seriesData.forEach((series, seriesIndex) => {
       if (series.data.length === 0) return;
+
+      // 關鍵修復：按 X 軸值排序數據點，避免路徑交叉和填充區域挖空
+      const sortedData = [...series.data].sort((a, b) => {
+        // 處理不同類型的 x 值排序
+        if (a.x instanceof Date && b.x instanceof Date) {
+          return a.x.getTime() - b.x.getTime();
+        } else if (typeof a.x === 'number' && typeof b.x === 'number') {
+          return a.x - b.x;
+        } else if (typeof a.x === 'string' && typeof b.x === 'string') {
+          return a.x.localeCompare(b.x);
+        }
+        return 0;
+      });
 
       const seriesGroup = this.areaGroup!
         .append('g')
@@ -411,17 +432,17 @@ export class AreaChartCore extends BaseChartCore<AreaChartData> {
       // 渲染區域
       seriesGroup
         .append('path')
-        .datum(series.data)
+        .datum(sortedData)
         .attr('class', 'area')
         .attr('d', area)
         .attr('fill', series.color)
-        .attr('fill-opacity', config.fillOpacity || 0.6)
+        .attr('fill-opacity', effectiveFillOpacity)
         .attr('stroke', 'none');
 
       // 渲染邊界線
       seriesGroup
         .append('path')
-        .datum(series.data)
+        .datum(sortedData)
         .attr('class', 'area-line')
         .attr('d', line)
         .attr('fill', 'none')
