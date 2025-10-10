@@ -364,18 +364,27 @@ export class FunnelChartCore extends BaseChartCore<FunnelChartData> {
       let labelX: number, labelY: number, textAnchor: string;
 
       if (labelPosition === 'side') {
-        // 計算標籤可用空間，確保不溢出
+        // 計算標籤可用空間和預估文字寬度
         const rightSpace = chartWidth - (x + topWidth);
-        const minLabelSpace = 100; // 標籤最小需要空間
 
-        if (rightSpace >= minLabelSpace) {
+        // 預估標籤文字總寬度：標籤文字 + 數值 + 百分比
+        const labelLength = data.label.length;
+        const valueLength = showValues ? data.value.toString().length + 2 : 0; // +2 for spacing
+        const percentLength = showPercentages ? 6 : 0; // "XX.X%"
+        const estimatedTextWidth = (labelLength + valueLength + percentLength) * fontSize * 0.6;
+
+        // 最小需要空間：預估文字寬度 + 左右邊距（改為更嚴格的判斷）
+        const requiredSpace = Math.max(estimatedTextWidth + 20, 80);
+
+        // 增強智能判斷：如果右側空間不足 80px 或無法容納預估文字，自動降級到中心
+        if (rightSpace < 80 || rightSpace < requiredSpace) {
+          // 空間不足，自動降級到內部居中
+          labelX = x + topWidth / 2;
+          textAnchor = 'middle';
+        } else {
           // 有足夠空間放在右側
           labelX = x + topWidth + 10;
           textAnchor = 'start';
-        } else {
-          // 空間不足，放在漏斗內部居中
-          labelX = x + topWidth / 2;
-          textAnchor = 'middle';
         }
         labelY = y + height / 2;
       } else {

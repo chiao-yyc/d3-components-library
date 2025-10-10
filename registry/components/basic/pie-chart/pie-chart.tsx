@@ -18,6 +18,10 @@ export interface PieChartProps extends PieChartCoreConfig, ReactChartWrapperProp
     value?: string;
     color?: string;
   };
+
+  // 簡化的 legend props（會自動轉換為 legend 物件）
+  showLegend?: boolean;
+  legendPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
 
 // 創建 PieChart 組件
@@ -26,8 +30,19 @@ const PieChartComponent = createReactChartWrapper(PieChartCore);
 // 導出最終組件
 export const PieChart = React.forwardRef<PieChartCore, PieChartProps>((props, ref) => {
   // 處理 mapping prop 轉換為 accessor props
-  const { mapping, ...otherProps } = props;
-  
+  const { mapping, showLegend, legendPosition, ...otherProps } = props;
+
+  // 處理 legend 配置：將簡化的 props 轉換為 legend 物件
+  let legendConfig: LegendConfig | undefined = props.legend;
+  if (showLegend !== undefined || legendPosition !== undefined) {
+    legendConfig = {
+      ...(defaultPieChartProps.legend as LegendConfig),
+      ...props.legend, // 保留用戶的 legend 配置
+      show: showLegend !== undefined ? showLegend : (props.legend?.show ?? false),
+      position: legendPosition || props.legend?.position || 'bottom'
+    };
+  }
+
   const finalProps = {
     ...defaultPieChartProps, // 先應用默認配置
     ...otherProps,           // 再應用用戶配置
@@ -35,8 +50,10 @@ export const PieChart = React.forwardRef<PieChartCore, PieChartProps>((props, re
     labelAccessor: props.labelAccessor || mapping?.label || 'label',
     valueAccessor: props.valueAccessor || mapping?.value || 'value',
     colorAccessor: props.colorAccessor || mapping?.color,
+    // 覆蓋 legend 配置
+    legend: legendConfig,
   };
-  
+
   return <PieChartComponent ref={ref} {...finalProps} />;
 });
 

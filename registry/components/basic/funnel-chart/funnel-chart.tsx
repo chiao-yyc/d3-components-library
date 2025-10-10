@@ -29,7 +29,7 @@ export const FunnelChartV2 = FunnelChart;
 export const defaultFunnelChartProps: Partial<FunnelChartProps> = {
   width: 400,
   height: 500,
-  margin: { top: 20, right: 60, bottom: 20, left: 60 },
+  margin: { top: 20, right: 20, bottom: 20, left: 20 },
   direction: 'top',
   shape: 'trapezoid',
   gap: 4,

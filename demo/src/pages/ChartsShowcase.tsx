@@ -121,6 +121,9 @@ export default function ChartsShowcase() {
   const [showGrid, setShowGrid] = useState(false)
   const [chartSize, setChartSize] = useState(280) // 統一圖表大小
 
+  // 根據檢視模式計算實際圖表尺寸
+  const actualChartSize = viewMode === 'list' ? chartSize * 1.8 : chartSize
+
   // 圖表配置定義
   const chartConfigs = [
     // 基礎圖表
@@ -134,8 +137,8 @@ export default function ChartsShowcase() {
           data={basicBarData}
           xKey="category"
           yKey="value"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#3b82f6']}
           animate={animate}
           interactive={interactive}
@@ -145,7 +148,7 @@ export default function ChartsShowcase() {
     },
     {
       id: 'bar-colorful',
-      title: '多色長條圖', 
+      title: '多色長條圖',
       category: 'basic',
       description: '每根長條使用不同顏色的彩虹配色',
       component: (
@@ -153,8 +156,8 @@ export default function ChartsShowcase() {
           data={basicBarData}
           xKey="category"
           yKey="value"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e']}
           animate={animate}
           interactive={interactive}
@@ -172,8 +175,8 @@ export default function ChartsShowcase() {
           data={timeSeriesData}
           xKey="date"
           yKey="value"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#3b82f6']}
           curve="monotone"
           animate={animate}
@@ -192,8 +195,8 @@ export default function ChartsShowcase() {
           data={timeSeriesData}
           xKey="date"
           yKey="value"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#10b981']}
           curve="cardinal"
           showArea={true}
@@ -213,8 +216,8 @@ export default function ChartsShowcase() {
         <PieChart
           data={pieData}
           mapping={{ label: 'category', value: 'value' }}
-          width={chartSize}
-          height={chartSize}
+          width={actualChartSize - 70}
+          height={actualChartSize - 60}
           showLegend={true}
           legendPosition="bottom"
           animate={animate}
@@ -231,8 +234,8 @@ export default function ChartsShowcase() {
         <PieChart
           data={pieData}
           mapping={{ label: 'category', value: 'value', color: 'region' }}
-          width={chartSize}
-          height={chartSize}
+          width={actualChartSize - 70}
+          height={actualChartSize - 60}
           innerRadius={60}
           showLegend={true}
           legendPosition="bottom"
@@ -251,8 +254,8 @@ export default function ChartsShowcase() {
         <AreaChart
           data={areaData}
           mapping={{ x: 'month', y: 'users', category: 'device' }}
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           stackMode="none"
           gradient={true}
           showLegend={true}
@@ -271,8 +274,8 @@ export default function ChartsShowcase() {
         <AreaChart
           data={areaData}
           mapping={{ x: 'month', y: 'users', category: 'device' }}
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           stackMode="stack"
           gradient={true}
           showLegend={true}
@@ -293,8 +296,8 @@ export default function ChartsShowcase() {
           data={scatterData}
           xKey="x"
           yKey="y"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#3b82f6']}
           radius={6}
           animate={animate}
@@ -314,8 +317,8 @@ export default function ChartsShowcase() {
           xKey="x"
           yKey="y"
           colorKey="category"
-          width={chartSize}
-          height={chartSize * 0.6}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.6}
           colors={['#3b82f6', '#ef4444', '#10b981']}
           radius={7}
           animate={animate}
@@ -334,8 +337,8 @@ export default function ChartsShowcase() {
         <Heatmap
           data={heatmapData}
           mapping={{ x: 'x', y: 'y', value: 'value' }}
-          width={chartSize}
-          height={chartSize * 0.7}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.7}
           colorScheme="blues"
           showLegend={true}
           legendPosition="right"
@@ -353,8 +356,8 @@ export default function ChartsShowcase() {
         <Heatmap
           data={heatmapData}
           mapping={{ x: 'x', y: 'y', value: 'value' }}
-          width={chartSize}
-          height={chartSize * 0.7}
+          width={actualChartSize - 70}
+          height={(actualChartSize - 60) * 0.7}
           colorScheme="reds"
           cellRadius={4}
           showValues={true}
@@ -375,8 +378,8 @@ export default function ChartsShowcase() {
           data={funnelData}
           labelKey="step"
           valueKey="users"
-          width={chartSize}
-          height={chartSize}
+          width={actualChartSize - 70}
+          height={actualChartSize - 60}
           colors={['#3b82f6', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554']}
           showLabels={true}
           showValues={true}
@@ -397,8 +400,8 @@ export default function ChartsShowcase() {
           data={funnelData}
           labelKey="step"
           valueKey="users"
-          width={chartSize}
-          height={chartSize}
+          width={actualChartSize - 70}
+          height={actualChartSize - 60}
           colors={['#10b981', '#059669', '#047857', '#065f46', '#064e3b']}
           showLabels={true}
           showValues={true}
@@ -600,7 +603,7 @@ export default function ChartsShowcase() {
                             {chart.category}
                           </span>
                           <span>
-                            {chartSize}×{Math.round(chartSize * (chart.id.includes('pie') || chart.id.includes('funnel') ? 1 : 0.6))}
+                            {Math.round(actualChartSize)}×{Math.round(actualChartSize * (chart.id.includes('pie') || chart.id.includes('funnel') ? 1 : 0.6))}
                           </span>
                         </div>
                         

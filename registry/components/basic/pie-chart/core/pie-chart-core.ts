@@ -128,6 +128,9 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   private radius: number = 0;
   private centerX: number = 0;
   private centerY: number = 0;
+  // 儲存圖例預留後的可用空間
+  private availableWidth: number = 0;
+  private availableHeight: number = 0;
 
   constructor(
     config: PieChartCoreConfig,
@@ -302,25 +305,29 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
   private calculateDimensions(): void {
     const config = this.config as PieChartCoreConfig;
     const { chartWidth, chartHeight } = this.getChartDimensions();
-    
-    // 計算可用空間（考慮圖例位置）
-    let availableWidth = chartWidth;
-    let availableHeight = chartHeight;
-    
+
+    // 保留完整的可用空間供圖例定位使用
+    this.availableWidth = chartWidth;
+    this.availableHeight = chartHeight;
+
+    // 計算半徑時考慮圖例位置，縮小繪圖區域而不是縮小可用空間
+    let radiusBaseWidth = chartWidth;
+    let radiusBaseHeight = chartHeight;
+
     if (config.legend?.show) {
       if (config.legend.position === 'right' || config.legend.position === 'left') {
-        availableWidth *= 0.75; // 為圖例預留空間
-      } else {
-        availableHeight *= 0.75;
+        radiusBaseWidth *= 0.65; // 為圖例預留空間
+      } else if (config.legend.position === 'bottom' || config.legend.position === 'top') {
+        radiusBaseHeight *= 0.65; // 為圖例預留空間
       }
     }
-    
-    // 計算半徑
-    this.radius = config.outerRadius || Math.min(availableWidth, availableHeight) / 2 - 10;
-    
-    // 計算中心位置
-    this.centerX = availableWidth / 2;
-    this.centerY = availableHeight / 2;
+
+    // 計算半徑（使用縮小後的基準）
+    this.radius = config.outerRadius || Math.min(radiusBaseWidth, radiusBaseHeight) / 2 - 10;
+
+    // 中心位置始終使用完整可用空間的中心
+    this.centerX = this.availableWidth / 2;
+    this.centerY = this.availableHeight / 2;
   }
 
   protected renderChart(): void {
@@ -528,7 +535,6 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
 
     const config = this.config as PieChartCoreConfig;
     const legendConfig = config.legend!;
-    const { chartHeight } = this.getChartDimensions();
 
     // 創建圖例組
     this.legendGroup = this.chartGroup
@@ -538,27 +544,29 @@ export class PieChartCore extends BaseChartCore<PieChartData> {
     const itemHeight = legendConfig.itemHeight || 20;
     const spacing = legendConfig.spacing || 5;
     const fontSize = legendConfig.fontSize || 12;
+    const legendHeight = this.pieProcessedData.length * (itemHeight + spacing);
 
-    // 計算圖例位置
+    // 計算圖例位置 - 關鍵修復：使用 availableHeight 而不是 chartHeight
     let legendX = 0;
     let legendY = 0;
 
     switch (legendConfig.position) {
       case 'right':
         legendX = this.centerX + this.radius + 20;
-        legendY = this.centerY - (this.pieProcessedData.length * (itemHeight + spacing)) / 2;
+        legendY = this.centerY - legendHeight / 2;
         break;
       case 'bottom':
-        legendX = 20;
-        legendY = chartHeight - this.pieProcessedData.length * (itemHeight + spacing) - 10;
+        // 修復：放在 availableHeight 之下，而不是 chartHeight 之下
+        legendX = this.availableWidth / 2 - 60; // 居中對齊
+        legendY = this.availableHeight + 10; // 緊接在可用高度之後
         break;
       case 'left':
         legendX = 20;
-        legendY = this.centerY - (this.pieProcessedData.length * (itemHeight + spacing)) / 2;
+        legendY = this.centerY - legendHeight / 2;
         break;
       case 'top':
-        legendX = 20;
-        legendY = 20;
+        legendX = this.availableWidth / 2 - 60; // 居中對齊
+        legendY = 10;
         break;
     }
 
