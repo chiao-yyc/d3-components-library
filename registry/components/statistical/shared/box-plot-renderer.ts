@@ -269,6 +269,31 @@ export class BoxPlotRenderer {
 
     const { xScale, yScale } = scales;
 
+    // 智能寬度限制：防止箱體重疊
+    let effectiveBoxWidth = boxWidth;
+    let effectiveWhiskerWidth = whiskerWidth;
+
+    // 根據方向檢測並調整箱體寬度
+    if (orientation === 'vertical') {
+      const xBandScale = xScale as d3.ScaleBand<string>;
+      const bandwidth = xBandScale.bandwidth();
+
+      // 如果 boxWidth 超過可用空間，自動調整為 bandwidth 的 80%
+      if (boxWidth > bandwidth) {
+        effectiveBoxWidth = bandwidth * 0.8;
+        // 同時按比例調整 whiskerWidth，避免鬚線也過寬
+        effectiveWhiskerWidth = Math.min(whiskerWidth, effectiveBoxWidth * 0.5);
+      }
+    } else {
+      const yBandScale = yScale as d3.ScaleBand<string>;
+      const bandwidth = yBandScale.bandwidth();
+
+      if (boxWidth > bandwidth) {
+        effectiveBoxWidth = bandwidth * 0.8;
+        effectiveWhiskerWidth = Math.min(whiskerWidth, effectiveBoxWidth * 0.5);
+      }
+    }
+
     // 渲染每個箱形圖
     processedData.forEach((d, i) => {
       const boxGroup = chartArea.append('g')
@@ -289,18 +314,18 @@ export class BoxPlotRenderer {
         centerX = 0; // 不需要在水平模式下使用
       }
 
-      // 使用嵌入式渲染方法
+      // 使用嵌入式渲染方法（使用調整後的寬度）
       this.renderEmbedded(boxGroup, d.statistics, {
         centerX,
         centerY,
         orientation,
-        boxWidth,
+        boxWidth: effectiveBoxWidth,
         showQuartiles,
         showMedian,
         showMean,
         showWhiskers,
         showOutliers,
-        whiskerWidth,
+        whiskerWidth: effectiveWhiskerWidth,
         xScale,
         yScale,
         boxFill: color,
